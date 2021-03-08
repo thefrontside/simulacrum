@@ -1,0 +1,23 @@
+{
+  "name": "@simulacrum/repository",
+  "version": "0.1.0",
+  "description": "Composable simulations for testing, development, and application previews",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thefrontside/simulacrum.git"
+  },
+  "workpsaces": [
+    "./packages/server"
+  ],
+  "keywords": [
+    "simulation",
+    "emulation"
+  ],
+  "author": "Charles Lowell <cowboyd@frontside.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
+  },
+  "homepage": "https://github.com/thefrontside/simulacrum#readme"
+}
