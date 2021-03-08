@@ -1,10 +1,23 @@
 import { describe, it } from 'mocha';
 import expect from 'expect';
 
-import { createServer } from '../src';
+import { world } from './helpers';
+
+import { createClient } from "@simulacrum/client";
+
+import { spawnServer, Server } from '../src';
 
 describe("@simulacrum/server", () => {
-  it('exists', () => {
-    expect(createServer).toBeInstanceOf(Function)
+  let client;
+  let server: Server;
+
+  beforeEach(async () => {
+    server = await spawnServer(world);
+    client = createClient(`http://localhost:${server.port}`);
+  });
+
+
+  it('starts', () => {
+    expect(typeof server.port).toBe('number');
   });
 })

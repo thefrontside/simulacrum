@@ -1,15 +1,15 @@
 {
-  "name": "@simulacrum/repository",
+  "name": "@simulacrum/client",
   "version": "0.0.0",
-  "description": "Composable simulations for testing, development, and application previews",
-  "private": true,
+  "description": "connect to simulacrum servers and manipulate them via the control API",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
-  "workspaces": [
-    "./packages/*"
-  ],
   "keywords": [
     "simulation",
     "emulation"

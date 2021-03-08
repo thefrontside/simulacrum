@@ -20,8 +20,14 @@
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "dependencies": {
+    "effection": ">2.0.0-preview.4",
+    "express": "^4.17.1"
+  },
   "devDependencies": {
     "@frontside/typescript": "^1.1.1",
+    "@simulacrum/client": "^0.0.0",
+    "@types/express": "^4.17.11",
     "@types/mocha": "^8.2.1",
     "expect": "^26.6.2",
     "mocha": "^8.3.1",
