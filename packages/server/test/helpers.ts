@@ -9,6 +9,6 @@ afterEach(async () => {
   await world.halt();
 });
 
-export default async function run<T>(operation: Operation<T>): Promise<T> {
+export async function run<T>(operation: Operation<T>): Promise<T> {
   return world.spawn(operation);
 }

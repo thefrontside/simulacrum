@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme"
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "dependencies": {
+    "cross-fetch": "^3.0.6"
+  }
 }
