@@ -1,7 +1,5 @@
-import { describe, it } from 'mocha';
+import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
-
-import { world, run } from './helpers';
 
 import { createClient, Client, Simulation } from "@simulacrum/client";
 
@@ -11,8 +9,8 @@ describe("@simulacrum/server", () => {
   let client: Client;
   let server: Server;
 
-  beforeEach(async () => {
-    server = await spawnServer(world, {
+  beforeEach(function*(world) {
+    server = yield spawnServer(world, {
       simulators: {
         ping(simulation) {
           simulation.service((request, response) => function*() {
@@ -27,17 +25,17 @@ describe("@simulacrum/server", () => {
   describe('creating a simulation', () => {
     let simulation: Simulation;
 
-    beforeEach(async () => {
-      simulation = await run(client.createSimulation("ping"));
+    beforeEach(function*() {
+      simulation = yield client.createSimulation("echo");
     });
 
-    it.skip('has a ping pong service', () => {
-      expect(simulation.services.pingpong).toBeDefined();
-    });
+    // it.skip('has a ping pong service', () => {
+    //   expect(simulation.services.pingpong).toBeDefined();
+    // });
   });
 
 
-  it('starts', () => {
+  it('starts', function*() {
     expect(typeof server.port).toBe('number');
   });
 })
