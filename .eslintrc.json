@@ -1,0 +1,11 @@
+{
+  "extends": "@frontside",
+  "rules": {
+    "eol-last": "off",
+    "@typescript-eslint/no-extra-semi": "off",
+    "no-multi-spaces": "off",
+    "no-trailing-spaces": "off",
+    "object-curly-spacing": "off",
+    "semi": "off"
+  }
+}

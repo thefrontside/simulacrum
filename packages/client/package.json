@@ -6,6 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "devDependencies": {
+    "@frontside/eslint-config": "^2.0.0",
+    "@frontside/tsconfig": "^1.2.0",
+    "@frontside/typescript": "^1.1.1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
