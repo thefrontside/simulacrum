@@ -31,8 +31,7 @@ describe("@simulacrum/server", () => {
       simulation = yield client.createSimulation("echo");
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    it('has a echo pong service', (): any => {
+    it('has a echo pong service', function* () {
       console.dir(simulation)
       expect(simulation.services.pingpong).toBeDefined();
     });
