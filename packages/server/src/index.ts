@@ -13,15 +13,20 @@ export interface ServerOptions {
 }
 
 export interface Simulator {
-  (simulation: Simulation): void;
+  (simulation: Simulation): Simulation;
 }
 
 export interface Simulation {
-  service(handler: ServiceHandler): Simulation;
+  http(handler: (app: HttpApp) => HttpApp): Simulation;
 }
 
-interface ServiceHandler {
+export interface HttpHandler {
   (request: IncomingMessage, response: ServerResponse): Operation<void>;
+}
+
+export interface HttpApp {
+  get(path: string, handler: HttpHandler): HttpApp;
+  post(path: string, handler: HttpHandler): HttpApp;
 }
 
 export function spawnServer(scope: Task, options: ServerOptions = { simulators: {} }): Promise<Server> {
@@ -37,7 +42,7 @@ export function spawnServer(scope: Task, options: ServerOptions = { simulators: 
     });
 
     scope.spawn(function*() {
-      let [error]: [Error] = yield once(server, 'error');
+      let error: Error = yield once(server, 'error');
       throw error;
     });
 
@@ -46,7 +51,7 @@ export function spawnServer(scope: Task, options: ServerOptions = { simulators: 
     } finally {
       server.close();
     }
-  })
+  });
 
   return startup.promise;
 }
