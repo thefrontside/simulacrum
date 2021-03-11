@@ -27,42 +27,44 @@ export function spawnHttpServer(parent: Task, httpServer: AvailableServers): Pro
       assert(!!address && typeof address !== 'string', 'unexpected address');
       
       let { port } = address;
-      
-      console.log(`server running on  http://localhost:${port}`);
-      
+
       startup.resolve({
         port
       });
     });
-
+    
     parent.spawn(function*() {
       let error: Error = yield once(server, 'error');
       throw error;
     });
-
+    
     try {
       yield;
     } finally {
       server.close();
     }
   });
-
+  
   return startup.promise;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function spawnServer(scope: Task, options: ServerOptions = { simulators: {} }): Promise<Server> {
   let startup = Deferred<Server>();
- 
+  
   scope.spawn(function*() {
     let app = express();
-
+    
+    app.disable('x-powered-by');
+    
     let context = new SimulationContext();
-
+    
     app.use('/graphql', graphqlHTTP({ schema, graphiql: true, context }));
-
+    
     let server = yield spawnHttpServer(scope, app);
-
+    
+    console.log(`Simulation server running on  http://localhost:${server.port}/graphql`);
+    
     console.dir({ server });
 
     startup.resolve(server);

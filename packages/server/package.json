@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
-    "generate": "tsc && ts-node src/schema/schema.ts"
+    "generate": "tsc && ts-node src/schema/schema.ts",
+    "start": "ts-node src/start.ts"
   },
   "repository": {
     "type": "git",

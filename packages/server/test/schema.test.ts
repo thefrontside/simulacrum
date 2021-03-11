@@ -31,15 +31,15 @@ describe('graphql control api', () => {
     let client = new GraphQLClient(endpoint, { headers: {} });
 
     let createSimulationMutation = gql`
-    mutation CreateSimulation {
-      createSimulation() {
-        uuid
+      mutation {
+        createSimulation {
+          id
+        }
       }
-    }
-  `    
+    `;    
 
-    let result = yield client.request(createSimulationMutation);
+    let { createSimulation: { id } } = yield client.request(createSimulationMutation);
 
-    expect(result).toBeTruthy();
+    expect(typeof id).toBe('string');
   });
 });
