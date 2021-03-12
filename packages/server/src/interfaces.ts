@@ -1,4 +1,4 @@
-import { Operation } from 'effection';
+import { Operation, Task } from 'effection';
 import { IncomingMessage, ServerResponse } from 'http';
 import type { Server as HttpServer } from 'http';
 import type { Server as HttpsServer } from 'https';
@@ -34,6 +34,7 @@ export interface Simulation {
   simulators: Record<string, Simulator>;
   services: Service[];
   addSimulator(name: string, simulator: Simulator): Simulation;
+  scope: Task;
 }
 
 export interface Server {

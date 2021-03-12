@@ -25,10 +25,11 @@ const createHttpApp = () => {
   return app;
 }
 
-export function createSimulation(id?: string): Simulation {
+export function createSimulation(scope: Task, id?: string): Simulation {
   // TODO: if id exists, and existing simulation exists then return existing
   let simulation: Simulation =  {
     id: id ?? v4(),
+    scope,
     simulators: {},
     services: [],
     addSimulator(name: string, simulator: Simulator): Simulation {
@@ -100,7 +101,7 @@ export function spawnServer(scope: Task, options: ServerOptions = { simulators: 
     
     app.disable('x-powered-by');
     
-    let context = new SimulationContext(options.simulators);
+    let context = new SimulationContext(options.simulators, scope.spawn());
     
     app.use('/graphql', graphqlHTTP({ schema, graphiql: true, context }));
     

@@ -13,20 +13,22 @@ const echo: HttpHandler = (_request, _response) => Promise.resolve();
 
 describe('graphql control api', () => {
   let server: Server;
- 
+
   beforeEach(function * (world) {
-    world.spawn(function* (){
+    world.spawn(function* (scope){
       let app = express();
 
-      app.use('/graphql', graphqlHTTP({ schema, graphiql: true, context: new SimulationContext({
-        echo(simulation) {
-          return simulation.http(app => {
-            app.get('/', echo);
-            return app;
-          });
-        },
-      }) }));
-      
+      app.use('/graphql', graphqlHTTP({ schema, graphiql: true, context: new SimulationContext(
+        scope, {
+          echo(simulation) {
+            return simulation.http(app => {
+              app.get('/', echo);
+              return app;
+            });
+          },
+        })
+      }));
+
       server = yield spawnHttpServer(world, app);
     });
   });
@@ -44,7 +46,7 @@ describe('graphql control api', () => {
           id
         }
       }
-    `;    
+    `;
 
     let { createSimulation: { id } } = yield client.request(createSimulationMutation);
 
