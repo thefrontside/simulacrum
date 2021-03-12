@@ -1,9 +1,21 @@
 import { spawnServer } from './server';
-import { run } from '@effection/core';
+import { main } from '@effection/node';
+import { HttpHandler } from './interfaces';
 
-// dev only
-(async () => {  
-  await spawnServer(run());
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const echo: HttpHandler = (_request, _response) => Promise.resolve();
 
-  // do I need to 
-})();
+main(function* (scope) {
+  yield spawnServer(scope, {
+    simulators: {
+      echo(simulation) {
+        return simulation.http(app => {
+          app.get('/', echo);
+          return app;
+        });
+      },
+    }
+  });
+
+  yield;
+});

@@ -3,7 +3,7 @@ import expect from 'expect';
 
 import { createClient, Client, Simulation } from "@simulacrum/client";
 
-import type { Server, HttpHandler, SimulationServer } from '../src/interfaces';
+import type { HttpHandler, SimulationServer } from '../src/interfaces';
 import { spawnServer } from '../src/server';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -17,10 +17,7 @@ describe("@simulacrum/server", () => {
     server = yield spawnServer(world, {
       simulators: {
         echo(simulation) {
-          return simulation.http(app => {
-            app.get('/', echo);
-            return app;
-          });
+          return simulation.http(app => app.get('/', echo));
         },
       }
     });

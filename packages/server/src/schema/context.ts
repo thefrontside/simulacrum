@@ -12,11 +12,11 @@ export class SimulationContext {
     let simulation = createSimulation(id);
 
     for(let sim of simulators) {
-      let simulator = this.availableSimulators[sim];
+      let simulator = simulation.simulators[sim] = this.availableSimulators[sim];
 
       assert(!!simulator, `no available simulator for ${sim}`);
 
-      simulator(simulation)      
+      simulation = simulator(simulation);
     }
 
     return simulation;

@@ -14,9 +14,17 @@ export interface ServerOptions {
   simulators: Record<string, Simulator>;
 }
 
+export type Protocols = 'http' | 'https';
+
 export interface Simulation {
   id: string;
+  https: (handler: (app: HttpApp) => HttpApp) => Simulation;
   http: (handler: (app: HttpApp) => HttpApp) => Simulation;
+  simulators: Record<string, Simulator>;
+  apps: Array<{
+    protocol: Protocols,
+    app: HttpApp
+  }>; 
 }
 
 export interface Server {

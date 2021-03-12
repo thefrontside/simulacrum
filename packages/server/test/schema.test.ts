@@ -1,12 +1,15 @@
 import { describe, it, beforeEach, afterEach } from '@effection/mocha';
 import express from 'express';
 import expect from 'expect';
-import { Server } from '../src/interfaces';
+import { HttpHandler, Server } from '../src/interfaces';
 import { graphqlHTTP } from 'express-graphql';
 import { schema } from '../src/schema/schema';
 import { spawnHttpServer } from '../src/server';
 import { SimulationContext } from '../src/schema/context';
-import { GraphQLClient, gql } from 'graphql-request'
+import { GraphQLClient, gql } from 'graphql-request';
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const echo: HttpHandler = (_request, _response) => Promise.resolve();
 
 describe('graphql control api', () => {
   let server: Server;
@@ -15,7 +18,14 @@ describe('graphql control api', () => {
     world.spawn(function* (){
       let app = express();
 
-      app.use('/graphql', graphqlHTTP({ schema, graphiql: true, context: new SimulationContext() }));
+      app.use('/graphql', graphqlHTTP({ schema, graphiql: true, context: new SimulationContext({
+        echo(simulation) {
+          return simulation.http(app => {
+            app.get('/', echo);
+            return app;
+          });
+        },
+      }) }));
       
       server = yield spawnHttpServer(world, app);
     });
@@ -31,8 +41,10 @@ describe('graphql control api', () => {
     let client = new GraphQLClient(endpoint, { headers: {} });
 
     let createSimulationMutation = gql`
-      mutation {
-        createSimulation {
+      mutation CreateSimulation {
+        createSimulation(
+          simulators: ["echo"]
+        ) {
           id
         }
       }

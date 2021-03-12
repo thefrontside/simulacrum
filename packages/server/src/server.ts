@@ -7,31 +7,43 @@ import { v4 } from 'uuid';
 import { HttpServers, Server, ServerOptions, Simulation, HttpServerOptions, SimulationServer, HttpApp, Methods, HttpHandler, HttpMethods } from './interfaces';
 import { SimulationContext } from './schema/context';
 
-const createAppHandler = (app: HttpApp) => (method: Methods) => (path: string, handler: HttpHandler) => {
-  app.handlers.push({ method, path, handler });
+const createAppHandler = (app: HttpApp) => (method: Methods) => (path: string, handler: HttpHandler): HttpApp => {
+  return {...app, handlers: app.handlers.concat({ method, path, handler })};
+}
+
+const createHttpApp = () => {
+  let app = {
+    handlers: []
+  } as unknown as HttpApp;
+  
+  let appHandler = createAppHandler(app);
+  
+  for(let method of HttpMethods) {
+    app[method] = appHandler(method);
+  }
 
   return app;
 }
 
 export function createSimulation(id?: string): Simulation {
-  let app = {
-    handlers: []
-  } as unknown as HttpApp;
-
-  let appHandler = createAppHandler(app);
-
-  for(let method of HttpMethods) {
-    app[method] = appHandler(method);
-  }
-
-  return {
+  // TODO: if id exists, and existing simulation exists then return existing
+  let simulation: Simulation =  {
     id: id ?? v4(),
-    http(handler) {
-      handler(app);
+    simulators: {},
+    apps: [],
+    https(handler) {
+      let app = handler(createHttpApp());
 
-      return this;
+      return {...simulation, apps: [...simulation.apps, { protocol: 'https', app  }]};
+    },    
+    http(handler) {
+      let app = handler(createHttpApp());
+
+      return {...simulation, apps: [...simulation.apps, { protocol: 'http', app  }]};
     }
   }
+
+  return simulation;
 }
 
 export function spawnHttpServer(
@@ -69,7 +81,6 @@ export function spawnHttpServer(
   return startup.promise;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function spawnServer(scope: Task, options: ServerOptions = { simulators: {} }): Promise<SimulationServer> {
   let startup = Deferred<SimulationServer>();
   

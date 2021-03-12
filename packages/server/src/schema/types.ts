@@ -1,4 +1,4 @@
-import { objectType, mutationType } from 'nexus';
+import { objectType, mutationType, nonNull, list, stringArg } from 'nexus';
 
 export const types = [
   objectType({
@@ -11,8 +11,13 @@ export const types = [
     definition(t) {
       t.nonNull.field('createSimulation', {
         type: 'Simulation',
-        resolve(_, __, ctx) {
-          return ctx.createSimulation();
+        args: {
+          simulators: nonNull(
+            list(nonNull(stringArg())),
+          ),
+        },
+        resolve(_, { simulators }, ctx) {
+          return ctx.createSimulation(simulators);
         }
       })
     }

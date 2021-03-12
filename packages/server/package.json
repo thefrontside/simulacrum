@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
     "generate": "tsc && ts-node src/schema/schema.ts",
-    "start": "ts-node src/start.ts"
+    "start": "npm run generate && ts-node src/start.ts"
   },
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
+    "@effection/node": "=1.0.0-preview.4",
     "@simulacrum/client": "^0.0.0",
     "assert-ts": "^0.3.2",
     "effection": "=2.0.0-preview.5",
