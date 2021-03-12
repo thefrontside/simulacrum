@@ -1,13 +1,7 @@
 import { Operation, Task } from 'effection';
 import { IncomingMessage, ServerResponse } from 'http';
-import type { Server as HttpServer } from 'http';
-import type { Server as HttpsServer } from 'https';
-import type { Express } from 'express';
 
-export type HttpServers = HttpServer | HttpsServer | Express;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Behaviors extends Record<string, any> {
+export interface Behaviors {
   https: (handler: (app: HttpApp) => HttpApp) => Behaviors;
   http: (handler: (app: HttpApp) => HttpApp) => Behaviors;
   services: Service[];
@@ -39,12 +33,6 @@ export interface Simulation {
 
 export interface Server {
   port: number;
-}
-
-export type HttpServerOptions = { onClose?: () => void };
-
-export interface SimulationServer extends Server {
-  availableSimulators: Record<string, Simulator>;
 }
 
 export interface HttpHandler {
