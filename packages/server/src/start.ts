@@ -1,4 +1,4 @@
-import { spawnServer } from './server';
+import { spawnSimulationServer } from './server';
 import { main } from '@effection/node';
 import { HttpHandler } from './interfaces';
 
@@ -6,7 +6,7 @@ import { HttpHandler } from './interfaces';
 const echo: HttpHandler = (_request, _response) => Promise.resolve();
 
 main(function* (scope) {
-  yield spawnServer(scope, {
+  yield spawnSimulationServer(scope, {
     simulators: {
       echo(simulation) {
         return simulation.http(app => {

@@ -4,7 +4,7 @@ import expect from 'expect';
 import { createClient, Client, Simulation } from "@simulacrum/client";
 
 import type { HttpHandler, SimulationServer } from '../src/interfaces';
-import { spawnServer } from '../src/server';
+import { spawnSimulationServer } from '../src/server';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const echo: HttpHandler = (_request, _response) => Promise.resolve();
@@ -14,7 +14,7 @@ describe("@simulacrum/server", () => {
   let server: SimulationServer;
 
   beforeEach(function*(world) {
-    server = yield spawnServer(world, {
+    server = yield spawnSimulationServer(world, {
       simulators: {
         echo({ http }) {
           return http(app => app.get('/', echo));
@@ -32,7 +32,6 @@ describe("@simulacrum/server", () => {
     });
 
     it('has a echo service', function* () {
-      console.dir(simulation)
       expect(simulation.services.pingpong).toBeDefined();
     });
   });
@@ -46,4 +45,3 @@ describe("@simulacrum/server", () => {
     expect(typeof server.availableSimulators.echo).toBe('function');
   })
 });
-

@@ -2,9 +2,19 @@ import { objectType, mutationType, nonNull, list, stringArg } from 'nexus';
 
 export const types = [
   objectType({
+    name: 'Service',
+    definition(t) {
+      t.nonNull.string('name');
+      t.nonNull.string('url');
+    }
+  }),
+  objectType({
     name: 'Simulation',
     definition(t) {
       t.id('id');
+      t.nonNull.list.field('services', {
+        type: 'Service'
+      });
     }
   }),
   mutationType({
