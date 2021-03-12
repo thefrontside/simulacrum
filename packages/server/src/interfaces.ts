@@ -6,8 +6,15 @@ import type { Express } from 'express';
 
 export type HttpServers = HttpServer | HttpsServer | Express;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface Behaviors extends Record<string, any> {
+  https: (handler: (app: HttpApp) => HttpApp) => Behaviors;
+  http: (handler: (app: HttpApp) => HttpApp) => Behaviors;
+  services: Service[];
+}
+
 export interface Simulator {
-  (simulation: Simulation): Simulation;
+  (behavior: Behaviors): Behaviors;
 }
 
 export interface ServerOptions {
@@ -16,15 +23,17 @@ export interface ServerOptions {
 
 export type Protocols = 'http' | 'https';
 
+export interface Service {
+  name: string;
+  protocol: Protocols,
+  app: HttpApp
+}
+
 export interface Simulation {
   id: string;
-  https: (handler: (app: HttpApp) => HttpApp) => Simulation;
-  http: (handler: (app: HttpApp) => HttpApp) => Simulation;
   simulators: Record<string, Simulator>;
-  apps: Array<{
-    protocol: Protocols,
-    app: HttpApp
-  }>; 
+  services: Service[];
+  addSimulator(name: string, simulator: Simulator): Simulation;
 }
 
 export interface Server {

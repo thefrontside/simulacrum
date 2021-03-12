@@ -31,10 +31,6 @@ describe('graphql control api', () => {
     });
   });
 
-  afterEach(function * (world) {
-    yield world.halt();
-  });
-
   it('should create a simulation', function * () {
     let endpoint = `http://localhost:${server.port}/graphql`;
 

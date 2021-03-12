@@ -4,7 +4,7 @@ import { graphqlHTTP } from 'express-graphql';
 import { schema } from './schema/schema';
 import { assert } from 'assert-ts';
 import { v4 } from 'uuid';
-import { HttpServers, Server, ServerOptions, Simulation, HttpServerOptions, SimulationServer, HttpApp, Methods, HttpHandler, HttpMethods } from './interfaces';
+import { HttpServers, Server, ServerOptions, Simulation, HttpServerOptions, SimulationServer, HttpApp, Methods, HttpHandler, HttpMethods, Simulator, Behaviors } from './interfaces';
 import { SimulationContext } from './schema/context';
 
 const createAppHandler = (app: HttpApp) => (method: Methods) => (path: string, handler: HttpHandler): HttpApp => {
@@ -30,18 +30,29 @@ export function createSimulation(id?: string): Simulation {
   let simulation: Simulation =  {
     id: id ?? v4(),
     simulators: {},
-    apps: [],
-    https(handler) {
-      let app = handler(createHttpApp());
+    services: [],
+    addSimulator(name: string, simulator: Simulator): Simulation {
+      let behavior: Behaviors = {
+        services: [],
+        https(handler) {
+          let app = handler(createHttpApp());
+    
+          return { ...behavior, services: behavior.services.concat({ name, protocol: 'https', app  }) };
+        },    
+        http(handler) {
+          let app = handler(createHttpApp());
 
-      return {...simulation, apps: [...simulation.apps, { protocol: 'https', app  }]};
-    },    
-    http(handler) {
-      let app = handler(createHttpApp());
+          return { ...behavior, services: behavior.services.concat({ name, protocol: 'http', app  }) };
+        }
+      };
 
-      return {...simulation, apps: [...simulation.apps, { protocol: 'http', app  }]};
+      let behaviors = simulator(behavior);
+
+      return { ...simulation, services: simulation.services.concat(behaviors.services) }
     }
   }
+
+  console.dir(simulation);
 
   return simulation;
 }

@@ -16,8 +16,8 @@ describe("@simulacrum/server", () => {
   beforeEach(function*(world) {
     server = yield spawnServer(world, {
       simulators: {
-        echo(simulation) {
-          return simulation.http(app => app.get('/', echo));
+        echo({ http }) {
+          return http(app => app.get('/', echo));
         },
       }
     });

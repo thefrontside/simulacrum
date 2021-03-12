@@ -16,7 +16,7 @@ export class SimulationContext {
 
       assert(!!simulator, `no available simulator for ${sim}`);
 
-      simulation = simulator(simulation);
+      simulation = simulation.addSimulator(sim, simulator);
     }
 
     return simulation;
