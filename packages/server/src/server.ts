@@ -4,20 +4,41 @@ import { graphqlHTTP } from 'express-graphql';
 import { schema } from './schema/schema';
 import { assert } from 'assert-ts';
 import { v4 } from 'uuid';
-import { AvailableServers, Server, ServerOptions, Simulation } from './interfaces';
+import { HttpServers, Server, ServerOptions, Simulation, HttpServerOptions, SimulationServer, HttpApp, Methods, HttpHandler, HttpMethods } from './interfaces';
 import { SimulationContext } from './schema/context';
 
-export function createSimulation(): Simulation {
+const createAppHandler = (app: HttpApp) => (method: Methods) => (path: string, handler: HttpHandler) => {
+  app.handlers.push({ method, path, handler });
+
+  return app;
+}
+
+export function createSimulation(id?: string): Simulation {
+  let app = {
+    handlers: []
+  } as unknown as HttpApp;
+
+  let appHandler = createAppHandler(app);
+
+  for(let method of HttpMethods) {
+    app[method] = appHandler(method);
+  }
+
   return {
-    id: v4(),
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    id: id ?? v4(),
     http(handler) {
+      handler(app);
+
       return this;
     }
   }
 }
 
-export function spawnHttpServer(parent: Task, httpServer: AvailableServers): Promise<Server> {
+export function spawnHttpServer(
+  parent: Task,
+  httpServer: HttpServers,
+  { onClose = () => undefined }: HttpServerOptions = {}
+): Promise<Server> {
   let startup = Deferred<Server>();
 
   parent.spawn(function*() {
@@ -29,7 +50,7 @@ export function spawnHttpServer(parent: Task, httpServer: AvailableServers): Pro
       let { port } = address;
 
       startup.resolve({
-        port
+        port,
       });
     });
     
@@ -37,11 +58,11 @@ export function spawnHttpServer(parent: Task, httpServer: AvailableServers): Pro
       let error: Error = yield once(server, 'error');
       throw error;
     });
-    
+
     try {
       yield;
     } finally {
-      server.close();
+      server.close(onClose);
     }
   });
   
@@ -49,23 +70,25 @@ export function spawnHttpServer(parent: Task, httpServer: AvailableServers): Pro
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function spawnServer(scope: Task, options: ServerOptions = { simulators: {} }): Promise<Server> {
-  let startup = Deferred<Server>();
+export function spawnServer(scope: Task, options: ServerOptions = { simulators: {} }): Promise<SimulationServer> {
+  let startup = Deferred<SimulationServer>();
   
   scope.spawn(function*() {
     let app = express();
     
     app.disable('x-powered-by');
     
-    let context = new SimulationContext();
+    let context = new SimulationContext(options.simulators);
     
     app.use('/graphql', graphqlHTTP({ schema, graphiql: true, context }));
     
-    let server = yield spawnHttpServer(scope, app);
+    let server: SimulationServer = yield spawnHttpServer(scope, app, {
+      onClose: () => console.log('simulation server shut down')
+    });
+
+    server.availableSimulators = options.simulators;
     
-    console.log(`Simulation server running on  http://localhost:${server.port}/graphql`);
-    
-    console.dir({ server });
+    console.log(`Simulation server running on http://localhost:${server.port}/graphql`);
 
     startup.resolve(server);
   });
