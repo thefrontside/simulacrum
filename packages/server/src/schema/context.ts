@@ -1,5 +1,5 @@
 import { createSimulation, spawnHttpServer } from '../server';
-import { Service, Simulation, Simulator, Server } from '../interfaces';
+import { Simulation, Simulator } from '../interfaces';
 import { assert } from 'assert-ts';
 import { Task } from 'effection';
 import express from 'express';

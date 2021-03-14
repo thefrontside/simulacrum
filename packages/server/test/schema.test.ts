@@ -49,7 +49,7 @@ mutation CreateSimulation {
 
     it('has the echo service', function* () {
       expect(simulation.services).toEqual([
-        {name: 'echo', url: 'http://localhost:444'}
+        {name: 'echo', url: expect.stringMatching('http://localhost') }
       ]);
     });
   });
