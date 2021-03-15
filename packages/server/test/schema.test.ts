@@ -40,7 +40,7 @@ mutation CreateSimulation {
 }
 `;
       let result = yield client.request(createSimulationMutation);
-      simulation = result.createSimulation
+      simulation = result.createSimulation;
     });
 
     it('creates a simulation', function * () {
@@ -49,7 +49,7 @@ mutation CreateSimulation {
 
     it('has the echo service', function* () {
       expect(simulation.services).toEqual([
-        {name: 'echo', url: expect.stringMatching('http://localhost') }
+        { name: 'echo', url: expect.stringMatching('http://localhost') }
       ]);
     });
   });
