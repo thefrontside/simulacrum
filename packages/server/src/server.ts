@@ -6,6 +6,7 @@ import { assert } from 'assert-ts';
 import { v4 } from 'uuid';
 import { Server, ServerOptions, Simulation, HttpApp, Methods, HttpHandler, HttpMethods, Simulator, Behaviors } from './interfaces';
 import { SimulationContext } from './schema/context';
+import getPort from 'get-port';
 
 const createAppHandler = (app: HttpApp) => (method: Methods) => (path: string, handler: HttpHandler): HttpApp => {
   return { ...app, handlers: app.handlers.concat({ method, path, handler }) };
@@ -59,11 +60,14 @@ export function createSimulation(scope: Task, id?: string): Simulation {
 export function spawnHttpServer(
   scope: Task,
   app: Express,
+  { port = undefined }: { port?: number } = {}
 ): Promise<Server> {
   let startup = Deferred<Server>();
 
   scope.spawn(function*() {
-    let server = app.listen(() => {
+    let availablePort = yield getPort({ port });
+
+    let serverListener = () => {
       let address = server.address();
 
       assert(!!address && typeof address !== 'string', 'unexpected address');
@@ -73,7 +77,8 @@ export function spawnHttpServer(
       startup.resolve({
         port,
       });
-    });
+    };
+    let server = app.listen(availablePort, serverListener);
 
     scope.spawn(function*() {
       let error: Error = yield once(server, 'error');
@@ -90,14 +95,15 @@ export function spawnHttpServer(
   return startup.promise;
 }
 
-export function spawnSimulationServer(scope: Task, options: ServerOptions = { simulators: {} }): Promise<Server> {
+export function spawnSimulationServer(scope: Task, { simulators = {}, port = undefined }: ServerOptions): Promise<Server> {
 
-  let context = new SimulationContext(scope, options.simulators);
+  let context = new SimulationContext(scope, simulators);
 
   return spawnHttpServer(
     scope,
     express()
       .disable('x-powered-by')
-      .use('/graphql', graphqlHTTP({ schema, graphiql: true, context })));
+      .use('/graphql', graphqlHTTP({ schema, graphiql: true, context })),
+      { port });
 
 }

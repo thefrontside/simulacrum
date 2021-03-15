@@ -30,6 +30,7 @@
     "assert-ts": "^0.3.2",
     "effection": "=2.0.0-preview.5",
     "express": "^4.17.1",
+    "get-port": "^5.1.1",
     "graphql": "^15.5.0",
     "nexus": "^1.0.0",
     "uuid": "^8.3.2"

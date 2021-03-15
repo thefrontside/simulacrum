@@ -13,6 +13,7 @@ export interface Simulator {
 
 export interface ServerOptions {
   simulators: Record<string, Simulator>;
+  port?: number;
 }
 
 export type Protocols = 'http' | 'https';
