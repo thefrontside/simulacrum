@@ -8,8 +8,8 @@ import { Server, ServerOptions, Simulation, HttpApp, Methods, HttpHandler, HttpM
 import { SimulationContext } from './schema/context';
 
 const createAppHandler = (app: HttpApp) => (method: Methods) => (path: string, handler: HttpHandler): HttpApp => {
-  return {...app, handlers: app.handlers.concat({ method, path, handler })};
-}
+  return { ...app, handlers: app.handlers.concat({ method, path, handler }) };
+};
 
 const createHttpApp = () => {
   let app = {
@@ -23,7 +23,7 @@ const createHttpApp = () => {
   }
 
   return app;
-}
+};
 
 export function createSimulation(scope: Task, id?: string): Simulation {
   // TODO: if id exists, and existing simulation exists then return existing
