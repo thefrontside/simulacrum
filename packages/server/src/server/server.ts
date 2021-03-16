@@ -1,12 +1,14 @@
+import type { Slice } from '@effection/atom';
 import { once, Task, Deferred } from 'effection';
 import express, { Express } from 'express';
 import { graphqlHTTP } from 'express-graphql';
-import { schema } from './schema/schema';
+import { schema } from '../schema/schema';
 import { assert } from 'assert-ts';
 import { v4 } from 'uuid';
-import { Server, ServerOptions, Simulation, HttpApp, Methods, HttpHandler, HttpMethods, Simulator, Behaviors } from './interfaces';
-import { SimulationContext } from './schema/context';
+import { Server, ServerOptions, Simulation, HttpApp, Methods, HttpHandler, HttpMethods, Simulator, Behaviors } from '../interfaces';
+import { SimulationContext } from '../schema/context';
 import getPort from 'get-port';
+import { SimulationState } from './atom';
 
 const createAppHandler = (app: HttpApp) => (method: Methods) => (path: string, handler: HttpHandler): HttpApp => {
   return { ...app, handlers: app.handlers.concat({ method, path, handler }) };
@@ -95,9 +97,8 @@ export function spawnHttpServer(
   return startup.promise;
 }
 
-export function spawnSimulationServer(scope: Task, { simulators = {}, port = undefined }: ServerOptions): Promise<Server> {
-
-  let context = new SimulationContext(scope, simulators);
+export function spawnSimulationServer(scope: Task, atom: Slice<SimulationState>, { simulators = {}, port = undefined }: ServerOptions): Promise<Server> {
+  let context = new SimulationContext(scope, atom, simulators);
 
   return spawnHttpServer(
     scope,
@@ -105,5 +106,4 @@ export function spawnSimulationServer(scope: Task, { simulators = {}, port = und
       .disable('x-powered-by')
       .use('/graphql', graphqlHTTP({ schema, graphiql: true, context })),
       { port });
-
 }

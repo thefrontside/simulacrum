@@ -1,18 +1,20 @@
-import { createSimulation, spawnHttpServer } from '../server';
-import { Simulation, Simulator } from '../interfaces';
+import { createSimulation, spawnHttpServer } from '../server/server';
+import { Simulator } from '../interfaces';
 import { assert } from 'assert-ts';
 import { Task } from 'effection';
+import type { Slice } from '@effection/atom/dist';
+import type { SimulationState } from '../server/atom';
 import express, { raw } from 'express';
 
 export class SimulationContext {
-  simulations: Record<string, Simulation> = {};
-  constructor(private scope: Task, private availableSimulators: Record<string, Simulator>) {}
+  constructor(private scope: Task, private atom: Slice<SimulationState>, private availableSimulators: Record<string, Simulator>) {}
 
   async createSimulation(simulators: string | string[], id?: string): Promise<SimulationRecord> {
-    let { scope, simulations, availableSimulators } = this;
+    let { scope, availableSimulators, atom } = this;
+
     return await scope.spawn(function*() {
-      if(typeof id !== 'undefined' && !!simulations[id]) {
-        let existing = simulations[id];
+      if(typeof id !== 'undefined') {
+        let existing = atom.slice('simulations', id).get();
 
         yield existing.scope.halt();
       }
@@ -23,14 +25,14 @@ export class SimulationContext {
       let simulation = createSimulation(scope.spawn(), id);
 
       for(let sim of simulators) {
-        let simulator = simulation.simulators[sim] = availableSimulators[sim];
+        let simulator = availableSimulators[sim];
 
         assert(!!simulator, `no available simulator for ${sim}`);
 
         simulation = simulation.addSimulator(sim, simulator);
       }
 
-      simulations[simulation.id] = simulation;
+      atom.slice('simulations').update(s => ({ ...s, [simulation.id]: simulation }));
 
       let services = yield Promise.all(simulation.services.map(async (service) => {
         let app = express();

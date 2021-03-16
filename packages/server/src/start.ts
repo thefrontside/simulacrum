@@ -1,6 +1,7 @@
-import { spawnSimulationServer } from './server';
+import { spawnSimulationServer } from './server/server';
 import { main } from '@effection/node';
 import { HttpHandler, Server } from './interfaces';
+import { createSimulationAtom } from './server/atom';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const echo: HttpHandler = function echo(request, response) {
@@ -14,7 +15,9 @@ const echo: HttpHandler = function echo(request, response) {
 const serverPort = !!process.env.PORT ? Number(process.env.PORT) : undefined;
 
 main(function* (scope) {
-  let { port }: Server = yield spawnSimulationServer(scope, {
+  let atom = createSimulationAtom();
+
+  let { port }: Server = yield spawnSimulationServer(scope, atom, {
     simulators: {
       echo(simulation) {
         return simulation.http(app => app.post('/', echo));

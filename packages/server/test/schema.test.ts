@@ -1,16 +1,19 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
-import { HttpHandler, Server } from '../src/interfaces';
-import { spawnSimulationServer } from '../src/server';
+import { HttpHandler } from '../src/interfaces';
+import { spawnSimulationServer } from '../src/server/server';
 import { GraphQLClient, gql } from 'graphql-request';
+import { createSimulationAtom } from '../src/server/atom';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const echo: HttpHandler = (_request, _response) => Promise.resolve();
 
 describe('graphql control api', () => {
   let client: GraphQLClient;
 
   beforeEach(function * (world) {
-    let { port } = yield spawnSimulationServer(world, {
+    let atom = createSimulationAtom();
+    let { port } = yield spawnSimulationServer(world, atom, {
       simulators: {
         echo(behaviors) {
           return behaviors.http(app => app.get('/', echo));
@@ -23,6 +26,7 @@ describe('graphql control api', () => {
   });
 
   describe('createSimulation()', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let simulation: Record<string, any>;
 
     beforeEach(function*() {

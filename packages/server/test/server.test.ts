@@ -1,10 +1,12 @@
+import type { Slice } from '@effection/atom';
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
 
 import { createClient, Client, Simulation } from "@simulacrum/client";
 
 import type { HttpHandler, Server } from '../src/interfaces';
-import { spawnSimulationServer } from '../src/server';
+import { spawnSimulationServer } from '../src/server/server';
+import { createSimulationAtom, SimulationState } from '../src/server/atom';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const echo: HttpHandler = (_request, _response) => Promise.resolve();
@@ -12,9 +14,12 @@ const echo: HttpHandler = (_request, _response) => Promise.resolve();
 describe("@simulacrum/server", () => {
   let client: Client;
   let server: Server;
+  let atom: Slice<SimulationState>;
 
   beforeEach(function*(world) {
-    server = yield spawnSimulationServer(world, {
+    atom = createSimulationAtom();
+
+    server = yield spawnSimulationServer(world, atom, {
       simulators: {
         echo({ http }) {
           return http(app => app.get('/', echo));
