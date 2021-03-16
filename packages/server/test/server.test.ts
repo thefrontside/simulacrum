@@ -3,25 +3,26 @@ import expect from 'expect';
 
 import { createClient, Client, Simulation } from "@simulacrum/client";
 
-import type { HttpHandler, Server } from '../src/interfaces';
-import { spawnSimulationServer } from '../src/server';
+import type { HttpHandler } from '../src/interfaces';
+import { createSimulationServer, AddressInfo } from '../src/server';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const echo: HttpHandler = (_request, _response) => Promise.resolve();
 
 describe("@simulacrum/server", () => {
   let client: Client;
-  let server: Server;
+  let address: AddressInfo;
 
   beforeEach(function*(world) {
-    server = yield spawnSimulationServer(world, {
+    let server = createSimulationServer({
       simulators: {
         echo({ http }) {
           return http(app => app.get('/', echo));
         },
       }
-    });
-    client = createClient(`http://localhost:${server.port}`);
+    }).run(world);
+    address = yield server.listening();
+    client = createClient(`http://localhost:${address.port}`);
   });
 
   describe.skip('creating a simulation', () => {
@@ -37,6 +38,6 @@ describe("@simulacrum/server", () => {
   });
 
   it('starts', function*() {
-    expect(typeof server.port).toBe('number');
+    expect(typeof address.port).toBe('number');
   });
 });

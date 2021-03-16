@@ -1,1 +1,1 @@
-export { spawnSimulationServer } from './server';
+export { createSimulationServer } from './server';

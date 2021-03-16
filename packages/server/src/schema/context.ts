@@ -1,4 +1,5 @@
-import { createSimulation, spawnHttpServer } from '../server';
+import { createServer } from '../http';
+import { createSimulation } from '../server';
 import { Simulation, Simulator } from '../interfaces';
 import { assert } from 'assert-ts';
 import { Task } from 'effection';
@@ -53,7 +54,8 @@ export class SimulationContext {
           });
         }
 
-        let { port } = await spawnHttpServer(simulation.scope, app);
+        let server = createServer(app).run(simulation.scope);
+        let { port } = await simulation.scope.spawn(server.listening());
 
         return {
           name: service.name,

@@ -1,6 +1,6 @@
-import { spawnSimulationServer } from './server';
+import { createSimulationServer, Server, AddressInfo } from './server';
 import { main } from '@effection/node';
-import { HttpHandler, Server } from './interfaces';
+import { HttpHandler } from './interfaces';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const echo: HttpHandler = function echo(request, response) {
@@ -14,14 +14,16 @@ const echo: HttpHandler = function echo(request, response) {
 const serverPort = !!process.env.PORT ? Number(process.env.PORT) : undefined;
 
 main(function* (scope) {
-  let { port }: Server = yield spawnSimulationServer(scope, {
+
+  let server: Server = createSimulationServer({
     simulators: {
       echo(simulation) {
         return simulation.http(app => app.post('/', echo));
       },
-    },
-    port: serverPort
-  });
+    }
+  }).run(scope);
+
+  let { port }: AddressInfo = yield server.listening();
 
   console.log(`Simulation server running on http://localhost:${port}/graphql`);
 

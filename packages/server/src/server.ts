@@ -1,12 +1,15 @@
-import { once, Task, Deferred } from 'effection';
-import express, { Express } from 'express';
+import { Task } from 'effection';
+import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { schema } from './schema/schema';
-import { assert } from 'assert-ts';
 import { v4 } from 'uuid';
-import { Server, ServerOptions, Simulation, HttpApp, Methods, HttpHandler, HttpMethods, Simulator, Behaviors } from './interfaces';
+import { ServerOptions, Simulation, HttpApp, Methods, HttpHandler, HttpMethods, Simulator, Behaviors } from './interfaces';
+import { Runnable, Server, createServer } from './http';
 import { SimulationContext } from './schema/context';
 import getPort from 'get-port';
+
+export { Server, createServer } from './http';
+export type { AddressInfo } from './http';
 
 const createAppHandler = (app: HttpApp) => (method: Methods) => (path: string, handler: HttpHandler): HttpApp => {
   return { ...app, handlers: app.handlers.concat({ method, path, handler }) };
@@ -57,53 +60,16 @@ export function createSimulation(scope: Task, id?: string): Simulation {
   return simulation;
 }
 
-export function spawnHttpServer(
-  scope: Task,
-  app: Express,
-  { port = undefined }: { port?: number } = {}
-): Promise<Server> {
-  let startup = Deferred<Server>();
+export function createSimulationServer(options: ServerOptions = { simulators: {} }): Runnable<Server> {
+  return {
+    run(scope) {
+      let context = new SimulationContext(scope, options.simulators);
 
-  scope.spawn(function*() {
-    let availablePort = yield getPort({ port });
+      let app = express()
+        .disable('x-powered-by')
+        .use('/graphql', graphqlHTTP({ schema, graphiql: true, context }));
 
-    let serverListener = () => {
-      let address = server.address();
-
-      assert(!!address && typeof address !== 'string', 'unexpected address');
-
-      let { port } = address;
-
-      startup.resolve({
-        port,
-      });
-    };
-    let server = app.listen(availablePort, serverListener);
-
-    scope.spawn(function*() {
-      let error: Error = yield once(server, 'error');
-      throw error;
-    });
-
-    try {
-      yield;
-    } finally {
-      server.close();
+      return createServer(app).run(scope);
     }
-  });
-
-  return startup.promise;
-}
-
-export function spawnSimulationServer(scope: Task, { simulators = {}, port = undefined }: ServerOptions): Promise<Server> {
-
-  let context = new SimulationContext(scope, simulators);
-
-  return spawnHttpServer(
-    scope,
-    express()
-      .disable('x-powered-by')
-      .use('/graphql', graphqlHTTP({ schema, graphiql: true, context })),
-      { port });
-
+  };
 }
