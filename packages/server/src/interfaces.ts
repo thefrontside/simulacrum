@@ -24,10 +24,17 @@ export interface Service {
   app: HttpApp
 }
 
+export interface ServiceInstance {
+  id: string;
+  port: number;
+  name: string;
+  url: string;
+}
+
 export interface Simulation {
   id: string;
-  simulators: Record<string, Simulator>;
   services: Service[];
+  serviceInstances: Record<string, ServiceInstance>;
   addSimulator(name: string, simulator: Simulator): Simulation;
   scope: Task;
 }

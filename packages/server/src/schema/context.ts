@@ -1,10 +1,11 @@
 import { createSimulation, spawnHttpServer } from '../server/server';
-import { Simulator } from '../interfaces';
+import { ServiceInstance, Simulator } from '../interfaces';
 import { assert } from 'assert-ts';
 import { Task } from 'effection';
 import type { Slice } from '@effection/atom/dist';
 import type { SimulationState } from '../server/atom';
 import express, { raw } from 'express';
+import { v4 } from 'uuid';
 
 export class SimulationContext {
   constructor(private scope: Task, private atom: Slice<SimulationState>, private availableSimulators: Record<string, Simulator>) {}
@@ -24,6 +25,7 @@ export class SimulationContext {
       // TODO if id is supplied we should check for an existing simulation and return it
       let simulation = createSimulation(scope.spawn(), id);
 
+
       for(let sim of simulators) {
         let simulator = availableSimulators[sim];
 
@@ -32,9 +34,7 @@ export class SimulationContext {
         simulation = simulation.addSimulator(sim, simulator);
       }
 
-      atom.slice('simulations').update(s => ({ ...s, [simulation.id]: simulation }));
-
-      let services = yield Promise.all(simulation.services.map(async (service) => {
+      let services: ServiceInstance[] = yield Promise.all(simulation.services.map(async (service) => {
         let app = express();
         app.use(raw({ type: "*/*" }));
 
@@ -58,9 +58,19 @@ export class SimulationContext {
         let { port } = await spawnHttpServer(simulation.scope, app);
 
         return {
+          id: v4(),
+          port,
           name: service.name,
-          url: `http://localhost:${port}`
+          url: `${service.protocol}://localhost:${port}`
         };
+      }));
+
+      atom.slice('simulations').update(s => ({
+        ...s,
+        [simulation.id]: {
+          ...simulation,
+          serviceInstances: services.reduce((acc, curr) => ({ ...acc, [curr.id]: curr }), {})
+        }
       }));
 
       return {

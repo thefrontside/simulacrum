@@ -4,6 +4,7 @@ export const types = [
   objectType({
     name: 'Service',
     definition(t) {
+      t.nonNull.id('id');
       t.nonNull.string('name');
       t.nonNull.string('url');
     }
@@ -29,7 +30,7 @@ export const types = [
         resolve(_, { simulators }, ctx) {
           return ctx.createSimulation(simulators);
         }
-      })
+      });
     }
   })
-]
+];

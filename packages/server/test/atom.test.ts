@@ -54,55 +54,12 @@ mutation CreateSimulation {
     it('should add http behaviour', function*() {
       let { createSimulation: { id } } = result;
 
-      let simulation = atom.slice('simulations', id).get();
+      let instances = atom.slice('simulations', id, 'serviceInstances').get();
 
-      let echo = simulation.services[0];
+      let echo = Object.values(instances)[0];
 
       expect(echo.name).toBe('echo');
-      expect(echo.protocol).toBe('http');
-    });
-  });
-
-  describe('adds a stimulation with an https simulator', () => {
-    beforeEach(function*(world) {
-      atom = createSimulationAtom();
-
-      let { port } = yield spawnSimulationServer(world, atom, {
-        simulators: {
-          auth0({ https }) {
-            return https(app => app.get('/', echo));
-          },
-        }
-      });
-
-      let endpoint = `http://localhost:${port}/graphql`;
-      client = new GraphQLClient(endpoint, { headers: {} });
-    });
-
-    let result: CreateSimulationResult;
-
-    beforeEach(function* () {
-      let createSimulationMutation = gql`
-mutation CreateSimulation {
-  createSimulation(
-    simulators: ["auth0"]
-  ) {
-    id
-  }
-}
-`;
-      result = yield client.request(createSimulationMutation);
-    });
-
-    it('should add https behaviour', function*() {
-      let { createSimulation: { id } } = result;
-
-      let simulation = atom.slice('simulations', id).get();
-
-      let echo = simulation.services[0];
-
-      expect(echo.name).toBe('auth0');
-      expect(echo.protocol).toBe('https');
+      expect(echo.url).toBe(`http://localhost:${echo.port}`);
     });
   });
 });

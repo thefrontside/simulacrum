@@ -33,7 +33,7 @@ export function createSimulation(scope: Task, id?: string): Simulation {
   let simulation: Simulation = {
     id: id ?? v4(),
     scope,
-    simulators: {},
+    serviceInstances: {},
     services: [],
     addSimulator(name: string, simulator: Simulator): Simulation {
       let behavior: Behaviors = {
