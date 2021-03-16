@@ -2,8 +2,8 @@ import { Operation, Task } from 'effection';
 import type { Process } from '@effection/node';
 import { main, exec, daemon, StdIO } from '@effection/node';
 import { sleep } from 'effection';
-import type { Channel } from '@effection/channel';
-import { on } from '@effection/events';
+import type { Channel } from 'effection';
+import { on } from 'effection';
 import { watch } from 'chokidar';
 
 main(function* (scope: Task) {

@@ -36,10 +36,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@effection/channel": "2.0.0-preview.4",
-    "@effection/events": "=2.0.0-preview.4",
     "@effection/mocha": "=2.0.0-preview.3",
-    "@effection/subscription": "=2.0.0-preview.4",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
