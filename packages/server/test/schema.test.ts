@@ -1,7 +1,7 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
-import { HttpHandler, Server } from '../src/interfaces';
-import { spawnSimulationServer } from '../src/server';
+import { HttpHandler } from '../src/interfaces';
+import { createSimulationServer } from '../src/server';
 import { GraphQLClient, gql } from 'graphql-request';
 
 const echo: HttpHandler = (_request, _response) => Promise.resolve();
@@ -10,13 +10,13 @@ describe('graphql control api', () => {
   let client: GraphQLClient;
 
   beforeEach(function * (world) {
-    let { port } = yield spawnSimulationServer(world, {
+    let { port } = yield createSimulationServer({
       simulators: {
         echo(behaviors) {
           return behaviors.http(app => app.get('/', echo));
         }
       }
-    });
+    }).run(world).address();
 
     let endpoint = `http://localhost:${port}/graphql`;
     client = new GraphQLClient(endpoint, { headers: {} });

@@ -1,6 +1,10 @@
 import { Operation, Task } from 'effection';
 import type { Request, Response } from 'express';
 
+export interface Runnable<T> {
+  run(scope: Task): T;
+}
+
 export interface Behaviors {
   https: (handler: (app: HttpApp) => HttpApp) => Behaviors;
   http: (handler: (app: HttpApp) => HttpApp) => Behaviors;
