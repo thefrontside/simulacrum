@@ -31,6 +31,7 @@ export class SimulationContext {
 
         assert(!!simulator, `no available simulator for ${sim}`);
 
+
         simulation = simulation.addSimulator(sim, simulator);
       }
 

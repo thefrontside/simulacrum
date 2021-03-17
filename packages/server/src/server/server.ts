@@ -52,7 +52,7 @@ export function createSimulation(scope: Task, id?: string): Simulation {
 
       let behaviors = simulator(behavior);
 
-      return { ...simulation, services: simulation.services.concat(behaviors.services) };
+      return { ...this, services: this.services.concat(behaviors.services) };
     }
   };
 

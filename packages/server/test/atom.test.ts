@@ -29,6 +29,9 @@ describe("atom", () => {
           echo({ http }) {
             return http(app => app.get('/', echo));
           },
+          secureEcho({ https }) {
+            return https(app => app.get('/', echo));
+          }
         }
       });
 
@@ -42,7 +45,7 @@ describe("atom", () => {
       let createSimulationMutation = gql`
 mutation CreateSimulation {
   createSimulation(
-    simulators: ["echo"]
+    simulators: ["echo", "secureEcho"]
   ) {
     id
   }
@@ -51,7 +54,7 @@ mutation CreateSimulation {
       result = yield client.request(createSimulationMutation);
     });
 
-    it('should add http behaviour', function*() {
+    it('should add an http behaviour', function*() {
       let { createSimulation: { id } } = result;
 
       let instances = atom.slice('simulations', id, 'serviceInstances').get();
@@ -60,6 +63,17 @@ mutation CreateSimulation {
 
       expect(echo.name).toBe('echo');
       expect(echo.url).toBe(`http://localhost:${echo.port}`);
+    });
+
+    it('should add an https behaviour', function*() {
+      let { createSimulation: { id } } = result;
+
+      let instances = atom.slice('simulations', id, 'serviceInstances').get();
+
+      let echo = Object.values(instances)[1];
+
+      expect(echo.name).toBe('secureEcho');
+      expect(echo.url).toBe(`https://localhost:${echo.port}`);
     });
   });
 });
