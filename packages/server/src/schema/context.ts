@@ -2,7 +2,7 @@ import { createSimulation, spawnHttpServer } from '../server';
 import { Simulation, Simulator } from '../interfaces';
 import { assert } from 'assert-ts';
 import { Task } from 'effection';
-import express from 'express';
+import express, { raw } from 'express';
 
 export class SimulationContext {
   simulations: Record<string, Simulation> = {};
@@ -34,11 +34,18 @@ export class SimulationContext {
 
       let services = yield Promise.all(simulation.services.map(async (service) => {
         let app = express();
+        app.use(raw({ type: "*/*" }));
+
         for (let handler of service.app.handlers) {
           app[handler.method](handler.path, (request, response) => {
             scope.spawn(function*() {
               try {
                 yield handler.handler(request, response);
+              } catch(err) {
+                console.error(err);
+
+                response.status(500);
+                response.write('server error');
               } finally {
                 response.end();
               }

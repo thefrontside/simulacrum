@@ -36,7 +36,6 @@ describe("@simulacrum/server", () => {
     });
   });
 
-
   it('starts', function*() {
     expect(typeof server.port).toBe('number');
   });

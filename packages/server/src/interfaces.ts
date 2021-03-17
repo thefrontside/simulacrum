@@ -1,5 +1,5 @@
 import { Operation, Task } from 'effection';
-import { IncomingMessage, ServerResponse } from 'http';
+import type { Request, Response } from 'express';
 
 export interface Behaviors {
   https: (handler: (app: HttpApp) => HttpApp) => Behaviors;
@@ -13,6 +13,7 @@ export interface Simulator {
 
 export interface ServerOptions {
   simulators: Record<string, Simulator>;
+  port?: number;
 }
 
 export type Protocols = 'http' | 'https';
@@ -36,7 +37,7 @@ export interface Server {
 }
 
 export interface HttpHandler {
-  (request: IncomingMessage, response: ServerResponse): Operation<void>;
+  (request: Request, response: Response): Operation<void>;
 }
 
 export const HttpMethods = ['get', 'post', 'put', 'delete', 'patch'] as const;
