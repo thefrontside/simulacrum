@@ -21,7 +21,7 @@ describe("@simulacrum/server", () => {
         },
       }
     }).run(world);
-    address = yield server.listening();
+    address = yield server.address();
     client = createClient(`http://localhost:${address.port}`);
   });
 

@@ -55,7 +55,7 @@ export class SimulationContext {
         }
 
         let server = createServer(app).run(simulation.scope);
-        let { port } = await simulation.scope.spawn(server.listening());
+        let { port } = await simulation.scope.spawn(server.address());
 
         return {
           name: service.name,

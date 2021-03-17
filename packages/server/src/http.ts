@@ -9,7 +9,7 @@ export type { AddressInfo } from 'net';
 import type { Runnable } from './interfaces';
 
 export interface Server {
-  listening(): Operation<AddressInfo>;
+  address(): Operation<AddressInfo>;
 }
 
 export interface ServerOptions {
@@ -43,7 +43,7 @@ export function createServer(app: Express, options: ServerOptions = {}): Runnabl
 
 
       return {
-        async listening() {
+        async address() {
           let server = await bound.promise;
           return server.address() as unknown as AddressInfo;
         }

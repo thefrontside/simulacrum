@@ -24,7 +24,7 @@ main(function* (scope) {
     }
   }).run(scope);
 
-  let { port }: AddressInfo = yield server.listening();
+  let { port }: AddressInfo = yield server.address();
 
   console.log(`Simulation server running on http://localhost:${port}/graphql`);
 

@@ -16,7 +16,7 @@ describe('graphql control api', () => {
           return behaviors.http(app => app.get('/', echo));
         }
       }
-    }).run(world).listening();
+    }).run(world).address();
 
     let endpoint = `http://localhost:${port}/graphql`;
     client = new GraphQLClient(endpoint, { headers: {} });
