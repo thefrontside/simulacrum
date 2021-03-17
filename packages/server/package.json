@@ -28,6 +28,7 @@
     "@effection/node": "=2.0.0-preview.5",
     "@simulacrum/client": "^0.0.0",
     "assert-ts": "^0.3.2",
+    "cross-fetch": "^3.1.0",
     "effection": "=2.0.0-preview.5",
     "express": "^4.17.1",
     "get-port": "^5.1.1",

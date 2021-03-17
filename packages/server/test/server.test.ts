@@ -1,43 +1,71 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
+import { createSimulationServer } from '../src/server';
+import { echo } from '../src/echo';
+import { GraphQLClient, gql } from 'graphql-request';
+import { fetch } from 'cross-fetch';
 
-import { createClient, Client, Simulation } from "@simulacrum/client";
+describe('@simulacrum/server', () => {
+  let client: GraphQLClient;
 
-import type { HttpHandler } from '../src/interfaces';
-import { createSimulationServer, AddressInfo } from '../src/server';
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const echo: HttpHandler = (_request, _response) => Promise.resolve();
-
-describe("@simulacrum/server", () => {
-  let client: Client;
-  let address: AddressInfo;
-
-  beforeEach(function*(world) {
-    let server = createSimulationServer({
+  beforeEach(function * (world) {
+    let { port } = yield createSimulationServer({
       simulators: {
-        echo({ http }) {
-          return http(app => app.get('/', echo));
-        },
+        echo(behaviors) {
+          return behaviors.http(app => app.post('/', echo));
+        }
       }
-    }).run(world);
-    address = yield server.address();
-    client = createClient(`http://localhost:${address.port}`);
+    }).run(world).address();
+
+    let endpoint = `http://localhost:${port}/graphql`;
+    client = new GraphQLClient(endpoint, { headers: {} });
   });
 
-  describe.skip('creating a simulation', () => {
-    let simulation: Simulation;
+  describe('createSimulation()', () => {
+    let simulation: Record<string, any>;
 
     beforeEach(function*() {
-      simulation = yield client.createSimulation("echo");
+      let createSimulationMutation = gql`
+mutation CreateSimulation {
+  createSimulation(
+    simulators: ["echo"]
+  ) {
+    id
+    services {
+      name
+      url
+    }
+  }
+}
+`;
+      let result = yield client.request(createSimulationMutation);
+      simulation = result.createSimulation;
     });
 
-    it('has a echo service', function* () {
-      expect(simulation.services.pingpong).toBeDefined();
+    it('creates a simulation', function * () {
+      expect(typeof simulation.id).toBe('string');
     });
-  });
 
-  it('starts', function*() {
-    expect(typeof address.port).toBe('number');
+    it('has the echo service', function* () {
+      expect(simulation.services).toEqual([
+        { name: 'echo', url: expect.stringMatching('http://localhost') }
+      ]);
+    });
+
+    describe('posting to the echo service', () => {
+      let body: string;
+
+      beforeEach(function*() {
+        let [{ url }]: [{name: string, url: string }] = simulation.services;
+
+        let response = yield fetch(url, { method: 'POST', body: "hello world" });
+        expect(response.ok).toEqual(true);
+        body = yield response.text();
+      });
+
+      it('gives you back what you gave it', function*() {
+        expect(body).toEqual("hello world");
+      });
+    });
   });
 });
