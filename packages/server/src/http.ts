@@ -1,15 +1,13 @@
 import { Deferred, Operation, Task, once } from 'effection';
 import { Express } from 'express';
-import type { AddressInfo } from 'net';
 
+import type { AddressInfo } from 'net';
 export type { AddressInfo } from 'net';
+
+import type { Runnable } from './interfaces';
 
 export interface Server {
   listening(): Operation<AddressInfo>;
-}
-
-export interface Runnable<T> {
-  run(scope: Task): T;
 }
 
 export function createServer(app: Express): Runnable<Server> {

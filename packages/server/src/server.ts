@@ -4,12 +4,13 @@ import { graphqlHTTP } from 'express-graphql';
 import { schema } from './schema/schema';
 import { v4 } from 'uuid';
 import { ServerOptions, Simulation, HttpApp, Methods, HttpHandler, HttpMethods, Simulator, Behaviors } from './interfaces';
-import { Runnable, Server, createServer } from './http';
+import { Server, createServer } from './http';
 import { SimulationContext } from './schema/context';
 import getPort from 'get-port';
 
 export { Server, createServer } from './http';
 export type { AddressInfo } from './http';
+import type { Runnable } from './interfaces';
 
 const createAppHandler = (app: HttpApp) => (method: Methods) => (path: string, handler: HttpHandler): HttpApp => {
   return { ...app, handlers: app.handlers.concat({ method, path, handler }) };
