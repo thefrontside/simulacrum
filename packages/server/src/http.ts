@@ -21,8 +21,12 @@ export function createServer(app: Express): Runnable<Server> {
 
       scope.spawn(function*() {
         try {
-          yield once(server, 'listening');
-          bound.resolve();
+          if (server.listening) {
+            bound.resolve();
+          } else {
+            yield once(server, 'listening');
+            bound.resolve();
+          }
           yield;
         } finally {
           server.close();
