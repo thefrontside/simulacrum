@@ -6,7 +6,6 @@ import { v4 } from 'uuid';
 import { ServerOptions, Simulation, HttpApp, Methods, HttpHandler, HttpMethods, Simulator, Behaviors } from './interfaces';
 import { Server, createServer } from './http';
 import { SimulationContext } from './schema/context';
-import getPort from 'get-port';
 
 export { Server, createServer } from './http';
 export type { AddressInfo } from './http';
@@ -62,6 +61,7 @@ export function createSimulation(scope: Task, id?: string): Simulation {
 }
 
 export function createSimulationServer(options: ServerOptions = { simulators: {} }): Runnable<Server> {
+  let { port } = options;
   return {
     run(scope) {
       let context = new SimulationContext(scope, options.simulators);
@@ -70,7 +70,7 @@ export function createSimulationServer(options: ServerOptions = { simulators: {}
         .disable('x-powered-by')
         .use('/graphql', graphqlHTTP({ schema, graphiql: true, context }));
 
-      return createServer(app).run(scope);
+      return createServer(app, { port }).run(scope);
     }
   };
 }

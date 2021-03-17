@@ -16,6 +16,7 @@ const serverPort = !!process.env.PORT ? Number(process.env.PORT) : undefined;
 main(function* (scope) {
 
   let server: Server = createSimulationServer({
+    port: serverPort,
     simulators: {
       echo(simulation) {
         return simulation.http(app => app.post('/', echo));
