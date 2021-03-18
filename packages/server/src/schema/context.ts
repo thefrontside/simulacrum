@@ -1,77 +1,21 @@
-import { createServer } from '../http';
-import { createSimulation } from '../server';
-import { Simulation, Simulator } from '../interfaces';
-import { assert } from 'assert-ts';
+import { Slice } from '@effection/atom';
 import { Task } from 'effection';
-import express, { raw } from 'express';
+import { v4 } from 'uuid';
+import { SimulationState } from '../interfaces';
 
 export class SimulationContext {
-  simulations: Record<string, Simulation> = {};
-  constructor(private scope: Task, private availableSimulators: Record<string, Simulator>) {}
+  constructor(private scope: Task, private simulations: Slice<Record<string, SimulationState>>) {}
 
-  async createSimulation(simulators: string | string[], id?: string): Promise<SimulationRecord> {
-    let { scope, simulations, availableSimulators } = this;
+  async createSimulation(using: string | string[], uuid?: string): Promise<SimulationState> {
+    let simulators = ([] as string[]).concat(using);
+    let { scope, simulations } = this;
+
     return await scope.spawn(function*() {
-      if(typeof id !== 'undefined' && !!simulations[id]) {
-        let existing = simulations[id];
-
-        yield existing.scope.halt();
-      }
-
-      simulators = Array.isArray(simulators) ? simulators : [simulators];
-
-      // TODO if id is supplied we should check for an existing simulation and return it
-      let simulation = createSimulation(scope.spawn(), id);
-
-      for(let sim of simulators) {
-        let simulator = simulation.simulators[sim] = availableSimulators[sim];
-
-        assert(!!simulator, `no available simulator for ${sim}`);
-
-        simulation = simulation.addSimulator(sim, simulator);
-      }
-
-      simulations[simulation.id] = simulation;
-
-      let services = yield Promise.all(simulation.services.map(async (service) => {
-        let app = express();
-        app.use(raw({ type: "*/*" }));
-
-        for (let handler of service.app.handlers) {
-          app[handler.method](handler.path, (request, response) => {
-            scope.spawn(function*() {
-              try {
-                yield handler.handler(request, response);
-              } catch(err) {
-                console.error(err);
-
-                response.status(500);
-                response.write('server error');
-              } finally {
-                response.end();
-              }
-            });
-          });
-        }
-
-        let server = createServer(app).run(simulation.scope);
-        let { port } = await simulation.scope.spawn(server.address());
-
-        return {
-          name: service.name,
-          url: `http://localhost:${port}`
-        };
-      }));
-
-      return {
-        id: simulation.id,
-        services
-      };
+      let id = uuid || v4();
+      let simulation = simulations.slice(id);
+      simulation.set({ id, status: 'new', simulators });
+      yield simulation.filter(({ status }) => status === 'running' || status === 'failed').first();
+      return simulation.get();
     });
   }
-}
-
-export interface SimulationRecord {
-  id: string;
-  services: {name: string, url: string}[];
 }
