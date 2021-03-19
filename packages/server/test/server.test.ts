@@ -12,7 +12,10 @@ describe('@simulacrum/server', () => {
     let { port } = yield createSimulationServer({
       simulators: {
         echo(behaviors) {
-          return behaviors.http(app => app.post('/', echo));
+          return behaviors
+            .http(app => app.post('/', echo))
+            .http(app => app.post('/', echo), 'too')
+
         }
       }
     }).run(world).address();
@@ -48,7 +51,8 @@ mutation CreateSimulation {
 
     it('has the echo service', function* () {
       expect(simulation.services).toEqual([
-        { name: 'echo', url: expect.stringMatching('http://localhost') }
+        { name: 'echo', url: expect.stringMatching('http://localhost') },
+        { name: 'echo.too', url: expect.stringMatching('http://localhost') }
       ]);
     });
 
