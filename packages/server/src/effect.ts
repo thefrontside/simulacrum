@@ -19,9 +19,9 @@ export function map<A>(slice: Slice<Record<string, A>>, effect: Effect<A>): Oper
         keep.add(key);
       }
 
-      for (let [key, context] of effects.entries()) {
+      for (let [key, effect] of effects.entries()) {
         if (!keep.has(key)) {
-          context.halt();
+          effect.halt();
         }
       }
     }
