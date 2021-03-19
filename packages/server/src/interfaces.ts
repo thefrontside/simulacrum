@@ -6,9 +6,8 @@ export interface Runnable<T> {
 }
 
 export interface Behaviors {
-  https: (handler: (app: HttpApp) => HttpApp) => Behaviors;
-  http: (handler: (app: HttpApp) => HttpApp) => Behaviors;
-  services: Service[];
+  https(handler: (app: HttpApp) => HttpApp, name?: string): Behaviors;
+  http(handler: (app: HttpApp) => HttpApp, name?: string): Behaviors;
 }
 
 export interface Simulator {

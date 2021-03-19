@@ -1,15 +1,15 @@
 import { Effect } from './effect';
 import express, { raw } from 'express';
-import { Behaviors, HttpApp, HttpHandler, HttpMethods, Methods, Protocols, Service, SimulationState, Simulator } from './interfaces';
+import { SimulationState, Simulator } from './interfaces';
 import { AddressInfo, createServer } from './http';
 
+import { applyBehaviors } from './behaviors';
 
 export function simulation(definitions: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {
     try {
-      let behaviors = Object.entries(definitions).reduce(({ services }, [name, simulator]) => {
-        return simulator(createBehaviors(services, name));
-      }, createBehaviors());
+      let selected = slice.get().simulators;
+      let behaviors = applyBehaviors(definitions, selected);
 
       let servers = behaviors.services.map((service) => {
         let app = express();
@@ -41,7 +41,7 @@ export function simulation(definitions: Record<string, Simulator>): Effect<Simul
       let services: {name: string; url: string; }[] = [];
       for (let { name, server, protocol } of servers) {
         let address: AddressInfo = yield server.address();
-        services.push({ name, url: `${protocol}://localhost:${address.port}`});
+        services.push({ name, url: `${protocol}://localhost:${address.port}` });
       }
 
       slice.update(state => ({
@@ -61,37 +61,3 @@ export function simulation(definitions: Record<string, Simulator>): Effect<Simul
     }
   };
 }
-
-function createBehaviors(services: Service[] = [], name = ''): Behaviors {
-  return {
-    services,
-    http(handler) {
-      let protocol: Protocols = 'http';
-      let app = handler(createHttpApp());
-      return createBehaviors(services.concat({ name, protocol, app }), name);
-    },
-    https(handler) {
-      let protocol: Protocols = 'https';
-      let app = handler(createHttpApp());
-      return createBehaviors(services.concat({ name, protocol, app }), name)
-    }
-  };
-}
-
-const createAppHandler = (app: HttpApp) => (method: Methods) => (path: string, handler: HttpHandler): HttpApp => {
-  return { ...app, handlers: app.handlers.concat({ method, path, handler }) };
-};
-
-const createHttpApp = () => {
-  let app = {
-    handlers: []
-  } as unknown as HttpApp;
-
-  let appHandler = createAppHandler(app);
-
-  for(let method of HttpMethods) {
-    app[method] = appHandler(method);
-  }
-
-  return app;
-};
