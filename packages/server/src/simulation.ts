@@ -56,7 +56,8 @@ export function simulation(definitions: Record<string, Simulator>): Effect<Simul
       slice.update((state) => ({
         ...state,
         status: "failed",
-        error
+        error,
+        services: []
       }));
     }
   };

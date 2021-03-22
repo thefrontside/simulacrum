@@ -10,12 +10,12 @@ export class SimulationContext {
     let simulators = ([] as string[]).concat(using);
     let { scope, simulations } = this;
 
-    return await scope.spawn(function*() {
-      let id = uuid || v4();
-      let simulation = simulations.slice(id);
-      simulation.set({ id, status: 'new', simulators });
-      yield simulation.filter(({ status }) => status === 'running' || status === 'failed').first();
-      return simulation.get();
-    });
+    let id = uuid || v4();
+    let simulation = simulations.slice(id);
+    simulation.set({ id, status: 'new', simulators });
+
+    return scope.spawn(
+      simulation.once(({ status }) => status === 'running' || status === 'failed')
+    );
   }
 }
