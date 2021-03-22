@@ -5,7 +5,7 @@ export interface Services {
   services: Service[];
 }
 
-export function applyBehaviors(simulators: Record<string, Simulator>, selected: string[]): Services {
+export function selectBehaviors(simulators: Record<string, Simulator>, selected: string[]): Services {
   return selected.reduce((behaviors, selection) => {
     assert(simulators[selection] != null, `unknown simulator ${selection}`);
     return collectSimulatorBehaviors(selection, simulators[selection], behaviors);

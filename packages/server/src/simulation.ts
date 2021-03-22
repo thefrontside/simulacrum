@@ -3,13 +3,13 @@ import express, { raw } from 'express';
 import { SimulationState, Simulator } from './interfaces';
 import { AddressInfo, createServer } from './http';
 
-import { applyBehaviors } from './behaviors';
+import { selectBehaviors } from './behaviors';
 
 export function simulation(definitions: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {
     try {
       let selected = slice.get().simulators;
-      let behaviors = applyBehaviors(definitions, selected);
+      let behaviors = selectBehaviors(definitions, selected);
 
       let servers = behaviors.services.map((service) => {
         let app = express();
