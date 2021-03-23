@@ -6,9 +6,8 @@ export interface Runnable<T> {
 }
 
 export interface Behaviors {
-  https: (handler: (app: HttpApp) => HttpApp) => Behaviors;
-  http: (handler: (app: HttpApp) => HttpApp) => Behaviors;
-  services: Service[];
+  https(handler: (app: HttpApp) => HttpApp, name?: string): Behaviors;
+  http(handler: (app: HttpApp) => HttpApp, name?: string): Behaviors;
 }
 
 export interface Simulator {
@@ -28,13 +27,30 @@ export interface Service {
   app: HttpApp
 }
 
-export interface Simulation {
-  id: string;
-  simulators: Record<string, Simulator>;
-  services: Service[];
-  addSimulator(name: string, simulator: Simulator): Simulation;
-  scope: Task;
+export interface ServerState {
+  simulations: Record<string, SimulationState>;
 }
+
+export type SimulationState =
+  {
+    id: string;
+    status: 'new',
+    simulators: string[]
+  } |
+  {
+    id: string,
+    status: 'running',
+    simulators: string[],
+    services: {
+      name: string;
+      url: string;
+    }[] }|
+  {
+    id: string,
+    status: 'failed',
+    simulators: string[],
+    error: Error
+  }
 
 export interface Server {
   port: number;
