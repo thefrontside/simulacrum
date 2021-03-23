@@ -1,9 +1,8 @@
+import assert from 'assert-ts';
 import { Effect } from './effect';
 import express, { raw } from 'express';
-import { SimulationState, Simulator } from './interfaces';
+import { Behaviors, SimulationState, Simulator } from './interfaces';
 import { AddressInfo, createServer } from './http';
-
-import { selectBehaviors } from './behaviors';
 
 export function simulation(definitions: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {
@@ -11,7 +10,7 @@ export function simulation(definitions: Record<string, Simulator>): Effect<Simul
       let selected = slice.get().simulators;
       let behaviors = selectBehaviors(definitions, selected);
 
-      let servers = behaviors.services.map((service) => {
+      let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();
         app.use(raw({ type: "*/*" }));
         for (let handler of service.app.handlers) {
@@ -32,7 +31,7 @@ export function simulation(definitions: Record<string, Simulator>): Effect<Simul
         }
 
         return {
-          name: service.name,
+          name,
           protocol: service.protocol,
           server: createServer(app).run(scope)
         };
@@ -59,6 +58,22 @@ export function simulation(definitions: Record<string, Simulator>): Effect<Simul
         error,
         services: []
       }));
+    }
+  };
+}
+
+function selectBehaviors(simulators: Record<string, Simulator>, selected: string[]): Behaviors {
+  return selected.reduce((behaviors, selection) => {
+    assert(simulators[selection] != null, `unknown simulator ${selection}`);
+    return append(behaviors, simulators[selection]());
+  }, { services: {} } as Behaviors);
+}
+
+function append(left: Behaviors, right: Behaviors): Behaviors {
+  return {
+    services: {
+      ...left.services,
+      ...right.services
     }
   };
 }

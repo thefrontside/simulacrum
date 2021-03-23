@@ -1,4 +1,4 @@
-import { HttpHandler } from './interfaces';
+import { HttpHandler } from './http';
 
 export const echo: HttpHandler = function echo(request, response) {
   return function * () {
