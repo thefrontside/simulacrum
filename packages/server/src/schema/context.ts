@@ -1,16 +1,15 @@
 import { Slice } from '@effection/atom';
 import { Task } from 'effection';
-import { v4 } from 'uuid';
 import { SimulationState } from '../interfaces';
 
 export class SimulationContext {
-  constructor(private scope: Task, private simulations: Slice<Record<string, SimulationState>>) {}
+  constructor(private scope: Task, private simulations: Slice<Record<string, SimulationState>>, private newid: () => string) {}
 
-  async createSimulation(using: string | string[], uuid?: string): Promise<SimulationState> {
+  async createSimulation(using: string | string[]): Promise<SimulationState> {
     let simulators = ([] as string[]).concat(using);
-    let { scope, simulations } = this;
+    let { scope, simulations, newid } = this;
 
-    let id = uuid || v4();
+    let id = newid();
     let simulation = simulations.slice(id);
     simulation.set({ id, status: 'new', simulators });
 

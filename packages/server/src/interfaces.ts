@@ -16,6 +16,7 @@ export interface Simulator {
 export interface ServerOptions {
   simulators: Record<string, Simulator>;
   port?: number;
+  seed?: number;
 }
 
 export interface Service {
