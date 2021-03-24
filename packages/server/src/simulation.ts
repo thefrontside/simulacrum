@@ -64,7 +64,7 @@ export function simulation(definitions: Record<string, Simulator>): Effect<Simul
 
 function selectBehaviors(simulators: Record<string, Simulator>, selected: string[]): Behaviors {
   return selected.reduce((behaviors, selection) => {
-    assert(simulators[selection] != null, `unknown simulator ${selection}`);
+    assert(!!simulators[selection], `unknown simulator ${selection}`);
     return append(behaviors, simulators[selection]());
   }, { services: {} } as Behaviors);
 }
