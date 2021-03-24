@@ -1,5 +1,5 @@
 import { Deferred, Operation, Task, once } from 'effection';
-import { Express } from 'express';
+import { Express, Request, Response } from 'express';
 import getPort from 'get-port';
 
 import type { Server as HTTPServer } from 'http';
@@ -51,3 +51,33 @@ export function createServer(app: Express, options: ServerOptions = {}): Runnabl
     }
   };
 }
+
+export interface HttpHandler {
+  (request: Request, response: Response): Operation<void>;
+}
+
+export type RouteHandler = {
+  method: 'get' | 'post' | 'put';
+  path: string;
+  handler: HttpHandler;
+}
+
+export interface HttpApp {
+  handlers: RouteHandler[];
+  get(path: string, handler: HttpHandler): HttpApp;
+  put(path: string, handler: HttpHandler): HttpApp;
+  post(path: string, handler: HttpHandler): HttpApp;
+}
+
+
+export function createHttpApp(handlers: RouteHandler[] = []): HttpApp {
+  function append(handler: RouteHandler) {
+    return createHttpApp(handlers.concat(handler));
+  }
+  return {
+    handlers,
+    get: (path, handler) => append({ path, handler, method: 'get' }),
+    post: (path, handler) => append({ path, handler, method: 'post' }),
+    put: (path, handler) => append({ path, handler, method: 'put' })
+  };
+};

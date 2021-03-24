@@ -1,6 +1,7 @@
 import { createSimulationServer, Server, AddressInfo } from './server';
 import { main } from '@effection/node';
 import { echo } from './echo';
+import { createHttpApp } from './http';
 
 const serverPort = !!process.env.PORT ? Number(process.env.PORT) : undefined;
 
@@ -9,9 +10,14 @@ main(function* (scope) {
   let server: Server = createSimulationServer({
     port: serverPort,
     simulators: {
-      echo(simulation) {
-        return simulation.http(app => app.post('/', echo));
-      },
+      echo: () => ({
+        services: {
+          echo: {
+            protocol: 'http',
+            app: createHttpApp().post('/', echo)
+          }
+        }
+      }),
     }
   }).run(scope);
 

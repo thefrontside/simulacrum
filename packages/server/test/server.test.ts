@@ -4,19 +4,28 @@ import { createSimulationServer } from '../src/server';
 import { echo } from '../src/echo';
 import { GraphQLClient, gql } from 'graphql-request';
 import { fetch } from 'cross-fetch';
+import { createHttpApp } from '../src/http';
 
 describe('@simulacrum/server', () => {
   let client: GraphQLClient;
 
+  let app = createHttpApp().post('/', echo);
+
   beforeEach(function * (world) {
     let { port } = yield createSimulationServer({
       simulators: {
-        echo(behaviors) {
-          return behaviors
-            .http(app => app.post('/', echo))
-            .http(app => app.post('/', echo), 'too')
-
-        }
+        echo: () => ({
+          services: {
+            echo: {
+              protocol: 'http',
+              app
+            },
+            ["echo.too"]: {
+              protocol: 'http',
+              app
+            }
+          }
+        })
       }
     }).run(world).address();
 
