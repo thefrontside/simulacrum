@@ -1,10 +1,10 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
-import { createSimulationServer } from '../src/server';
 import { echo } from '../src/echo';
 import { GraphQLClient, gql } from 'graphql-request';
 import { fetch } from 'cross-fetch';
 import { createHttpApp } from '../src/http';
+import { createTestServer } from './helpers';
 
 describe('@simulacrum/server', () => {
   let client: GraphQLClient;
@@ -12,7 +12,7 @@ describe('@simulacrum/server', () => {
   let app = createHttpApp().post('/', echo);
 
   beforeEach(function * (world) {
-    let { port } = yield createSimulationServer({
+    client = yield createTestServer({
       simulators: {
         echo: () => ({
           services: {
@@ -27,10 +27,7 @@ describe('@simulacrum/server', () => {
           }
         })
       }
-    }).run(world).address();
-
-    let endpoint = `http://localhost:${port}/graphql`;
-    client = new GraphQLClient(endpoint, { headers: {} });
+    }).run(world).client();
   });
 
   describe('createSimulation()', () => {
@@ -79,6 +76,34 @@ mutation CreateSimulation {
       it('gives you back what you gave it', function*() {
         expect(body).toEqual("hello world");
       });
+    });
+  });
+
+  describe('creating two servers with the same seed', () => {
+    let one: GraphQLClient;
+    let two: GraphQLClient;
+
+    beforeEach(function*(world) {
+      one = yield createTestServer({
+        seed: 5,
+        simulators: {}
+      }).run(world).client();
+
+      two = yield createTestServer({
+        seed: 5,
+        simulators: {}
+      }).run(world).client();
+    });
+
+    it('creates simulations with the same uuid', function*() {
+      let create = `mutation { createSimulation(simulators: []) { id }}`;
+      let first = yield one.request(create);
+      let second = yield two.request(create);
+
+      expect(first).toBeDefined();
+      expect(second).toBeDefined();
+
+      expect(first.createSimulation).toEqual(second.createSimulation);
     });
   });
 });
