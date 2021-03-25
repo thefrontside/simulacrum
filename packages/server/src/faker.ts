@@ -1,8 +1,10 @@
 // @ts-ignore
 import Faker from 'faker/lib';
+// @ts-ignore
+import locales from 'faker/lib/locales';
 
 export function createFaker(seed: number): any {
-  let faker = new Faker({ locales: require('faker/lib/locales') });
+  let faker = new Faker({ locales });
   faker.seed(seed);
   return faker;
 }
