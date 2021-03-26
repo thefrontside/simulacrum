@@ -1,6 +1,11 @@
-import { objectType, mutationType, nonNull, list, stringArg } from 'nexus';
+import { objectType, mutationType, scalarType, nonNull, list, stringArg, intArg } from 'nexus';
 
 export const types = [
+  scalarType({
+    name: "JSON",
+    description: "JSON value",
+    serialize: value => value
+  }),
   objectType({
     name: 'Service',
     definition(t) {
@@ -19,9 +24,10 @@ export const types = [
   }),
   mutationType({
     definition(t) {
-      t.nonNull.field('createSimulation', {
+      t.field('createSimulation', {
         type: 'Simulation',
         args: {
+          seed: intArg(),
           simulators: nonNull(
             list(nonNull(stringArg())),
           ),
@@ -29,7 +35,17 @@ export const types = [
         resolve(_, { simulators }, ctx) {
           return ctx.createSimulation(simulators);
         }
-      })
+      });
+      t.field('given', {
+        type: 'JSON',
+        args: {
+          simulation: nonNull(stringArg()),
+          a: nonNull(stringArg())
+        },
+        resolve: async (_, { simulation, a: scenarioName }, ctx) => {
+          return ctx.given(simulation, scenarioName);
+        }
+      });
     }
   })
-]
+];

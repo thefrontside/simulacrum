@@ -24,7 +24,8 @@ describe('@simulacrum/server', () => {
               protocol: 'http',
               app
             }
-          }
+          },
+          scenarios: {}
         })
       }
     }).run(world).client();

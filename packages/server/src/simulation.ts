@@ -1,5 +1,5 @@
 import assert from 'assert-ts';
-import { Effect } from './effect';
+import { Effect, map } from './effect';
 import express, { raw } from 'express';
 import { Behaviors, SimulationState, Simulator } from './interfaces';
 import { AddressInfo, createServer } from './http';
@@ -43,6 +43,30 @@ export function simulation(definitions: Record<string, Simulator>): Effect<Simul
         services.push({ name, url: `${protocol}://localhost:${address.port}` });
       }
 
+      let store = slice.slice("store");
+      let { scenarios } = behaviors;
+
+      scope.spawn(map(slice.slice("scenarios"), slice => function*() {
+        try {
+          let { name } = slice.get();
+          let fn = scenarios[name];
+          assert(fn, `unknown scenario ${name}`);
+
+          let data = yield fn(store);
+          slice.update(state => ({
+            ...state,
+            status: 'running',
+            data
+          }));
+        } catch (error) {
+          slice.update(state => ({
+            ...state,
+            status: 'failed',
+            error
+          }));
+        }
+      }));
+
       slice.update(state => ({
         ...state,
         status: 'running',
@@ -66,7 +90,7 @@ function selectBehaviors(simulators: Record<string, Simulator>, selected: string
   return selected.reduce((behaviors, selection) => {
     assert(!!simulators[selection], `unknown simulator ${selection}`);
     return append(behaviors, simulators[selection]());
-  }, { services: {} } as Behaviors);
+  }, { services: {}, scenarios: {} } as Behaviors);
 }
 
 function append(left: Behaviors, right: Behaviors): Behaviors {
@@ -74,6 +98,10 @@ function append(left: Behaviors, right: Behaviors): Behaviors {
     services: {
       ...left.services,
       ...right.services
+    },
+    scenarios: {
+      ...left.scenarios,
+      ...right.scenarios
     }
   };
 }

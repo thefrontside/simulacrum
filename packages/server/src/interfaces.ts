@@ -1,4 +1,5 @@
-import { Task } from 'effection';
+import { Operation, Task } from 'effection';
+import { Slice } from '@effection/atom';
 import type { HttpApp } from './http';
 
 export interface Runnable<T> {
@@ -7,6 +8,11 @@ export interface Runnable<T> {
 
 export interface Behaviors {
   services: Record<string, Service>;
+  scenarios: Record<string, Scenario>;
+}
+
+export interface Scenario<T = any> {
+  (store: Store): Operation<T>;
 }
 
 export interface Simulator {
@@ -24,6 +30,9 @@ export interface Service {
   app: HttpApp
 }
 
+export type StoreState = Record<string, Record<string, Record<string, unknown>>>;
+export type Store = Slice<StoreState>;
+
 export interface ServerState {
   simulations: Record<string, SimulationState>;
 }
@@ -32,7 +41,9 @@ export type SimulationState =
   {
     id: string;
     status: 'new',
-    simulators: string[]
+    simulators: string[],
+    scenarios: Record<string, ScenarioState>;
+    store: StoreState;
   } |
   {
     id: string,
@@ -41,12 +52,35 @@ export type SimulationState =
     services: {
       name: string;
       url: string;
-    }[] }|
+    }[];
+    scenarios: Record<string, ScenarioState>;
+    store: StoreState;
+  } |
   {
     id: string,
     status: 'failed',
     simulators: string[],
+    scenarios: Record<string, ScenarioState>;
+    store: StoreState;
     error: Error
+  }
+
+export type ScenarioState =
+  {
+    id: string;
+    name: string;
+    status: 'new';
+  } |
+  {
+    id: string;
+    name: string;
+    status: 'running';
+  } |
+  {
+    id: string;
+    name: string;
+    status: "failed";
+    error: Error;
   }
 
 export interface Server {
