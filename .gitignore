@@ -2,4 +2,6 @@ package-lock.json
 node_modules
 *.tsbuildinfo
 dist
+dist-ui
 __generated__
+/.parcel-cache
