@@ -6,9 +6,6 @@
     },
     {
       "path": "./packages/server"
-    },
-    {
-      "path": "./packages/ui"
     }
   ]
 }

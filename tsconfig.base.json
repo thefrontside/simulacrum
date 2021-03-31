@@ -6,8 +6,7 @@
     "declarationMap": true,
     "paths": {
       "@simulacrum/client": ["packages/client/src"],
-      "@simulacrum/server": ["packages/server/src"],
-      "@simulacrum/ui": ["packages/ui"]
+      "@simulacrum/server": ["packages/server/src"]
     }
   }
 }
