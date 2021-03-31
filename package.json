@@ -4,8 +4,8 @@
   "description": "Composable simulations for testing, development, and application previews",
   "private": true,
   "scripts": {
-    "build": "npm run clean:tsc && tsc -b ./tsconfig.packages.json",
-    "clean:tsc": "find . \\( -name node_modules -o -name dir2 -o -path name \\) -prune -false -o -name 'dist' -o -name \"*.tsbuildinfo\" -delete",
+    "build": "tsc -b ./tsconfig.packages.json && cd packages/ui && npm run build",
+    "clean": "find . \\( -name node_modules -o -name dir2 -o -path name \\) -prune -false -o -name dist | xargs rm -rf",
     "watch": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.packages.json --watch"
   },
   "repository": {

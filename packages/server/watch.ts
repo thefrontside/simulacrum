@@ -11,7 +11,7 @@ main(function* (scope: Task) {
     let process: Task = scope.spawn(buildAndRun(500));
 
     yield on(watcher, 'all').forEach(function () {
-      console.log('buidling.....');
+      console.log('building.....');
       process.halt();
       process = scope.spawn(buildAndRun(500));
     });
@@ -47,7 +47,7 @@ function buildAndRun(delay: number):Operation<void> {
   return function*(scope) {
     try {
       yield executeAndOut('clean');
-      yield executeAndOut('generate');
+      yield executeAndOut('build');
       yield sleep(delay);
 
       let server: StdIO = daemon('node dist/start.js').run(scope);
