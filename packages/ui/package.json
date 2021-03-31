@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "bigtest ci",
+    "start": "parcel serve app/index.html --target browser",
     "build": "parcel build app/index.html --target browser"
   },
   "repository": {
