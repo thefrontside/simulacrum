@@ -1,4 +1,5 @@
 import { createAtom } from '@effection/atom';
+import { appDir } from '@simulacrum/ui';
 import cors from 'cors';
 import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
@@ -32,7 +33,7 @@ export function createSimulationServer(options: ServerOptions = { simulators: {}
       let app = express()
         .use(cors())
         .disable('x-powered-by')
-        .use('/', express.static('dist-ui'))
+        .use('/', express.static(appDir))
         .use('/', graphqlHTTP({ schema, context }));
 
       return createServer(app, { port }).run(scope);

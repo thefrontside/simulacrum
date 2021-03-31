@@ -3,17 +3,12 @@
   "version": "0.0.0",
   "description": "A server containing simulation state, and the control API to manipulate it",
   "main": "dist/index.js",
-  "targets": {
-    "ui": {
-      "distDir": "dist-ui"
-    }
-  },
   "scripts": {
     "clean": "rimraf tsconfig.tsbuildinfo __generated__ dist",
     "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
     "generate": "tsc && ts-node src/schema/schema.ts",
-    "start": "parcel build ui/index.html --target ui --detailed-report 0 && npm run generate && ts-node src/start.ts",
-    "watch": "parcel build ui/index.html --target ui --detailed-report 0 && PORT=3000 NODE_ENV=development ts-node -P ./watch-tsconfig.json ./watch.ts"
+    "start": "npm run generate && ts-node src/start.ts",
+    "watch": "PORT=3000 NODE_ENV=development ts-node -P ./watch-tsconfig.json ./watch.ts"
   },
   "repository": {
     "type": "git",
@@ -32,6 +27,7 @@
   "dependencies": {
     "@effection/atom": "=2.0.0-preview.5",
     "@effection/node": "=2.0.0-preview.7",
+    "@simulacrum/ui": "file://../ui",
     "assert-ts": "^0.3.2",
     "cors": "^2.8.5",
     "cross-fetch": "^3.1.0",
@@ -56,12 +52,8 @@
     "@types/uuid": "^8.3.0",
     "expect": "^26.6.2",
     "express-graphql": "^0.12.0",
-    "graphiql": "^1.4.0",
     "graphql-request": "^3.4.0",
     "mocha": "^8.0.0",
-    "parcel": "next",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0",
     "rimraf": "^3.0.2",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3"
