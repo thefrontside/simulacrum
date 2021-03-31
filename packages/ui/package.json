@@ -7,7 +7,8 @@
   "scripts": {
     "test": "bigtest ci",
     "start": "parcel serve app/index.html --target browser",
-    "build": "parcel build app/index.html --target browser"
+    "build": "parcel build app/index.html --target browser",
+    "clean": "rm -rf dist"
   },
   "repository": {
     "type": "git",
