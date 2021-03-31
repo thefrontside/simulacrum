@@ -5,6 +5,8 @@
   "browser": "dist/index.html",
   "main": "index.js",
   "scripts": {
+    "start": "node start.js",
+    "bigtest": "bigtest",
     "test": "bigtest ci",
     "build": "parcel build app/index.html --target browser"
   },

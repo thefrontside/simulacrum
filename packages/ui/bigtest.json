@@ -1,0 +1,17 @@
+{
+  "port": 28000,
+  "launch": [
+    "default"
+  ],
+  "app": {
+    "command": "npm start",
+    "env": {
+      "PORT": 28001
+    },
+    "url": "http://localhost:28001/?server=http://localhost:3000"
+  },
+  "testFiles": [
+    "test/**/*.test.{ts,js}"
+  ],
+  "tsconfig": "./bigtest.tsconfig.json"
+}
