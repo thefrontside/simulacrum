@@ -8,19 +8,19 @@
     }
   },
   "packages": {
-    "@simulacrum/client": {
+    "client": {
       "path": "./packages/client",
       "manager": "javascript"
     },
-    "@simulacrum/server": {
+    "server": {
       "path": "./packages/server",
       "manager": "javascript",
-      "dependencies": ["@simulacrum/ui", "@simulacrum/client"]
+      "dependencies": ["ui", "client"]
     },
-    "@simulacrum/ui": {
+    "ui": {
       "path": "./packages/ui",
       "manager": "javascript",
-      "dependencies": ["@simulacrum/client"]
+      "dependencies": ["client"]
     }
   }
 }
