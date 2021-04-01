@@ -7,7 +7,7 @@ import { v4 } from 'uuid';
 import { schema } from './schema/schema';
 import { ServerOptions, ServerState } from './interfaces';
 import { Server, createServer } from './http';
-import { SimulationContext } from './schema/context';
+import { OperationContext } from './schema/context';
 
 export { Server, createServer } from './http';
 export type { AddressInfo } from './http';
@@ -26,7 +26,7 @@ export function createSimulationServer(options: ServerOptions = { simulators: {}
         simulations: {}
       });
 
-      let context = new SimulationContext(scope, atom.slice('simulations'), newid);
+      let context: OperationContext = { atom, scope, newid };
 
       createEffects(atom, options.simulators).run(scope);
 
