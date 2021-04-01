@@ -20,7 +20,7 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
     let simulation = atom.slice("simulations").slice(id);
     simulation.set({ id, status: 'new', simulators, scenarios: {}, store: {} });
 
-    return scope.spawn(simulation.filter(settled).expect());
+    return scope.spawn(simulation.filter(({ status }) => status !== 'new').expect());
   }
 };
 
@@ -39,10 +39,6 @@ export const given: Resolver<GivenParameters, ScenarioState> = {
     let scenario = simulation.slice('scenarios').slice(id);
     scenario.set({ id, status: 'new', name: scenarioName });
 
-    return scope.spawn(scenario.filter(settled).expect());
+    return scope.spawn(scenario.filter(({ status }) => status !== 'new').expect());
   }
 };
-
-function settled<T extends { status: 'new' | 'running' | 'failed' }>(value: T): boolean {
-  return value.status !== 'new';
-}
