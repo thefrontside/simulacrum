@@ -4,7 +4,9 @@
   "description": "connect to simulacrum servers and manipulate them via the control API",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "echo nothing to do",
+    "build": "echo nothing to do",
+    "test": "echo nothing to do"
   },
   "devDependencies": {
     "@frontside/eslint-config": "^2.0.0",
