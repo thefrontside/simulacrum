@@ -27,7 +27,7 @@
   "dependencies": {
     "@effection/atom": "=2.0.0-preview.5",
     "@effection/node": "=2.0.0-preview.7",
-    "@simulacrum/ui": "file://../ui",
+    "@simulacrum/ui": "^0.0.0",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "cors": "^2.8.5",
