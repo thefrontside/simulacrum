@@ -28,5 +28,8 @@
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "engines": {
     "npm": ">=7.7.0"
+  },
+  "devDependencies": {
+    "covector": "^0.5.3"
   }
 }
