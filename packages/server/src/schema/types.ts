@@ -1,6 +1,6 @@
-import { objectType, mutationType, scalarType, nonNull, list, stringArg, intArg } from 'nexus';
+import { objectType, mutationType, scalarType, nonNull, list, stringArg, intArg, subscriptionType } from 'nexus';
 
-import { createSimulation, given } from './operations';
+import { createSimulation, given, state } from './operations';
 
 export const types = [
   scalarType({
@@ -43,6 +43,14 @@ export const types = [
           a: nonNull(stringArg())
         },
         ...given
+      });
+    }
+  }),
+  subscriptionType({
+    definition(t) {
+      t.field('state', {
+        type: 'JSON',
+        ...state
       });
     }
   })

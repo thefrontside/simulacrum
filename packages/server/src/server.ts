@@ -15,6 +15,7 @@ import type { Runnable } from './interfaces';
 
 import { createEffects } from './effects';
 import { stableIds } from './faker';
+import { createWebSocketTransport } from './websocket-transport';
 
 export function createSimulationServer(options: ServerOptions = { simulators: {} }): Runnable<Server> {
   let { port } = options;
@@ -28,15 +29,19 @@ export function createSimulationServer(options: ServerOptions = { simulators: {}
 
       let context: OperationContext = { atom, scope, newid };
 
-      createEffects(atom, options.simulators).run(scope);
-
       let app = express()
         .use(cors())
         .disable('x-powered-by')
         .use('/', express.static(appDir()))
         .use('/', graphqlHTTP({ schema, context }));
 
-      return createServer(app, { port }).run(scope);
+      let server = createServer(app, { port }).run(scope);
+
+      createWebSocketTransport(context, server.http).run(scope);
+
+      createEffects(atom, options.simulators).run(scope);
+
+      return server;
     }
   };
 }
