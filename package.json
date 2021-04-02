@@ -2,7 +2,6 @@
   "name": "@simulacrum/repository",
   "version": "0.0.0",
   "description": "Composable simulations for testing, development, and application previews",
-  "private": true,
   "scripts": {
     "build": "tsc -b ./tsconfig.packages.json && cd packages/ui && npm run build",
     "clean": "find . \\( -name node_modules -o -name dir2 -o -path name \\) -prune -false -o -name dist | xargs rm -rf",
