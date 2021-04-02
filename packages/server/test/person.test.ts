@@ -47,7 +47,7 @@ mutation {
         });
 
       it('creates a person', function*() {
-        expect(person.data).toMatchObject({ name: "Bob Dobalina" });
+        expect(person.data).toMatchObject({ name: "Paul Waters" });
       });
     });
   });

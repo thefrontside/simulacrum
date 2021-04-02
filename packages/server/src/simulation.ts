@@ -3,6 +3,7 @@ import { Effect, map } from './effect';
 import express, { raw } from 'express';
 import { Behaviors, SimulationState, Simulator } from './interfaces';
 import { AddressInfo, createServer } from './http';
+import { createFaker } from './faker';
 
 export function simulation(definitions: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {
@@ -46,13 +47,17 @@ export function simulation(definitions: Record<string, Simulator>): Effect<Simul
       let store = slice.slice("store");
       let { scenarios } = behaviors;
 
+      // we can support passing a seed to a scenario later, but let's
+      // just hard-code it for now.
+      let faker = createFaker(2);
+
       scope.spawn(map(slice.slice("scenarios"), slice => function*() {
         try {
           let { name } = slice.get();
           let fn = scenarios[name];
           assert(fn, `unknown scenario ${name}`);
 
-          let data = yield fn(store);
+          let data = yield fn(store, faker);
           slice.update(state => ({
             ...state,
             status: 'running',
