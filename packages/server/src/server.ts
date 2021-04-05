@@ -32,7 +32,7 @@ export function createSimulationServer(options: ServerOptions = { simulators: {}
       let app = express()
         .use(cors())
         .disable('x-powered-by')
-        .use('/', express.static(appDir()))
+        .use(express.static(appDir()))
         .use('/', graphqlHTTP({ schema, context }));
 
       let server = createServer(app, { port }).run(scope);
