@@ -1,11 +1,17 @@
-import { SimulationState, ScenarioState } from "../interfaces";
-import { OperationContext } from "./context";
 import { v4 } from 'uuid';
+import { SimulationState, ScenarioState, ServerState } from "../interfaces";
+import { OperationContext } from "./context";
+import { createQueue } from '../queue';
 
 import { assert } from 'assert-ts';
 
 export interface Resolver<Args, Result> {
   resolve(args: Args, context: OperationContext): Promise<Result>;
+}
+
+export interface Subscriber<Args, TEach, Result = TEach> {
+  subscribe(args: Args, context: OperationContext): AsyncIterable<TEach>;
+  resolve?(each: TEach): Result;
 }
 
 export interface CreateSimulationParameters {
@@ -40,5 +46,27 @@ export const given: Resolver<GivenParameters, ScenarioState> = {
     scenario.set({ id, status: 'new', name: scenarioName });
 
     return scope.spawn(scenario.filter(({ status }) => status !== 'new').expect());
+  }
+};
+
+interface StateParameters {
+  path: string
+}
+
+export const state: Subscriber<StateParameters, ServerState> = {
+  subscribe(_args, { scope, atom }) {
+    let queue = createQueue<ServerState>();
+    scope.spawn(atom.forEach(queue.push));
+    return {
+      [Symbol.asyncIterator]: () => ({
+        async next(): Promise<IteratorResult<ServerState>> {
+          let value = await queue.pop();
+          return {
+            done: false,
+            value
+          };
+        }
+      })
+    };
   }
 };

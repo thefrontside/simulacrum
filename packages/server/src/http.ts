@@ -1,6 +1,5 @@
 import { Deferred, Operation, Task, once } from 'effection';
-import { Express, Request, Response } from 'express';
-import getPort from 'get-port';
+import { Request, Response, Application } from 'express';
 
 import type { Server as HTTPServer } from 'http';
 import type { AddressInfo } from 'net';
@@ -9,6 +8,7 @@ export type { AddressInfo } from 'net';
 import type { Runnable } from './interfaces';
 
 export interface Server {
+  http: HTTPServer;
   address(): Operation<AddressInfo>;
 }
 
@@ -16,15 +16,14 @@ export interface ServerOptions {
   port?: number
 }
 
-export function createServer(app: Express, options: ServerOptions = {}): Runnable<Server> {
+export function createServer(app: Application, options: ServerOptions = {}): Runnable<Server> {
   return {
     run(scope: Task) {
 
       let bound = Deferred<HTTPServer>();
+      let server = app.listen(options.port);
 
       scope.spawn(function*(task: Task) {
-        let port = yield getPort(options);
-        let server = app.listen(port);
 
         task.spawn(function*() {
           let error: Error = yield once(server, 'error');
@@ -32,7 +31,10 @@ export function createServer(app: Express, options: ServerOptions = {}): Runnabl
         });
 
         try {
-          yield once(server, 'listening');
+          if (!server.listening) {
+            yield once(server, 'listening');
+          }
+
           bound.resolve(server);
 
           yield;
@@ -41,10 +43,12 @@ export function createServer(app: Express, options: ServerOptions = {}): Runnabl
         }
       });
 
+      let network = bound.promise;
 
       return {
+        http: server,
         async address() {
-          let server = await bound.promise;
+          let server = await network;
           return server.address() as unknown as AddressInfo;
         }
       };
@@ -80,4 +84,4 @@ export function createHttpApp(handlers: RouteHandler[] = []): HttpApp {
     post: (path, handler) => append({ path, handler, method: 'post' }),
     put: (path, handler) => append({ path, handler, method: 'put' })
   };
-};
+}

@@ -4,14 +4,16 @@ import { echo } from './echo';
 import { createSimulationServer, Server, AddressInfo } from './server';
 import { createHttpApp } from './http';
 import person from './simulators/person';
-
-const serverPort = !!process.env.PORT ? Number(process.env.PORT) : undefined;
-
+import getPort from 'get-port';
 
 main(function* (scope) {
 
+  let port = yield getPort({
+    port: !!process.env.PORT ? Number(process.env.PORT) : undefined
+  });
+
   let server: Server = createSimulationServer({
-    port: serverPort,
+    port,
     seed: 1,
     simulators: {
       person,
@@ -27,9 +29,9 @@ main(function* (scope) {
     }
   }).run(scope);
 
-  let { port }: AddressInfo = yield server.address();
+  let address: AddressInfo = yield server.address();
 
-  console.log(`Simulation server running on http://localhost:${port}`);
+  console.log(`Simulation server running on http://localhost:${address.port}`);
 
   yield;
 });
