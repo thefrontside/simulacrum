@@ -3,16 +3,18 @@
   "version": "0.0.0",
   "description": "Composable simulations for testing, development, and application previews",
   "scripts": {
-    "build": "tsc -b ./tsconfig.packages.json && cd packages/ui && npm run build",
-    "clean": "find . \\( -name node_modules -o -name dir2 -o -path name \\) -prune -false -o -name dist | xargs rm -rf",
-    "watch": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.packages.json --watch"
+    "clean": "npm run clean -ws",
+    "test": "npm run test -ws",
+    "build": "npm run build -ws",
+    "build:tsc": "tsc -b ./tsconfig.packages.json",
+    "watch:tsc": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.packages.json --watch"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
   "workspaces": [
-    "./packages/*"
+    "packages/*"
   ],
   "keywords": [
     "simulation",
@@ -23,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme"
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "engines": {
+    "npm": ">=7.7.0"
+  }
 }
