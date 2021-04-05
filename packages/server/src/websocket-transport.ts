@@ -38,15 +38,17 @@ export function createWebSocketTransport({ atom, newid }: OperationContext, serv
         subscribe,
       });
 
-      scope.spawn(on<WS>(new WS.Server({ server }), 'connection').forEach(socket => function*(child) {
-        try {
-          let websocket = createWebSocket(socket).run(child);
-          let closed = transport.opened(websocket, child);
-          let close: CloseEvent = yield once(socket, 'close');
-          yield closed(close.code, close.reason);
-        } finally {
-          socket.close();
-        }
+      scope.spawn(on<WS>(new WS.Server({ server }), 'connection').forEach(socket => {
+        scope.spawn(function*(child) {
+          try {
+            let websocket = createWebSocket(socket).run(child);
+            let closed = transport.opened(websocket, child);
+            let close: CloseEvent = yield once(socket, 'close');
+            yield closed(close.code, close.reason);
+          } finally {
+            socket.close();
+          }
+        })
       }));
     }
   };
