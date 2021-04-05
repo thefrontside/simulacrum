@@ -13,7 +13,11 @@ describe('webocket transport', () => {
   let first: IteratorResult<ServerState>;
 
   beforeEach(function*(world) {
-    let server = createSimulationServer().run(world);
+    let server = createSimulationServer({
+      simulators: {
+        empty: () => ({ services: {}, scenarios: {} })
+      }
+    }).run(world);
 
     let address = yield server.address();
 
@@ -46,7 +50,8 @@ describe('webocket transport', () => {
     let result: any;
     beforeEach(function*() {
       result = yield query<Record<string, unknown>>(client, {
-        query: `mutation { createSimulation(simulators: []) { id } }`
+        query: `mutation Create($sim: String!) { createSimulation(simulators: [$sim]) { id } }`,
+        variables: { sim: 'empty' }
       });
     });
 

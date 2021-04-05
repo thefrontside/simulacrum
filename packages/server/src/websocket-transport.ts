@@ -21,11 +21,11 @@ export function createWebSocketTransport({ atom, newid }: OperationContext, serv
         schema,
         onConnect: () => true,
         onSubscribe({ extra }, message) {
-          let { operationName, variables } = message.payload;
+          let { operationName, variables: variableValues } = message.payload;
           return {
             schema,
             operationName,
-            variables,
+            variableValues,
             document: parse(message.payload.query),
             contextValue: {
               atom,
