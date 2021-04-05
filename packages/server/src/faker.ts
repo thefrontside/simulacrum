@@ -1,10 +1,18 @@
 // @ts-ignore
-import Faker from 'faker/lib';
+import FakerInstance from 'faker/lib';
 // @ts-ignore
 import locales from 'faker/lib/locales';
 
-export function createFaker(seed: number): any {
-  let faker = new Faker({ locales });
+// the @types/faker don't account for
+// constructing individual instances of faker so we
+// import the default faker export and use that type
+// as the type of all fakers. A nice side-quest would be
+// to add types.d.ts directly to the faker project.
+import faker from 'faker';
+export type Faker = typeof faker;
+
+export function createFaker(seed: number): Faker {
+  let faker = new FakerInstance({ locales });
   faker.seed(seed);
   return faker;
 }

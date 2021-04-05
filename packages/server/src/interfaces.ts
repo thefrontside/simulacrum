@@ -1,6 +1,7 @@
 import { Operation, Task } from 'effection';
 import { Slice } from '@effection/atom';
 import type { HttpApp } from './http';
+import type { Faker } from './faker';
 
 export interface Runnable<T> {
   run(scope: Task): T;
@@ -12,7 +13,7 @@ export interface Behaviors {
 }
 
 export interface Scenario<T = any> {
-  (store: Store): Operation<T>;
+  (store: Store, faker: Faker): Operation<T>;
 }
 
 export interface Simulator {

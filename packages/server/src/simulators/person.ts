@@ -1,6 +1,7 @@
 import { Slice } from '@effection/atom';
 import { Operation } from 'effection';
 import { v4 } from 'uuid';
+import { Faker } from '../faker';
 import { Behaviors, Store } from "../interfaces";
 
 export default function(): Behaviors {
@@ -14,13 +15,13 @@ export interface Person {
   name: string;
 }
 
-export function person(store: Store): Operation<Person> {
+export function person(store: Store, faker: Faker): Operation<Person> {
   return function*() {
     let id = v4();
     let slice = records(store).slice(id);
 
     // this is the lamest data generation ever :)
-    let attrs = { id, name: "Bob Dobalina" };
+    let attrs = { id, name: faker.name.findName() };
 
     slice.set(attrs);
     return attrs;
