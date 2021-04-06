@@ -1,0 +1,26 @@
+{
+  "gitSiteUrl": "https://github.com/thefrontside/simulacrum/",
+  "pkgManagers": {
+    "javascript": {
+      "version": true,
+      "getPublishedVersion": "npm view ${ pkg.pkg } version",
+      "publish": "npm publish --access public"
+    }
+  },
+  "packages": {
+    "client": {
+      "path": "./packages/client",
+      "manager": "javascript"
+    },
+    "server": {
+      "path": "./packages/server",
+      "manager": "javascript",
+      "dependencies": ["ui", "client"]
+    },
+    "ui": {
+      "path": "./packages/ui",
+      "manager": "javascript",
+      "dependencies": ["client"]
+    }
+  }
+}
