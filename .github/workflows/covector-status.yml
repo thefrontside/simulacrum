@@ -13,4 +13,5 @@ jobs:
         uses: jbolda/covector/packages/action@covector-v0.5
         id: covector
         with:
-          command: 'status'
+          token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
+          command: "status"

@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 14
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
       - name: git config
         run: |
           git config --global user.name "${{ github.event.pusher.name }}"
@@ -32,14 +32,15 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          command: 'version-or-publish'
+          token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
+          command: "version-or-publish"
           createRelease: true
       - name: Create Pull Request With Versions Bumped
         id: cpr
         uses: peter-evans/create-pull-request@v3
         if: steps.covector.outputs.commandRan == 'version'
         with:
+          token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
           title: "Publish New Versions"
           commit-message: "publish new versions"
           labels: "version updates"
