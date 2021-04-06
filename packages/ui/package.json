@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/ui",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A web UI to work with a Simulacrum Server",
   "browser": "dist/index.html",
   "main": "index.js",
