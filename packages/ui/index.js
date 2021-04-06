@@ -6,8 +6,8 @@ const { strict: assert } = require('assert');
 
 module.exports = {
   appDir() {
-    let path = join(__dirname, 'dist', 'index.html');
-    assert(existsSync(path), "the @simulation/ui app has gone missing! Either the package is malformed, or you're in development mode and haven't built it yet.");
+    let path = join(__dirname, 'dist');
+    assert(existsSync(join(path, "index.html")), "the @simulation/ui app has gone missing! Either the package is malformed, or you're in development mode and haven't built it yet.");
     return path;
   }
 };
