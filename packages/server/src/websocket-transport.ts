@@ -1,5 +1,5 @@
-import { on, once, Task, throwOnErrorEvent } from 'effection';
-import { Server as HTTPServer } from 'http';
+import { on, once, onEmit, Task, throwOnErrorEvent } from 'effection';
+import { Server as HTTPServer, IncomingMessage } from 'http';
 import { subscribe, execute, parse } from 'graphql';
 import { makeServer, WebSocket } from 'graphql-ws';
 import WS, { CloseEvent } from 'ws';
@@ -63,7 +63,9 @@ export function createWebSocket(ws: WS): Runnable<WebSocket> {
       return {
         protocol: ws.protocol,
         send: (data: string) => new Promise((resolve, reject) => {
-          ws.send(data, (err) => (err ? reject(err) : resolve()));
+          if (scope.state === 'running') {
+            ws.send(data, (err) => (err ? reject(err) : resolve()));
+          }
         }),
         close: (code, reason) => ws.close(code, reason),
         onMessage(cb) {

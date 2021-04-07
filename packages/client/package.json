@@ -5,13 +5,20 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "echo nothing to do",
-    "build": "echo nothing to do",
-    "test": "echo nothing to do"
+    "build": "tsc --build",
+    "test": "echo client is used to test server"
+  },
+  "dependencies": {
+    "effection": "=2.0.0-preview.9",
+    "graphql-ws": "^4.2.3"
   },
   "devDependencies": {
+    "@effection/node": "=2.0.0-preview.9",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
-    "@frontside/typescript": "^1.1.1"
+    "@frontside/typescript": "^1.1.1",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
   },
   "repository": {
     "type": "git",
@@ -26,8 +33,5 @@
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme",
-  "dependencies": {
-    "cross-fetch": "^3.0.6"
-  }
+  "homepage": "https://github.com/thefrontside/simulacrum#readme"
 }
