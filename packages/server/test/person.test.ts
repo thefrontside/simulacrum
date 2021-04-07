@@ -1,21 +1,17 @@
 import { describe, it, beforeEach } from '@effection/mocha';
-import { createClient, Client, Simulation, Scenario } from '@simulacrum/client';
-import WS from 'ws';
+import { Client, Simulation, Scenario } from '@simulacrum/client';
 import expect from 'expect';
-import { createSimulationServer } from '../src/server';
 import person from '../src/simulators/person';
 
+import { createTestServer } from './helpers';
 
 describe('person simulator', () => {
   let client: Client;
 
   beforeEach(function * (world) {
-    let { port } = yield createSimulationServer({
+    client = yield createTestServer({
       simulators: { person }
-    }).run(world).address();
-
-    let endpoint = `ws://localhost:${port}`;
-    client = createClient(endpoint, WS);
+    }).run(world).client();
   });
 
   describe('createSimulation()', () => {

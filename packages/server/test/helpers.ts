@@ -1,9 +1,10 @@
+import { createClient, Client } from '@simulacrum/client';
 import { Operation } from 'effection';
-import { GraphQLClient } from 'graphql-request';
 import { ServerOptions, Runnable } from '../src/interfaces';
 import { createSimulationServer } from '../src/server';
+import WS from 'ws';
 
-export function createTestServer(options: ServerOptions): Runnable<{ client(): Operation<GraphQLClient>}> {
+export function createTestServer(options: ServerOptions): Runnable<{ client(): Operation<Client>}> {
   return {
     run(scope) {
       let server = createSimulationServer(options).run(scope);
@@ -11,9 +12,15 @@ export function createTestServer(options: ServerOptions): Runnable<{ client(): O
       return {
         client: () => function*() {
           let { port } = yield server.address();
-          return new GraphQLClient(`http://localhost:${port}/graphql`, {
-            headers: {}
+          let client = createClient(`http://localhost:${port}/graphql`, WS)
+          scope.spawn(function*() {
+            try {
+              yield;
+            } finally {
+              client.dispose();
+            }
           });
+          return client;
         }
       };
     }

@@ -1,13 +1,15 @@
 import { describe, it, beforeEach } from '@effection/mocha';
+import { Client, Simulation } from '@simulacrum/client';
+import fetch from 'cross-fetch';
 import expect from 'expect';
+
 import { echo } from '../src/echo';
-import { GraphQLClient, gql } from 'graphql-request';
-import { fetch } from 'cross-fetch';
 import { createHttpApp } from '../src/http';
+
 import { createTestServer } from './helpers';
 
 describe('@simulacrum/server', () => {
-  let client: GraphQLClient;
+  let client: Client;
 
   let app = createHttpApp().post('/', echo);
 
@@ -32,24 +34,10 @@ describe('@simulacrum/server', () => {
   });
 
   describe('createSimulation()', () => {
-    let simulation: Record<string, any>;
+    let simulation: Simulation;
 
     beforeEach(function*() {
-      let createSimulationMutation = gql`
-mutation CreateSimulation {
-  createSimulation(
-    simulators: ["echo"]
-  ) {
-    id
-    services {
-      name
-      url
-    }
-  }
-}
-`;
-      let result = yield client.request(createSimulationMutation);
-      simulation = result.createSimulation;
+      simulation = yield client.createSimulation("echo");
     });
 
     it('creates a simulation', function * () {
@@ -67,9 +55,9 @@ mutation CreateSimulation {
       let body: string;
 
       beforeEach(function*() {
-        let [{ url }]: [{name: string, url: string }] = simulation.services;
+        let [{ url }] = simulation.services;
 
-        let response = yield fetch(url, { method: 'POST', body: "hello world" });
+        let response = yield fetch(url.toString(), { method: 'POST', body: "hello world" });
         expect(response.ok).toEqual(true);
         body = yield response.text();
       });
@@ -81,8 +69,8 @@ mutation CreateSimulation {
   });
 
   describe('creating two servers with the same seed', () => {
-    let one: GraphQLClient;
-    let two: GraphQLClient;
+    let one: Client;
+    let two: Client;
 
     beforeEach(function*(world) {
       one = yield createTestServer({
@@ -94,17 +82,17 @@ mutation CreateSimulation {
         seed: 5,
         simulators: {}
       }).run(world).client();
+
     });
 
     it('creates simulations with the same uuid', function*() {
-      let create = `mutation { createSimulation(simulators: []) { id }}`;
-      let first = yield one.request(create);
-      let second = yield two.request(create);
+      let first = yield one.createSimulation();
+      let second = yield two.createSimulation();
 
       expect(first).toBeDefined();
       expect(second).toBeDefined();
 
-      expect(first.createSimulation).toEqual(second.createSimulation);
+      expect(first).toEqual(second);
     });
   });
 });
