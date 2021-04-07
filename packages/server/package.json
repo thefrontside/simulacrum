@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/server",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A server containing simulation state, and the control API to manipulate it",
   "main": "dist/index.js",
   "scripts": {
