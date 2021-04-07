@@ -3,7 +3,7 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
-      "getPublishedVersion": "npm view ${ pkg.pkg } version",
+      "getPublishedVersion": "npm view ${ pkgFile.pkg.name } version",
       "publish": "npm publish --access public"
     }
   },
