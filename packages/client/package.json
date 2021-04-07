@@ -9,11 +9,11 @@
     "test": "echo client is used to test server"
   },
   "dependencies": {
-    "effection": "^2.0.0-preview.7",
+    "effection": "=2.0.0-preview.9",
     "graphql-ws": "^4.2.3"
   },
   "devDependencies": {
-    "@effection/node": "^2.0.0-preview.1",
+    "@effection/node": "=2.0.0-preview.9",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
