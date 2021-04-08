@@ -9,6 +9,7 @@ jobs:
       - node/install:
           npm-version: 7.7.6
       - checkout
+      - run: npm install
       - run: npm run build        
       - run: npm run test
 
