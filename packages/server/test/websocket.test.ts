@@ -1,10 +1,10 @@
 import { describe, beforeEach, it } from '@effection/mocha';
-import { createClient, Client } from '@simulacrum/client';
+import { Client } from '@simulacrum/client';
 import expect from 'expect';
-import webSocketImpl from 'ws';
 
-import { createSimulationServer } from '../src/index';
 import { ServerState, SimulationState } from '../src/interfaces';
+
+import { createTestServer } from './helpers';
 
 describe('webocket transport', () => {
   let client: Client;
@@ -12,15 +12,11 @@ describe('webocket transport', () => {
   let first: IteratorResult<ServerState>;
 
   beforeEach(function*(world) {
-    let server = createSimulationServer({
+    client = yield createTestServer({
       simulators: {
         empty: () => ({ services: {}, scenarios: {} })
       }
-    }).run(world);
-
-    let address = yield server.address();
-
-    client = createClient(`ws://localhost:${address.port}`, webSocketImpl);
+    }).run(world).client();
 
     subscription = client.state<ServerState>();
 

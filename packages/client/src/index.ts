@@ -3,7 +3,7 @@ import { createClient as createWSClient, SubscribePayload } from 'graphql-ws';
 import { GraphQLError } from 'graphql';
 
 export interface Client {
-  createSimulation(simulator: string): Promise<Simulation>;
+  createSimulation(simulators?: string | string[]): Promise<Simulation>;
   given(simulation: Simulation, scenario: string): Promise<Scenario>;
   state<T>(): AsyncIterable<T> & AsyncIterator<T>;
   dispose(): Promise<void>;
@@ -11,7 +11,7 @@ export interface Client {
 
 export interface Simulation {
   id: string;
-  services: Record<string, Service>;
+  services: Service[];
 }
 
 export interface WebSocketImpl {
@@ -28,7 +28,7 @@ export interface Scenario<T = unknown> {
 
 export interface Service {
   name: string;
-  url: URL;
+  url: string;
 }
 
 interface Runnable<T> {
@@ -86,16 +86,16 @@ export function createClient(serverURL: string, webSocketImpl?: WebSocketImpl): 
       yield sleep(10);
       let subscription = subscribe<Record<string, T>>(payload).run(child);
       let result: Result<Record<string, T>> = yield subscription.expect();
-
       return result.data[field];
     });
   }
 
   return {
-    createSimulation: (simulator: string) => query<Simulation>("createSimulation", {
-      query: `
-mutation CreateSimulation($simulator: String!) {
-  createSimulation(simulators: [$simulator]) {
+    createSimulation: (simulators?: string | string[]) => {
+      return query<Simulation>("createSimulation", {
+        query: `
+mutation CreateSimulation($simulators: [String!]!) {
+  createSimulation(simulators: $simulators) {
     id
     simulators
     services {
@@ -104,9 +104,10 @@ mutation CreateSimulation($simulator: String!) {
     }
   }
 }`,
-      operationName: 'CreateSimulation',
-      variables: { simulator }
-    }),
+        operationName: 'CreateSimulation',
+        variables: { simulators: ([] as string[]).concat(simulators || []) }
+      })
+    },
     given: (simulation: Simulation, scenario: string) => query<Scenario>("given", {
       query: `
 mutation Given($simulation: String!, $scenario: String) {
