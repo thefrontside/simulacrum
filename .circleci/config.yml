@@ -7,8 +7,8 @@ jobs:
       - image: cimg/node:15.14.0
     steps:
       - node/install
-      - npm run build
-      - node/test
+      - run: npm run build        
+      - run: npm run test
 
 workflows:
   tests:
