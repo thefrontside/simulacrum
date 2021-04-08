@@ -27,7 +27,7 @@
   "dependencies": {
     "@effection/atom": "=2.0.0-preview.8",
     "@effection/node": "=2.0.0-preview.10",
-    "@simulacrum/ui": "0.0.1",
+    "@simulacrum/ui": "^0",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "cors": "^2.8.5",
@@ -47,7 +47,7 @@
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
-    "@simulacrum/client": "0.0.1",
+    "@simulacrum/client": "^0",
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/mocha": "^8.2.1",
