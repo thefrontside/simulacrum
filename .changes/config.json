@@ -20,7 +20,7 @@
     "@simulacrum/ui": {
       "path": "./packages/ui",
       "manager": "javascript",
-      "dependencies": ["@simulacrum/client"]
+      "dependencies": []
     }
   }
 }
