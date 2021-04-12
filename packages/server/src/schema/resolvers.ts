@@ -30,6 +30,18 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
   }
 };
 
+export const destroySimulation: Resolver<{ id: string; }, boolean> = {
+  async resolve({ id }, { atom }) {
+    let simulation = atom.slice("simulations").slice(id);
+    if (simulation.get()) {
+      simulation.remove();
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
 export interface GivenParameters {
   a: string;
   simulation: string;

@@ -2,6 +2,7 @@ import { Resolver, Subscriber } from './resolvers';
 import * as resolvers from './resolvers';
 
 export const createSimulation = uncover(resolvers.createSimulation);
+export const destroySimulation = uncover(resolvers.destroySimulation);
 export const given = uncover(resolvers.given);
 export const state = uncover(resolvers.state);
 

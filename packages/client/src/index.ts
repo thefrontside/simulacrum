@@ -4,6 +4,7 @@ import { GraphQLError } from 'graphql';
 
 export interface Client {
   createSimulation(simulators?: string | string[]): Promise<Simulation>;
+  destroySimulation(simulation: Simulation): Promise<boolean>;
   given(simulation: Simulation, scenario: string): Promise<Scenario>;
   state<T>(): AsyncIterable<T> & AsyncIterator<T>;
   dispose(): Promise<void>;
@@ -115,6 +116,13 @@ mutation Given($simulation: String!, $scenario: String) {
 }
 `,
       variables: { scenario, simulation: simulation.id }
+    }),
+    destroySimulation: ({ id }: Simulation) => query<boolean>("destroySimulation", {
+      query: `
+mutation DestroySimulation($id: String!) {
+  destroySimulation(id: $id)
+}`,
+      variables: { id }
     }),
     state<T = unknown>() {
       let child = scope.spawn();

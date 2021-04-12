@@ -12,11 +12,20 @@ export function map<A>(slice: Slice<Record<string, A>>, effect: Effect<A>): Oper
     function synchronize(record: Record<string, A>) {
       let keep = new Set<string>();
 
-      for (let key of Object.keys(record)) {
-        if (!effects.has(key)) {
-          effects.set(key, scope.spawn(effect(slice.slice(key))));
+      // the checks for non-null `record` and `value`
+      // should not be necessary, except for some weirdness
+      // when removing values from our Atom means that sometimes
+      // the are.
+      if (record) {
+        for (let [key, value] of Object.entries(record)) {
+          // see comment above
+          if (value) {
+            if (!effects.has(key)) {
+              effects.set(key, scope.spawn(effect(slice.slice(key))));
+            }
+            keep.add(key);
+          }
         }
-        keep.add(key);
       }
 
       for (let [key, effect] of effects.entries()) {

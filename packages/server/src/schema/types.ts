@@ -1,6 +1,6 @@
 import { objectType, mutationType, scalarType, nonNull, list, stringArg, intArg, subscriptionType } from 'nexus';
 
-import { createSimulation, given, state } from './operations';
+import { createSimulation, destroySimulation, given, state } from './operations';
 
 export const types = [
   scalarType({
@@ -35,6 +35,13 @@ export const types = [
           ),
         },
         ...createSimulation
+      });
+      t.field('destroySimulation', {
+        type: 'Boolean',
+        args: {
+          id: nonNull(stringArg())
+        },
+        ...destroySimulation
       });
       t.field('given', {
         type: 'JSON',

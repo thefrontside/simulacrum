@@ -1,4 +1,4 @@
-import { describe, it, beforeEach } from '@effection/mocha';
+import { describe, it, beforeEach, captureError } from '@effection/mocha';
 import { Client, Simulation } from '@simulacrum/client';
 import fetch from 'cross-fetch';
 import expect from 'expect';
@@ -66,6 +66,24 @@ describe('@simulacrum/server', () => {
         expect(body).toEqual("hello world");
       });
     });
+
+    describe('destroySimulation()', () => {
+      let destroyed: boolean;
+      beforeEach(function*() {
+        destroyed = yield client.destroySimulation(simulation);
+      })
+
+      it('indicates in the response that this operation tore down the simulation', function*() {
+        expect(destroyed).toEqual(true);
+      });
+
+      it('tears down any running services', function*() {
+        let [{ url }] = simulation.services;
+        let response = fetch(url.toString(), { method: 'POST', body: "hello world" });
+        expect(yield captureError(response)).toMatchObject({ name: 'FetchError' })
+      });
+    });
+
   });
 
   describe('creating two servers with the same seed', () => {
