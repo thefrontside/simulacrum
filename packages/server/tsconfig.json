@@ -3,7 +3,6 @@
   "references": [{ "path": "../client"}],
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src"
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts"]
 }
