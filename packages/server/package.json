@@ -4,9 +4,9 @@
   "description": "A server containing simulation state, and the control API to manipulate it",
   "main": "dist/index.js",
   "scripts": {
-    "clean": "rimraf tsconfig.tsbuildinfo __generated__ dist",
+    "clean": "rimraf *.tsbuildinfo __generated__ dist",
     "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
-    "build": "tsc --build && ts-node src/schema/schema.ts",
+    "build": "tsc --build tsconfig.dist.json && ts-node src/schema/schema.ts",
     "start": "node dist/start.js",
     "watch": "PORT=3000 NODE_ENV=development ts-node -P ./watch-tsconfig.json ./watch.ts"
   },
