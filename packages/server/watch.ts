@@ -13,7 +13,7 @@ main(function* (scope: Task) {
       process = scope.spawn(function*() {
         yield sleep(10);
         console.log('rebuilding.....');
-        process = scope.spawn(buildAndRun);
+        yield buildAndRun;
       });
     });
   } finally {
