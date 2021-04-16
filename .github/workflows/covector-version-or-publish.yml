@@ -22,6 +22,7 @@ jobs:
         with:
           node-version: 14
           registry-url: "https://registry.npmjs.org"
+      - run: npm install --global npm@7.10.0
       - run: npm install
       - name: git config
         run: |
