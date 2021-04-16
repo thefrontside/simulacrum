@@ -1,6 +1,7 @@
 import { describe, it, beforeEach, captureError } from '@effection/mocha';
 import { Client, Simulation } from '@simulacrum/client';
 import fetch from 'cross-fetch';
+import { Task } from 'effection';
 import expect from 'expect';
 
 import { echo } from '../src/echo';
@@ -13,6 +14,8 @@ describe('@simulacrum/server', () => {
   let client: Client;
 
   let app = createHttpApp().post('/', echo);
+
+
 
   beforeEach(function * (world) {
     client = yield createTestServer({
@@ -86,6 +89,31 @@ describe('@simulacrum/server', () => {
     });
 
   });
+
+  describe('creating a simulation with parameters', () => {
+    let simulation: Simulation;
+    let echo: (value: string) => Promise<string>;
+
+    beforeEach(function*(world) {
+      simulation = yield client.createSimulation("echo", {
+        double: true
+      });
+      let [{ url }] = simulation.services;
+      echo = (body) => world.spawn(function*() {
+        let response: Response = yield fetch(url.toString(), {
+          method: 'POST',
+          body
+        });
+        expect(response.ok).toEqual(true);
+        return yield response.text();
+      })
+    });
+
+    it('can effect the way in which the simulation runs ', function*() {
+      expect(yield echo("hello")).toEqual("hellohello");
+    });
+  });
+
 
   describe('creating two servers with the same seed', () => {
     let one: Client;
