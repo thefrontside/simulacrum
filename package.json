@@ -5,7 +5,8 @@
   "scripts": {
     "clean": "npm run clean -ws",
     "test": "npm run test -ws",
-    "build": "npm run build -ws",
+    "build": "npm run prepack -ws",
+    "prepack": "npm run prepack -ws",
     "build:tsc": "tsc -b ./tsconfig.packages.json",
     "watch:tsc": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.packages.json --watch"
   },

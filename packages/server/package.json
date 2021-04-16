@@ -3,10 +3,12 @@
   "version": "0.0.2",
   "description": "A server containing simulation state, and the control API to manipulate it",
   "main": "dist/index.js",
+  "files": ["dist"],
   "scripts": {
-    "clean": "rimraf *.tsbuildinfo __generated__ dist",
+    "clean": "rimraf *.tsbuildinfo dist",
     "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
-    "build": "tsc --build tsconfig.dist.json && ts-node src/schema/schema.ts",
+    "prepack": "tsc --build tsconfig.dist.json",
+    "build": "npm run prepack",
     "start": "node dist/start.js",
     "watch": "PORT=3000 NODE_ENV=development ts-node -P ./watch-tsconfig.json ./watch.ts"
   },
@@ -18,7 +20,7 @@
     "simulation",
     "emulation"
   ],
-  "author": "Charles Lowell <cowboyd@frontside.io>",
+  "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
