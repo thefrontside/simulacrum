@@ -7,7 +7,10 @@ import { simulation } from './simulation';
 export function createEffects(atom: Slice<ServerState>, available: Record<string, Simulator>): Runnable<void> {
   return {
     run(scope: Task) {
-      scope.spawn(map(atom.slice('simulations'), simulation(available)));
+      scope.spawn(map(atom.slice('simulations'), simulation({
+        nothing: () => ({ scenarios: {}, services: {} }),
+        ...available
+      })));
     }
   };
 }

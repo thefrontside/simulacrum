@@ -1,4 +1,4 @@
-import { objectType, mutationType, scalarType, nonNull, list, stringArg, intArg, subscriptionType } from 'nexus';
+import { objectType, mutationType, scalarType, nonNull, stringArg, intArg, subscriptionType } from 'nexus';
 
 import { createSimulation, destroySimulation, given, state } from './operations';
 
@@ -30,9 +30,7 @@ export const types = [
         type: 'Simulation',
         args: {
           seed: intArg(),
-          simulators: nonNull(
-            list(nonNull(stringArg())),
-          ),
+          simulator: stringArg(),
         },
         ...createSimulation
       });

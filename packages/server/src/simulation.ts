@@ -1,15 +1,16 @@
 import assert from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
-import { Behaviors, SimulationState, Simulator } from './interfaces';
+import { SimulationState, Simulator } from './interfaces';
 import { AddressInfo, createServer } from './http';
 import { createFaker } from './faker';
 
-export function simulation(definitions: Record<string, Simulator>): Effect<SimulationState> {
+export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {
     try {
-      let selected = slice.get().simulators;
-      let behaviors = selectBehaviors(definitions, selected);
+      let simulatorName = slice.get().simulator;
+      assert(!!simulators[simulatorName], `unknown simulator ${simulatorName}`);
+      let behaviors = simulators[simulatorName]();
 
       let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();
@@ -87,26 +88,6 @@ export function simulation(definitions: Record<string, Simulator>): Effect<Simul
         error,
         services: []
       }));
-    }
-  };
-}
-
-function selectBehaviors(simulators: Record<string, Simulator>, selected: string[]): Behaviors {
-  return selected.reduce((behaviors, selection) => {
-    assert(!!simulators[selection], `unknown simulator ${selection}`);
-    return append(behaviors, simulators[selection]());
-  }, { services: {}, scenarios: {} } as Behaviors);
-}
-
-function append(left: Behaviors, right: Behaviors): Behaviors {
-  return {
-    services: {
-      ...left.services,
-      ...right.services
-    },
-    scenarios: {
-      ...left.scenarios,
-      ...right.scenarios
     }
   };
 }
