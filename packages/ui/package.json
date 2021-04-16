@@ -1,10 +1,12 @@
 {
   "name": "@simulacrum/ui",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A web UI to work with a Simulacrum Server",
   "browser": "dist/index.html",
   "main": "index.js",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "echo skip",
     "prepack": "parcel build app/index.html --target browser",

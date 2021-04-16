@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.2.0]
+
+- Add destroySimulation()
+  - [72f3490](https://github.com/thefrontside/simulacrum/commit/72f3490fb5d33cdfd039c31cb5eab06ddd00afcd) add changeset on 2021-04-12
+- create proper npm packages that actually work
+  - [87b30c4](https://github.com/thefrontside/simulacrum/commit/87b30c45b502f31747918610bed3604afd21bba9) Make a proper release on 2021-04-16
+
 ## \[0.1.0]
 
 - Provide a decent implementation of createClient() that can create

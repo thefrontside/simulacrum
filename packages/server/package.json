@@ -1,9 +1,11 @@
 {
   "name": "@simulacrum/server",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "A server containing simulation state, and the control API to manipulate it",
   "main": "dist/index.js",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
@@ -29,7 +31,7 @@
   "dependencies": {
     "@effection/atom": "=2.0.0-preview.8",
     "@effection/node": "=2.0.0-preview.10",
-    "@simulacrum/ui": "0.0.1",
+    "@simulacrum/ui": "0.0.2",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "cors": "^2.8.5",
@@ -49,7 +51,7 @@
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
-    "@simulacrum/client": "0.1.0",
+    "@simulacrum/client": "0.2.0",
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/mocha": "^8.2.1",
