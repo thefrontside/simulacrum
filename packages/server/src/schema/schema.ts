@@ -2,15 +2,9 @@ import { makeSchema } from 'nexus';
 import path from 'path';
 import { types } from './types';
 
-const parent = path.basename(path.join(__dirname, '..'));
-
 export const schema = makeSchema({
-  shouldGenerateArtifacts: parent !== 'dist',
+  shouldGenerateArtifacts: false,
   types,
-  outputs: {
-    schema: path.join(__dirname, '../__generated__/schema.graphql'),
-    typegen: path.join(__dirname, '../__generated__/schema.types.d.ts'),
-  },
   sourceTypes: {
     modules: [
       {
