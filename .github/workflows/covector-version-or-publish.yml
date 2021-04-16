@@ -37,6 +37,13 @@ jobs:
           token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
           command: "version-or-publish"
           createRelease: true
+
+      # We need to run npm again so that `package-lock.json`
+      # is updated if it needs to be before the PR is created
+      # and submitted. We can remove this if this gets baked into
+      # covector
+      - run: npm install
+
       - name: Create Pull Request With Versions Bumped
         id: cpr
         uses: peter-evans/create-pull-request@v3
