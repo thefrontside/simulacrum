@@ -8,7 +8,7 @@
     "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
     "build": "tsc --build tsconfig.dist.json && ts-node src/schema/schema.ts",
     "start": "node dist/start.js",
-    "watch": "PORT=3000 NODE_ENV=development ts-node -P ./watch-tsconfig.json ./watch.ts"
+    "watch": "PORT=3000 NODE_ENV=development ts-node -P ./tsconfig.watch.json ./watch.ts"
   },
   "repository": {
     "type": "git",
