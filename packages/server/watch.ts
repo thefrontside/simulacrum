@@ -1,19 +1,20 @@
-import { Operation, Stream, Task } from 'effection';
+import { Operation, Stream, Task, on, sleep } from 'effection';
 import type { Process } from '@effection/node';
 import { main, exec, daemon, StdIO } from '@effection/node';
-import { sleep } from 'effection';
-import { on } from 'effection';
 import { watch } from 'chokidar';
 
 main(function* (scope: Task) {
   let watcher = watch('./src/**/*.ts', { ignoreInitial: true, ignored: 'dist' });
   try {
-    let process: Task = scope.spawn(buildAndRun(500));
+    let process: Task = scope.spawn(buildAndRun);
 
-    yield on(watcher, 'all').forEach(function () {
-      console.log('building.....');
+    yield on(watcher, 'all').forEach(() => {
       process.halt();
-      process = scope.spawn(buildAndRun(500));
+      process = scope.spawn(function*() {
+        yield sleep(10);
+        console.log('rebuilding.....');
+        yield buildAndRun;
+      });
     });
   } finally {
     watcher.close();
@@ -43,20 +44,17 @@ function executeAndOut(command: string): Operation<void> {
   };
 }
 
-function buildAndRun(delay: number):Operation<void> {
-  return function*(scope) {
-    try {
-      yield executeAndOut('clean');
-      yield executeAndOut('build');
-      yield sleep(delay);
+function* buildAndRun(scope: Task) {
+  try {
+    yield executeAndOut('clean');
+    yield executeAndOut('prepack');
 
-      let server: StdIO = daemon('node dist/start.js').run(scope);
-      scope.spawn(writeOut(server.stdout, process.stdout));
-      scope.spawn(writeOut(server.stderr, process.stderr));
-    } catch (err) {
-      console.error(err);
-    }
+    let server: StdIO = daemon('node dist/start.js').run(scope);
+    scope.spawn(writeOut(server.stdout, process.stdout));
+    scope.spawn(writeOut(server.stderr, process.stderr));
+  } catch (err) {
+    console.error(err);
+  }
 
-    yield;
-  };
+  yield;
 }
