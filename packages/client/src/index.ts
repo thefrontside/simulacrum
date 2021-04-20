@@ -3,7 +3,7 @@ import { createClient as createWSClient, SubscribePayload } from 'graphql-ws';
 import { GraphQLError } from 'graphql';
 
 export interface Client {
-  createSimulation(simulator?: string): Promise<Simulation>;
+  createSimulation(simulator: string): Promise<Simulation>;
   destroySimulation(simulation: Simulation): Promise<boolean>;
   given(simulation: Simulation, scenario: string): Promise<Scenario>;
   state<T>(): AsyncIterable<T> & AsyncIterator<T>;

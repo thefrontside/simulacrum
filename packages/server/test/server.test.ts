@@ -5,6 +5,7 @@ import expect from 'expect';
 
 import { echo } from '../src/echo';
 import { createHttpApp } from '../src/http';
+import { ServerOptions } from '../src/interfaces';
 
 import { createTestServer } from './helpers';
 
@@ -89,23 +90,21 @@ describe('@simulacrum/server', () => {
   describe('creating two servers with the same seed', () => {
     let one: Client;
     let two: Client;
+    let options: ServerOptions = {
+      seed: 5,
+      simulators: {
+        empty: () => ({ services: {}, scenarios: {} })
+      }
+    };
 
     beforeEach(function*(world) {
-      one = yield createTestServer({
-        seed: 5,
-        simulators: {}
-      }).run(world).client();
-
-      two = yield createTestServer({
-        seed: 5,
-        simulators: {}
-      }).run(world).client();
-
+      one = yield createTestServer(options).run(world).client();
+      two = yield createTestServer(options).run(world).client();
     });
 
     it('creates simulations with the same uuid', function*() {
-      let first = yield one.createSimulation();
-      let second = yield two.createSimulation();
+      let first = yield one.createSimulation("empty");
+      let second = yield two.createSimulation("empty");
 
       expect(first).toBeDefined();
       expect(second).toBeDefined();

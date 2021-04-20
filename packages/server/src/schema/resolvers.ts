@@ -15,11 +15,11 @@ export interface Subscriber<Args, TEach, Result = TEach> {
 }
 
 export interface CreateSimulationParameters {
-  simulator?: string;
+  simulator: string;
 }
 
 export const createSimulation: Resolver<CreateSimulationParameters, SimulationState> = {
-  resolve({ simulator = "nothing" }, ctx) {
+  resolve({ simulator }, ctx) {
     let { atom, scope, newid } = ctx;
 
     let id = newid();

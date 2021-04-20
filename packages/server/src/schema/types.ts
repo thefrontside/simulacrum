@@ -30,7 +30,7 @@ export const types = [
         type: 'Simulation',
         args: {
           seed: intArg(),
-          simulator: stringArg(),
+          simulator: nonNull(stringArg()),
         },
         ...createSimulation
       });
