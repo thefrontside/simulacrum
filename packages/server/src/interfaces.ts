@@ -43,14 +43,14 @@ export type SimulationState =
   {
     id: string;
     status: 'new',
-    simulators: string[],
+    simulator: string,
     scenarios: Record<string, ScenarioState>;
     store: StoreState;
   } |
   {
     id: string,
     status: 'running',
-    simulators: string[],
+    simulator: string,
     services: {
       name: string;
       url: string;
@@ -61,7 +61,7 @@ export type SimulationState =
   {
     id: string,
     status: 'failed',
-    simulators: string[],
+    simulator: string,
     scenarios: Record<string, ScenarioState>;
     store: StoreState;
     error: Error
