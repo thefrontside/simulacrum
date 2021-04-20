@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Resolver, Subscriber } from './resolvers';
 import * as resolvers from './resolvers';
 

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 // @ts-ignore
 import FakerInstance from 'faker/lib';
 // @ts-ignore

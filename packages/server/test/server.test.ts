@@ -71,7 +71,7 @@ describe('@simulacrum/server', () => {
       let destroyed: boolean;
       beforeEach(function*() {
         destroyed = yield client.destroySimulation(simulation);
-      })
+      });
 
       it('indicates in the response that this operation tore down the simulation', function*() {
         expect(destroyed).toEqual(true);
@@ -80,7 +80,7 @@ describe('@simulacrum/server', () => {
       it('tears down any running services', function*() {
         let [{ url }] = simulation.services;
         let response = fetch(url.toString(), { method: 'POST', body: "hello world" });
-        expect(yield captureError(response)).toMatchObject({ name: 'FetchError' })
+        expect(yield captureError(response)).toMatchObject({ name: 'FetchError' });
       });
     });
 

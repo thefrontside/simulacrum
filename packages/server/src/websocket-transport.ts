@@ -1,5 +1,5 @@
-import { on, once, onEmit, Task, throwOnErrorEvent } from 'effection';
-import { Server as HTTPServer, IncomingMessage } from 'http';
+import { on, once, Task, throwOnErrorEvent } from 'effection';
+import { Server as HTTPServer } from 'http';
 import { subscribe, execute, parse } from 'graphql';
 import { makeServer, WebSocket } from 'graphql-ws';
 import WS, { CloseEvent } from 'ws';
@@ -48,7 +48,7 @@ export function createWebSocketTransport({ atom, newid }: OperationContext, serv
           } finally {
             socket.close();
           }
-        })
+        });
       }));
     }
   };
