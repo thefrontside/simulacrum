@@ -12,7 +12,7 @@ export function createTestServer(options: ServerOptions): Runnable<{ client(): O
       return {
         client: () => function*() {
           let { port } = yield server.address();
-          let client = createClient(`http://localhost:${port}`, WS)
+          let client = createClient(`http://localhost:${port}`, WS);
           scope.spawn(function*() {
             try {
               yield;

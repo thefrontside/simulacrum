@@ -7,7 +7,7 @@ export interface AppProps {
   server: () => URL;
 }
 
-export function App({server}: AppProps): ReactElement {
+export function App({ server }: AppProps): ReactElement {
   let url = server();
 
   let websocketEndpoint = new URL(url);

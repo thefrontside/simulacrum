@@ -10,6 +10,7 @@
     "clean": "echo nothing to do",
     "prepack": "tsc --build",
     "build": "npm run prepack",
+    "lint": "eslint src",
     "test": "echo client is used to test server"
   },
   "dependencies": {

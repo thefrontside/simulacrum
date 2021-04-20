@@ -28,5 +28,5 @@ export function createQueue<T>(): Queue<T> {
         }
       });
     }
-  }
+  };
 }

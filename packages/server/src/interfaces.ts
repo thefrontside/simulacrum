@@ -12,6 +12,7 @@ export interface Behaviors {
   scenarios: Record<string, Scenario>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Scenario<T = any> {
   (store: Store, faker: Faker): Operation<T>;
 }

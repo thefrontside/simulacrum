@@ -107,7 +107,7 @@ mutation CreateSimulation($simulators: [String!]!) {
 }`,
         operationName: 'CreateSimulation',
         variables: { simulators: ([] as string[]).concat(simulators || []) }
-      })
+      });
     },
     given: (simulation: Simulation, scenario: string) => query<Scenario>("given", {
       query: `

@@ -40,7 +40,7 @@ export const destroySimulation: Resolver<{ id: string; }, boolean> = {
       return false;
     }
   }
-}
+};
 
 export interface GivenParameters {
   a: string;

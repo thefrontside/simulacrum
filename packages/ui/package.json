@@ -13,6 +13,7 @@
     "start": "parcel serve app/index.html --target browser",
     "watch": "parcel watch app/index.html --target browser",
     "build": "npm run prepack",
+    "lint": "eslint app index.js",
     "clean": "rm -rf dist"
   },
   "repository": {
