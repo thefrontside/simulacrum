@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.2.0]
+
+- require a single root simulator for each simulation
+  - [0cf5eb5](https://github.com/thefrontside/simulacrum/commit/0cf5eb5983dc20ab05c8e59bdc77b18603b526c8) Only one top-level simulator in a simulation on 2021-04-16
+
 ## \[0.1.0]
 
 - Add destroySimulation()

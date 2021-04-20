@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/server",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A server containing simulation state, and the control API to manipulate it",
   "main": "dist/index.js",
   "files": [
@@ -52,7 +52,7 @@
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
-    "@simulacrum/client": "0.2.0",
+    "@simulacrum/client": "0.3.0",
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/mocha": "^8.2.1",
