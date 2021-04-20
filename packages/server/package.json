@@ -11,6 +11,7 @@
     "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
     "prepack": "tsc --build tsconfig.dist.json",
     "build": "npm run prepack",
+    "lint": "eslint src test",
     "start": "node dist/start.js",
     "watch": "PORT=3000 NODE_ENV=development ts-node -P ./tsconfig.watch.json ./watch.ts"
   },

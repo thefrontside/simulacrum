@@ -7,6 +7,7 @@
     "test": "npm run test -ws",
     "build": "npm run prepack -ws",
     "prepack": "npm run prepack -ws",
+    "lint": "npm run lint -ws",
     "build:tsc": "tsc -b ./tsconfig.packages.json",
     "watch:tsc": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.packages.json --watch"
   },
