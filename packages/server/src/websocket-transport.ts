@@ -58,7 +58,7 @@ export function createWebSocket(ws: WS): Runnable<WebSocket> {
   return {
     run(scope: Task) {
 
-      throwOnErrorEvent(scope, ws);
+      scope.spawn(throwOnErrorEvent(ws));
 
       return {
         protocol: ws.protocol,

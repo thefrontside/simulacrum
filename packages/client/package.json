@@ -14,7 +14,7 @@
     "test": "echo client is used to test server"
   },
   "dependencies": {
-    "effection": "=2.0.0-preview.10",
+    "effection": "=2.0.0-preview.12",
     "graphql-ws": "^4.2.3"
   },
   "devDependencies": {
