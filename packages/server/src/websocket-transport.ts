@@ -4,7 +4,6 @@ import { subscribe, execute, parse } from 'graphql';
 import { makeServer, WebSocket } from 'graphql-ws';
 import WS, { CloseEvent } from 'ws';
 import { schema } from './schema/schema';
-import { Runnable } from './interfaces';
 import { OperationContext } from './schema/context';
 
 /**

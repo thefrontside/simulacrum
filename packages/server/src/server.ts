@@ -39,7 +39,7 @@ export function createSimulationServer(options: ServerOptions = { simulators: {}
 
       yield createWebSocketTransport(context, server.http);
 
-      createEffects(atom, options.simulators).run(scope);
+      yield createEffects(atom, options.simulators);
 
       return server;
     }
