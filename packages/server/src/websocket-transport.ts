@@ -1,4 +1,4 @@
-import { on, once, Task, throwOnErrorEvent } from 'effection';
+import { on, once, Resource, Task, throwOnErrorEvent } from 'effection';
 import { Server as HTTPServer } from 'http';
 import { subscribe, execute, parse } from 'graphql';
 import { makeServer, WebSocket } from 'graphql-ws';
@@ -14,6 +14,8 @@ import { OperationContext } from './schema/context';
  * Every websocket gets its own effection scope, and graphql operations are
  * executed there instead of the main server scope.
  */
+
+
 export function createWebSocketTransport({ atom, newid }: OperationContext, server: HTTPServer): Runnable<void> {
   return {
     run(scope: Task) {
@@ -41,7 +43,7 @@ export function createWebSocketTransport({ atom, newid }: OperationContext, serv
       scope.spawn(on<WS>(new WS.Server({ server }), 'connection').forEach(socket => {
         scope.spawn(function*(child) {
           try {
-            let websocket = createWebSocket(socket).run(child);
+            let websocket = yield createWebSocket(socket);
             let closed = transport.opened(websocket, child);
             let close: CloseEvent = yield once(socket, 'close');
             yield closed(close.code, close.reason);
@@ -54,9 +56,9 @@ export function createWebSocketTransport({ atom, newid }: OperationContext, serv
   };
 }
 
-export function createWebSocket(ws: WS): Runnable<WebSocket> {
+export function createWebSocket(ws: WS): Resource<WebSocket> {
   return {
-    run(scope: Task) {
+    *init(scope: Task) {
 
       scope.spawn(throwOnErrorEvent(ws));
 

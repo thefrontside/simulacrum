@@ -12,7 +12,7 @@ main(function* (scope) {
     port: !!process.env.PORT ? Number(process.env.PORT) : undefined
   });
 
-  let server: Server = createSimulationServer({
+  let server: Server = yield createSimulationServer({
     port,
     seed: 1,
     simulators: {
@@ -27,7 +27,7 @@ main(function* (scope) {
         scenarios: {}
       }),
     }
-  }).run(scope);
+  });
 
   let address: AddressInfo = yield server.address();
 
