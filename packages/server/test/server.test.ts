@@ -15,7 +15,7 @@ describe('@simulacrum/server', () => {
   let app = createHttpApp().post('/', echo);
 
   beforeEach(function * (world) {
-    client = yield createTestServer({
+    client = yield world.spawn(createTestServer({
       simulators: {
         echo: () => ({
           services: {
@@ -31,7 +31,7 @@ describe('@simulacrum/server', () => {
           scenarios: {}
         })
       }
-    }).run(world).client();
+    }));
   });
 
   describe('createSimulation()', () => {
@@ -98,8 +98,8 @@ describe('@simulacrum/server', () => {
     };
 
     beforeEach(function*(world) {
-      one = yield createTestServer(options).run(world).client();
-      two = yield createTestServer(options).run(world).client();
+      one = yield world.spawn(createTestServer(options));
+      two = yield world.spawn(createTestServer(options));
     });
 
     it('creates simulations with the same uuid', function*() {
