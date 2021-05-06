@@ -6,7 +6,7 @@ import { createHttpApp } from './http';
 import person from './simulators/person';
 import getPort from 'get-port';
 
-main(function* (scope) {
+main(function* () {
 
   let port = yield getPort({
     port: !!process.env.PORT ? Number(process.env.PORT) : undefined
