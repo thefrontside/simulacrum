@@ -37,7 +37,7 @@ export function createSimulationServer(options: ServerOptions = { simulators: {}
 
       let server = yield createServer(app, { port });
 
-      createWebSocketTransport(context, server.http).run(scope);
+      yield createWebSocketTransport(context, server.http);
 
       createEffects(atom, options.simulators).run(scope);
 

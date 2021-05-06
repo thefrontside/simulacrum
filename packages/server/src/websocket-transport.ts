@@ -16,9 +16,9 @@ import { OperationContext } from './schema/context';
  */
 
 
-export function createWebSocketTransport({ atom, newid }: OperationContext, server: HTTPServer): Runnable<void> {
+export function createWebSocketTransport({ atom, newid }: OperationContext, server: HTTPServer): Resource<void> {
   return {
-    run(scope: Task) {
+    *init(scope) {
       let transport = makeServer<Task>({
         schema,
         onConnect: () => true,
