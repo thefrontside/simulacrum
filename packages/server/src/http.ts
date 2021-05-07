@@ -7,7 +7,7 @@ export type { AddressInfo } from 'net';
 
 export interface Server {
   http: HTTPServer;
-  address(): Operation<AddressInfo>;
+  address: AddressInfo;
 }
 
 export interface ServerOptions {
@@ -25,7 +25,6 @@ export function createServer(app: Application, options: ServerOptions = {}): Res
         throw error;
       });
 
-
       scope.spawn(function*() {
         try {
           yield;
@@ -40,9 +39,7 @@ export function createServer(app: Application, options: ServerOptions = {}): Res
 
       return {
         http: server,
-        async address() {
-          return server.address() as unknown as AddressInfo;
-        }
+        address: server.address() as unknown as AddressInfo
       };
     }
   };

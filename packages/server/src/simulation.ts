@@ -42,7 +42,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       let services: {name: string; url: string; }[] = [];
       for (let { name, protocol, create } of servers) {
         let server: Server = yield create;
-        let address: AddressInfo = yield server.address();
+        let address: AddressInfo = server.address;
         services.push({ name, url: `${protocol}://localhost:${address.port}` });
       }
 

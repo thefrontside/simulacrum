@@ -1,7 +1,7 @@
 import { main } from '@effection/node';
 
 import { echo } from './echo';
-import { createSimulationServer, Server, AddressInfo } from './server';
+import { createSimulationServer, Server } from './server';
 import { createHttpApp } from './http';
 import person from './simulators/person';
 import getPort from 'get-port';
@@ -29,7 +29,7 @@ main(function* () {
     }
   });
 
-  let address: AddressInfo = yield server.address();
+  let address = server.address;
 
   console.log(`Simulation server running on http://localhost:${address.port}`);
 

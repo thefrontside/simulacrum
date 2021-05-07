@@ -8,7 +8,7 @@ export function createTestServer(options: ServerOptions): Resource<Client> {
   return {
     *init(scope: Task) {
       let server: Server = yield createSimulationServer(options);
-      let { port } = yield server.address();
+      let { port } = server.address;
       let client = createClient(`http://localhost:${port}`, WS);
       scope.spawn(function*() {
         try {
