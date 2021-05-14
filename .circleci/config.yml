@@ -6,8 +6,6 @@ jobs:
     docker:
       - image: cimg/node:15.14.0
     steps:
-      - node/install:
-          npm-version: 7.11.2
       - checkout
       - node/install-packages
       - run: npm run build
