@@ -12,6 +12,7 @@ export interface Client {
 
 export interface Simulation {
   id: string;
+  status: string;
   services: Service[];
 }
 
@@ -98,6 +99,7 @@ export function createClient(serverURL: string, webSocketImpl?: WebSocketImpl): 
 mutation CreateSimulation($simulator: String, $options: JSON) {
   createSimulation(simulator: $simulator, options: $options) {
     id
+    status
     simulators
     services {
       name
