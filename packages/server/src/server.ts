@@ -11,16 +11,16 @@ import { OperationContext } from './schema/context';
 
 export { Server, createServer } from './http';
 export type { AddressInfo } from './http';
-import type { Runnable } from './interfaces';
 
 import { createEffects } from './effects';
 import { stableIds } from './faker';
 import { createWebSocketTransport } from './websocket-transport';
+import { Resource } from 'effection';
 
-export function createSimulationServer(options: ServerOptions = { simulators: {} }): Runnable<Server> {
+export function createSimulationServer(options: ServerOptions = { simulators: {} }): Resource<Server> {
   let { port } = options;
   return {
-    run(scope) {
+    *init(scope) {
       let newid = options.seed ? stableIds(options.seed) : v4;
 
       let atom = createAtom<ServerState>({
@@ -35,11 +35,11 @@ export function createSimulationServer(options: ServerOptions = { simulators: {}
         .use(express.static(appDir()))
         .use('/', graphqlHTTP({ schema, context }));
 
-      let server = createServer(app, { port }).run(scope);
+      let server = yield createServer(app, { port });
 
-      createWebSocketTransport(context, server.http).run(scope);
+      yield createWebSocketTransport(context, server.http);
 
-      createEffects(atom, options.simulators).run(scope);
+      yield createEffects(atom, options.simulators);
 
       return server;
     }

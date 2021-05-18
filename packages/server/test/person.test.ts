@@ -9,9 +9,9 @@ describe('person simulator', () => {
   let client: Client;
 
   beforeEach(function * (world) {
-    client = yield createTestServer({
+    client = yield world.spawn(createTestServer({
       simulators: { person }
-    }).run(world).client();
+    }));
   });
 
   describe('createSimulation()', () => {

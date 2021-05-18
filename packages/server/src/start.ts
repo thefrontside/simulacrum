@@ -1,18 +1,18 @@
 import { main } from '@effection/node';
 
 import { echo } from './echo';
-import { createSimulationServer, Server, AddressInfo } from './server';
+import { createSimulationServer, Server } from './server';
 import { createHttpApp } from './http';
 import person from './simulators/person';
 import getPort from 'get-port';
 
-main(function* (scope) {
+main(function* () {
 
   let port = yield getPort({
     port: !!process.env.PORT ? Number(process.env.PORT) : undefined
   });
 
-  let server: Server = createSimulationServer({
+  let server: Server = yield createSimulationServer({
     port,
     seed: 1,
     simulators: {
@@ -27,9 +27,9 @@ main(function* (scope) {
         scenarios: {}
       }),
     }
-  }).run(scope);
+  });
 
-  let address: AddressInfo = yield server.address();
+  let address = server.address;
 
   console.log(`Simulation server running on http://localhost:${address.port}`);
 

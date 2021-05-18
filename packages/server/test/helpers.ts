@@ -1,28 +1,23 @@
 import { createClient, Client } from '@simulacrum/client';
-import { Operation } from 'effection';
-import { ServerOptions, Runnable } from '../src/interfaces';
-import { createSimulationServer } from '../src/server';
+import { Resource, Task } from 'effection';
+import { ServerOptions } from '../src/interfaces';
+import { createSimulationServer, Server } from '../src/server';
 import WS from 'ws';
 
-export function createTestServer(options: ServerOptions): Runnable<{ client(): Operation<Client>}> {
+export function createTestServer(options: ServerOptions): Resource<Client> {
   return {
-    run(scope) {
-      let server = createSimulationServer(options).run(scope);
-
-      return {
-        client: () => function*() {
-          let { port } = yield server.address();
-          let client = createClient(`http://localhost:${port}`, WS);
-          scope.spawn(function*() {
-            try {
-              yield;
-            } finally {
-              client.dispose();
-            }
-          });
-          return client;
+    *init(scope: Task) {
+      let server: Server = yield createSimulationServer(options);
+      let { port } = server.address;
+      let client = createClient(`http://localhost:${port}`, WS);
+      scope.spawn(function*() {
+        try {
+          yield;
+        } finally {
+          client.dispose();
         }
-      };
+      });
+      return client;
     }
   };
 }

@@ -1,56 +1,45 @@
-import { Deferred, Operation, Task, once } from 'effection';
+import { Operation, Task, once, Resource } from 'effection';
 import { Request, Response, Application } from 'express';
 
 import type { Server as HTTPServer } from 'http';
 import type { AddressInfo } from 'net';
 export type { AddressInfo } from 'net';
 
-import type { Runnable } from './interfaces';
-
 export interface Server {
   http: HTTPServer;
-  address(): Operation<AddressInfo>;
+  address: AddressInfo;
 }
 
 export interface ServerOptions {
   port?: number
 }
 
-export function createServer(app: Application, options: ServerOptions = {}): Runnable<Server> {
+export function createServer(app: Application, options: ServerOptions = {}): Resource<Server> {
   return {
-    run(scope: Task) {
+    *init(scope: Task) {
 
-      let bound = Deferred<HTTPServer>();
       let server = app.listen(options.port);
 
-      scope.spawn(function*(task: Task) {
+      scope.spawn(function*() {
+        let error: Error = yield once(server, 'error');
+        throw error;
+      });
 
-        task.spawn(function*() {
-          let error: Error = yield once(server, 'error');
-          throw error;
-        });
-
+      scope.spawn(function*() {
         try {
-          if (!server.listening) {
-            yield once(server, 'listening');
-          }
-
-          bound.resolve(server);
-
           yield;
         } finally {
           server.close();
         }
       });
 
-      let network = bound.promise;
+      if (!server.listening) {
+        yield once(server, 'listening');
+      }
 
       return {
         http: server,
-        async address() {
-          let server = await network;
-          return server.address() as unknown as AddressInfo;
-        }
+        address: server.address() as unknown as AddressInfo
       };
     }
   };

@@ -1,11 +1,7 @@
-import { Operation, Task } from 'effection';
+import { Operation } from 'effection';
 import { Slice } from '@effection/atom';
 import type { HttpApp } from './http';
 import type { Faker } from './faker';
-
-export interface Runnable<T> {
-  run(scope: Task): T;
-}
 
 export interface Behaviors {
   services: Record<string, Service>;
