@@ -6,6 +6,9 @@
     },
     {
       "path": "./packages/server"
+    },
+    {
+      "path": "./packages/auth0"
     }
   ]
 }
