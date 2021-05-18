@@ -37,5 +37,8 @@
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme"
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "volta": {
+    "extends": "../../package.json"
+  }
 }
