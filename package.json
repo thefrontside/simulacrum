@@ -33,5 +33,9 @@
   },
   "devDependencies": {
     "covector": "^0.5.3"
+  },
+  "volta": {
+    "node": "14.17.0",
+    "npm": "7.13.0"
   }
 }
