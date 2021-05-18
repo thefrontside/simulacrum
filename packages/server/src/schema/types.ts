@@ -20,6 +20,7 @@ export const types = [
     name: 'Simulation',
     definition(t) {
       t.id('id');
+      t.nonNull.string('status');
       t.nonNull.list.field('services', {
         type: 'Service'
       });
