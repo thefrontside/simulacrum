@@ -2,8 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "references": [{ "path": "../client"}],
   "compilerOptions": {
+    "baseUrl": ".",
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDirs": ["src", "test"]
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }
