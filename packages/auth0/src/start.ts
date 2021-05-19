@@ -6,6 +6,7 @@ const port = process.env.PORT ? parseInt(process.env.PORT) : undefined;
 
 main(function*() {
   let server: Server = yield createSimulationServer({
+    seed: 1,
     port,
     simulators: { auth0 }
   });
