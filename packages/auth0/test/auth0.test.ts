@@ -9,7 +9,7 @@ describe('Auth0 simulator', () => {
   beforeEach(function*() {
     client = yield createTestServer({
       simulators: { auth0 }
-    })
+    });
   });
 
   describe("Creating a simulation with an Auth0 simulator", () => {
@@ -21,5 +21,5 @@ describe('Auth0 simulator', () => {
     it('works', function*() {
       expect(simulation.status).toEqual('running');
     });
-  })
-})
+  });
+});
