@@ -2,10 +2,8 @@
   "name": "@simulacrum/server",
   "version": "0.2.0",
   "description": "A server containing simulation state, and the control API to manipulate it",
-  "main": "dist/index.js",
-  "files": [
-    "dist"
-  ],
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",

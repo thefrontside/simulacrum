@@ -2,8 +2,6 @@
   "extends": "../../tsconfig.base.json",
   "references": [{
     "path": "../server/tsconfig.dist.json"
-  }, {
-    "path": "../client/tsconfig.json"
   }],
   "compilerOptions": {
     "baseUrl": ".",
