@@ -3,9 +3,7 @@
   "version": "0.3.0",
   "description": "connect to simulacrum servers and manipulate them via the control API",
   "main": "dist/index.js",
-  "files": [
-    "dist"
-  ],
+  "types": "dist/index.d.ts",
   "scripts": {
     "clean": "echo nothing to do",
     "prepack": "tsc --build",
