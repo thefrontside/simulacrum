@@ -2,15 +2,14 @@
   "name": "@simulacrum/auth0",
   "version": "0.0.0",
   "description": "Simulate Auth0",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
     "prepack": "tsc --build tsconfig.dist.json",
     "build": "npm run prepack",
     "lint": "eslint src test",
-    "start": "node dist/src/start.js",
+    "start": "node dist/start.js",
     "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
   },
   "repository": {
