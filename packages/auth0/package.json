@@ -10,7 +10,7 @@
     "prepack": "tsc --build tsconfig.dist.json",
     "build": "npm run prepack",
     "lint": "eslint src test",
-    "start": "node dist/start.js",
+    "start": "node dist/src/start.js",
     "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
   },
   "repository": {
