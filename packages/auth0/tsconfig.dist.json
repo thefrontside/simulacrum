@@ -4,7 +4,8 @@
     "path": "../server/tsconfig.dist.json"
   }],
   "compilerOptions": {
-    "rootDirs": ["src"]
+    "outDir": "dist",
+    "rootDir": "src",
   },
   "exclude": ["test"]
 }
