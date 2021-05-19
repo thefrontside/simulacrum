@@ -1,8 +1,8 @@
 {
   "extends": "@frontside/tsconfig",
   "compilerOptions": {
-    "baseUrl": ".",
     "composite": true,
+    "declaration": true,
     "declarationMap": true,
     "paths": {
       "@simulacrum/client": ["packages/client/src"],
