@@ -1,9 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../server"}],
+  "references": [{
+    "path": "../server/tsconfig.dist.json"
+  }, {
+    "path": "../client/tsconfig.json"
+  }],
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "dist"
+    "outDir": "dist",
+    "rootDirs": ["src", "test"]
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }
