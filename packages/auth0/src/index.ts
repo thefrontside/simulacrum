@@ -31,7 +31,7 @@ const loginHandler: HttpHandler = function* (req, res) {
     nonce,
   };
 
-  return res.status(200).send(userNamePasswordForm(req.body));
+  res.status(200).send(userNamePasswordForm(req.body));
 };
 
 const createAuth0Service = (store?: Store) => {
@@ -39,7 +39,7 @@ const createAuth0Service = (store?: Store) => {
   return {
     protocol: 'https',
     port: 4400,
-    app: createHttpApp().get("/heartbeat", heartbeat).get('/login', login)
+    app: createHttpApp().get("/heartbeat", heartbeat).get('/login', login).post('/usernamepassword/login', loginHandler)
   } as const;
 };
 
