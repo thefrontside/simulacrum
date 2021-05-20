@@ -1,30 +1,31 @@
-import { Simulator, Service, createHttpApp, Person, person as createPerson, HttpHandler } from "@simulacrum/server";
+import { Simulator, createHttpApp, Person, person as createPerson, HttpHandler } from "@simulacrum/server";
+import { Store } from '@simulacrum/server';
 import { loginView } from './views/login';
 
-const heartbeat: HttpHandler = function(_, res) {
-  return function *() {
-    res.status(200).json({ ok: true });
-  };
+const heartbeat: HttpHandler = function *(_, res) {
+  res.status(200).json({ ok: true });
 };
 
-const login: HttpHandler = function(req, res) {
-  return function *() {
-    let html = loginView();
+const login: HttpHandler = function* (req, res) {
+  let html = loginView();
 
-    res.set("Content-Type", "text/html");
+  res.set("Content-Type", "text/html");
 
-    res.status(200).send(Buffer.from(html));
-  };
+  res.status(200).send(Buffer.from(html));
 };
 
-const auth0Service: Service = {
-  protocol: 'https',
-  port: 4400,
-  app: createHttpApp().get("/heartbeat", heartbeat).get('/login', login)
+const createAuth0Service = (store?: Store) => {
+  console.log({ store });
+  return {
+    protocol: 'https',
+    port: 4400,
+    app: createHttpApp().get("/heartbeat", heartbeat).get('/login', login)
+  } as const;
 };
+
 
 export const auth0: Simulator = () => ({
-  services: { auth0: auth0Service },
+  services: { auth0: createAuth0Service },
   scenarios: {
     /**
      * Here we just wrap the internal `person` scenario to augment

@@ -42,6 +42,8 @@ const createAppServer = (app: Application, options: ServerOptions) => {
       } as const;
 
       return createHttpsServer(ssl, app);
+    default:
+      throw new Error(`no server for optin ${options.protocol}`);
   }
 };
 

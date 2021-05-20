@@ -29,13 +29,14 @@ export interface ServerOptions {
 }
 
 export interface Service {
-  readonly protocol: 'http' | 'https'
-  readonly app: HttpApp
+  protocol: 'http' | 'https';
+  app: HttpApp;
   port?: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type StoreState = Record<string, Record<string, Record<string, any>>>;
+
 export type Store = Slice<StoreState>;
 
 export interface ServerState {
