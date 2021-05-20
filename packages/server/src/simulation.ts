@@ -25,7 +25,6 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         }
 
         app.use(raw({ type: "*/*" }));
-
         for (let handler of service.app.handlers) {
           app[handler.method](handler.path, (request, response) => {
             scope.spawn(function*() {

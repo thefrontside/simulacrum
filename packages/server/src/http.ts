@@ -1,5 +1,5 @@
 
-import { Operation, Task, once, Resource, spawn } from 'effection';
+import { Operation, once, Resource, spawn } from 'effection';
 import { Request, Response, Application } from 'express';
 import type { Server as HTTPServer } from 'http';
 import type { AddressInfo } from 'net';
@@ -9,7 +9,7 @@ import type { ServerOptions as SSLOptions } from 'https';
 import { createServer as createHttpsServer } from 'https';
 
 import fs from 'fs';
-import { Service } from './interfaces';
+import { ServiceDetails } from './interfaces';
 
 export interface Server {
   http: HTTPServer;

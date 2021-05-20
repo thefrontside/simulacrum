@@ -72,7 +72,7 @@ export const loginView = ({
               
               var username = document.querySelector('#username').value;
               var password = document.querySelector('#password').value;
-              
+
               webAuth.login(
                 {
                   username,
