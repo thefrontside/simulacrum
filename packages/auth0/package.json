@@ -32,7 +32,9 @@
     "@simulacrum/server": "0.2.0",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
+    "base64-url": "^2.3.3",
     "effection": "=2.0.0-preview.12",
+    "jsonwebtoken": "^8.5.1",
     "html-entities": "^2.3.2"
   },
   "devDependencies": {
@@ -42,6 +44,8 @@
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
     "@simulacrum/client": "0.3.0",
+    "@types/base64-url": "^2.2.0",
+    "@types/jsonwebtoken": "^8.5.1",
     "@types/mocha": "^8.2.1",
     "@types/ws": "^7.4.4",
     "effection": "2.0.0-preview.12",
