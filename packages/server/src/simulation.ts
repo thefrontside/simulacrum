@@ -40,7 +40,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         return {
           name,
           protocol: service.protocol,
-          create: createServer(app, { protocol: service.protocol })
+          create: createServer(app, { protocol: service.protocol, port: service.port })
         };
       });
 

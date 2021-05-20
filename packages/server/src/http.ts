@@ -34,6 +34,7 @@ const createAppServer = (app: Application, options: ServerOptions) => {
       return app.listen(options.port);
     case 'https':
       let httpsServer = createHttpsServer(ssl, app);
+
       return httpsServer.listen(options.port);
   }
 };
