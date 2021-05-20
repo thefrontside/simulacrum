@@ -20,7 +20,8 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();
         app.use(raw({ type: "*/*" }));
-        for (let handler of service.app.handlers) {
+        let serviceDetails = service();
+        for (let handler of serviceDetails.app.handlers) {
           app[handler.method](handler.path, (request, response) => {
             scope.spawn(function*() {
               try {
@@ -37,10 +38,12 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
           });
         }
 
+        let { port, protocol } = serviceDetails;
+
         return {
           name,
-          protocol: service.protocol,
-          create: createServer(app, { protocol: service.protocol, port: service.port })
+          protocol,
+          create: createServer(app, { protocol, port })
         };
       });
 
