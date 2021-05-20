@@ -1,6 +1,15 @@
 import { Simulator, createHttpApp, Person, person as createPerson, HttpHandler } from "@simulacrum/server";
 import { Store } from '@simulacrum/server';
 import { loginView } from './views/login';
+import { userNamePasswordForm } from './views/usernamePassword';
+
+const nonceMap: Record<
+  string,
+  {
+    username: string;
+    nonce: string;
+  }
+> = {};
 
 const heartbeat: HttpHandler = function *(_, res) {
   res.status(200).json({ ok: true });
@@ -12,6 +21,17 @@ const login: HttpHandler = function* (req, res) {
   res.set("Content-Type", "text/html");
 
   res.status(200).send(Buffer.from(html));
+};
+
+const loginHandler: HttpHandler = function* (req, res) {
+  let { username, nonce } = req.body;
+
+  nonceMap[nonce] = {
+    username,
+    nonce,
+  };
+
+  return res.status(200).send(userNamePasswordForm(req.body));
 };
 
 const createAuth0Service = (store?: Store) => {
