@@ -1,15 +1,14 @@
 
-import { Operation, once, Resource, spawn } from 'effection';
-import type { ServerOptions as SSLOptions } from 'https';
+import { Operation, Task, once, Resource, spawn } from 'effection';
 import { Request, Response, Application } from 'express';
-import { Server as HTTPServer, createServer as createHttpServer } from 'http';
-import { createServer as createHttpsServer } from 'https';
+import type { Server as HTTPServer } from 'http';
 import type { AddressInfo } from 'net';
+export type { AddressInfo } from 'net';
 import { paths } from './config/paths';
+import type { ServerOptions as SSLOptions } from 'https';
+import { createServer as createHttpsServer } from 'https';
 
 import fs from 'fs';
-import { assert } from 'assert-ts';
-import { NextFunction } from 'express';
 import { Service } from './interfaces';
 
 export interface Server {
