@@ -2,7 +2,7 @@ import { Simulator, Service, createHttpApp, Person, person as createPerson } fro
 
 const auth0Service: Service = {
   protocol: 'https',
-  app: createHttpApp()
+  app: createHttpApp(),
 };
 
 export const auth0: Simulator = () => ({
