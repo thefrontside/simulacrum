@@ -1,6 +1,6 @@
 const html = String.raw;
 
-export const loginView = (): string => {
+export const loginView = ({ port, scope }: {port: number, scope: string}): string => {
   return html`
     <html>
       <head>
@@ -45,8 +45,7 @@ export const loginView = (): string => {
           document.addEventListener('DOMContentLoaded', function(){
             console.log(window.auth0.default.WebAuth)
             var webAuth = new window.auth0.default.WebAuth({
-              // TODO: replace with config
-              domain: 'localhost:4400',
+              domain: 'localhost:${port}',
               clientID: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
             });
             var form = document.querySelector('#the-form');
@@ -59,10 +58,10 @@ export const loginView = (): string => {
                 {
                   username,
                   password,
-                  // TODO: replace with config
                   realm: 'Username-Password-Authentication',
+                  // TODO: replace with config
                   audience: 'https://mystore.com/api/v2',
-                  scope: 'read:order write:order',
+                  scope: '${scope}',
                   responseType: 'token id_token',
                   redirectUri: window.origin
                 },
