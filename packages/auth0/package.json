@@ -29,10 +29,11 @@
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
+    "@simulacrum/server": "0.2.0",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "effection": "=2.0.0-preview.12",
-    "@simulacrum/server": "0.2.0"
+    "html-entities": "^2.3.2"
   },
   "devDependencies": {
     "@effection/mocha": "2.0.0-preview.11",
