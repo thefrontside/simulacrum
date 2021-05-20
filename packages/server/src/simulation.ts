@@ -9,6 +9,7 @@ import { createFaker } from './faker';
 export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {
     try {
+      let store = slice.slice("store");
       let simulatorName = slice.get().simulator;
       let simulator = simulators[simulatorName];
       assert(simulator, `unknown simulator ${simulatorName}`);

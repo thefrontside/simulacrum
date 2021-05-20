@@ -80,6 +80,11 @@ export const loginView = ({
                   realm: 'Username-Password-Authentication',
                   scope: '${scope}',
                   nonce: nonce
+                  // TODO: replace with config
+                  audience: 'https://mystore.com/api/v2',
+                  scope: '${scope}',
+                  responseType: 'token id_token',
+                  redirectUri: window.origin
                 },
                 function(err, authResult) {
                   console.log(arguments)
