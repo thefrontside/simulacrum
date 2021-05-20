@@ -8,7 +8,7 @@ import type { ServerOptions as SSLOptions } from 'https';
 import { createServer as createHttpsServer } from 'https';
 
 import fs from 'fs';
-import { Service } from './interfaces';
+import { ServiceDetails } from './interfaces';
 
 export interface Server {
   http: HTTPServer;
@@ -17,7 +17,7 @@ export interface Server {
 
 export interface ServerOptions {
   port?: number
-  protocol: Service['protocol']
+  protocol: ServiceDetails['protocol']
 }
 
 const ssl: SSLOptions = {
