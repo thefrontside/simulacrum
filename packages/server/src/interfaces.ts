@@ -28,7 +28,7 @@ export interface ServerOptions {
   seed?: number;
 }
 
-export interface Service {
+export interface ServiceDetails {
   readonly protocol: 'http' | 'https'
   readonly app: HttpApp
   port?: number;
@@ -36,6 +36,7 @@ export interface Service {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type StoreState = Record<string, Record<string, Record<string, any>>>;
+
 export type Store = Slice<StoreState>;
 
 export interface ServerState {
