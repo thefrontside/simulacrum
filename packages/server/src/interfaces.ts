@@ -28,9 +28,12 @@ export interface ServerOptions {
   seed?: number;
 }
 
-export interface Service {
-  protocol: 'http' | 'https',
-  app: HttpApp
+export type Service = {
+  readonly protocol: 'http'
+  readonly app: HttpApp
+} | {
+  readonly protocol: 'https'
+  readonly app: HttpApp,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

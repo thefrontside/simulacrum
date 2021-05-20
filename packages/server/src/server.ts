@@ -34,7 +34,7 @@ export function createSimulationServer(options: ServerOptions = { simulators: {}
         .use(express.static(appDir()))
         .use('/', graphqlHTTP({ schema, context }));
 
-      let server = yield createServer(app, { port });
+      let server = yield createServer(app, { port, protocol: 'http' });
 
       yield createWebSocketTransport(context, server.http);
 

@@ -1,8 +1,14 @@
 import { Operation, once, Resource, spawn } from 'effection';
 import { Request, Response, Application } from 'express';
-
 import type { Server as HTTPServer } from 'http';
 import type { AddressInfo } from 'net';
+export type { AddressInfo } from 'net';
+import { paths } from './config/paths';
+import type { ServerOptions as SSLOptions } from 'https';
+import { createServer as createHttpsServer } from 'https';
+
+import fs from 'fs';
+import { Service } from './interfaces';
 
 export interface Server {
   http: HTTPServer;
@@ -11,13 +17,32 @@ export interface Server {
 
 export interface ServerOptions {
   port?: number
+  protocol: Service['protocol']
 }
 
-export function createServer(app: Application, options: ServerOptions = {}): Resource<Server> {
+const ssl: SSLOptions = {
+  key: fs.readFileSync(
+    paths.ssl.keyFile
+
+  ),
+  cert: fs.readFileSync(paths.ssl.pemFile),
+} as const;
+
+const createAppServer = (app: Application, options: ServerOptions) => {
+  switch(options.protocol) {
+    case 'http':
+      return app.listen(options.port);
+    case 'https':
+      let httpsServer = createHttpsServer(ssl, app);
+      return httpsServer.listen(options.port);
+  }
+};
+
+export function createServer(app: Application, options: ServerOptions): Resource<Server> {
   return {
     *init() {
 
-      let server = app.listen(options.port);
+      let server = createAppServer(app, options);
 
       yield spawn(function*() {
         let error: Error = yield once(server, 'error');
@@ -60,7 +85,6 @@ export interface HttpApp {
   put(path: string, handler: HttpHandler): HttpApp;
   post(path: string, handler: HttpHandler): HttpApp;
 }
-
 
 export function createHttpApp(handlers: RouteHandler[] = []): HttpApp {
   function append(handler: RouteHandler) {

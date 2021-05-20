@@ -10,7 +10,7 @@
     "build": "npm run prepack",
     "lint": "eslint src test",
     "start": "node dist/start.js",
-    "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
+    "watch": "PORT=4000 ts-node -P ./tsconfig.watch.json ./watch.ts"
   },
   "repository": {
     "type": "git",
