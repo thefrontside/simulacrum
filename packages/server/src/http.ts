@@ -8,6 +8,7 @@ import { Server as HTTPServer, createServer as createHttpServer } from 'http';
 import { paths } from './config/paths';
 import fs from 'fs';
 import { mkcertText, NoSSLError } from './errors/ssl/ssl-error';
+
 export interface Server {
   http: HTTPServer;
   address: AddressInfo;
