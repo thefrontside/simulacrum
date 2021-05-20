@@ -34,5 +34,8 @@
   "volta": {
     "node": "14.17.0",
     "npm": "7.13.0"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1"
   }
 }

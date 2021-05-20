@@ -6,7 +6,6 @@ export type Auth0QueryParams = {
   scope: string;
   client_id: string;
   nonce: string;
-  simulationId: string;
   code_challenge_method: string;
   response_type: string;
   response_mode: "query" | "web_message" | "fragment";
