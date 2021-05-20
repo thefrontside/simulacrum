@@ -1,4 +1,5 @@
 import { Simulator, Service, createHttpApp, Person, person as createPerson, HttpHandler } from "@simulacrum/server";
+import { loginView } from './views/login';
 
 const heartbeat: HttpHandler = function(_, res) {
   return function *() {
@@ -6,9 +7,20 @@ const heartbeat: HttpHandler = function(_, res) {
   };
 };
 
+const login: HttpHandler = function(req, res) {
+  return function *() {
+    let html = loginView();
+
+    res.set("Content-Type", "text/html");
+
+    res.status(200).send(Buffer.from(html));
+  };
+};
+
 const auth0Service: Service = {
   protocol: 'https',
-  app: createHttpApp().get("/heartbeat", heartbeat),
+  port: 4400,
+  app: createHttpApp().get("/heartbeat", heartbeat).get('/login', login)
 };
 
 export const auth0: Simulator = () => ({
