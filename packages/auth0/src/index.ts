@@ -1,8 +1,14 @@
-import { Simulator, Service, createHttpApp, Person, person as createPerson } from "@simulacrum/server";
+import { Simulator, Service, createHttpApp, Person, person as createPerson, HttpHandler } from "@simulacrum/server";
+
+const heartbeat: HttpHandler = function(_, res) {
+  return function *() {
+    res.status(200).json({ ok: true });
+  };
+};
 
 const auth0Service: Service = {
   protocol: 'https',
-  app: createHttpApp(),
+  app: createHttpApp().get("/heartbeat", heartbeat),
 };
 
 export const auth0: Simulator = () => ({
