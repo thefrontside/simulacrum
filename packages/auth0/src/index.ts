@@ -1,27 +1,36 @@
 import { Simulator, createHttpApp, Person, person as createPerson, Store } from "@simulacrum/server";
 import { createHandlers } from './handlers';
 
+// TODO: move this into config
 const scope = 'openid profile email offline_access';
-// TODO: we need to get this from the service
 const port = 4400;
+const audience = 'https://frontside.auth0.com/api/v2/';
+const tenant = "frontside";
+const clientId: 
 
 const createAuth0Service = (store: Store) => {
   let url = `https://localhost:${port}`;
-  let { heartbeat, login, loginHandler, token } = createHandlers({
+  let handlers = createHandlers({
     store,
     url,
     scope,
-    port
+    port,
+    audience,
+    tenant
   });
 
   return {
     protocol: 'https',
     port,
     app: createHttpApp()
-            .get("/heartbeat", heartbeat)
-            .get('/login', login)
-            .post('/usernamepassword/login', loginHandler)
-            .post('/oauth/token', token)
+            .get('/heartbeat', handlers['/heartbeat'])
+            .get('/authorize', handlers['/authorize'])
+            .get('/login', handlers['/login'])
+            .post('/usernamepassword/login', handlers['/usernamepassword/login'])
+            .get('/u/login', handlers['/u/login'])
+            .post('/login/callback', handlers['/login/callback'])
+            .post('/oauth/token', handlers['/oauth/token'])
+            .get('/v2/logout', handlers['/v2/logout'])
   } as const;
 };
 

@@ -10,4 +10,5 @@ export type Auth0QueryParams = {
   response_type: string;
   response_mode: "query" | "web_message" | "fragment";
   auth0Client: string;
+  audience: string;
 };
