@@ -12,8 +12,9 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       let store = slice.slice("store");
       let simulatorName = slice.get().simulator;
       let simulator = simulators[simulatorName];
+
       assert(simulator, `unknown simulator ${simulatorName}`);
-      let store = slice.slice("store");
+
       let options = slice.get().options;
 
       let behaviors = simulator(slice, options);

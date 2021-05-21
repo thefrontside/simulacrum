@@ -1,6 +1,5 @@
-
 import { Operation, once, Resource, spawn } from 'effection';
-import { Request, Response, Application } from 'express';
+import { Request, Response, Application, NextFunction } from 'express';
 import type { Server as HTTPServer } from 'http';
 import type { AddressInfo } from 'net';
 export type { AddressInfo } from 'net';
@@ -78,7 +77,7 @@ export function createServer(app: Application, options: ServerOptions): Resource
 }
 
 export interface HttpHandler {
-  (request: Request, response: Response): Operation<void>;
+  (request: Request, response: Response, next?: NextFunction): Operation<void>;
 }
 
 export type RouteHandler = {

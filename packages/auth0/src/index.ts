@@ -65,7 +65,6 @@ const createAuth0Service = (store: Store): Service => {
           .post('/dbconnections/signup', emptyResponse.bind({}))
           .get('/utility/token', utilityHandlers['/utility/token'])
           .post('/utility/verify', utilityHandlers['/utility/verify'])
-
   } as const;
 };
 

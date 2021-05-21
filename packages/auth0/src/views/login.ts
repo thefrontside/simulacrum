@@ -72,7 +72,7 @@ export const loginView = ({
               
               var username = document.querySelector('#username').value;
               var password = document.querySelector('#password').value;
-
+              
               webAuth.login(
                 {
                   username,
@@ -80,11 +80,6 @@ export const loginView = ({
                   realm: 'Username-Password-Authentication',
                   scope: '${scope}',
                   nonce: nonce
-                  // TODO: replace with config
-                  audience: 'https://mystore.com/api/v2',
-                  scope: '${scope}',
-                  responseType: 'token id_token',
-                  redirectUri: window.origin
                 },
                 function(err, authResult) {
                   console.log(arguments)
