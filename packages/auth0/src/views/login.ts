@@ -61,6 +61,8 @@ export const loginView = ({ port, scope, redirectUri }: LoginViewProps): string 
             var button = document.querySelector('#sumbit');
 
             submit.addEventListener('click', function(e) {
+              let nonce = new URLSearchParams(window.location.search).get('nonce');
+
               webAuth.login(
                 {
                   username,
@@ -69,6 +71,7 @@ export const loginView = ({ port, scope, redirectUri }: LoginViewProps): string 
                   // TODO: replace with config
                   scope: '${scope}',
                   responseType: 'token id_token',
+                  nonce: nonce
                 },
                 function(err, authResult) {
                   console.log(arguments)
