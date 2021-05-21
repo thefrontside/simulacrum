@@ -6,7 +6,7 @@ export type UserNamePasswordForm = {
   audience?: string;
   connection?: string;
   response_type?: string;
-  tenant?: string;
+  tenant: string;
 } & Partial<Auth0QueryParams>;
 
 export const userNamePasswordForm = ({
@@ -20,7 +20,7 @@ export const userNamePasswordForm = ({
   connection,
   response_type,
   tenant,
-}: UserNamePasswordForm = {}): string => {
+}: UserNamePasswordForm): string => {
   let wctx = encode(
     JSON.stringify({
       strategy: "auth0",
