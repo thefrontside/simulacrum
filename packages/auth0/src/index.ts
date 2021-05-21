@@ -1,12 +1,13 @@
 import { Simulator, createHttpApp, Person, person as createPerson, Store } from "@simulacrum/server";
 import { createHandlers } from './handlers';
+import { urlencoded, json } from 'express';
 
 // TODO: move this into config
 const scope = 'openid profile email offline_access';
 const port = 4400;
 const audience = 'https://frontside.auth0.com/api/v2/';
 const tenant = "frontside";
-const clientId: 
+const clientId = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 
 const createAuth0Service = (store: Store) => {
   let url = `https://localhost:${port}`;
@@ -16,21 +17,29 @@ const createAuth0Service = (store: Store) => {
     scope,
     port,
     audience,
-    tenant
+    tenant,
+    clientId
   });
 
   return {
     protocol: 'https',
     port,
     app: createHttpApp()
-            .get('/heartbeat', handlers['/heartbeat'])
-            .get('/authorize', handlers['/authorize'])
-            .get('/login', handlers['/login'])
-            .post('/usernamepassword/login', handlers['/usernamepassword/login'])
-            .get('/u/login', handlers['/u/login'])
-            .post('/login/callback', handlers['/login/callback'])
-            .post('/oauth/token', handlers['/oauth/token'])
-            .get('/v2/logout', handlers['/v2/logout'])
+          .use(urlencoded({ extended: true }))
+          .use(json())
+          .use((_, res, next) => {
+            res.set("Pragma", "no-cache");
+            res.set("Cache-Control", "no-cache, no-store");
+            next();
+          })
+          .get('/heartbeat', handlers['/heartbeat'])
+          .get('/authorize', handlers['/authorize'])
+          .get('/login', handlers['/login'])
+          .post('/usernamepassword/login', handlers['/usernamepassword/login'])
+          .get('/u/login', handlers['/u/login'])
+          .post('/login/callback', handlers['/login/callback'])
+          .post('/oauth/token', handlers['/oauth/token'])
+          .get('/v2/logout', handlers['/v2/logout'])
   } as const;
 };
 
