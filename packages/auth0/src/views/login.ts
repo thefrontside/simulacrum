@@ -1,6 +1,12 @@
 const html = String.raw;
 
-export const loginView = ({ port, scope }: {port: number, scope: string}): string => {
+interface LoginViewProps {
+  port: number;
+  scope: string;
+  redirectUri: string
+}
+
+export const loginView = ({ port, scope, redirectUri }: LoginViewProps): string => {
   return html`
     <html>
       <head>
@@ -46,14 +52,13 @@ export const loginView = ({ port, scope }: {port: number, scope: string}): strin
             console.log(window.auth0.default.WebAuth)
             var webAuth = new window.auth0.default.WebAuth({
               domain: 'localhost:${port}',
-              clientID: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+              clientID: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
+              redirectUri: '${redirectUri}'
             });
             var form = document.querySelector('#the-form');
             var username = document.querySelector('#email-address').value;
             var password = document.querySelector('#password').value;
             var button = document.querySelector('#sumbit');
-
-            console.log({username, password})
 
             submit.addEventListener('click', function(e) {
               webAuth.login(
@@ -62,10 +67,8 @@ export const loginView = ({ port, scope }: {port: number, scope: string}): strin
                   password,
                   realm: 'Username-Password-Authentication',
                   // TODO: replace with config
-                  audience: 'https://mystore.com/api/v2',
                   scope: '${scope}',
                   responseType: 'token id_token',
-                  redirectUri: window.origin
                 },
                 function(err, authResult) {
                   console.log(arguments)
