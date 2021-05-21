@@ -20,12 +20,13 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
 
       let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();
-        app.use(raw({ type: "*/*" }));
         let serviceDetails = service(store);
 
         for(let middleware of serviceDetails.app.middleware) {
           app.use(middleware);
         }
+
+        app.use(raw({ type: "*/*" }));
 
         for (let handler of serviceDetails.app.handlers) {
           app[handler.method](handler.path, (request, response) => {

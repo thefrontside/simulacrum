@@ -1,6 +1,9 @@
-import { Simulator, createHttpApp, Person, person as createPerson, Store } from "@simulacrum/server";
-import { createHandlers } from './handlers';
+import { Simulator, createHttpApp, Person, person as createPerson, Store, Middleware } from "@simulacrum/server";
+import { createAuth0Handlers } from './handlers/auth0-handlers';
 import { urlencoded, json } from 'express';
+import { createOpenIdHandlers } from './handlers/openid-handlers';
+import { createCors } from './middleware/create-cors';
+import { noCache } from './middleware/no-cache';
 
 // TODO: move this into config
 const scope = 'openid profile email offline_access';
@@ -11,7 +14,7 @@ const clientId = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 
 const createAuth0Service = (store: Store) => {
   let url = `https://localhost:${port}`;
-  let handlers = createHandlers({
+  let auth0Handlers = createAuth0Handlers({
     store,
     url,
     scope,
@@ -21,25 +24,34 @@ const createAuth0Service = (store: Store) => {
     clientId
   });
 
+  let openIdHandlers = createOpenIdHandlers({
+    url,
+    store
+  });
+
+  // let mid: () => Middleware = () => (_, __, next) => {
+  //   console.log('aye');
+  //   next();
+  // };
+
   return {
     protocol: 'https',
     port,
     app: createHttpApp()
-          .use(urlencoded({ extended: true }))
+          .use(createCors())
+          .use(noCache())
           .use(json())
-          .use((_, res, next) => {
-            res.set("Pragma", "no-cache");
-            res.set("Cache-Control", "no-cache, no-store");
-            next();
-          })
-          .get('/heartbeat', handlers['/heartbeat'])
-          .get('/authorize', handlers['/authorize'])
-          .get('/login', handlers['/login'])
-          .post('/usernamepassword/login', handlers['/usernamepassword/login'])
-          .get('/u/login', handlers['/u/login'])
-          .post('/login/callback', handlers['/login/callback'])
-          .post('/oauth/token', handlers['/oauth/token'])
-          .get('/v2/logout', handlers['/v2/logout'])
+          .use(urlencoded({ extended: true }))
+          .get('/heartbeat', auth0Handlers['/heartbeat'])
+          .get('/authorize', auth0Handlers['/authorize'])
+          .get('/login', auth0Handlers['/login'])
+          .post('/usernamepassword/login', auth0Handlers['/usernamepassword/login'])
+          .get('/u/login', auth0Handlers['/u/login'])
+          .post('/login/callback', auth0Handlers['/login/callback'])
+          .post('/oauth/token', auth0Handlers['/oauth/token'])
+          .get('/v2/logout', auth0Handlers['/v2/logout'])
+          .get('/jwks.json', openIdHandlers['/jwks.json'])
+          .get('/openid-configuration', openIdHandlers['/openid-configuration'])
   } as const;
 };
 
