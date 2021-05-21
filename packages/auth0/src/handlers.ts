@@ -8,7 +8,6 @@ import { userNamePasswordForm } from './views/username-password';
 import querystring from "querystring";
 import { webMessage } from './views/web-message';
 import { Auth0QueryParams } from './types';
-import { createAuth0Config } from './auth/create-auth0-config';
 
 // TODO: if we use the session then fix the types
 declare global{
@@ -49,7 +48,7 @@ interface HandlerOptions {
   tenant: string;
 }
 
-export const createHandlers = ({ url, scope, port, audience, clientId, tenant }: HandlerOptions): Record<Routes, HttpHandler> => ({
+export const createHandlers = ({ url, scope, port, audience }: HandlerOptions): Record<Routes, HttpHandler> => ({
   ['/heartbeat']: function *(_, res) {
     res.status(200).json({ ok: true });
   },
