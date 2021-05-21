@@ -1,6 +1,6 @@
 import { HttpHandler, Store } from '@simulacrum/server';
 import { assert } from 'assert-ts';
-import { decode, encode } from 'html-entities';
+import { decode, encode } from "base64-url";
 import { expiresAt } from '../auth/date';
 import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
 import { loginView } from '../views/login';
@@ -104,6 +104,8 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
   ['/usernamepassword/login']: function* (req, res) {
     let { username, nonce } = req.body;
 
+    console.log({ login: nonce, qs: req.query.nonce });
+
     assert(!!username, 'no username in /usernamepassword/login');
     assert(!!nonce, 'no nonce in /usernamepassword/login');
 
@@ -122,7 +124,7 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
 
     let { redirect_uri, state, nonce } = wctx;
 
-    let username = store.slice('auth0', nonce).get().username;
+    let { username } = store.slice('auth0', nonce).get();
 
     let encodedNonce = encode(`${nonce}:${username}`);
 
@@ -147,6 +149,8 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
       return;
     }
 
+    console.log(decode(store.slice('auth0', nonce, 'nonce').get() as string));
+
     let idToken = createJsonWebToken({
       alg: "RS256",
       typ: "JWT",
@@ -156,7 +160,7 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
       mail: username,
       aud: client_id,
       sub: "subject field",
-      nonce,
+      nonce: store.slice('auth0', nonce, 'nonce').get(),
     });
 
     res.status(200).json({
