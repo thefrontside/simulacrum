@@ -53,6 +53,8 @@ export const loginView = ({ port, scope }: {port: number, scope: string}): strin
             var password = document.querySelector('#password').value;
             var button = document.querySelector('#sumbit');
 
+            console.log({username, password})
+
             submit.addEventListener('click', function(e) {
               webAuth.login(
                 {

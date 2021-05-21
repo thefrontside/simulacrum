@@ -1,32 +1,13 @@
 import { HttpHandler, Store } from '@simulacrum/server';
 import { assert } from 'assert-ts';
 import { decode, encode } from 'html-entities';
-import { expiresAt } from './auth/date';
-import { createAuthJWT, createJsonWebToken } from './auth/jwt';
-import { loginView } from './views/login';
-import { userNamePasswordForm } from './views/username-password';
+import { expiresAt } from '../auth/date';
+import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
+import { loginView } from '../views/login';
+import { userNamePasswordForm } from '../views/username-password';
 import querystring from "querystring";
-import { webMessage } from './views/web-message';
-import { Auth0QueryParams } from './types';
-
-// TODO: if we use the session then fix the types
-declare global{
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Express {
-      interface Request {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          session: any;
-      }
-  }
-}
-
-const nonceMap: Record<
-  string,
-  {
-    username: string;
-    nonce: string;
-  }
-> = {};
+import { webMessage } from '../views/web-message';
+import { Auth0QueryParams } from '../types';
 
 export type Routes =
   | '/heartbeat'
@@ -38,7 +19,7 @@ export type Routes =
   | '/oauth/token'
   | '/v2/logout';
 
-interface HandlerOptions {
+interface Auth0HandlerOptions {
   store: Store;
   url: string;
   scope: string;
@@ -48,7 +29,12 @@ interface HandlerOptions {
   tenant: string;
 }
 
-export const createHandlers = ({ url, scope, port, audience }: HandlerOptions): Record<Routes, HttpHandler> => ({
+export type SessionState = {
+  nonce: string;
+  username: string;
+}
+
+export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0HandlerOptions): Record<Routes, HttpHandler> => ({
   ['/heartbeat']: function *(_, res) {
     res.status(200).json({ ok: true });
   },
@@ -65,19 +51,12 @@ export const createHandlers = ({ url, scope, port, audience }: HandlerOptions): 
       code_challenge_method,
       auth0Client,
       response_type,
-      contactEmail,
     } = req.query as Auth0QueryParams & { contactEmail?: string };
-
-    assert(!!req.session, "no session");
-
-    if (typeof contactEmail !== "undefined") {
-      req.session.username = contactEmail;
-    }
 
     res.removeHeader("X-Frame-Options");
 
     if (response_mode === "web_message") {
-      let username = req.session.username;
+      let username = store.slice('auth0', nonce).get().username;
 
       assert(!!username, `no username in authorise`);
 
@@ -123,14 +102,15 @@ export const createHandlers = ({ url, scope, port, audience }: HandlerOptions): 
   ['/usernamepassword/login']: function* (req, res) {
     let { username, nonce } = req.body;
 
-    assert(!!req.session, "no session");
+    assert(!!username, 'no username in /usernamepassword/login');
+    assert(!!nonce, 'no nonce in /usernamepassword/login');
 
-    req.session.username = username;
-
-    nonceMap[nonce] = {
-      username,
-      nonce,
-    };
+    store.slice('auth0').set({
+      [nonce]: {
+        username,
+        nonce
+      }
+    });
 
     res.status(200).send(userNamePasswordForm(req.body));
   },
@@ -140,9 +120,9 @@ export const createHandlers = ({ url, scope, port, audience }: HandlerOptions): 
 
     let { redirect_uri, state, nonce } = wctx;
 
-    assert(!!req.session, "no session");
+    let username = store.slice('auth0', nonce).get().username;
 
-    let encodedNonce = encode(`${nonce}:${req.session.username}`);
+    let encodedNonce = encode(`${nonce}:${username}`);
 
     let qs = querystring.stringify({ code: encodedNonce, state, nonce });
 
@@ -187,8 +167,6 @@ export const createHandlers = ({ url, scope, port, audience }: HandlerOptions): 
   },
 
   ['/v2/logout']: function *(req, res) {
-    req.session = null;
-
     assert(typeof req.query.returnTo === 'string', `unexpected ${req.query.returnTo} for returnTo`);
 
     res.redirect(req.query.returnTo);
