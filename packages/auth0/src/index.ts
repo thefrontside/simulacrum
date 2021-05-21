@@ -29,11 +29,6 @@ const createAuth0Service = (store: Store) => {
     store
   });
 
-  // let mid: () => Middleware = () => (_, __, next) => {
-  //   console.log('aye');
-  //   next();
-  // };
-
   return {
     protocol: 'https',
     port,

@@ -56,7 +56,7 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
     res.removeHeader("X-Frame-Options");
 
     if (response_mode === "web_message") {
-      let username = store.slice('auth0', nonce).get().username;
+      let username = store.slice('auth0', nonce, 'username').get();
 
       assert(!!username, `no username in authorise`);
 
@@ -92,7 +92,9 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
   },
 
   ['/login']: function* (req, res) {
-    let html = loginView({ port, scope });
+    let { redirect_uri } = req.query as Auth0QueryParams;
+
+    let html = loginView({ port, scope, redirectUri: redirect_uri });
 
     res.set("Content-Type", "text/html");
 
