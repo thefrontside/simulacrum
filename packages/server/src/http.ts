@@ -1,5 +1,5 @@
 import { Operation, once, Resource, spawn } from 'effection';
-import { Request, Response, Application } from 'express';
+import { Request, Response, Application, NextFunction } from 'express';
 import type { Server as HTTPServer } from 'http';
 import type { AddressInfo } from 'net';
 export type { AddressInfo } from 'net';
@@ -71,7 +71,7 @@ export function createServer(app: Application, options: ServerOptions): Resource
 }
 
 export interface HttpHandler {
-  (request: Request, response: Response): Operation<void>;
+  (request: Request, response: Response, next?: NextFunction): Operation<void>;
 }
 
 export type RouteHandler = {
@@ -80,21 +80,31 @@ export type RouteHandler = {
   handler: HttpHandler;
 }
 
+export type Middleware = (req: Request, res: Response, next: NextFunction) => void;
+
 export interface HttpApp {
   handlers: RouteHandler[];
+  middleware: Middleware[];
   get(path: string, handler: HttpHandler): HttpApp;
   put(path: string, handler: HttpHandler): HttpApp;
   post(path: string, handler: HttpHandler): HttpApp;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  use(middleware: Middleware): HttpApp;
 }
 
-export function createHttpApp(handlers: RouteHandler[] = []): HttpApp {
+export function createHttpApp(handlers: RouteHandler[] = [], middlewareHandlers: Middleware[] = []): HttpApp {
   function append(handler: RouteHandler) {
-    return createHttpApp(handlers.concat(handler));
+    return createHttpApp(handlers.concat(handler), middlewareHandlers);
+  }
+  function addMiddleware(middleware: Middleware) {
+    return createHttpApp(handlers, middlewareHandlers.concat(middleware));
   }
   return {
     handlers,
+    middleware: middlewareHandlers,
     get: (path, handler) => append({ path, handler, method: 'get' }),
     post: (path, handler) => append({ path, handler, method: 'post' }),
-    put: (path, handler) => append({ path, handler, method: 'put' })
+    put: (path, handler) => append({ path, handler, method: 'put' }),
+    use: (middleware) => addMiddleware(middleware)
   };
 }
