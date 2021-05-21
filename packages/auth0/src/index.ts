@@ -1,9 +1,10 @@
-import { Simulator, createHttpApp, Person, person as createPerson, Store, Middleware } from "@simulacrum/server";
+import { Simulator, createHttpApp, Person, person as createPerson, Store } from "@simulacrum/server";
 import { createAuth0Handlers } from './handlers/auth0-handlers';
 import { urlencoded, json } from 'express';
 import { createOpenIdHandlers } from './handlers/openid-handlers';
 import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
+import { createSession } from './middleware/session';
 
 // TODO: move this into config
 const scope = 'openid profile email offline_access';
@@ -33,6 +34,7 @@ const createAuth0Service = (store: Store) => {
     protocol: 'https',
     port,
     app: createHttpApp()
+          .use(createSession())
           .use(createCors())
           .use(noCache())
           .use(json())

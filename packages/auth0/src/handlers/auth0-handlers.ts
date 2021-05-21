@@ -53,10 +53,12 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
       response_type,
     } = req.query as Auth0QueryParams & { contactEmail?: string };
 
+    assert(!!req.session, "no session");
+
     res.removeHeader("X-Frame-Options");
 
     if (response_mode === "web_message") {
-      let username = store.slice('auth0', nonce, 'username').get();
+      let username = req.session.username;
 
       assert(!!username, `no username in authorise`);
 
@@ -104,10 +106,12 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
   ['/usernamepassword/login']: function* (req, res) {
     let { username, nonce } = req.body;
 
-    console.log({ login: nonce, qs: req.query.nonce });
-
     assert(!!username, 'no username in /usernamepassword/login');
     assert(!!nonce, 'no nonce in /usernamepassword/login');
+
+    assert(!!req.session, "no session");
+
+    req.session.username = username;
 
     store.slice('auth0').set({
       [nonce]: {
@@ -149,8 +153,6 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
       return;
     }
 
-    console.log(decode(store.slice('auth0', nonce, 'nonce').get() as string));
-
     let idToken = createJsonWebToken({
       alg: "RS256",
       typ: "JWT",
@@ -160,7 +162,7 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
       mail: username,
       aud: client_id,
       sub: "subject field",
-      nonce: store.slice('auth0', nonce, 'nonce').get(),
+      nonce,
     });
 
     res.status(200).json({
@@ -174,6 +176,8 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
 
   ['/v2/logout']: function *(req, res) {
     assert(typeof req.query.returnTo === 'string', `unexpected ${req.query.returnTo} for returnTo`);
+
+    req.session = null;
 
     res.redirect(req.query.returnTo);
   }
