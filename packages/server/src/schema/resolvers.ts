@@ -16,15 +16,16 @@ export interface Subscriber<Args, TEach, Result = TEach> {
 
 export interface CreateSimulationParameters {
   simulator: string;
+  options?: Record<string, unknown>;
 }
 
 export const createSimulation: Resolver<CreateSimulationParameters, SimulationState> = {
-  resolve({ simulator }, ctx) {
+  resolve({ simulator, options = {} }, ctx) {
     let { atom, scope, newid } = ctx;
 
     let id = newid();
     let simulation = atom.slice("simulations").slice(id);
-    simulation.set({ id, status: 'new', simulator, scenarios: {}, store: {} });
+    simulation.set({ id, status: 'new', simulator, options, scenarios: {}, store: {} });
 
     return scope.spawn(simulation.filter(({ status }) => status !== 'new').expect());
   }

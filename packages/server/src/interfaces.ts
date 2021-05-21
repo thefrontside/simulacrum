@@ -13,12 +13,12 @@ export interface Scenario<T = any> {
   (store: Store, faker: Faker): Operation<T>;
 }
 
-export interface Simulator {
-  (): Behaviors;
+export interface Simulator<Options = any> {
+  (options: Options): Behaviors;
 }
 
 export interface ServerOptions {
-  simulators: Record<string, Simulator>;
+  simulators: Record<string, Simulator<any>>;
   port?: number;
   seed?: number;
 }
@@ -40,6 +40,7 @@ export type SimulationState =
     id: string;
     status: 'new',
     simulator: string,
+    options: Record<string, unknown>;
     scenarios: Record<string, ScenarioState>;
     store: StoreState;
   } |
@@ -47,6 +48,7 @@ export type SimulationState =
     id: string,
     status: 'running',
     simulator: string,
+    options: Record<string, unknown>;
     services: {
       name: string;
       url: string;
@@ -58,6 +60,7 @@ export type SimulationState =
     id: string,
     status: 'failed',
     simulator: string,
+    options: Record<string, unknown>;
     scenarios: Record<string, ScenarioState>;
     store: StoreState;
     error: Error
