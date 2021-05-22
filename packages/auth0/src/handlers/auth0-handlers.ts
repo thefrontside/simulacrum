@@ -172,7 +172,7 @@ export const createAuth0Handlers = ({
       exp: expiresAt(),
       iat: Date.now(),
       mail: username,
-      aud: audience,
+      aud: clientId,
       sub: username,
       nonce,
     });
