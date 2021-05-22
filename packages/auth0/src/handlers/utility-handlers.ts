@@ -1,5 +1,4 @@
 import { HttpHandler, Store } from '@simulacrum/server';
-import { expiresAt } from '../auth/date';
 import { verify } from '../auth/verify';
 import { renderToken } from '../views/utility';
 
@@ -22,7 +21,7 @@ export const createUtilityRoutes = ({ store, url, audience }: {store: Store, url
   ['/utility/verify']: function * (req, res) {
     let { id_token, nonce } = req.body as { id_token: string; nonce: string; };
 
-    let result = verify({ id_token, aud: audience, iss: `${url}/`, nonce, max_age: expiresAt() });
+    let result = verify({ id_token, aud: audience, iss: `${url}/`, nonce });
 
     console.log(result);
 
