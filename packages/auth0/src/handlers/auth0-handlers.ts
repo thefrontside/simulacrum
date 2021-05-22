@@ -178,7 +178,7 @@ export const createAuth0Handlers = ({
     });
 
     res.status(200).json({
-      access_token: createAuthJWT(url),
+      access_token: createAuthJWT(url, audience),
       id_token: idToken,
       scope,
       expires_in: 86400,
