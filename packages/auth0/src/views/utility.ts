@@ -8,10 +8,8 @@ interface Props {
   result?: Record<string, any>
 }
 
-const idToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik5rUkdRakk1TjBSQk5VVXdNVFl3T0VNeFFVVkdRa0pCUVRKQk9EQkdOVEUyTURBNU5ETTVSQSJ9.eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjQ0MDAvIiwiZXhwIjoxNjI1Mjc0MjU5LCJpYXQiOjE2MjE2NzQyNTk3OTIsIm1haWwiOiJwYXVsLmNvd2FuQGN1dHRpbmcuc2NvdCIsImF1ZCI6Imh0dHBzOi8vdGhlZnJvbnRzaWRlLmF1dGgwLmNvbS9hcGkvdjEvIiwic3ViIjoicGF1bC5jb3dhbkBjdXR0aW5nLnNjb3QiLCJub25jZSI6ImRDNWxObUZLUTFac1dVSTFORVpNWld0WlYxVkRaVWRsTkVvM1FVNVdPRE0yVlhneE5YVmhiMzVWVmc9PSJ9.QiLLzlsCVvOClfkYIbWb2TUGtn-39_S0TcTf73mxpMmBtKQCHhyMc77erzmtdDGM_5Wg9oZ0BUIcyoWjbpAy1AjZr8HKlcazLV54bdzzLpRdthFmh7mxNhxfDnt-rDI7JrWuMd29xEzUGjiGOwut6oOMx_hw0s_TreeWn13YW8IwaPkzqtjnTGsatv3aOW-t5TOt0m3Dv8_R8qBmV9PvC4xZVLwpwPA6iZgh4t2TkGnOLb9qLlE0JUTfNIHjDHdkwN6jegBtwDOl9zrYz4Y59IYGYA-qeqsTVmMnjrfv3ZOdbzFPYiidCUsxDfalj0k94aoGwb2NxR3x8Lh0EiZ6bg";
-const noncein = 'dC5lNmFKQ1ZsWUI1NEZMZWtZV1VDZUdlNEo3QU5WODM2VXgxNXVhb35VVg==';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const renderToken = ({ url, nonce = noncein, id_token = idToken, result = {} }: Props): string => html`
+export const renderToken = ({ url, nonce = '', id_token = '', result = {} }: Props): string => html`
 <html>
   <head>
     <meta charset="UTF-8" />
