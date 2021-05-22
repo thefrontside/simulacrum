@@ -15,9 +15,11 @@ export const createJsonWebToken = (
   return sign(payload, privateKey, options);
 };
 
-export function createAuthJWT(authNamespace: string): string {
+export function createAuthJWT(authNamespace: string, audience: string): string {
   return createJsonWebToken({
-    [`${authNamespace}`]: 'what can we add here',
+    [`${authNamespace}`]: 'decorate token',
+    aud: audience,
+    iss: `${authNamespace}/`,
   });
 }
 
