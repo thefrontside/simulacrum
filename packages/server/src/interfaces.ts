@@ -13,11 +13,13 @@ export interface Scenario<T = any> {
   (store: Store, faker: Faker): Operation<T>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Simulator<Options = any> {
   (options: Options): Behaviors;
 }
 
 export interface ServerOptions {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   simulators: Record<string, Simulator<any>>;
   port?: number;
   seed?: number;

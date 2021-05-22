@@ -9,7 +9,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
   return slice => function*(scope) {
     try {
       let simulatorName = slice.get().simulator;
-      let simulator = simulators[simulatorName]
+      let simulator = simulators[simulatorName];
       assert(simulator, `unknown simulator ${simulatorName}`);
       let options = slice.get().options;
 

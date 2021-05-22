@@ -104,7 +104,7 @@ describe('@simulacrum/server', () => {
 hello world
 hello world`);
     });
-  })
+  });
 
   describe('creating two servers with the same seed', () => {
     let one: Client;
