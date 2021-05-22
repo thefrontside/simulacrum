@@ -34,7 +34,14 @@ export type SessionState = {
   username: string;
 }
 
-export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0HandlerOptions): Record<Routes, HttpHandler> => ({
+export const createAuth0Handlers = ({
+  store,
+  url,
+  scope,
+  port,
+  audience,
+  clientId
+}: Auth0HandlerOptions): Record<Routes, HttpHandler> => ({
   ['/heartbeat']: function *(_, res) {
     res.status(200).json({ ok: true });
   },
@@ -51,7 +58,7 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
       code_challenge_method,
       auth0Client,
       response_type,
-    } = req.query as Auth0QueryParams & { contactEmail?: string };
+    } = req.query as Auth0QueryParams;
 
     assert(!!req.session, "no session");
 
@@ -96,7 +103,13 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
   ['/login']: function* (req, res) {
     let { redirect_uri } = req.query as Auth0QueryParams;
 
-    let html = loginView({ port, scope, redirectUri: redirect_uri });
+    let html = loginView({
+      port,
+      scope,
+      redirectUri: redirect_uri,
+      clientId,
+      audience
+    });
 
     res.set("Content-Type", "text/html");
 
@@ -108,7 +121,6 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
 
     assert(!!username, 'no username in /usernamepassword/login');
     assert(!!nonce, 'no nonce in /usernamepassword/login');
-
     assert(!!req.session, "no session");
 
     req.session.username = username;
@@ -144,7 +156,7 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
   },
 
   ['/oauth/token']: function* (req, res) {
-    let { client_id, code } = req.body;
+    let { code } = req.body;
 
     let [nonce, username] = decode(code).split(":");
 
@@ -160,8 +172,8 @@ export const createAuth0Handlers = ({ store, url, scope, port, audience }: Auth0
       exp: expiresAt(),
       iat: Date.now(),
       mail: username,
-      aud: client_id,
-      sub: "subject field",
+      aud: audience,
+      sub: username,
       nonce,
     });
 
