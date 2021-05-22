@@ -1,3 +1,4 @@
+import type { Request, Response } from 'express';
 import { Simulator, createHttpApp, Person, person as createPerson, Store } from "@simulacrum/server";
 import { createAuth0Handlers } from './handlers/auth0-handlers';
 import { urlencoded, json } from 'express';
@@ -5,13 +6,20 @@ import { createOpenIdHandlers } from './handlers/openid-handlers';
 import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
 import { createSession } from './middleware/session';
+import { createUtilityRoutes } from './handlers/utility-handlers';
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 // TODO: move this into config
 const scope = 'openid profile email offline_access';
 const port = 4400;
-const audience = 'https://frontside.auth0.com/api/v2/';
+const audience = "https://thefrontside.auth0.com/api/v1/";
 const tenant = "frontside";
-const clientId = 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+const clientId = 'IsuLUyWaFczCbAKQrIpVPmyBTFs4g5iq';
+
+const emptyResponse = function*(_: Request, res: Response<Record<never, never>>) {
+  res.json({});
+};
 
 const createAuth0Service = (store: Store) => {
   let url = `https://localhost:${port}`;
@@ -30,6 +38,8 @@ const createAuth0Service = (store: Store) => {
     store
   });
 
+  let utilityHandlers = createUtilityRoutes({ url, store, audience });
+
   return {
     protocol: 'https',
     port,
@@ -47,8 +57,14 @@ const createAuth0Service = (store: Store) => {
           .post('/login/callback', auth0Handlers['/login/callback'])
           .post('/oauth/token', auth0Handlers['/oauth/token'])
           .get('/v2/logout', auth0Handlers['/v2/logout'])
-          .get('/jwks.json', openIdHandlers['/jwks.json'])
-          .get('/openid-configuration', openIdHandlers['/openid-configuration'])
+          .get('/.well-known/jwks.json', openIdHandlers['/.well-known/jwks.json'])
+          .get('/.well-known/openid-cofiguration', openIdHandlers['/.well-known/openid-cofiguration'])
+          .post('/userinfo', emptyResponse.bind({}))
+          .post('/dbconnections/change_password', emptyResponse.bind({}))
+          .post('/dbconnections/signup', emptyResponse.bind({}))
+          .get('/utility/token', utilityHandlers['/utility/token'])
+          .post('/utility/verify', utilityHandlers['/utility/verify'])
+
   } as const;
 };
 

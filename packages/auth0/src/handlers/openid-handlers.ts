@@ -1,9 +1,11 @@
 import type { HttpHandler, Store } from '@simulacrum/server';
 import { JWKS } from '../auth/constants';
 
-type OpenIdRoutes =
+type Routes =
   | '/jwks.json'
-  | '/openid-configuration'
+  | '/openid-cofiguration'
+
+ type OpenIdRoutes = `${`/.well-known`}${Routes}`
 
 interface OpenIdHandlersOptions {
   url: string;
@@ -11,11 +13,11 @@ interface OpenIdHandlersOptions {
 }
 
 export const createOpenIdHandlers = ({ url }: OpenIdHandlersOptions): Record<OpenIdRoutes, HttpHandler> => ({
-  ['/jwks.json']: function* (_, res) {
+  ['/.well-known/jwks.json']: function* (_, res) {
     res.json(JWKS);
   },
 
-  ['/openid-configuration']: function* (_, res) {
+  ['/.well-known/openid-cofiguration']: function* (_, res) {
     res.json({
       issuer: url,
       authorization_endpoint: [url, "authorize"].join('/'),
