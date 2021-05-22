@@ -3,10 +3,18 @@ const html = String.raw;
 interface LoginViewProps {
   port: number;
   scope: string;
-  redirectUri: string
+  redirectUri: string;
+  clientId: string;
+  audience: string;
 }
 
-export const loginView = ({ port, scope, redirectUri }: LoginViewProps): string => {
+export const loginView = ({
+  port,
+  scope,
+  redirectUri,
+  clientId,
+  audience
+}: LoginViewProps): string => {
   return html`
     <html>
       <head>
@@ -52,8 +60,9 @@ export const loginView = ({ port, scope, redirectUri }: LoginViewProps): string 
             console.log(window.auth0.default.WebAuth)
             var webAuth = new window.auth0.default.WebAuth({
               domain: 'localhost:${port}',
-              clientID: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
-              redirectUri: '${redirectUri}'
+              clientID: '${clientId}',
+              redirectUri: '${redirectUri}',
+              audience: '${audience}'
             });
             var form = document.querySelector('#the-form');
             var username = document.querySelector('#email-address').value;
