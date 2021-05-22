@@ -88,7 +88,6 @@ export interface HttpApp {
   get(path: string, handler: HttpHandler): HttpApp;
   put(path: string, handler: HttpHandler): HttpApp;
   post(path: string, handler: HttpHandler): HttpApp;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   use(middleware: Middleware): HttpApp;
 }
 
@@ -105,6 +104,6 @@ export function createHttpApp(handlers: RouteHandler[] = [], middlewareHandlers:
     get: (path, handler) => append({ path, handler, method: 'get' }),
     post: (path, handler) => append({ path, handler, method: 'post' }),
     put: (path, handler) => append({ path, handler, method: 'put' }),
-    use: (middleware) => addMiddleware(middleware)
+    use: (middleware) => addMiddleware(middleware),
   };
 }
