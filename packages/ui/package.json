@@ -33,6 +33,7 @@
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
+    "@types/react": "^16.8.0",
     "graphiql": "^1.4.0",
     "parcel": "next",
     "react": "^16.8.0",
