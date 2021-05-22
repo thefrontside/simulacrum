@@ -57,7 +57,6 @@ export const loginView = ({
         </div>
         <script>
           document.addEventListener('DOMContentLoaded', function(){
-            console.log(window.auth0.default.WebAuth)
             var webAuth = new window.auth0.default.WebAuth({
               domain: 'localhost:${port}',
               clientID: '${clientId}',
