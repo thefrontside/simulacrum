@@ -21,7 +21,7 @@ main(function* () {
         services: {
           echo: {
             protocol: 'http',
-            app: createHttpApp().post('/', echo)
+            app: createHttpApp().post('/', echo(1))
           }
         },
         scenarios: {}

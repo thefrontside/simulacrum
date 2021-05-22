@@ -1,9 +1,9 @@
 import { HttpHandler } from './http';
 
-export const echo: HttpHandler = function echo(request, response) {
+export const echo: (times: number) => HttpHandler = (times: number) => function echo(request, response) {
   return function * () {
     response.contentType(request.headers['content-type'] ?? "application/octet-stream");
-
-    response.status(200).write(request.body ?? "echo");
+    let body = Array(times).fill(request.body ?? "echo").join("\n");
+    response.status(200).write(body);
   };
-};
+} as HttpHandler;

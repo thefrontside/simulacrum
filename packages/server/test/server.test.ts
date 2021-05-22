@@ -10,33 +10,32 @@ import { ServerOptions } from '../src/interfaces';
 import { createTestServer } from './helpers';
 
 describe('@simulacrum/server', () => {
+  let simulation: Simulation;
   let client: Client;
 
-  let app = createHttpApp().post('/', echo);
+  let app = (times: number) => createHttpApp().post('/', echo(times));
 
   beforeEach(function * (world) {
     client = yield world.spawn(createTestServer({
       simulators: {
-        echo: () => ({
+        echo: (({ times = 1 }) => ({
           services: {
             echo: {
               protocol: 'http',
-              app
+              app: app(times)
             },
             ["echo.too"]: {
               protocol: 'http',
-              app
+              app:  app(times)
             }
           },
           scenarios: {}
-        })
+        }))
       }
     }));
   });
 
   describe('createSimulation()', () => {
-    let simulation: Simulation;
-
     beforeEach(function*() {
       simulation = yield client.createSimulation("echo");
     });
@@ -84,7 +83,27 @@ describe('@simulacrum/server', () => {
         expect(yield captureError(response)).toMatchObject({ name: 'FetchError' });
       });
     });
+  });
 
+  describe('createSimulation() with parameters', () => {
+    let response: Response;
+    let body: string;
+    beforeEach(function*() {
+      simulation = yield client.createSimulation("echo", {
+        times: 3
+      });
+      let [{ url }] = simulation.services;
+      response = yield fetch(url.toString(), { method: 'POST', body: "hello world" });
+      expect(response.ok).toBe(true);
+      body = yield response.text();
+    });
+
+    it('can use those parameters to alter the behavor of its services', function*() {
+      expect(body).toEqual(
+        `hello world
+hello world
+hello world`);
+    });
   });
 
   describe('creating two servers with the same seed', () => {

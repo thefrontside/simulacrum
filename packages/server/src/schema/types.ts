@@ -1,4 +1,4 @@
-import { objectType, mutationType, scalarType, nonNull, stringArg, intArg, subscriptionType } from 'nexus';
+import { objectType, mutationType, scalarType, nonNull, arg, stringArg, intArg, subscriptionType } from 'nexus';
 
 import { createSimulation, destroySimulation, given, state } from './operations';
 
@@ -6,7 +6,8 @@ export const types = [
   scalarType({
     name: "JSON",
     description: "JSON value",
-    serialize: value => value
+    serialize: value => value,
+    parseValue: value => value
   }),
   objectType({
     name: 'Service',
@@ -31,6 +32,11 @@ export const types = [
         args: {
           seed: intArg(),
           simulator: nonNull(stringArg()),
+          options: arg({
+            type: 'JSON',
+            description: "options to pass to the simulation",
+
+          })
         },
         ...createSimulation
       });

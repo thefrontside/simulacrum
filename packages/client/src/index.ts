@@ -3,7 +3,7 @@ import { createClient as createWSClient, SubscribePayload } from 'graphql-ws';
 import { GraphQLError } from 'graphql';
 
 export interface Client {
-  createSimulation(simulator: string): Promise<Simulation>;
+  createSimulation(simulator: string, options?: Record<string, unknown>): Promise<Simulation>;
   destroySimulation(simulation: Simulation): Promise<boolean>;
   given(simulation: Simulation, scenario: string): Promise<Scenario>;
   state<T>(): AsyncIterable<T> & AsyncIterator<T>;
@@ -92,11 +92,11 @@ export function createClient(serverURL: string, webSocketImpl?: WebSocketImpl): 
   }
 
   return {
-    createSimulation: (simulator?: string) => {
+    createSimulation: (simulator: string, options?: Record<string, unknown>) => {
       return query<Simulation>("createSimulation", {
         query: `
-mutation CreateSimulation($simulator: String) {
-  createSimulation(simulator: $simulator) {
+mutation CreateSimulation($simulator: String, $options: JSON) {
+  createSimulation(simulator: $simulator, options: $options) {
     id
     simulators
     services {
@@ -106,7 +106,7 @@ mutation CreateSimulation($simulator: String) {
   }
 }`,
         operationName: 'CreateSimulation',
-        variables: { simulator }
+        variables: { simulator, options }
       });
     },
     given: (simulation: Simulation, scenario: string) => query<Scenario>("given", {

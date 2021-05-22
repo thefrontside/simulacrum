@@ -9,8 +9,11 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
   return slice => function*(scope) {
     try {
       let simulatorName = slice.get().simulator;
-      assert(!!simulators[simulatorName], `unknown simulator ${simulatorName}`);
-      let behaviors = simulators[simulatorName]();
+      let simulator = simulators[simulatorName];
+      assert(simulator, `unknown simulator ${simulatorName}`);
+      let options = slice.get().options;
+
+      let behaviors = simulator(options);
 
       let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();
