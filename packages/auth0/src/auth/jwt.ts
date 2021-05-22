@@ -54,6 +54,10 @@ export const idTokendecoded = [
   'vtm'
 ];
 
+function atob(str: string) {
+  return Buffer.from(str, 'base64').toString('binary');
+}
+
 const decodeB64 = (input: string) =>
   decodeURIComponent(
     atob(input)
