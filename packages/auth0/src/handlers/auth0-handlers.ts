@@ -8,6 +8,7 @@ import { userNamePasswordForm } from '../views/username-password';
 import querystring from "querystring";
 import { webMessage } from '../views/web-message';
 import { Auth0QueryParams } from '../types';
+import { createRulesRunner } from '../rules/run-rules';
 
 export type Routes =
   | '/heartbeat'
@@ -33,6 +34,8 @@ export type SessionState = {
   nonce: string;
   username: string;
 }
+
+let rulesRunner = createRulesRunner();
 
 export const createAuth0Handlers = ({
   store,
@@ -165,7 +168,7 @@ export const createAuth0Handlers = ({
       return;
     }
 
-    let idToken = createJsonWebToken({
+    let idTokenData = {
       alg: "RS256",
       typ: "JWT",
       iss: `${url}/`,
@@ -175,7 +178,11 @@ export const createAuth0Handlers = ({
       aud: clientId,
       sub: username,
       nonce,
-    });
+    };
+
+    rulesRunner(idTokenData, {});
+
+    let idToken = createJsonWebToken(idTokenData);
 
     res.status(200).json({
       access_token: createAuthJWT(url, audience),
