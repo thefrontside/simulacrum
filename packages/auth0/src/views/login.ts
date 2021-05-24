@@ -33,8 +33,8 @@ export const loginView = ({
             <form id="the-form" class="mt-8 space-y-6">
               <div class="rounded-md shadow-sm -space-y-px">
                 <div>
-                  <label for="email-address" class="sr-only">Email address</label>
-                  <input id="email-address" name="email" type="email" autocomplete="email" required="" value="paul.cowan@cutting.scot" class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address">
+                  <label for="username" class="sr-only">Email address</label>
+                  <input id="username" name="username" type="email" autocomplete="email" required="" value="" class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address">
                 </div>
                 <div>
                   <label for="password" class="sr-only">Password</label>
@@ -61,24 +61,24 @@ export const loginView = ({
               domain: 'localhost:${port}',
               clientID: '${clientId}',
               redirectUri: '${redirectUri}',
-              audience: '${audience}'
+              audience: '${audience}',
+              responseType: 'token id_token',
             });
             var form = document.querySelector('#the-form');
-            var username = document.querySelector('#email-address').value;
-            var password = document.querySelector('#password').value;
             var button = document.querySelector('#sumbit');
-
+            
             submit.addEventListener('click', function(e) {
               let nonce = new URLSearchParams(window.location.search).get('nonce');
-
+              
+              var username = document.querySelector('#username').value;
+              var password = document.querySelector('#password').value;
+              
               webAuth.login(
                 {
                   username,
                   password,
                   realm: 'Username-Password-Authentication',
-                  // TODO: replace with config
                   scope: '${scope}',
-                  responseType: 'token id_token',
                   nonce: nonce
                 },
                 function(err, authResult) {

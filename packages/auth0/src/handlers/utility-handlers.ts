@@ -23,8 +23,6 @@ export const createUtilityRoutes = ({ store, url, audience }: {store: Store, url
 
     let result = verify({ id_token, aud: audience, iss: `${url}/`, nonce });
 
-    console.log(result);
-
     let html = renderToken({ url, result });
 
     res.set("Content-Type", "text/html");
