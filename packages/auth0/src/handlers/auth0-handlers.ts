@@ -1,4 +1,4 @@
-import { HttpHandler, Store } from '@simulacrum/server';
+import { HttpHandler, Person, Store } from '@simulacrum/server';
 import { assert } from 'assert-ts';
 import { decode, encode } from "base64-url";
 import { expiresAt } from '../auth/date';
@@ -67,6 +67,7 @@ export const createAuth0Handlers = ({
     assert(!!req.session, "no session");
 
     if(currentUser) {
+      console.log({ response_mode });
       req.session.username = currentUser;
     }
 
@@ -173,6 +174,19 @@ export const createAuth0Handlers = ({
       return;
     }
 
+    let entry = Object.entries(store.slice('people').get()).find(([, person]) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (person as any).email.toLowerCase() === username.toLowerCase();
+    }) as unknown as [string, {id: string}] ;
+
+
+    if(!entry) {
+      res.status(401).send('Unauthorized');
+      return;
+    }
+
+    let [,user] = entry;
+
     let idTokenData = {
       alg: "RS256",
       typ: "JWT",
@@ -181,7 +195,7 @@ export const createAuth0Handlers = ({
       iat: Date.now(),
       mail: username,
       aud: clientId,
-      sub: username,
+      sub: user.id,
       nonce,
     };
 
