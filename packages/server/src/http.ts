@@ -51,10 +51,26 @@ export function createServer(app: Application, options: ServerOptions): Resource
   return {
     *init() {
 
-      let server = createAppServer(app, options);
+      let server: HTTPServer | HTTPSServer;
+
+      try {
+        server = createAppServer(app, options);
+      } catch (err) {
+        console.dir(err);
+
+        if(err.code === 'EADDRINUSE') {
+          console.warn(`port ${options.port} in use, ignoring`);
+          return;
+        }
+
+        throw err;
+      }
+
 
       yield spawn(function*() {
+        assert(!!server, 'no server');
         let error: Error = yield once(server, 'error');
+
         throw error;
       });
 

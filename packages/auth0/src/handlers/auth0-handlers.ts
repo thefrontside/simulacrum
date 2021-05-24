@@ -61,9 +61,14 @@ export const createAuth0Handlers = ({
       code_challenge_method,
       auth0Client,
       response_type,
-    } = req.query as Auth0QueryParams;
+      currentUser
+    } = req.query as Auth0QueryParams & {currentUser?: string};
 
     assert(!!req.session, "no session");
+
+    if(currentUser) {
+      req.session.username = currentUser;
+    }
 
     res.removeHeader("X-Frame-Options");
 
