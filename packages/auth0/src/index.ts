@@ -7,21 +7,15 @@ import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
 import { createSession } from './middleware/session';
 import { createUtilityRoutes } from './handlers/utility-handlers';
+import { OauthConfig } from './types';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
-
-// TODO: move this into config
-const scope = 'openid profile email offline_access';
-const port = 4400;
-const audience = "https://thefrontside.auth0.com/api/v1/";
-const tenant = "frontside";
-const clientId = 'IsuLUyWaFczCbAKQrIpVPmyBTFs4g5iq';
 
 const emptyResponse = function*(_: Request, res: Response<Record<never, never>>) {
   res.json({});
 };
 
-const createAuth0Service = (store: Store): Service => {
+const createAuth0Service = ({ scope, port, audience, tenant, clientId }: OauthConfig) => (store: Store): Service => {
   let url = `https://localhost:${port}`;
   let auth0Handlers = createAuth0Handlers({
     store,
@@ -32,7 +26,6 @@ const createAuth0Service = (store: Store): Service => {
     tenant,
     clientId
   });
-
 
   let openIdHandlers = createOpenIdHandlers({
     url,
@@ -65,11 +58,12 @@ const createAuth0Service = (store: Store): Service => {
           .post('/dbconnections/signup', emptyResponse.bind({}))
           .get('/utility/token', utilityHandlers['/utility/token'])
           .post('/utility/verify', utilityHandlers['/utility/verify'])
+
   } as const;
 };
 
-export const auth0: Simulator = (store) => ({
-  services: { auth0: createAuth0Service(store) },
+export const createAuth0Simulator = (oauthConfig: OauthConfig): Simulator => (store) => ({
+  services: { auth0: createAuth0Service(oauthConfig)(store) },
   scenarios: {
     /**
      * Here we just wrap the internal `person` scenario to augment
@@ -83,9 +77,8 @@ export const auth0: Simulator = (store) => ({
       let password = faker.internet.password();
       let augmented = { ...person, email, password };
 
-        store.slice('people').slice(person.id).set(augmented);
-        return augmented;
-      }
+      store.slice('people').slice(person.id).set(augmented);
+      return augmented;
     }
-  };
-};
+  }
+});

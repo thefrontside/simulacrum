@@ -1,14 +1,17 @@
 import { Store } from '@simulacrum/server';
 
-export interface Auth0Options {
+export interface OauthConfig {
   scope: string;
   port: number;
   audience: string;
   tenant: string;
   clientId: string;
+}
+
+export type Auth0Options = {
   store: Store;
   url: string;
-}
+} & OauthConfig;
 
 export type Auth0QueryParams = {
   state: string;
