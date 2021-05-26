@@ -59,11 +59,11 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
 
       yield spawn(map(slice.slice("scenarios"), slice => function*() {
         try {
-          let { name } = slice.get();
+          let { name, params } = slice.get();
           let fn = scenarios[name];
           assert(fn, `unknown scenario ${name}`);
 
-          let data = yield fn(store, faker);
+          let data = yield fn(store, faker, params);
           slice.update(state => ({
             ...state,
             status: 'running',

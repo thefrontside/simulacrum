@@ -31,5 +31,18 @@ describe('person simulator', () => {
         expect(person.data.name).toEqual("Paul Waters");
       });
     });
+
+    describe('given a person with a specified name', () => {
+      let person: Scenario<{ name: string}>;
+      beforeEach(function*() {
+        person = yield client.given(simulation, "person", {
+          name: "Bob Dobalina"
+        });
+      });
+
+      it('creates the person with that name', function*() {
+        expect(person.data.name).toEqual("Bob Dobalina");
+      });
+    });
   });
 });

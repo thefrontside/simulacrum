@@ -46,17 +46,18 @@ export const destroySimulation: Resolver<{ id: string; }, boolean> = {
 export interface GivenParameters {
   a: string;
   simulation: string;
+  params: Record<string, unknown>;
 }
 
 export const given: Resolver<GivenParameters, ScenarioState> = {
-  resolve({ simulation: simulationId, a: scenarioName }, context) {
+  resolve({ simulation: simulationId, a: scenarioName, params }, context) {
     let { scope, atom } = context;
     let simulation = atom.slice("simulations").slice(simulationId);
     assert(simulation.get() != null, `no simulation found with id: ${simulationId}`);
 
     let id = v4();
     let scenario = simulation.slice('scenarios').slice(id);
-    scenario.set({ id, status: 'new', name: scenarioName });
+    scenario.set({ id, status: 'new', name: scenarioName, params });
 
     return scope.spawn(scenario.filter(({ status }) => status !== 'new').expect());
   }

@@ -5,7 +5,7 @@ import { GraphQLError } from 'graphql';
 export interface Client {
   createSimulation(simulator: string, options?: Record<string, unknown>): Promise<Simulation>;
   destroySimulation(simulation: Simulation): Promise<boolean>;
-  given(simulation: Simulation, scenario: string): Promise<Scenario>;
+  given(simulation: Simulation, scenario: string, params?: Record<string, unknown>): Promise<Scenario>;
   state<T>(): AsyncIterable<T> & AsyncIterator<T>;
   dispose(): Promise<void>;
 }
@@ -109,13 +109,13 @@ mutation CreateSimulation($simulator: String, $options: JSON) {
         variables: { simulator, options }
       });
     },
-    given: (simulation: Simulation, scenario: string) => query<Scenario>("given", {
+    given: (simulation: Simulation, scenario: string, params: Record<string, unknown> = {}) => query<Scenario>("given", {
       query: `
-mutation Given($simulation: String!, $scenario: String) {
-  given(a: $scenario, simulation: $simulation)
+mutation Given($simulation: String!, $scenario: String, $params: JSON) {
+  given(a: $scenario, simulation: $simulation, params: $params)
 }
 `,
-      variables: { scenario, simulation: simulation.id }
+      variables: { scenario, simulation: simulation.id, params }
     }),
     destroySimulation: ({ id }: Simulation) => query<boolean>("destroySimulation", {
       query: `

@@ -34,8 +34,7 @@ export const types = [
           simulator: nonNull(stringArg()),
           options: arg({
             type: 'JSON',
-            description: "options to pass to the simulation",
-
+            description: "options to pass to the simulation"
           })
         },
         ...createSimulation
@@ -51,7 +50,12 @@ export const types = [
         type: 'JSON',
         args: {
           simulation: nonNull(stringArg()),
-          a: nonNull(stringArg())
+          a: nonNull(stringArg()),
+          params: arg({
+            type: 'JSON',
+            description: "parameters for this scenario",
+            default: {}
+          })
         },
         ...given
       });

@@ -8,9 +8,11 @@ export interface Behaviors {
   scenarios: Record<string, Scenario>;
 }
 
+export type Params = Record<string, unknown>;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Scenario<T = any> {
-  (store: Store, faker: Faker): Operation<T>;
+export interface Scenario<T = any, P extends Params = Params> {
+  (store: Store, faker: Faker, params: P): Operation<T>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,16 +75,19 @@ export type ScenarioState =
     id: string;
     name: string;
     status: 'new';
+    params: Params
   } |
   {
     id: string;
     name: string;
     status: 'running';
+    params: Params;
   } |
   {
     id: string;
     name: string;
     status: "failed";
+    params: Params;
     error: Error;
   }
 
