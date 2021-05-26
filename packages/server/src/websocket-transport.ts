@@ -1,4 +1,4 @@
-import { on, once, Resource, Task, throwOnErrorEvent } from 'effection';
+import { on, once, spawn, Resource, Task, throwOnErrorEvent } from 'effection';
 import { Server as HTTPServer } from 'http';
 import { subscribe, execute, parse } from 'graphql';
 import { makeServer, WebSocket } from 'graphql-ws';
@@ -39,18 +39,26 @@ export function createWebSocketTransport({ atom, newid }: OperationContext, serv
         subscribe,
       });
 
-      scope.spawn(on<WS>(new WS.Server({ server }), 'connection').forEach(socket => {
-        scope.spawn(function*(child) {
-          try {
-            let websocket = yield createWebSocket(socket);
-            let closed = transport.opened(websocket, child);
-            let close: CloseEvent = yield once(socket, 'close');
-            yield closed(close.code, close.reason);
-          } finally {
-            socket.close();
-          }
-        });
-      }));
+      yield spawn(function*() {
+        let sockets = new WS.Server({ server });
+        try {
+          yield on<WS>(sockets, 'connection').forEach(function* (socket) {
+            yield spawn(function*(child) {
+              try {
+                let websocket = yield createWebSocket(socket);
+                let closed = transport.opened(websocket, child);
+                let close: CloseEvent = yield once(socket, 'close');
+                yield closed(close.code, close.reason);
+              } finally {
+                socket.close();
+              }
+            }).within(scope);
+          });
+        } finally {
+          sockets.close();
+        }
+      });
+
     }
   };
 }
@@ -59,7 +67,7 @@ export function createWebSocket(ws: WS): Resource<WebSocket> {
   return {
     *init(scope: Task) {
 
-      scope.spawn(throwOnErrorEvent(ws));
+      yield spawn(throwOnErrorEvent(ws));
 
       return {
         protocol: ws.protocol,

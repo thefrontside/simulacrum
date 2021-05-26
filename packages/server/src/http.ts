@@ -1,4 +1,4 @@
-import { Operation, Task, once, Resource } from 'effection';
+import { Operation, Task, once, Resource, spawn } from 'effection';
 import { Request, Response, Application } from 'express';
 
 import type { Server as HTTPServer } from 'http';
@@ -20,12 +20,12 @@ export function createServer(app: Application, options: ServerOptions = {}): Res
 
       let server = app.listen(options.port);
 
-      scope.spawn(function*() {
+      yield spawn(function*() {
         let error: Error = yield once(server, 'error');
         throw error;
       });
 
-      scope.spawn(function*() {
+      yield spawn(function*() {
         try {
           yield;
         } finally {
