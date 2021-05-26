@@ -1,4 +1,4 @@
-import type { ServerOptions as SSLOptions } from 'https';
+import type { ServerOptions as SSLOptions, Server as HTTPSServer } from 'https';
 import type { AddressInfo } from 'net';
 import type { Service } from './interfaces';
 import { Operation, once, Resource, spawn } from 'effection';
@@ -68,7 +68,6 @@ export function createServer(app: Application, options: ServerOptions): Resource
 
 
       yield spawn(function*() {
-        assert(!!server, 'no server');
         let error: Error = yield once(server, 'error');
 
         throw error;
