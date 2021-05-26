@@ -8,7 +8,7 @@ import type { ServerOptions as SSLOptions } from 'https';
 import { createServer as createHttpsServer } from 'https';
 
 import fs from 'fs';
-import { ServiceDetails } from './interfaces';
+import { assert } from 'assert-ts';
 
 export interface Server {
   http: HTTPServer;

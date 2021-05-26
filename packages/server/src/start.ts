@@ -19,10 +19,10 @@ main(function* () {
       person,
       echo: () => ({
         services: {
-          echo: {
+          echo: () => ({
             protocol: 'http',
             app: createHttpApp().post('/', echo(1))
-          }
+          })
         },
         scenarios: {}
       }),
