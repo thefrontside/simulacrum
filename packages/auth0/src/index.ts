@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { Simulator, createHttpApp, Person, person as createPerson, Store } from "@simulacrum/server";
+import { Simulator, createHttpApp, Person, person as createPerson, Store, Service } from "@simulacrum/server";
 import { createAuth0Handlers } from './handlers/auth0-handlers';
 import { urlencoded, json } from 'express';
 import { createOpenIdHandlers } from './handlers/openid-handlers';
@@ -21,7 +21,7 @@ const emptyResponse = function*(_: Request, res: Response<Record<never, never>>)
   res.json({});
 };
 
-const createAuth0Service = (store: Store) => {
+const createAuth0Service = (store: Store): Service => {
   let url = `https://localhost:${port}`;
   let auth0Handlers = createAuth0Handlers({
     store,
@@ -69,8 +69,8 @@ const createAuth0Service = (store: Store) => {
   } as const;
 };
 
-export const auth0: Simulator = () => ({
-  services: { auth0: createAuth0Service },
+export const auth0: Simulator = (store) => ({
+  services: { auth0: createAuth0Service(store) },
   scenarios: {
     /**
      * Here we just wrap the internal `person` scenario to augment

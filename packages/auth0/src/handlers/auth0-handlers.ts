@@ -1,4 +1,4 @@
-import { HttpHandler, Store } from '@simulacrum/server';
+import { HttpHandler } from '@simulacrum/server';
 import { assert } from 'assert-ts';
 import { decode, encode } from "base64-url";
 import { expiresAt } from '../auth/date';
