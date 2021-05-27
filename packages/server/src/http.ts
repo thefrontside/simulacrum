@@ -1,11 +1,11 @@
+
 import { Operation, once, Resource, spawn } from 'effection';
-import { Request, Response, Application, NextFunction } from 'express';
-import type { Server as HTTPServer } from 'http';
-import type { AddressInfo } from 'net';
-export type { AddressInfo } from 'net';
-import { paths } from './config/paths';
 import type { ServerOptions as SSLOptions } from 'https';
-import { createServer as createHttpsServer, Server as HTTPSServer } from 'https';
+import { Request, Response, Application, NextFunction } from 'express';
+import { Server as HTTPServer, createServer as createHttpServer } from 'http';
+import { createServer as createHttpsServer } from 'https';
+import type { AddressInfo } from 'net';
+import { paths } from './config/paths';
 
 import fs from 'fs';
 import { ServiceOptions } from './interfaces';
@@ -24,7 +24,6 @@ export interface ServerOptions {
 const ssl: SSLOptions = {
   key: fs.readFileSync(
     paths.ssl.keyFile
-
   ),
   cert: fs.readFileSync(paths.ssl.pemFile),
 } as const;
@@ -32,11 +31,9 @@ const ssl: SSLOptions = {
 const createAppServer = (app: Application, options: ServerOptions) => {
   switch(options.protocol) {
     case 'http':
-      return app.listen(options.port);
+      return createHttpServer(app);
     case 'https':
-      let httpsServer = createHttpsServer(ssl, app);
-
-      return httpsServer.listen(options.port);
+      return createHttpsServer(ssl, app);
   }
 };
 
@@ -44,28 +41,21 @@ export function createServer(app: Application, options: ServerOptions): Resource
   return {
     *init() {
 
-      let server: HTTPServer | HTTPSServer;
+      let server = createAppServer(app, options);
 
-      try {
-        server = createAppServer(app, options);
-      } catch (err) {
-        console.dir(err);
+      yield spawn(function*() {
+        assert(!!server, 'no server');
+        let error: Error & { code?: string } = yield once(server, 'error');
 
-        if(err.code === 'EADDRINUSE') {
+        if(error.code === 'EADDRINUSE') {
           console.warn(`port ${options.port} in use, ignoring`);
           return;
         }
 
-        throw err;
-      }
-
-
-      yield spawn(function*() {
-        assert(!!server, 'no server');
-        let error: Error = yield once(server, 'error');
-
         throw error;
       });
+
+      server.listen(options.port);
 
       yield spawn(function*() {
         try {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import path from "path";
 import fs from "fs";
@@ -49,7 +50,6 @@ export const createRulesRunner = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let callback = (_a: any, user:any) => {
-    console.log(user);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
