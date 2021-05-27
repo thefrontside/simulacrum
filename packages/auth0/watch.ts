@@ -3,7 +3,7 @@ import { main, exec, daemon, StdIO } from '@effection/node';
 import { watch } from 'chokidar';
 
 main(function* (scope: Task) {
-  let watcher = watch('./src/**/*.ts', { ignoreInitial: true, ignored: 'dist' });
+  let watcher = watch(['../server/src/**/*.ts', './src/**/*.ts'], { ignoreInitial: true, ignored: 'dist' });
   try {
     let process: Task = scope.spawn(buildAndRun);
 

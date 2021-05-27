@@ -23,6 +23,17 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
   resolve({ simulator, options = {} }, ctx) {
     let { atom, scope, newid } = ctx;
 
+    let simulations = atom.slice('simulations');
+
+    let existing = Object.values(simulations.get())
+                         .find(simulation => simulation.simulator === 'auth0' && simulation.status === 'running');
+
+    if (existing) {
+      let existingId = existing.id;
+      assert(!!existingId, 'simimulation');
+      return scope.spawn(simulations.slice(existing.id).filter(({ id }) => id === existingId).expect());
+    }
+
     let id = newid();
     let simulation = atom.slice("simulations").slice(id);
     simulation.set({ id, status: 'new', simulator, options, scenarios: {}, store: {} });

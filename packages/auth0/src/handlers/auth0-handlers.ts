@@ -1,4 +1,4 @@
-import { HttpHandler, Person, Store } from '@simulacrum/server';
+import { HttpHandler, Store } from '@simulacrum/server';
 import { assert } from 'assert-ts';
 import { decode, encode } from "base64-url";
 import { expiresAt } from '../auth/date';
@@ -67,7 +67,6 @@ export const createAuth0Handlers = ({
     assert(!!req.session, "no session");
 
     if(currentUser) {
-      console.log({ response_mode });
       req.session.username = currentUser;
     }
 
@@ -177,7 +176,7 @@ export const createAuth0Handlers = ({
     let entry = Object.entries(store.slice('people').get()).find(([, person]) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return (person as any).email.toLowerCase() === username.toLowerCase();
-    }) as unknown as [string, {id: string}] ;
+    });
 
 
     if(!entry) {
