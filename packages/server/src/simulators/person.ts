@@ -12,6 +12,7 @@ export default function(): Behaviors {
 }
 
 export interface Person {
+  id: string
   name: string;
 }
 

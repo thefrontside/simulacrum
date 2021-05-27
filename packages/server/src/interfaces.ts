@@ -6,6 +6,7 @@ import type { Faker } from './faker';
 export interface Behaviors {
   services: Record<string, Service>;
   scenarios: Record<string, Scenario>;
+  effects?: () => Operation<void>;
 }
 
 export type Params = Record<string, unknown>;
@@ -32,7 +33,8 @@ export interface Service {
   app: HttpApp
 }
 
-export type StoreState = Record<string, Record<string, Record<string, unknown>>>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type StoreState = Record<string, Record<string, Record<string, any>>>;
 export type Store = Slice<StoreState>;
 
 export interface ServerState {
