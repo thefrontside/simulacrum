@@ -9,7 +9,6 @@ import { createFaker } from './faker';
 export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {
     try {
-      let store = slice.slice("store");
       let simulatorName = slice.get().simulator;
       let simulator = simulators[simulatorName];
       assert(simulator, `unknown simulator ${simulatorName}`);
@@ -20,15 +19,14 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
 
       let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();
-        let serviceOptions = service(store);
 
-        for(let middleware of serviceOptions.app.middleware) {
+        for(let middleware of service.app.middleware) {
           app.use(middleware);
         }
 
         app.use(raw({ type: "*/*" }));
 
-        for (let handler of serviceOptions.app.handlers) {
+        for (let handler of service.app.handlers) {
           app[handler.method](handler.path, (request, response) => {
             scope.spawn(function*() {
               try {
@@ -45,7 +43,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
           });
         }
 
-        let { port, protocol } = serviceOptions;
+        let { port, protocol } = service;
 
         return {
           name,

@@ -1,15 +1,16 @@
 
 import { Operation, once, Resource, spawn } from 'effection';
 import type { ServerOptions as SSLOptions } from 'https';
-import { Request, Response, Application, NextFunction } from 'express';
+import { Request, Response, Application } from 'express';
 import { Server as HTTPServer, createServer as createHttpServer } from 'http';
 import { createServer as createHttpsServer } from 'https';
 import type { AddressInfo } from 'net';
 import { paths } from './config/paths';
 
 import fs from 'fs';
-import { ServiceOptions } from './interfaces';
 import { assert } from 'assert-ts';
+import { NextFunction } from 'express';
+import { Service } from './interfaces';
 
 export interface Server {
   http: HTTPServer;
@@ -17,8 +18,8 @@ export interface Server {
 }
 
 export interface ServerOptions {
-  port?: number
-  protocol: ServiceOptions['protocol']
+  port?: number;
+  protocol: Service['protocol'];
 }
 
 const ssl: SSLOptions = {
@@ -78,7 +79,7 @@ export function createServer(app: Application, options: ServerOptions): Resource
 }
 
 export interface HttpHandler {
-  (request: Request, response: Response, next?: NextFunction): Operation<void>;
+  (request: Request, response: Response): Operation<void>;
 }
 
 export type RouteHandler = {
