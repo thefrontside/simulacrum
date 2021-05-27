@@ -15,7 +15,7 @@ export interface Scenario<T = any> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Simulator<Options = any> {
-  (options: Options): Behaviors;
+  (store: Store, options: Options): Behaviors;
 }
 
 export interface ServerOptions {
