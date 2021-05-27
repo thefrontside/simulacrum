@@ -10,7 +10,6 @@ import { Server, createServer } from './http';
 import { OperationContext } from './schema/context';
 
 export { Server, createServer } from './http';
-export type { AddressInfo } from './http';
 
 import { createEffects } from './effects';
 import { stableIds } from './faker';

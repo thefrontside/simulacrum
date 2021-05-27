@@ -2,7 +2,7 @@ import assert from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
 import { SimulationState, Simulator } from './interfaces';
-import { AddressInfo, createServer, Server } from './http';
+import { createServer, Server } from './http';
 import { createFaker } from './faker';
 
 export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
@@ -45,7 +45,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       let services: {name: string; url: string; }[] = [];
       for (let { name, protocol, create } of servers) {
         let server: Server = yield create;
-        let address: AddressInfo = server.address;
+        let address = server.address;
         services.push({ name, url: `${protocol}://localhost:${address.port}` });
       }
 
