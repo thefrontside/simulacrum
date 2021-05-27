@@ -10,20 +10,18 @@ import { createUtilityRoutes } from './handlers/utility-handlers';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-export interface Auth0Options {
-  scope: string;
-  port: number;
-  audience: string;
-  tenant: string;
-  clientId: string
-}
+// TODO: move this into config
+const scope = 'openid profile email offline_access';
+const port = 4400;
+const audience = "https://thefrontside.auth0.com/api/v1/";
+const tenant = "frontside";
+const clientId = 'IsuLUyWaFczCbAKQrIpVPmyBTFs4g5iq';
 
 const emptyResponse = function*(_: Request, res: Response<Record<never, never>>) {
   res.json({});
 };
 
-
-const createAuth0Service = ({ scope, port, audience, tenant, clientId }: Auth0Options) => (store: Store) => {
+const createAuth0Service = (store: Store) => {
   let url = `https://localhost:${port}`;
   let auth0Handlers = createAuth0Handlers({
     store,
@@ -34,6 +32,7 @@ const createAuth0Service = ({ scope, port, audience, tenant, clientId }: Auth0Op
     tenant,
     clientId
   });
+
 
   let openIdHandlers = createOpenIdHandlers({
     url,
@@ -70,8 +69,8 @@ const createAuth0Service = ({ scope, port, audience, tenant, clientId }: Auth0Op
   } as const;
 };
 
-export const createAuth0Simulator = (options: Auth0Options): Simulator => () => ({
-  services: { auth0: createAuth0Service(options) },
+export const auth0: Simulator = () => ({
+  services: { auth0: createAuth0Service },
   scenarios: {
     /**
      * Here we just wrap the internal `person` scenario to augment
