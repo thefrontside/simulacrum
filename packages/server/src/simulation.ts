@@ -1,3 +1,4 @@
+import { spawn } from 'effection';
 import assert from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
@@ -56,7 +57,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       // just hard-code it for now.
       let faker = createFaker(2);
 
-      scope.spawn(map(slice.slice("scenarios"), slice => function*() {
+      yield spawn(map(slice.slice("scenarios"), slice => function*() {
         try {
           let { name } = slice.get();
           let fn = scenarios[name];

@@ -8,10 +8,10 @@ import { createTestServer } from './helpers';
 describe('person simulator', () => {
   let client: Client;
 
-  beforeEach(function * (world) {
-    client = yield world.spawn(createTestServer({
+  beforeEach(function* () {
+    client = yield createTestServer({
       simulators: { person }
-    }));
+    });
   });
 
   describe('createSimulation()', () => {

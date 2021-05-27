@@ -11,12 +11,12 @@ describe('webocket transport', () => {
   let subscription: AsyncIterator<ServerState>;
   let first: IteratorResult<ServerState>;
 
-  beforeEach(function*(world) {
-    client = yield world.spawn(createTestServer({
+  beforeEach(function*() {
+    client = yield createTestServer({
       simulators: {
         empty: () => ({ services: {}, scenarios: {} })
       }
-    }));
+    });
 
     subscription = client.state<ServerState>();
 
