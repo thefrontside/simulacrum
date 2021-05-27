@@ -1,5 +1,6 @@
 import { describe, it, beforeEach, captureError } from '@effection/mocha';
 import { Client, Simulation } from '@simulacrum/client';
+import { assert } from 'assert-ts';
 import fetch from 'cross-fetch';
 import expect from 'expect';
 
@@ -18,19 +19,24 @@ describe('@simulacrum/server', () => {
   beforeEach(function* () {
     client = yield createTestServer({
       simulators: {
-        echo: (({ times = 1 }) => ({
-          services: {
-            echo: {
-              protocol: 'http',
-              app: app(times)
+        echo: ((store, { times }) => {
+          assert(typeof store !== 'undefined', 'store not getting passed to simulator');
+
+          return {
+            services: {
+              echo: {
+                protocol: 'http',
+                app: app(times)
+              },
+              ["echo.too"]: {
+                protocol: 'http',
+                app:  app(times)
+              },
+
             },
-            ["echo.too"]: {
-              protocol: 'http',
-              app:  app(times)
-            }
-          },
-          scenarios: {}
-        }))
+            scenarios: {}
+          };
+        }),
       }
     });
   });

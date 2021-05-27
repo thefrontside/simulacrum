@@ -12,9 +12,10 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       let simulatorName = slice.get().simulator;
       let simulator = simulators[simulatorName];
       assert(simulator, `unknown simulator ${simulatorName}`);
+      let store = slice.slice("store");
       let options = slice.get().options;
 
-      let behaviors = simulator(options);
+      let behaviors = simulator(store, options);
 
       let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();
@@ -50,7 +51,6 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         services.push({ name, url: `${protocol}://localhost:${address.port}` });
       }
 
-      let store = slice.slice("store");
       let { scenarios } = behaviors;
 
       // we can support passing a seed to a scenario later, but let's
