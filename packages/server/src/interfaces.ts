@@ -27,10 +27,9 @@ export interface ServerOptions {
   port?: number;
   seed?: number;
 }
-
-export interface ServiceOptions {
-  readonly protocol: 'http' | 'https'
-  readonly app: HttpApp
+export interface Service {
+  protocol: 'http' | 'https';
+  app: HttpApp;
   port?: number;
 }
 

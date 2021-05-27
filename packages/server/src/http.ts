@@ -9,6 +9,8 @@ import { createServer as createHttpsServer } from 'https';
 
 import fs from 'fs';
 import { assert } from 'assert-ts';
+import { NextFunction } from 'express';
+import { Service } from './interfaces';
 
 export interface Server {
   http: HTTPServer;
@@ -77,7 +79,7 @@ export function createServer(app: Application, options: ServerOptions): Resource
 }
 
 export interface HttpHandler {
-  (request: Request, response: Response, next?: NextFunction): Operation<void>;
+  (request: Request, response: Response): Operation<void>;
 }
 
 export type RouteHandler = {
