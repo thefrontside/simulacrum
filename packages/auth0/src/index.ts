@@ -10,18 +10,20 @@ import { createUtilityRoutes } from './handlers/utility-handlers';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-// TODO: move this into config
-const scope = 'openid profile email offline_access';
-const port = 4400;
-const audience = "https://thefrontside.auth0.com/api/v1/";
-const tenant = "frontside";
-const clientId = 'IsuLUyWaFczCbAKQrIpVPmyBTFs4g5iq';
+export interface Auth0Options {
+  scope: string;
+  port: number;
+  audience: string;
+  tenant: string;
+  clientId: string
+}
 
 const emptyResponse = function*(_: Request, res: Response<Record<never, never>>) {
   res.json({});
 };
 
-const createAuth0Service = (store: Store) => {
+
+const createAuth0Service = ({ scope, port, audience, tenant, clientId }: Auth0Options) => (store: Store) => {
   let url = `https://localhost:${port}`;
   let auth0Handlers = createAuth0Handlers({
     store,
@@ -32,7 +34,6 @@ const createAuth0Service = (store: Store) => {
     tenant,
     clientId
   });
-
 
   let openIdHandlers = createOpenIdHandlers({
     url,
@@ -69,8 +70,8 @@ const createAuth0Service = (store: Store) => {
   } as const;
 };
 
-export const auth0: Simulator = () => ({
-  services: { auth0: createAuth0Service },
+export const createAuth0Simulator = (options: Auth0Options): Simulator => () => ({
+  services: { auth0: createAuth0Service(options) },
   scenarios: {
     /**
      * Here we just wrap the internal `person` scenario to augment

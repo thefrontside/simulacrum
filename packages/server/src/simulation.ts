@@ -66,6 +66,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       });
 
       let services: {name: string; url: string; }[] = [];
+
       for (let { name, protocol, create } of servers) {
         let server: Server = yield create;
         let address = server.address;

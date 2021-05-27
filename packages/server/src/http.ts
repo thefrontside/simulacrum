@@ -1,4 +1,4 @@
-import type { ServerOptions as SSLOptions, Server as HTTPSServer } from 'https';
+import type { ServerOptions as SSLOptions } from 'https';
 import type { AddressInfo } from 'net';
 import type { Service } from './interfaces';
 import { Operation, once, Resource, spawn } from 'effection';
@@ -6,6 +6,7 @@ import { Request, Response, Application, RequestHandler } from 'express';
 import { createServer as createHttpsServer } from 'https';
 import { Server as HTTPServer, createServer as createHttpServer } from 'http';
 import { paths } from './config/paths';
+
 import fs from 'fs';
 import { mkcertText, NoSSLError } from './errors/ssl/ssl-error';
 
@@ -51,24 +52,10 @@ export function createServer(app: Application, options: ServerOptions): Resource
   return {
     *init() {
 
-      let server: HTTPServer | HTTPSServer;
-
-      try {
-        server = createAppServer(app, options);
-      } catch (err) {
-        console.dir(err);
-
-        if(err.code === 'EADDRINUSE') {
-          console.warn(`port ${options.port} in use, ignoring`);
-          return;
-        }
-
-        throw err;
-      }
-
+      let server = createAppServer(app, options);
 
       yield spawn(function*() {
-        let error: Error = yield once(server, 'error');
+        let error: Error & { code?: string } = yield once(server, 'error');
 
         throw error;
       });
