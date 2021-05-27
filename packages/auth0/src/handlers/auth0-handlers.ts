@@ -7,7 +7,7 @@ import { loginView } from '../views/login';
 import { userNamePasswordForm } from '../views/username-password';
 import querystring from "querystring";
 import { webMessage } from '../views/web-message';
-import { Auth0QueryParams } from '../types';
+import { Auth0Options, Auth0QueryParams } from '../types';
 import { createRulesRunner } from '../rules/run-rules';
 
 export type Routes =
@@ -19,16 +19,6 @@ export type Routes =
   | '/login/callback'
   | '/oauth/token'
   | '/v2/logout';
-
-interface Auth0HandlerOptions {
-  store: Store;
-  url: string;
-  scope: string;
-  port: number
-  audience: string;
-  clientId: string;
-  tenant: string;
-}
 
 export type SessionState = {
   nonce: string;
@@ -44,7 +34,7 @@ export const createAuth0Handlers = ({
   port,
   audience,
   clientId
-}: Auth0HandlerOptions): Record<Routes, HttpHandler> => ({
+}: Auth0Options): Record<Routes, HttpHandler> => ({
   ['/heartbeat']: function *(_, res) {
     res.status(200).json({ ok: true });
   },

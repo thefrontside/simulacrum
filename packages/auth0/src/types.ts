@@ -1,3 +1,15 @@
+import { Store } from '@simulacrum/server';
+
+export interface Auth0Options {
+  scope: string;
+  port: number;
+  audience: string;
+  tenant: string;
+  clientId: string;
+  store: Store;
+  url: string;
+}
+
 export type Auth0QueryParams = {
   state: string;
   code: string;
