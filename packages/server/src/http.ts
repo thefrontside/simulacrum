@@ -3,7 +3,6 @@ import { Request, Response, Application } from 'express';
 
 import type { Server as HTTPServer } from 'http';
 import type { AddressInfo } from 'net';
-export type { AddressInfo } from 'net';
 
 export interface Server {
   http: HTTPServer;
@@ -39,7 +38,7 @@ export function createServer(app: Application, options: ServerOptions = {}): Res
 
       return {
         http: server,
-        address: server.address() as unknown as AddressInfo
+        address: server.address() as AddressInfo
       };
     }
   };
