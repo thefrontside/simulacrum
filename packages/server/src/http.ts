@@ -9,7 +9,6 @@ import { createServer as createHttpsServer } from 'https';
 
 import fs from 'fs';
 import { assert } from 'assert-ts';
-import { NextFunction } from 'express';
 import { Service } from './interfaces';
 
 export interface Server {

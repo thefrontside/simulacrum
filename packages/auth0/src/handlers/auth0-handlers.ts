@@ -5,7 +5,7 @@ import { expiresAt } from '../auth/date';
 import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
 import { loginView } from '../views/login';
 import { userNamePasswordForm } from '../views/username-password';
-import querystring from "querystring";
+import { stringify } from "querystring";
 import { webMessage } from '../views/web-message';
 import { Auth0Options, Auth0QueryParams } from '../types';
 import { createRulesRunner } from '../rules/run-rules';
@@ -81,7 +81,7 @@ export const createAuth0Handlers = ({
     }
 
     res.status(302).redirect(
-      `/login?${querystring.stringify({
+      `/login?${stringify({
         state,
         redirect_uri,
         client: client_id,
@@ -142,7 +142,7 @@ export const createAuth0Handlers = ({
 
     let encodedNonce = encode(`${nonce}:${username}`);
 
-    let qs = querystring.stringify({ code: encodedNonce, state, nonce });
+    let qs = stringify({ code: encodedNonce, state, nonce });
 
     let routerUrl = `${redirect_uri}?${qs}`;
 
