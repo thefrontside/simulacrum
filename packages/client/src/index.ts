@@ -1,5 +1,6 @@
 import { Deferred, Task, createChannel, run, sleep, Subscription } from 'effection';
 import { createClient as createWSClient, SubscribePayload } from 'graphql-ws';
+import webSocketImpl from 'isomorphic-ws';
 import { GraphQLError } from 'graphql';
 
 export interface Client {
@@ -41,7 +42,7 @@ interface Result<T> {
   errors?: GraphQLError[];
 }
 
-export function createClient(serverURL: string, webSocketImpl?: WebSocketImpl): Client {
+export function createClient(serverURL: string): Client {
   let wsurl = new URL(serverURL);
   wsurl.protocol = 'ws';
   let url = wsurl.toString();
