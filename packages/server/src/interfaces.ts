@@ -27,6 +27,7 @@ export interface ServerOptions {
   port?: number;
   seed?: number;
 }
+
 export interface Service {
   protocol: 'http' | 'https';
   app: HttpApp;
