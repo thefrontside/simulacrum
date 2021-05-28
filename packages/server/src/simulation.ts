@@ -15,7 +15,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       let store = slice.slice("store");
       let options = slice.get().options;
 
-      let behaviors = simulator(store, options);
+      let behaviors = simulator(slice, options);
 
       let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();

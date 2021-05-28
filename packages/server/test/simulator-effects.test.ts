@@ -16,13 +16,13 @@ describe('simulator effects', () => {
   beforeEach(function* () {
     people = {};
 
-    let test: Simulator = (store) => ({
+    let test: Simulator = (slice) => ({
       services: {},
       scenarios: {
         person: createPerson
       },
       * effects() {
-        yield map(store.slice('people'), function* (slice) {
+        yield map(slice.slice('store', 'people'), function* (slice) {
           let newPerson = slice.get();
 
           people[newPerson.id] = newPerson;
