@@ -84,8 +84,9 @@ export const auth0: Simulator = (store) => ({
       let password = faker.internet.password();
       let augmented = { ...person, email, password };
 
-      store.slice('people').slice(person.id).set(augmented);
-      return augmented;
+        store.slice('people').slice(person.id).set(augmented);
+        return augmented;
+      }
     }
-  }
-});
+  };
+};
