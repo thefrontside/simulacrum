@@ -1,5 +1,5 @@
 import { Slice } from "@effection/atom";
-import { Resource, Task, spawn } from "effection";
+import { Resource, spawn } from "effection";
 import { ServerState, Simulator } from "./interfaces";
 import { map } from './effect';
 import { simulation } from './simulation';

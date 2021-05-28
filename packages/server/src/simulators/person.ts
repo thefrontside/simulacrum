@@ -2,7 +2,7 @@ import { Slice } from '@effection/atom';
 import { Operation } from 'effection';
 import { v4 } from 'uuid';
 import { Faker } from '../faker';
-import { Behaviors, Store } from "../interfaces";
+import { Behaviors, Params, Store } from "../interfaces";
 
 export default function(): Behaviors {
   return {
@@ -12,16 +12,21 @@ export default function(): Behaviors {
 }
 
 export interface Person {
+  id: string
   name: string;
 }
 
-export function person(store: Store, faker: Faker): Operation<Person> {
+export interface PersonParams extends Params {
+  name?: string;
+}
+
+export function person(store: Store, faker: Faker, params: PersonParams): Operation<Person> {
   return function*() {
     let id = v4();
     let slice = records(store).slice(id);
 
     // this is the lamest data generation ever :)
-    let attrs = { id, name: faker.name.findName() };
+    let attrs = { id, name: params.name || faker.name.findName() };
 
     slice.set(attrs);
     return attrs;

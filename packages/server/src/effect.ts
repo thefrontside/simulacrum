@@ -6,8 +6,8 @@ export interface Effect<A> {
 }
 
 export function map<A>(slice: Slice<Record<string, A>>, effect: Effect<A>): Operation<void> {
-  return function*(scope) {
-    let effects = new Map<string,Task>();
+  return function* (scope) {
+    let effects = new Map<string, Task>();
 
     function synchronize(record: Record<string, A>) {
       let keep = new Set<string>();

@@ -1,4 +1,4 @@
-import { Operation, Task, once, Resource, spawn } from 'effection';
+import { Operation, once, Resource, spawn } from 'effection';
 import { Request, Response, Application } from 'express';
 
 import type { Server as HTTPServer } from 'http';
@@ -15,7 +15,7 @@ export interface ServerOptions {
 
 export function createServer(app: Application, options: ServerOptions = {}): Resource<Server> {
   return {
-    *init(scope: Task) {
+    *init() {
 
       let server = app.listen(options.port);
 

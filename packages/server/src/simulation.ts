@@ -15,7 +15,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       let store = slice.slice("store");
       let options = slice.get().options;
 
-      let behaviors = simulator(store, options);
+      let behaviors = simulator(slice, options);
 
       let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();
@@ -51,7 +51,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         services.push({ name, url: `${protocol}://localhost:${address.port}` });
       }
 
-      let { scenarios } = behaviors;
+      let { scenarios, effects } = behaviors;
 
       // we can support passing a seed to a scenario later, but let's
       // just hard-code it for now.
@@ -59,11 +59,11 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
 
       yield spawn(map(slice.slice("scenarios"), slice => function*() {
         try {
-          let { name } = slice.get();
+          let { name, params } = slice.get();
           let fn = scenarios[name];
           assert(fn, `unknown scenario ${name}`);
 
-          let data = yield fn(store, faker);
+          let data = yield fn(store, faker, params);
           slice.update(state => ({
             ...state,
             status: 'running',
@@ -77,6 +77,10 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
           }));
         }
       }));
+
+      if(typeof effects !== 'undefined') {
+        yield spawn(effects());
+      }
 
       slice.update(state => ({
         ...state,

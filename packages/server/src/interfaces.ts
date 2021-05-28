@@ -6,16 +6,19 @@ import type { Faker } from './faker';
 export interface Behaviors {
   services: Record<string, Service>;
   scenarios: Record<string, Scenario>;
+  effects?: () => Operation<void>;
 }
 
+export type Params = Record<string, unknown>;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Scenario<T = any> {
-  (store: Store, faker: Faker): Operation<T>;
+export interface Scenario<T = any, P extends Params = Params> {
+  (store: Store, faker: Faker, params: P): Operation<T>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface Simulator<Options = any> {
-  (store: Store, options: Options): Behaviors;
+  (state: Slice<SimulationState>, options: Options): Behaviors;
 }
 
 export interface ServerOptions {
@@ -30,7 +33,8 @@ export interface Service {
   app: HttpApp
 }
 
-export type StoreState = Record<string, Record<string, Record<string, unknown>>>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type StoreState = Record<string, Record<string, Record<string, any>>>;
 export type Store = Slice<StoreState>;
 
 export interface ServerState {
@@ -73,16 +77,19 @@ export type ScenarioState =
     id: string;
     name: string;
     status: 'new';
+    params: Params
   } |
   {
     id: string;
     name: string;
     status: 'running';
+    params: Params;
   } |
   {
     id: string;
     name: string;
     status: "failed";
+    params: Params;
     error: Error;
   }
 
