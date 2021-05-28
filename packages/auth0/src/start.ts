@@ -5,6 +5,15 @@ import { config } from './config';
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : undefined;
 
+// TODO: should come from outside
+const config: OauthConfig = {
+  scope: 'openid profile email offline_access',
+  port: 4400,
+  audience: "https://thefrontside.auth0.com/api/v1/",
+  tenant: "frontside",
+  clientId: 'IsuLUyWaFczCbAKQrIpVPmyBTFs4g5iq',
+};
+
 main(function*() {
   let server: Server = yield createSimulationServer({
     seed: 1,

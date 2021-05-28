@@ -1,7 +1,7 @@
 {
-  "name": "@simulacrum/auth0",
+  "name": "@simulacrum/rest",
   "version": "0.0.0",
-  "description": "Simulate Auth0",
+  "description": "test rest simulator",
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
@@ -10,7 +10,7 @@
     "build": "npm run prepack",
     "lint": "eslint src test",
     "start": "node dist/start.js",
-    "watch": "PORT=4000 ts-node -P ./tsconfig.watch.json ./watch.ts"
+    "watch": "PORT=5000 ts-node -P ./tsconfig.watch.json ./watch.ts"
   },
   "repository": {
     "type": "git",
@@ -32,12 +32,10 @@
     "@effection/node": "2.0.0-preview.14",
     "@simulacrum/server": "0.2.0",
     "assert-ts": "^0.3.2",
-    "base64-url": "^2.3.3",
-    "cookie-session": "^1.4.0",
     "effection": "2.0.0-preview.14",
-    "jsesc": "^3.0.2",
-    "jsonwebtoken": "^8.5.1",
-    "html-entities": "^2.3.2"
+    "express-jwt": "^6.0.0",
+    "helmet": "^4.6.0",
+    "jwks-rsa": "^2.0.3"
   },
   "devDependencies": {
     "@effection/mocha": "2.0.0-preview.11",
@@ -45,13 +43,10 @@
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
     "@simulacrum/client": "0.3.0",
-    "@types/base64-url": "^2.2.0",
     "@types/faker": "^5.1.7",
     "@types/jsesc": "^2.5.1",
-    "@types/jsonwebtoken": "^8.5.1",
     "@types/mocha": "^8.2.1",
     "@types/ws": "^7.4.4",
-    "@types/cookie-session": "^2.0.42",
     "expect": "^26.6.2",
     "mocha": "^8.0.0",
     "rimraf": "^3.0.2",
