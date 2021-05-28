@@ -14,7 +14,7 @@
     "watch": "parcel watch app/index.html --target browser",
     "build": "npm run prepack",
     "lint": "eslint app index.js",
-    "clean": "rm -rf dist"
+    "clean": "rimraf dist"
   },
   "repository": {
     "type": "git",
@@ -37,6 +37,7 @@
     "parcel": "next",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
+    "rimraf": "^3.0.2",
     "typescript": "^4.2.3"
   },
   "volta": {
