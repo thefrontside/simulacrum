@@ -6,9 +6,6 @@ import helmet from "helmet";
 import jwt from "express-jwt";
 import { OauthConfig } from 'src/types';
 
-interface RestOptions {
-  port: number
-}
 
 const checkJwt = (authConfig: OauthConfig) => jwt({
   secret: jwksRsa.expressJwtSecret({
@@ -23,10 +20,10 @@ const checkJwt = (authConfig: OauthConfig) => jwt({
   algorithms: ["RS256"],
 });
 
-export const restService = (authConfig: OauthConfig) => ({ port }: RestOptions): Service => {
+const restService = (authConfig: OauthConfig) => (): Service => {
   return {
     protocol: 'http',
-    port,
+    port: authConfig.port,
     app: createHttpApp()
           .use(morgan("dev"))
           .use(helmet())
@@ -39,7 +36,7 @@ export const restService = (authConfig: OauthConfig) => ({ port }: RestOptions):
   };
 };
 
-export const restSimulator = (authConfig: OauthConfig): Simulator<RestOptions> => (store, options: RestOptions) => ({
-  services: { rest: restService(authConfig)(options) },
-  scenarios: {}
+export const createRestSimulator = (authConfig: OauthConfig): Simulator => () => ({
+    services: { rest: restService(authConfig)() },
+    scenarios: {}
 });

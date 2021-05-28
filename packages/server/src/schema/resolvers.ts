@@ -26,7 +26,7 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
     let simulations = atom.slice('simulations');
 
     let existing = Object.values(simulations.get())
-                         .find(simulation => simulation.simulator === 'auth0' && simulation.status === 'running');
+                         .find(simulation => simulation.simulator === simulator && simulation.status === 'running');
 
     if (existing) {
       let existingId = existing.id;
