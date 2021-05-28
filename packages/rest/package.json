@@ -36,7 +36,8 @@
     "effection": "2.0.0-preview.14",
     "express-jwt": "^6.0.0",
     "helmet": "^4.6.0",
-    "jwks-rsa": "^2.0.3"
+    "jwks-rsa": "^2.0.3",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "@effection/mocha": "2.0.0-preview.11",
