@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{
-    "path": "../server/tsconfig.dist.json"
-  }],
+  "references": [
+    {"path": "../server/tsconfig.dist.json"},
+    {"path": "../auth0/tsconfig.dist.json"}
+  ],
   "compilerOptions": {
     "baseUrl": ".",
     "noEmit": true
