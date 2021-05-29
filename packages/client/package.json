@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "effection": "2.0.0-preview.14",
-    "graphql-ws": "^4.2.3"
+    "graphql-ws": "^4.2.3",
+    "isomorphic-ws": "^4.0.1"
   },
   "devDependencies": {
     "@frontside/eslint-config": "^2.0.0",
