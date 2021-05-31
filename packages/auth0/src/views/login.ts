@@ -40,10 +40,10 @@ export const loginView = ({
                 </div>
                 <div>
                   <label for="password" class="sr-only">Password</label>
-                  <input id="password" name="password" type="password" autocomplete="current-password" required="" class="${loginFailed ? 'border-red-500' : ''} appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password">
+                  <input id="password" name="password" type="password" autocomplete="current-password" required="" class="my-4 ${loginFailed ? 'border-red-500' : ''} appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password">
                 </div>
               </div>
-              ${loginFailed ? '<div class="bg-red-500 text-white p-3">Wrong email or password</div>' : ''}
+              <div class="error bg-red-500 text-white p-3 ${loginFailed ? '' : 'hidden'}">Wrong email or password</div>
  
               <div>
                 <button id="submit" type="button" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -73,19 +73,23 @@ export const loginView = ({
             submit.addEventListener('click', function(e) {
               let nonce = new URLSearchParams(window.location.search).get('nonce');
               
-              var username = document.querySelector('#username').value;
-              var password = document.querySelector('#password').value;
+              var username = document.querySelector('#username');
+              var password = document.querySelector('#password');
               
               webAuth.login(
                 {
-                  username,
-                  password,
+                  username: username.value,
+                  password: password.value,
                   realm: 'Username-Password-Authentication',
                   scope: '${scope}',
                   nonce: nonce
                 },
                 function(err, authResult) {
-                  console.log(arguments)
+                  if (err) {
+
+                    [username, password].forEach(e => e.classList.add('border-red-500'));
+                    document.querySelector('.error').classList.remove('hidden');
+                  }
                 }
               );
             });

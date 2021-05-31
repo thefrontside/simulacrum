@@ -14,27 +14,25 @@ export default function(): Behaviors {
 export interface Person {
   id: string;
   name: string;
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
   avatar?: string;
 }
 
-export interface PersonParams extends Params {
-  name?: string;
-  email?: string;
-  password?: string;
-}
+export type OptionalParams<T extends { id: string }> = Partial<Omit<T, 'id'>>;
 
-export function person(store: Store, faker: Faker, params: PersonParams): Operation<Person> {
+export function person(store: Store, faker: Faker, params: OptionalParams<Person>): Operation<Person> {
   return function*() {
     let id = v4();
     let slice = records(store).slice(id);
 
+    let name = params.name ?? faker.name.findName();
+
     // this is the lamest data generation ever :)
     let attrs = {
       id,
-      name: params.name ?? faker.name.findName(),
-      email: params.email ?? faker.internet.email(),
+      name,
+      email: params.email ?? faker.internet.email(name).toLowerCase(),
       password: params.password ?? faker.internet.password()
     };
 

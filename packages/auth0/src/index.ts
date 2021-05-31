@@ -54,7 +54,7 @@ const createAuth0Service = (store: Store): Service => {
           .get('/authorize', auth0Handlers['/authorize'])
           .get('/login', auth0Handlers['/login'])
           .post('/usernamepassword/login', auth0Handlers['/usernamepassword/login'])
-          .get('/u/login', auth0Handlers['/u/login'])
+          .get('/u/login', auth0Handlers['/usernamepassword/login'])
           .post('/login/callback', auth0Handlers['/login/callback'])
           .post('/oauth/token', auth0Handlers['/oauth/token'])
           .get('/v2/logout', auth0Handlers['/v2/logout'])
@@ -81,7 +81,7 @@ export const auth0: Simulator = (slice) => {
        * having been created and augment the record at that point.
        */
       *person(store, faker) {
-        let person: Person = yield createPerson(store, faker, {});
+        let person: Person = yield createPerson(store, faker, { password: 'Passw0rd' });
 
         return person;
       }
