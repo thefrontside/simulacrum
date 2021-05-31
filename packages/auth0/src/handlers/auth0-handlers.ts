@@ -15,7 +15,6 @@ export type Routes =
   | '/authorize'
   | '/login'
   | '/usernamepassword/login'
-  | '/u/login'
   | '/login/callback'
   | '/oauth/token'
   | '/v2/logout';
@@ -31,7 +30,9 @@ let rulesRunner = createRulesRunner();
 
 const createPersonQuery = (store: Store) => (predicate: Predicate<Person>) =>
   {
-    let entry = Object.entries(store.slice('people').get() as unknown as Person[]).find(predicate);
+    let people = store.slice('people').get() ?? [];
+
+    let entry = Object.entries(people as unknown as Person[]).find(predicate);
 
     if(!entry) {
       return undefined;
@@ -134,11 +135,31 @@ export const createAuth0Handlers = ({
     },
 
     ['/usernamepassword/login']: function* (req, res) {
-      let { username, nonce } = req.body;
+      let { username, nonce, password } = req.body;
 
       assert(!!username, 'no username in /usernamepassword/login');
       assert(!!nonce, 'no nonce in /usernamepassword/login');
       assert(!!req.session, "no session");
+
+      let user = personQuery(([, person]) => person.email?.toLowerCase() === username.toLowerCase() && person.password === password);
+
+      if(!user) {
+        let { redirect_uri } = req.query as Auth0QueryParams;
+
+        let html = loginView({
+          port,
+          scope,
+          redirectUri: redirect_uri,
+          clientId,
+          audience,
+          loginFailed: true
+        });
+
+        res.set("Content-Type", "text/html");
+
+        res.status(400).send(html);
+        return;
+      }
 
       req.session.username = username;
 
@@ -166,33 +187,6 @@ export const createAuth0Handlers = ({
       let routerUrl = `${redirect_uri}?${qs}`;
 
       return res.status(302).redirect(routerUrl);
-    },
-
-    ['/u/login']: function* (req, res) {
-      let { username, password } = req.body;
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let user = personQuery(([, person]) => person.email.toLowerCase() === username.toLowerCase() && person.password === password);
-
-      if(!user) {
-        let { redirect_uri } = req.query as Auth0QueryParams;
-
-        let html = loginView({
-          port,
-          scope,
-          redirectUri: redirect_uri,
-          clientId,
-          audience,
-          loginFailed: true
-        });
-
-        res.set("Content-Type", "text/html");
-
-        res.status(400).send(html);
-        return;
-      }
-
-      res.status(200).redirect('/login');
     },
 
     ['/oauth/token']: function* (req, res) {
