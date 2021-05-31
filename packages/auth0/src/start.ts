@@ -10,6 +10,10 @@ main(function*() {
     port,
     simulators: { auth0 }
   });
-  console.log(`simulation server running at http://localhost:${server.address.port}`);
+
+  let url = `http://localhost:${server.address.port}`;
+
+  console.log(`simulation server running at ${url}`);
+
   yield;
 });

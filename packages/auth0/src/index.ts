@@ -82,13 +82,8 @@ export const auth0: Simulator = (slice) => {
        */
       *person(store, faker) {
         let person: Person = yield createPerson(store, faker, {});
-        let email = faker.internet.email(person.name, undefined);
-        let password = faker.internet.password();
-        let avatar = faker.image.avatar();
-        let augmented = { ...person, email, password, picture: avatar };
 
-        store.slice('people').slice(person.id).set(augmented);
-        return augmented;
+        return person;
       }
     }
   };

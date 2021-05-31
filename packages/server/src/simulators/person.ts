@@ -14,10 +14,15 @@ export default function(): Behaviors {
 export interface Person {
   id: string;
   name: string;
+  email: string;
+  password: string;
+  avatar?: string;
 }
 
 export interface PersonParams extends Params {
   name?: string;
+  email?: string;
+  password?: string;
 }
 
 export function person(store: Store, faker: Faker, params: PersonParams): Operation<Person> {
@@ -26,7 +31,12 @@ export function person(store: Store, faker: Faker, params: PersonParams): Operat
     let slice = records(store).slice(id);
 
     // this is the lamest data generation ever :)
-    let attrs = { id, name: params.name || faker.name.findName() };
+    let attrs = {
+      id,
+      name: params.name ?? faker.name.findName(),
+      email: params.email ?? faker.internet.email(),
+      password: params.password ?? faker.internet.password()
+    };
 
     slice.set(attrs);
     return attrs;
