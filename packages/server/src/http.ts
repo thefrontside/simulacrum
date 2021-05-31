@@ -6,11 +6,11 @@ import { Server as HTTPServer, createServer as createHttpServer } from 'http';
 import { createServer as createHttpsServer } from 'https';
 import type { AddressInfo } from 'net';
 import { paths } from './config/paths';
-
 import fs from 'fs';
 import { assert } from 'assert-ts';
 import { NextFunction } from 'express';
 import { Service } from './interfaces';
+import {logger} from '@simulacrum/logger';
 
 export interface Server {
   http: HTTPServer;
@@ -49,7 +49,7 @@ export function createServer(app: Application, options: ServerOptions): Resource
         let error: Error & { code?: string } = yield once(server, 'error');
 
         if(error.code === 'EADDRINUSE') {
-          console.warn(`port ${options.port} in use, ignoring`);
+          logger.warn(`port ${options.port} in use, ignoring`);
           return;
         }
 

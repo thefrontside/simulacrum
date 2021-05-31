@@ -1,6 +1,7 @@
 import { Operation, Stream, Task, on, sleep, spawn } from 'effection';
 import { main, exec, daemon, StdIO } from '@effection/node';
 import { watch } from 'chokidar';
+import {logger} from '@simulacrum/logger';
 
 main(function*(scope) {
   let watcher = watch('./src/**/*.ts', { ignoreInitial: true, ignored: 'dist' });
@@ -11,7 +12,7 @@ main(function*(scope) {
       yield process.halt();
       process = yield spawn(function*() {
         yield sleep(10);
-        console.log('rebuilding.....');
+        logger.debug('rebuilding.....');
         yield buildAndRun;
       }).within(scope);
     });
@@ -50,7 +51,7 @@ function* buildAndRun() {
     yield spawn(writeOut(server.stdout, process.stdout));
     yield spawn(writeOut(server.stderr, process.stderr));
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 
   yield;

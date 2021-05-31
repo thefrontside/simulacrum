@@ -30,6 +30,7 @@
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
     "@effection/node": "2.0.0-preview.14",
+    "@simulacrum/logger": "0.1.0",
     "@simulacrum/server": "0.2.0",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",

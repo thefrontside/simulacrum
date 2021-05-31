@@ -1,0 +1,36 @@
+{
+  "name": "@simulacrum/logger",
+  "version": "0.1.0",
+  "description": "Simple demo logger",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf *.tsbuildinfo dist",
+    "test": "echo noop",
+    "prepack": "tsc --build tsconfig.json",
+    "build": "npm run prepack",
+    "lint": "eslint src test",
+    "start": "echo noop"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thefrontside/simulacrum.git"
+  },
+  "keywords": [
+    "logging"
+  ],
+  "author": "Frontside Engineering <engineering@frontside.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
+  },
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "dependencies": {
+    "chalk": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}

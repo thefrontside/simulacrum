@@ -6,6 +6,7 @@ import vm from "vm";
 import assert from "assert-ts";
 import { extensionlessFileName } from './utils';
 import { RuleMeta } from './types';
+import {logger} from '@simulacrum/logger';
 
 const RulesPath = path.join(__dirname, '..', '..', 'rules');
 
@@ -54,7 +55,7 @@ export const createRulesRunner = () => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (user: any, context: Record<string, any>) => {
-    console.debug(`applying ${rules.length} rules`);
+    logger.debug(`applying ${rules.length} rules`);
 
     let vmContext = vm.createContext({
       process,
@@ -82,7 +83,7 @@ export const createRulesRunner = () => {
 
       let { code, filename } = rule;
 
-      console.debug(`executing rule ${path.basename(filename)}`);
+      logger.debug(`executing rule ${path.basename(filename)}`);
 
       let script = new vm.Script(
         `(function(exports) {

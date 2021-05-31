@@ -29,6 +29,7 @@
   "dependencies": {
     "@effection/atom": "2.0.0-preview.13",
     "@effection/node": "2.0.0-preview.14",
+    "@simulacrum/logger": "0.1.0",
     "@simulacrum/ui": "0.0.2",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",

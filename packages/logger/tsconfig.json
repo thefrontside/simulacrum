@@ -1,11 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{
-    "path": "../server/tsconfig.dist.json"
-  }],
   "compilerOptions": {
     "baseUrl": ".",
-    "noEmit": true
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }

@@ -1,10 +1,10 @@
 import { main } from '@effection/node';
-
 import { echo } from './echo';
 import { createSimulationServer, Server } from './server';
 import { createHttpApp } from './http';
 import person from './simulators/person';
 import getPort from 'get-port';
+import {logger} from '@simulacrum/logger';
 
 main(function* () {
 
@@ -31,7 +31,7 @@ main(function* () {
 
   let address = server.address;
 
-  console.log(`Simulation server running on http://localhost:${address.port}`);
+  logger.start(`Simulation server running on http://localhost:${address.port}`);
 
   yield;
 });

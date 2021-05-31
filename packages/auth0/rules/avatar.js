@@ -1,3 +1,5 @@
+const { logger } = require('@simulacrum/logger');
+
 /*
  simple fake rule to add an avatar
 */
@@ -7,7 +9,7 @@ function avatar(user, context, callback) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   user.picture = require('faker').internet.avatar();
 
-  console.log(`added avatar ${user.picture} to user`);
+  logger.info(`added avatar ${user.picture} to user`);
 
   callback(null, user, context);
 }

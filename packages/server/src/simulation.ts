@@ -5,6 +5,7 @@ import express, { raw } from 'express';
 import { SimulationState, Simulator } from './interfaces';
 import { createServer, Server } from './http';
 import { createFaker } from './faker';
+import {logger} from '@simulacrum/logger';
 
 export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {
@@ -32,7 +33,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
               try {
                 yield handler.handler(request, response);
               } catch(err) {
-                console.error(err);
+                logger.error(err);
 
                 response.status(500);
                 response.write('server error');
