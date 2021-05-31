@@ -6,6 +6,7 @@ interface LoginViewProps {
   redirectUri: string;
   clientId: string;
   audience: string;
+  loginFailed: boolean;
 }
 
 export const loginView = ({
@@ -13,7 +14,8 @@ export const loginView = ({
   scope,
   redirectUri,
   clientId,
-  audience
+  audience,
+  loginFailed = false
 }: LoginViewProps): string => {
   return html`
     <html>
@@ -34,14 +36,15 @@ export const loginView = ({
               <div class="rounded-md shadow-sm -space-y-px">
                 <div>
                   <label for="username" class="sr-only">Email address</label>
-                  <input id="username" name="username" type="email" autocomplete="email" required="" value="" class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address">
+                  <input id="username" name="username" type="email" autocomplete="email" required="" value="" class="${loginFailed ? 'border-red-500' : ''} appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address">
                 </div>
                 <div>
                   <label for="password" class="sr-only">Password</label>
-                  <input id="password" name="password" type="password" autocomplete="current-password" required="" class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password">
+                  <input id="password" name="password" type="password" autocomplete="current-password" required="" class="${loginFailed ? 'border-red-500' : ''} appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password">
                 </div>
               </div>
-    
+              ${loginFailed ? '<div class="bg-red-500 text-white p-3">Wrong email or password</div>' : ''}
+ 
               <div>
                 <button id="submit" type="button" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                   <span class="absolute left-0 inset-y-0 flex items-center pl-3">
