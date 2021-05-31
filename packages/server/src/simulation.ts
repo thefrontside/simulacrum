@@ -5,7 +5,7 @@ import express, { raw } from 'express';
 import { SimulationState, Simulator } from './interfaces';
 import { createServer, Server } from './http';
 import { createFaker } from './faker';
-import {logger} from '@simulacrum/logger';
+import { logger } from '@simulacrum/logger';
 
 export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {

@@ -1,6 +1,9 @@
 {
   "extends": "./tsconfig",
-  "references": [{ "path": "../client"}],
+  "references": [
+    { "path": "../logger"},
+    { "path": "../client"}
+  ],
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",

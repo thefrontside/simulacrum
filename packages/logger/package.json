@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Simple demo logger",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "echo noop",

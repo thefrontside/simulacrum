@@ -1,7 +1,7 @@
 import { Operation, Stream, Task, on, sleep, spawn } from 'effection';
 import { main, exec, daemon, StdIO } from '@effection/node';
 import { watch } from 'chokidar';
-import {logger} from '@simulacrum/logger';
+import { logger } from '@simulacrum/logger';
 
 main(function* (scope: Task) {
   let watcher = watch(['../server/src/**/*.ts', './src/**/*.ts'], { ignoreInitial: true, ignored: 'dist' });

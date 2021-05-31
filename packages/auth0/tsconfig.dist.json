@@ -1,8 +1,9 @@
 {
   "extends": "./tsconfig.json",
-  "references": [{
-    "path": "../server/tsconfig.dist.json"
-  }],
+  "references": [
+    { "path": "../logger"},
+    { "path": "../server/tsconfig.dist.json"}
+  ],
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",

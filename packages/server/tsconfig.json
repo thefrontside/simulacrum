@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../client"}],
+  "references": [
+    { "path": "../logger"},
+    { "path": "../client"}
+  ],
   "compilerOptions": {
     "baseUrl": ".",
     "noEmit": true
