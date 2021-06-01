@@ -21,7 +21,7 @@ export const webMessage = ({
 
   return `
   <!DOCTYPE html>
-    <html>
+    <html lang="en">
       <head>
         <title>Authorization Response</title>
       </head>
