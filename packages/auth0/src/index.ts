@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import express from 'express';
 import { Simulator, createHttpApp, Person, person as createPerson, Store, Service } from "@simulacrum/server";
 import { createAuth0Handlers } from './handlers/auth0-handlers';
 import { urlencoded, json } from 'express';
@@ -7,6 +8,7 @@ import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
 import { createSession } from './middleware/session';
 import { createUtilityRoutes } from './handlers/utility-handlers';
+import path from 'path';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -20,6 +22,8 @@ const clientId = 'IsuLUyWaFczCbAKQrIpVPmyBTFs4g5iq';
 const emptyResponse = function*(_: Request, res: Response<Record<never, never>>) {
   res.json({});
 };
+
+const publicDir = path.join(process.cwd(), 'src', 'views', 'public');
 
 const createAuth0Service = (store: Store): Service => {
   let url = `https://localhost:${port}`;
@@ -45,6 +49,7 @@ const createAuth0Service = (store: Store): Service => {
     protocol: 'https',
     port,
     app: createHttpApp()
+          .use(express.static(publicDir))
           .use(createSession())
           .use(createCors())
           .use(noCache())
