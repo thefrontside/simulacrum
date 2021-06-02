@@ -31,7 +31,7 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
     if (existing) {
       let existingId = existing.id;
       assert(!!existingId, 'simimulation');
-      return scope.spawn(simulations.slice(existing.id).filter(({ id }) => id === existingId).expect());
+      return Promise.resolve(existing);
     }
 
     let id = newid();
@@ -44,9 +44,15 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
 
 export const destroySimulation: Resolver<{ id: string; }, boolean> = {
   async resolve({ id }, { atom }) {
-    let simulation = atom.slice("simulations").slice(id);
+    let simulation = atom.slice("simulations", id);
+
     if (simulation.get()) {
-      simulation.remove();
+      atom.slice("simulations").update((simulations) => {
+        delete simulations[id];
+
+        return { ...simulations };
+      });
+
       return true;
     } else {
       return false;
