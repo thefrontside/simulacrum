@@ -28,7 +28,7 @@ reality.
 Simulacrum is based on a client server architecture. The server can hold
 any number of simulations which you can create and control via the
 client. The following examples use JavaScript, but under the hood it
-is just connects over HTTP and so an be used from any language.
+is just connects over HTTP and so can be used from any language.
 
 To create a simulation in a simulacrum server with one of its
 available simulators. In this case, we'll assume that there is an
@@ -51,7 +51,7 @@ let simulation = await client.createSimulation("auth0");
 ```
 
 The resulting simulation has a list of service endpoints that you can
-use to configure whatever things need to `auth0`.
+use to configure whatever things needed for `auth0`.
 
 To create a user that you can log in as, you would run the `person`
 scenario. This will create a person with realistic data.
