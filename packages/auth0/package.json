@@ -42,7 +42,7 @@
     "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
-    "@effection/mocha": "2.0.0-preview.11",
+    "@effection/mocha": "2.0.0-preview.13",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
