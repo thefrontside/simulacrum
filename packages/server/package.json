@@ -28,7 +28,8 @@
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
     "@effection/atom": "2.0.0-preview.13",
-    "@effection/node": "2.0.0-preview.14",
+    "@effection/main": "2.0.0-preview.3",
+    "@effection/node": "2.0.0-preview.16",
     "@simulacrum/ui": "0.0.2",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
