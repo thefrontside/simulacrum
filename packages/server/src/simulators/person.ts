@@ -2,7 +2,7 @@ import { Slice } from '@effection/atom';
 import { Operation } from 'effection';
 import { v4 } from 'uuid';
 import { Faker } from '../faker';
-import { Behaviors, Params, Store } from "../interfaces";
+import { Behaviors, Store } from "../interfaces";
 
 export default function(): Behaviors {
   return {
