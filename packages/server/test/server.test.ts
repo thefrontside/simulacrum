@@ -10,6 +10,12 @@ import { ServerOptions } from '../src/interfaces';
 
 import { createTestServer } from './helpers';
 
+// mkcert does not generate a fullchain certificate
+// https://github.com/FiloSottile/mkcert/issues/76
+// There are a number of ways around this that we should probably handle when scripting the ssl setup
+// NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem" works also
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 describe('@simulacrum/server', () => {
   let simulation: Simulation;
   let client: Client;
@@ -28,9 +34,9 @@ describe('@simulacrum/server', () => {
                 protocol: 'http',
                 app: app(times)
               },
-              ["echo.too"]: {
-                protocol: 'http',
-                app:  app(times)
+              ["echo.secure"]: {
+                protocol: 'https',
+                app: app(times)
               },
 
             },
@@ -53,15 +59,31 @@ describe('@simulacrum/server', () => {
     it('has the echo service', function* () {
       expect(simulation.services).toEqual([
         { name: 'echo', url: expect.stringMatching('http://localhost') },
-        { name: 'echo.too', url: expect.stringMatching('http://localhost') }
+        { name: 'echo.secure', url: expect.stringMatching('https://localhost') }
       ]);
     });
 
-    describe('posting to the echo service', () => {
+    describe('posting to the http echo service', () => {
       let body: string;
 
       beforeEach(function*() {
         let [{ url }] = simulation.services;
+
+        let response = yield fetch(url.toString(), { method: 'POST', body: "hello world" });
+        expect(response.ok).toEqual(true);
+        body = yield response.text();
+      });
+
+      it('gives you back what you gave it', function*() {
+        expect(body).toEqual("hello world");
+      });
+    });
+
+    describe('posting to the https echo service', () => {
+      let body: string;
+
+      beforeEach(function*() {
+        let [, { url }] = simulation.services;
 
         let response = yield fetch(url.toString(), { method: 'POST', body: "hello world" });
         expect(response.ok).toEqual(true);
