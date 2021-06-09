@@ -87,7 +87,9 @@ export type RouteHandler = {
   handler: HttpHandler;
 }
 
-export type Middleware = (req: Request, res: Response) => void;
+export interface Middleware {
+  (req: Request, res: Response): Operation<void>
+}
 
 export interface HttpApp {
   handlers: RouteHandler[];

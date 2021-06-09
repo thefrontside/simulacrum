@@ -20,6 +20,15 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();
         app.use(raw({ type: "*/*" }));
+
+        for(let middleware of service.app.middleware) {
+          app.use(function(...args) {
+            scope.spawn(function* () {
+              yield middleware(...args);
+            });
+          });
+        }
+
         for (let handler of service.app.handlers) {
           app[handler.method](handler.path, (request, response) => {
             scope.spawn(function*() {
