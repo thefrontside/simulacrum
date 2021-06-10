@@ -96,7 +96,7 @@ describe('@simulacrum/server', () => {
     });
 
     describe('middleware', () => {
-      it('should add middleware handler', function* () {
+      it('should add middleware handlers', function* () {
         expect(calls).toEqual(['one', 'two']);
       });
     });
