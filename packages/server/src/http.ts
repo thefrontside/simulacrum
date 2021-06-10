@@ -19,7 +19,6 @@ export interface ServerOptions {
   protocol: Service['protocol'];
 }
 
-
 const createAppServer = (app: Application, options: ServerOptions) => {
   switch(options.protocol) {
     case 'http':
@@ -91,7 +90,6 @@ export interface HttpApp {
   put(path: string, handler: HttpHandler): HttpApp;
   post(path: string, handler: HttpHandler): HttpApp;
 }
-
 
 export function createHttpApp(handlers: RouteHandler[] = []): HttpApp {
   function append(handler: RouteHandler) {

@@ -25,3 +25,30 @@ Server running at http://localhost:1234
 You can now connect to the server with the following url:
 
 http://localhost:1234?server=http://localhost:5000
+
+### running https services from localhost
+
+In order to run an https service from localhost you need locally-trusted development certificates.
+
+[mkcert](https://github.com/FiloSottile/mkcert) makes this pretty easy:
+
+```bash
+brew install mkcert
+brew install nss  # for firefox
+
+mkdir -p ~/.simulacrum/certificates
+cd ~/.simulacrum/certificates
+
+mkcert -install   # Created a new local CA at the location returned from mkcert -CAROOT
+mkcert localhost  # Using the local CA at CAROOT, create a new certificate valid for the following names
+```
+
+To uninstall the certificates
+
+```bash
+cd ~/.simulacrum/certs
+mkcert -uninstall localhost
+mkcert -uninstall 
+rm -rf "$(mkcert -CAROOT)/*"
+mkcert localhost
+```
