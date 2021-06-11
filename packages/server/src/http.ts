@@ -30,6 +30,10 @@ const createAppServer = (app: Application, options: ServerOptions) => {
         throw new NoSSLError('no self signed certificate.');
       }
 
+      // mkcert does not generate a fullchain certificate
+      // https://github.com/FiloSottile/mkcert/issues/76
+      // one solution is to monkey patch secureContext
+      // https://medium.com/trabe/monkey-patching-tls-in-node-js-to-support-self-signed-certificates-with-custom-root-cas-25c7396dfd2a
       let ssl: SSLOptions = {
         key: fs.readFileSync(
           paths.ssl.keyFile

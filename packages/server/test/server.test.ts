@@ -10,12 +10,6 @@ import { ServerOptions } from '../src/interfaces';
 
 import { createTestServer } from './helpers';
 
-// mkcert does not generate a fullchain certificate
-// https://github.com/FiloSottile/mkcert/issues/76
-// There are a number of ways around this that we should probably handle when scripting the ssl setup
-// NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem" works also
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 describe('@simulacrum/server', () => {
   let simulation: Simulation;
   let client: Client;
