@@ -8,11 +8,13 @@ jobs:
     steps:
       - run: wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-linux-amd64 
       - run: mv mkcert-v1.4.3-linux-amd64 mkcert
+      - run: export CWD=$(pwd)
       - run: chmod +x mkcert
       - run: sudo cp mkcert /usr/local/bin/
       - run: sudo mkcert -install
       - run: mkdir -p ~/.simulacrum/certs
       - run: cd ~/.simulacrum/certs
+      - run: cd $CWD
       - run: mkcert localhost
       - checkout
       - node/install-packages
