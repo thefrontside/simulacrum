@@ -79,6 +79,12 @@ describe('@simulacrum/server', () => {
       });
     });
 
+    describe('middleware', () => {
+      it('should add middleware handlers', function* () {
+        expect(calls).toEqual(['one', 'two']);
+      });
+    });
+
     describe('posting to the https echo service', () => {
       let body: string;
 
@@ -92,12 +98,6 @@ describe('@simulacrum/server', () => {
 
       it('gives you back what you gave it', function*() {
         expect(body).toEqual("hello world");
-      });
-    });
-
-    describe('middleware', () => {
-      it('should add middleware handlers', function* () {
-        expect(calls).toEqual(['one', 'two']);
       });
     });
 
