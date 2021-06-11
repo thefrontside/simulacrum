@@ -13,8 +13,14 @@ import { createTestServer } from './helpers';
 describe('@simulacrum/server', () => {
   let simulation: Simulation;
   let client: Client;
+  let calls: string[] = [];
 
-  let app = (times: number) => createHttpApp().post('/', echo(times));
+  let app = (times: number) => createHttpApp()
+    .use(function* () {
+      calls.push('one');
+    }).use(function* () {
+      calls.push('two');
+    }).post('/', echo(times));
 
   beforeEach(function* () {
     client = yield createTestServer({
@@ -70,6 +76,12 @@ describe('@simulacrum/server', () => {
 
       it('gives you back what you gave it', function*() {
         expect(body).toEqual("hello world");
+      });
+    });
+
+    describe('middleware', () => {
+      it('should add middleware handlers', function* () {
+        expect(calls).toEqual(['one', 'two']);
       });
     });
 

@@ -8,7 +8,6 @@ import { Server as HTTPServer, createServer as createHttpServer } from 'http';
 import { paths } from './config/paths';
 import fs from 'fs';
 import { mkcertText, NoSSLError } from './errors/ssl/ssl-error';
-
 export interface Server {
   http: HTTPServer;
   address: AddressInfo;
@@ -88,21 +87,34 @@ export type RouteHandler = {
   handler: HttpHandler;
 }
 
+export interface Middleware {
+  (req: Request, res: Response): Operation<void>
+}
+
 export interface HttpApp {
   handlers: RouteHandler[];
+  middleware: Middleware[];
   get(path: string, handler: HttpHandler): HttpApp;
   put(path: string, handler: HttpHandler): HttpApp;
   post(path: string, handler: HttpHandler): HttpApp;
+  use(middleware: Middleware): HttpApp;
 }
 
-export function createHttpApp(handlers: RouteHandler[] = []): HttpApp {
-  function append(handler: RouteHandler) {
-    return createHttpApp(handlers.concat(handler));
+export function createHttpApp(handlers: RouteHandler[] = [], middleware: Middleware[] = []): HttpApp {
+  function appendHandler(routeHandler: RouteHandler) {
+    return createHttpApp(handlers.concat(routeHandler), middleware);
   }
+
+  function appendMiddleware(middlewareHandler: Middleware) {
+    return createHttpApp(handlers, middleware.concat(middlewareHandler));
+  }
+
   return {
     handlers,
-    get: (path, handler) => append({ path, handler, method: 'get' }),
-    post: (path, handler) => append({ path, handler, method: 'post' }),
-    put: (path, handler) => append({ path, handler, method: 'put' })
+    middleware: middleware,
+    get: (path, handler) => appendHandler({ path, handler, method: 'get' }),
+    post: (path, handler) => appendHandler({ path, handler, method: 'post' }),
+    put: (path, handler) => appendHandler({ path, handler, method: 'put' }),
+    use: (middlewareHandler) => appendMiddleware(middlewareHandler),
   };
 }
