@@ -6,6 +6,7 @@ jobs:
     docker:
       - image: cimg/node:15.14.0
     steps:
+      - checkout
       - run: wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-linux-amd64 
       - run: mv mkcert-v1.4.3-linux-amd64 mkcert
       - run: export CWD=$(pwd)
@@ -13,10 +14,9 @@ jobs:
       - run: sudo cp mkcert /usr/local/bin/
       - run: sudo mkcert -install
       - run: mkdir -p ~/.simulacrum/certs
-      - run: cd ~/.simulacrum/certs
-      - run: cd $CWD
-      - run: mkcert localhost
-      - checkout
+      - run:
+          command: mkcert localhost
+          working_directory: ~/.simulacrum/certs
       - node/install-packages
       - run: npm run build
       - run: npm run test
