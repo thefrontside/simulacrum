@@ -1,18 +1,19 @@
 import { spawn } from 'effection';
-import assert from 'assert-ts';
+import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
 import { SimulationState, Simulator } from './interfaces';
 import { createServer, Server } from './http';
 import { createFaker } from './faker';
+import { middlewareHandlerIsOperation, isRequestHandler } from './guards/guards';
 
 export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {
     try {
+      let store = slice.slice("store");
       let simulatorName = slice.get().simulator;
       let simulator = simulators[simulatorName];
       assert(simulator, `unknown simulator ${simulatorName}`);
-      let store = slice.slice("store");
       let options = slice.get().options;
 
       let behaviors = simulator(slice, options);
@@ -21,7 +22,15 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         let app = express();
 
         for(let handler of service.app.middleware) {
+          if(isRequestHandler(handler)) {
+            app.use(handler);
+
+            continue;
+          }
+
           app.use(function(req, res, next) {
+            assert(middlewareHandlerIsOperation(handler), 'invalid middleware function');
+
             scope.spawn(handler(req, res))
             .then(next)
             .catch(next);
