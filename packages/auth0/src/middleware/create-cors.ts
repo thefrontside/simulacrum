@@ -1,7 +1,7 @@
-import { Middleware } from '@simulacrum/server';
+import { RequestHandler } from 'express';
 import cors from "cors";
 
-export const createCors = (): Middleware =>
+export const createCors = (): RequestHandler =>
   cors({
     origin: (origin, cb) => {
       if (typeof origin === "string") {
