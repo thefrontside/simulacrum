@@ -1,0 +1,65 @@
+{
+  "name": "@simulacrum/auth0",
+  "version": "0.0.0",
+  "description": "Simulate Auth0",
+  "main": "dist/index.js",
+  "scripts": {
+    "clean": "rimraf *.tsbuildinfo dist",
+    "test": "mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
+    "prepack": "tsc --build tsconfig.dist.json",
+    "build": "npm run prepack",
+    "lint": "eslint src test",
+    "start": "node dist/start.js",
+    "watch": "PORT=4000 ts-node -P ./tsconfig.watch.json ./watch.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thefrontside/simulacrum.git"
+  },
+  "keywords": [
+    "simulation",
+    "emulation",
+    "authentication",
+    "auth0"
+  ],
+  "author": "Frontside Engineering <engineering@frontside.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
+  },
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "dependencies": {
+    "@effection/node": "2.0.0-preview.14",
+    "@simulacrum/server": "0.2.0",
+    "@types/faker": "^5.1.7",
+    "assert-ts": "^0.3.2",
+    "base64-url": "^2.3.3",
+    "cookie-session": "^1.4.0",
+    "effection": "2.0.0-preview.14",
+    "jsesc": "^3.0.2",
+    "jsonwebtoken": "^8.5.1",
+    "html-entities": "^2.3.2"
+  },
+  "devDependencies": {
+    "@effection/mocha": "2.0.0-preview.11",
+    "@frontside/eslint-config": "^2.0.0",
+    "@frontside/tsconfig": "^1.2.0",
+    "@frontside/typescript": "^1.1.1",
+    "@simulacrum/client": "0.3.0",
+    "@types/base64-url": "^2.2.0",
+    "@types/jsesc": "^2.5.1",
+    "@types/jsonwebtoken": "^8.5.1",
+    "@types/mocha": "^8.2.1",
+    "@types/ws": "^7.4.4",
+    "@types/cookie-session": "^2.0.42",
+    "expect": "^26.6.2",
+    "mocha": "^8.0.0",
+    "rimraf": "^3.0.2",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3",
+    "ws": "^7.4.4"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}

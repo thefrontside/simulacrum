@@ -1,0 +1,9 @@
+{ 
+  "extends": "@frontside/tsconfig",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "sourceMap": true
+  },
+  "include": ["./watch.ts"]
+}
