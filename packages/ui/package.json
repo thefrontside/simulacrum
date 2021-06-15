@@ -4,9 +4,6 @@
   "description": "A web UI to work with a Simulacrum Server",
   "browser": "dist/index.html",
   "main": "index.js",
-  "files": [
-    "dist"
-  ],
   "scripts": {
     "test": "echo skip",
     "prepack": "parcel build app/index.html --target browser",

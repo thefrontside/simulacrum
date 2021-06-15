@@ -1,4 +1,4 @@
-import type { Simulator, Service, Store } from '@simulacrum/server';
+import type { Simulator, Service } from '@simulacrum/server';
 import { createHttpApp } from '@simulacrum/server';
 import express from 'express';
 import { urlencoded, json } from 'express';
@@ -7,20 +7,15 @@ import { noCache } from './middleware/no-cache';
 import { createSession } from './middleware/session';
 import { createAuth0Handlers } from './handlers/auth0-handlers';
 import path from 'path';
-import person from '@simulacrum/server/src/simulators/person';
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+import { person } from '@simulacrum/server';
 
 const publicDir = path.join(process.cwd(), 'src', 'views', 'public');
 
-let auth0Handlers = createAuth0Handlers({
-  port,
-});
+let auth0Handlers = createAuth0Handlers();
 
-const createAuth0Service = (store: Store): Service => {
+const createAuth0Service = (): Service => {
   return {
     protocol: 'https',
-    port,
     app: createHttpApp()
           .use(express.static(publicDir))
           .use(createSession())
@@ -33,10 +28,9 @@ const createAuth0Service = (store: Store): Service => {
   } as const;
 };
 
-export const auth0: Simulator = (slice) => {
-  let store = slice.slice('store');
+export const auth0: Simulator = () => {
   return {
-    services: { auth0: createAuth0Service(store) },
+    services: { auth0: createAuth0Service() },
     scenarios: {
       /**
        * Here we just wrap the internal `person` scenario to augment
@@ -45,7 +39,7 @@ export const auth0: Simulator = (slice) => {
        * having been created and augment the record at that point.
        */
       *person(store, faker) {
-        return yield person(store, faker, { password: 'Passw0rd' });
+        return yield person(store, faker);
       }
     }
   };

@@ -13,6 +13,7 @@ export interface Client {
 
 export interface Simulation {
   id: string;
+  status: 'new' | 'running' | 'failed',
   services: Service[];
 }
 
@@ -100,6 +101,7 @@ mutation CreateSimulation($simulator: String, $options: JSON) {
   createSimulation(simulator: $simulator, options: $options) {
     id
     simulators
+    status
     services {
       name
       url

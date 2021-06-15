@@ -2,7 +2,7 @@ import { Slice } from '@effection/atom';
 import { Operation } from 'effection';
 import { v4 } from 'uuid';
 import { Faker } from '../faker';
-import { Behaviors, Params, Store } from "../interfaces";
+import { Behaviors, Store } from "../interfaces";
 
 export default function(): Behaviors {
   return {
@@ -12,21 +12,29 @@ export default function(): Behaviors {
 }
 
 export interface Person {
-  id: string
+  id: string;
   name: string;
+  email?: string;
+  password?: string;
+  avatar?: string;
 }
 
-export interface PersonParams extends Params {
-  name?: string;
-}
+export type OptionalParams<T extends { id: string }> = Partial<Omit<T, 'id'>>;
 
-export function person(store: Store, faker: Faker, params: PersonParams): Operation<Person> {
+export function person(store: Store, faker: Faker, params: OptionalParams<Person> = {}): Operation<Person> {
   return function*() {
     let id = v4();
     let slice = records(store).slice(id);
 
+    let name = params.name ?? faker.name.findName();
+
     // this is the lamest data generation ever :)
-    let attrs = { id, name: params.name || faker.name.findName() };
+    let attrs = {
+      id,
+      name,
+      email: params.email ?? faker.internet.email(name).toLowerCase(),
+      password: params.password ?? faker.internet.password()
+    };
 
     slice.set(attrs);
     return attrs;

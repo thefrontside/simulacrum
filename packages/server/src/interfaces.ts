@@ -29,12 +29,14 @@ export interface ServerOptions {
 }
 
 export interface Service {
-  protocol: 'http' | 'https',
-  app: HttpApp
+  protocol: 'http' | 'https';
+  app: HttpApp;
+  port?: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type StoreState = Record<string, Record<string, Record<string, any>>>;
+
 export type Store = Slice<StoreState>;
 
 export interface ServerState {
@@ -92,6 +94,8 @@ export type ScenarioState =
     params: Params;
     error: Error;
   }
+
+export type SimulationStatus = SimulationState['status'];
 
 export interface Server {
   port: number;

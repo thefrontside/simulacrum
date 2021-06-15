@@ -1,7 +1,10 @@
 {
   "extends": "./tsconfig",
+  "references": [{ "path": "../client"}],
   "compilerOptions": {
-    "rootDir": "src"
+    "rootDir": "src",
+    "outDir": "dist",
+    "noEmit": false
   },
   "exclude": ["test"]
 }
