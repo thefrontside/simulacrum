@@ -1,13 +1,10 @@
 import type { Simulator, Service } from '@simulacrum/server';
 import { createHttpApp } from '@simulacrum/server';
-import express from 'express';
 import { urlencoded, json } from 'express';
-import { createCors } from './middleware/create-cors';
-import { noCache } from './middleware/no-cache';
-import { createSession } from './middleware/session';
 import { createAuth0Handlers } from './handlers/auth0-handlers';
-import path from 'path';
 import { person } from '@simulacrum/server';
+import path from 'path';
+import express from 'express';
 
 const publicDir = path.join(process.cwd(), 'src', 'views', 'public');
 
@@ -18,9 +15,6 @@ const createAuth0Service = (): Service => {
     protocol: 'https',
     app: createHttpApp()
           .use(express.static(publicDir))
-          .use(createSession())
-          .use(createCors())
-          .use(noCache())
           .use(json())
           .use(urlencoded({ extended: true }))
           .get('/heartbeat', auth0Handlers['/heartbeat'])
