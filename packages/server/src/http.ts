@@ -2,7 +2,7 @@ import type { ServerOptions as SSLOptions } from 'https';
 import type { AddressInfo } from 'net';
 import type { Service } from './interfaces';
 import { Operation, once, Resource, spawn } from 'effection';
-import { Request, Response, Application } from 'express';
+import { Request, Response, Application, RequestHandler } from 'express';
 import { createServer as createHttpsServer } from 'https';
 import { Server as HTTPServer, createServer as createHttpServer } from 'http';
 import { paths } from './config/paths';
@@ -93,19 +93,19 @@ export interface Middleware {
 
 export interface HttpApp {
   handlers: RouteHandler[];
-  middleware: Middleware[];
+  middleware: (Middleware | RequestHandler)[];
   get(path: string, handler: HttpHandler): HttpApp;
   put(path: string, handler: HttpHandler): HttpApp;
   post(path: string, handler: HttpHandler): HttpApp;
-  use(middleware: Middleware): HttpApp;
+  use(middleware: Middleware | RequestHandler): HttpApp;
 }
 
-export function createHttpApp(handlers: RouteHandler[] = [], middleware: Middleware[] = []): HttpApp {
+export function createHttpApp(handlers: RouteHandler[] = [], middleware: (Middleware | RequestHandler)[] = []): HttpApp {
   function appendHandler(routeHandler: RouteHandler) {
     return createHttpApp(handlers.concat(routeHandler), middleware);
   }
 
-  function appendMiddleware(middlewareHandler: Middleware) {
+  function appendMiddleware(middlewareHandler: Middleware | RequestHandler) {
     return createHttpApp(handlers, middleware.concat(middlewareHandler));
   }
 

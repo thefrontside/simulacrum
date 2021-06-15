@@ -20,7 +20,15 @@ describe('@simulacrum/server', () => {
       calls.push('one');
     }).use(function* () {
       calls.push('two');
-    }).post('/', echo(times));
+    })
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .use(function(_, __, next) {
+      calls.push('three');
+
+      next();
+    })
+    .post('/', echo(times));
+
 
   beforeEach(function* () {
     client = yield createTestServer({
@@ -81,7 +89,7 @@ describe('@simulacrum/server', () => {
 
     describe('middleware', () => {
       it('should add middleware handlers', function* () {
-        expect(calls).toEqual(['one', 'two']);
+        expect(calls).toEqual(['one', 'two', 'three']);
       });
     });
 
