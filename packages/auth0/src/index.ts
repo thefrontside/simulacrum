@@ -5,10 +5,11 @@ import { createAuth0Handlers } from './handlers/auth0-handlers';
 import { person } from '@simulacrum/server';
 import path from 'path';
 import express from 'express';
+import { Options } from './types';
 
 const publicDir = path.join(process.cwd(), 'src', 'views', 'public');
 
-let auth0Handlers = createAuth0Handlers();
+let auth0Handlers = createAuth0Handlers({ audience: 'https://thefrontside.auth0.com/api/v1/' });
 
 const createAuth0Service = (): Service => {
   return {
@@ -18,11 +19,14 @@ const createAuth0Service = (): Service => {
           .use(json())
           .use(urlencoded({ extended: true }))
           .get('/heartbeat', auth0Handlers['/heartbeat'])
+          .get('/authorize', auth0Handlers['/authorize'])
 
   } as const;
 };
 
-export const auth0: Simulator = () => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const auth0: Simulator<Options> = (options) => {
+  // console.log({ simulatorOptions: options.get() });
   return {
     services: { auth0: createAuth0Service() },
     scenarios: {
