@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { SimulationState, ScenarioState, ServerState } from "../interfaces";
+import { SimulationState, ScenarioState, ServerState, SimulationOptions } from "../interfaces";
 import { OperationContext } from "./context";
 import { createQueue } from '../queue';
 
@@ -16,7 +16,7 @@ export interface Subscriber<Args, TEach, Result = TEach> {
 
 export interface CreateSimulationParameters {
   simulator: string;
-  options?: Record<string, unknown>;
+  options?: SimulationOptions;
 }
 
 export const createSimulation: Resolver<CreateSimulationParameters, SimulationState> = {

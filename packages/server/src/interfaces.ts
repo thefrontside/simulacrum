@@ -41,12 +41,14 @@ export interface ServerState {
   simulations: Record<string, SimulationState>;
 }
 
+export type SimulationOptions = { port?: number } & Omit<Record<string, unknown>, 'port'>;
+
 export type SimulationState =
   {
     id: string;
     status: 'new',
     simulator: string,
-    options: Record<string, unknown>;
+    options: SimulationOptions;
     scenarios: Record<string, ScenarioState>;
     store: StoreState;
   } |
@@ -54,7 +56,7 @@ export type SimulationState =
     id: string,
     status: 'running',
     simulator: string,
-    options: Record<string, unknown>;
+    options: SimulationOptions;
     services: {
       name: string;
       url: string;
@@ -66,7 +68,7 @@ export type SimulationState =
     id: string,
     status: 'failed',
     simulator: string,
-    options: Record<string, unknown>;
+    options: SimulationOptions;
     scenarios: Record<string, ScenarioState>;
     store: StoreState;
     error: Error

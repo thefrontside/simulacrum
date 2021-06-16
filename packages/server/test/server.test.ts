@@ -148,6 +148,33 @@ hello world`);
     });
   });
 
+  describe('creating a simulator with static port', () => {
+    let client: Client;
+    let simulation: Simulation;
+    let options: ServerOptions = {
+      simulators: {
+        static: () => ({ services: {
+          static: {
+            protocol: 'http',
+            app: createHttpApp()
+          }
+        }, scenarios: {} })
+      }
+    };
+
+    beforeEach(function*() {
+      client = yield createTestServer(options);
+
+      simulation = yield client.createSimulation("static", { port: 3300 });
+    });
+
+    it('creates simulations with the same uuid', function*() {
+      let [{ url }] = simulation.services;
+
+      expect(url).toBe('http://localhost:3300');
+    });
+  });
+
   describe('creating two servers with the same seed', () => {
     let one: Client;
     let two: Client;
@@ -174,3 +201,6 @@ hello world`);
     });
   });
 });
+
+
+
