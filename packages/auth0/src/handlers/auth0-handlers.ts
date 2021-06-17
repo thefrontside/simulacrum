@@ -99,8 +99,10 @@ export const createAuth0Handlers = ({
         return;
       }
 
+      console.log({ url: `${req.baseUrl}/login` });
+
       res.status(302).redirect(
-        `/login?${querystring.stringify({
+        `${req.baseUrl}/login?${querystring.stringify({
           state,
           redirect_uri,
           client: client_id,
@@ -186,7 +188,7 @@ export const createAuth0Handlers = ({
 
       let routerUrl = `${redirect_uri}?${qs}`;
 
-      return res.status(302).redirect(routerUrl);
+      return res.status(302).redirect(`${req.baseUrl}/${routerUrl}`);
     },
 
     ['/oauth/token']: function* (req, res) {

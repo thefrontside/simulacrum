@@ -1,7 +1,7 @@
 import { spawn } from 'effection';
 import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
-import express, { raw } from 'express';
+import express, { raw, Router } from 'express';
 import { SimulationState, Simulator } from './interfaces';
 import { createServer, Server } from './http';
 import { createFaker } from './faker';
@@ -21,14 +21,20 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       let servers = Object.entries(behaviors.services).map(([name, service]) => {
         let app = express();
 
+        let router = Router();
+
+        // mount the app at the service name
+        // e.g. https://localhost:4400/auth0
+        app.use(`/${name}`, router);
+
         for(let handler of service.app.middleware) {
           if(isRequestHandler(handler)) {
-            app.use(handler);
+            router.use(handler);
 
             continue;
           }
 
-          app.use(function(req, res, next) {
+          router.use(function(req, res, next) {
             assert(middlewareHandlerIsOperation(handler), 'invalid middleware function');
 
             scope.spawn(handler(req, res))
@@ -37,10 +43,10 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
           });
         }
 
-        app.use(raw({ type: "*/*" }));
+        router.use(raw({ type: "*/*" }));
 
         for (let handler of service.app.handlers) {
-          app[handler.method](handler.path, (request, response) => {
+          router[handler.method](handler.path, (request, response) => {
             scope.spawn(function*() {
               try {
                 yield handler.handler(request, response);
@@ -70,7 +76,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       for (let { name, protocol, create } of servers) {
         let server: Server = yield create;
         let address = server.address;
-        services.push({ name, url: `${protocol}://localhost:${address.port}` });
+        services.push({ name, url: `${protocol}://localhost:${address.port}/${name}` });
       }
 
       let { scenarios, effects } = behaviors;

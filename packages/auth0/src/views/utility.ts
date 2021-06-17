@@ -18,7 +18,7 @@ export const renderToken = ({ url, nonce = '', id_token = '', result = {} }: Pro
       href="https://unpkg.com/tailwindcss@^2/dist/tailwind.css"
       rel="stylesheet"
     />
-    <script src="https://cdn.auth0.com/js/auth0/9.16.0/auth0.js"></script>
+    <script src="https://cdn.auth0.com/js/auth0/9.16.2/auth0.js"></script>
   </0head>
   <body>
     <main class="min-h-screen flex items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">

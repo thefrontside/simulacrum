@@ -26,14 +26,14 @@ export const loginView = ({
           href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
           rel="stylesheet"
         />
-        <script src="https://cdn.auth0.com/js/auth0/9.16.0/auth0.min.js"></script>
+        <script src="https://cdn.auth0.com/js/auth0/9.16.2/auth0.js"></script>
       </head>
       <title>login</title>
       <body>
         <main class="min-h-screen flex items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
           <div class="max-w-md w-full space-y-8">
             <div class="flex justify-center">
-              <img alt="frontside" class="bg-transparent object-contain h-16" src="/img/frontside-logo.png" />
+              <img alt="frontside" class="bg-transparent object-contain h-16" src="/auth0/img/frontside-logo.png" />
             </div>
             <h1 class="flex justify-center text-4xl">Welcome</h1>
             <h2 class="flex justify-center">Log in to continue to frontside</h2>
@@ -66,7 +66,7 @@ export const loginView = ({
         <script>
           document.addEventListener('DOMContentLoaded', function(){
             var webAuth = new window.auth0.default.WebAuth({
-              domain: 'localhost:${port}',
+              domain: 'localhost:${port}/auth0',
               clientID: '${clientId}',
               redirectUri: '${redirectUri}',
               audience: '${audience}',
