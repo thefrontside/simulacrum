@@ -41,7 +41,12 @@ export interface ServerState {
   simulations: Record<string, SimulationState>;
 }
 
-export type SimulationOptions = { port?: number } & Omit<Record<string, unknown>, 'port'>;
+export interface SimulationOptions {
+  options?: Record<string, unknown>;
+  services?: Record<string, {
+    port?: number
+  }>
+}
 
 export type SimulationState =
   {
