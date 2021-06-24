@@ -14,7 +14,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       let simulatorName = slice.get().simulator;
       let simulator = simulators[simulatorName];
       assert(simulator, `unknown simulator ${simulatorName}`);
-      let options = slice.get().options;
+      let { options = {}, services: serviceOptions = {} } = slice.get().options;
 
       let behaviors = simulator(slice, options);
 
@@ -61,7 +61,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         return {
           name,
           protocol,
-          create: createServer(app, { protocol })
+          create: createServer(app, { protocol, port: serviceOptions[name]?.port })
         };
       });
 

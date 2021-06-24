@@ -3,8 +3,15 @@ import { createClient as createWSClient, SubscribePayload } from 'graphql-ws';
 import webSocketImpl from 'isomorphic-ws';
 import { GraphQLError } from 'graphql';
 
+export interface SimulationOptions {
+  options?: Record<string, unknown>;
+  services?: Record<string,{
+    port?: number
+  }>
+}
+
 export interface Client {
-  createSimulation(simulator: string, options?: Record<string, unknown>): Promise<Simulation>;
+  createSimulation(simulator: string, options?: SimulationOptions): Promise<Simulation>;
   destroySimulation(simulation: Simulation): Promise<boolean>;
   given(simulation: Simulation, scenario: string, params?: Record<string, unknown>): Promise<Scenario>;
   state<T>(): AsyncIterable<T> & AsyncIterator<T>;

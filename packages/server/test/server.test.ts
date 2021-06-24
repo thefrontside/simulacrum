@@ -3,6 +3,7 @@ import { Client, Simulation } from '@simulacrum/client';
 import { assert } from 'assert-ts';
 import fetch from 'cross-fetch';
 import expect from 'expect';
+import getPort from 'get-port';
 
 import { echo } from '../src/echo';
 import { createHttpApp } from '../src/http';
@@ -130,11 +131,22 @@ describe('@simulacrum/server', () => {
   describe('createSimulation() with parameters', () => {
     let response: Response;
     let body: string;
+    let serviceUrl: string;
+    let port: number;
     beforeEach(function*() {
-      simulation = yield client.createSimulation("echo", {
+      port = yield getPort();
+
+      expect(port).toBeDefined();
+
+      simulation = yield client.createSimulation("echo", { options: {
         times: 3
-      });
+      }, services: {
+        echo: {
+          port
+        }
+      } });
       let [{ url }] = simulation.services;
+      serviceUrl = url;
       response = yield fetch(url.toString(), { method: 'POST', body: "hello world" });
       expect(response.ok).toBe(true);
       body = yield response.text();
@@ -145,6 +157,37 @@ describe('@simulacrum/server', () => {
         `hello world
 hello world
 hello world`);
+    });
+
+    it('assigns a static port to the service', function* () {
+      expect(serviceUrl).toBe(`http://localhost:${port}`);
+    });
+  });
+
+  describe('creating a simulator with static port', () => {
+    let client: Client;
+    let simulation: Simulation;
+    let options: ServerOptions = {
+      simulators: {
+        static: () => ({ services: {
+          static: {
+            protocol: 'http',
+            app: createHttpApp()
+          }
+        }, scenarios: {} })
+      }
+    };
+
+    beforeEach(function*() {
+      client = yield createTestServer(options);
+
+      simulation = yield client.createSimulation("static", { services: { static: { port: 3300 } } });
+    });
+
+    it('creates simulations with the same uuid', function*() {
+      let [{ url }] = simulation.services;
+
+      expect(url).toBe('http://localhost:3300');
     });
   });
 
@@ -174,3 +217,6 @@ hello world`);
     });
   });
 });
+
+
+
