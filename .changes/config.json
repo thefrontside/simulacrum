@@ -17,6 +17,11 @@
       "manager": "javascript",
       "dependencies": ["@simulacrum/ui", "@simulacrum/client"]
     },
+    "@simulacrum/auth0": {
+      "path": "./packages/auth0",
+      "manager": "javascript",
+      "dependencies": ["@simulacrum/server", "@simulacrum/client"]
+    },
     "@simulacrum/ui": {
       "path": "./packages/ui",
       "manager": "javascript",

@@ -1,8 +1,11 @@
+import { Store } from '@simulacrum/server';
+
 export interface Options {
   scope: string;
   port?: number;
   audience: string;
   clientId?: string;
+  store: Store;
 }
 
 export type ResponseModes = 'query' | 'web_message' | 'fragment';
