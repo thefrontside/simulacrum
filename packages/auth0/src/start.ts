@@ -22,9 +22,15 @@ main(function*() {
   client = createClient(`http://localhost:${port}`);
 
   simulation = yield client.createSimulation("auth0", {
-    audience: 'https://thefrontside.auth0.com/api/v1/',
-    scope: "openid profile email offline_access",
-    port: 4400
+    options: {
+      audience: 'https://thefrontside.auth0.com/api/v1/',
+      scope: "openid profile email offline_access",
+    },
+    services: {
+      auth0: {
+        port: 4400
+      }
+    }
   });
 
   console.log(simulation);
