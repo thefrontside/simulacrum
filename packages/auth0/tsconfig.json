@@ -1,6 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../client"}],
+  "references": [{
+    "path": "../server/tsconfig.dist.json"
+  }],
   "compilerOptions": {
     "baseUrl": ".",
     "noEmit": true
