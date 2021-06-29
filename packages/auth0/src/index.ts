@@ -9,26 +9,34 @@ import { Options } from './types';
 
 const publicDir = path.join(process.cwd(), 'src', 'views', 'public');
 
-let auth0Handlers = createAuth0Handlers({ audience: 'https://thefrontside.auth0.com/api/v1/' });
+const DefaultOptions = {
+  clientId: '00000000000000000000000000000000',
+  audience: 'https://thefrontside.auth0.com/api/v1/',
+  scope: "openid profile email offline_access",
+};
 
-const createAuth0Service = (): Service => {
+const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers>): Service => {
   return {
     protocol: 'https',
     app: createHttpApp()
           .use(express.static(publicDir))
           .use(json())
           .use(urlencoded({ extended: true }))
-          .get('/heartbeat', auth0Handlers['/heartbeat'])
-          .get('/authorize', auth0Handlers['/authorize'])
+          .get('/heartbeat', handlers['/heartbeat'])
+          .get('/authorize', handlers['/authorize'])
+          .get('/login', handlers['/login'])
 
   } as const;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const auth0: Simulator<Options> = (options) => {
-  // console.log({ simulatorOptions: options.get() });
+export const auth0: Simulator<Options> = (authOptions) => {
+  let { options } = authOptions.get().options;
+
+  let handlers = createAuth0Handlers({ ...DefaultOptions, ...options });
+
   return {
-    services: { auth0: createAuth0Service() },
+    services: { auth0: createAuth0Service(handlers) },
     scenarios: {
       /**
        * Here we just wrap the internal `person` scenario to augment

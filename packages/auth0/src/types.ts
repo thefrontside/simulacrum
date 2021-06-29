@@ -1,7 +1,11 @@
 export interface Options {
+  scope: string;
   port?: number;
   audience: string;
+  clientId?: string;
 }
+
+export type ResponseModes = 'query' | 'web_message' | 'fragment';
 
 export type QueryParams = {
   state: string;
@@ -13,7 +17,7 @@ export type QueryParams = {
   nonce: string;
   code_challenge_method: string;
   response_type: string;
-  response_mode: "query" | "web_message" | "fragment";
+  response_mode: ResponseModes;
   auth0Client: string;
   audience: string;
 };

@@ -1,38 +1,9 @@
 import type { Request, Response } from 'express';
-import { assert } from 'assert-ts';
 import { Options, QueryParams } from '../types';
-import querystring from "querystring";
-import { encode } from "base64-url";
-import { webMessage } from '../views/web-message';
+import { stringify } from "querystring";
 import { Middleware } from '@simulacrum/server';
 
-export const createAuthorizeHandlers = (options: Options): Record<'webMessageResponse' | 'loginRedirect', Middleware> => ({
-  webMessageResponse: function *(req: Request, res: Response) {
-    assert(!!req.session, "no session");
-
-    let username = req.session.username;
-
-    assert(!!username, `no username in authorise`);
-
-    res.set("Content-Type", "text/html");
-
-    let {
-      nonce,
-      state,
-      redirect_uri,
-    } = req.query as QueryParams;
-
-    let message = webMessage({
-      code: encode(`${nonce}:${username}`),
-      state,
-      redirect_uri,
-      nonce,
-    });
-
-    res.status(200).send(Buffer.from(message));
-    return;
-  },
-
+export const createAuthorizeHandlers = (options: Options): Record<'loginRedirect', Middleware> => ({
   loginRedirect: function* (req: Request, res: Response) {
     let {
       client_id,
@@ -48,7 +19,7 @@ export const createAuthorizeHandlers = (options: Options): Record<'webMessageRes
     } = req.query as QueryParams;
 
     res.status(302).redirect(
-      `/login?${querystring.stringify({
+      `/login?${stringify({
         state,
         redirect_uri,
         client: client_id,

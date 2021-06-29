@@ -1,30 +1,37 @@
 import { HttpHandler } from '@simulacrum/server';
-import { Options } from '../types';
+import { Options, ResponseModes } from '../types';
 import { createAuthorizeHandlers } from './authorize';
-
 
 export type Routes =
   | '/heartbeat'
   | '/authorize'
   | '/login'
 
+
 export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandler> => {
-  let { webMessageResponse, loginRedirect } = createAuthorizeHandlers(options);
+  let { loginRedirect } = createAuthorizeHandlers(options);
 
   return {
     ['/heartbeat']: function *(_, res) {
       res.status(200).json({ ok: true });
     },
+
     ['/authorize']: function *(req, res) {
-      if (req.query.response_mode === 'web_message') {
-        yield webMessageResponse(req, res);
-      } else {
-        yield loginRedirect(req, res);
+      let responseMode = req.query.response_mode as ResponseModes;
+
+      switch(responseMode) {
+        case 'query':
+          yield loginRedirect(req, res);
+          break;
+        default:
+          throw new Error(`unknown response_mode ${responseMode}`);
       }
     },
-    ['/login']: function *(_, res) {
-      res.status(200).send('Not implemented.....yet');
-    }
+
+    // TODO: fleshed out in next PR
+    ['/login']: function* (_, res) {
+      res.status(200).send('ok');
+    },
   };
 };
 

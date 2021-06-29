@@ -1,5 +1,4 @@
 import { main } from '@effection/node';
-import { Client, createClient, Simulation } from '@simulacrum/client';
 import { createSimulationServer, Server } from '@simulacrum/server';
 import { auth0 } from '.';
 
@@ -16,32 +15,5 @@ main(function*() {
 
   console.log(`simulation server running at ${url}`);
 
-  let client: Client;
-  let simulation: Simulation;
-
-  client = createClient(`http://localhost:${port}`);
-
-  simulation = yield client.createSimulation("auth0", {
-    options: {
-      audience: 'https://thefrontside.auth0.com/api/v1/',
-      scope: "openid profile email offline_access",
-    },
-    services: {
-      auth0: {
-        port: 4400
-      }
-    }
-  });
-
-  console.log(simulation);
-
-  try {
-    yield;
-  } finally {
-    if(! simulation) {
-      return;
-    }
-
-    client.destroySimulation(simulation);
-  }
+  yield;
 });
