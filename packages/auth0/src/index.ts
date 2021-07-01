@@ -31,8 +31,8 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers>): S
           .get('/heartbeat', handlers['/heartbeat'])
           .get('/authorize', handlers['/authorize'])
           .get('/login', handlers['/login'])
-          .post('/usernamepassword/login', handlers['/usernamepassword/login'])
           .get('/u/login', handlers['/usernamepassword/login'])
+          .post('/usernamepassword/login', handlers['/usernamepassword/login'])
           .post('/login/callback', handlers['/login/callback'])
 
   } as const;

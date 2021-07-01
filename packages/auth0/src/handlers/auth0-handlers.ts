@@ -29,13 +29,11 @@ const createPersonQuery = (store: Store) => (predicate: Predicate<Person>) => {
   }
 };
 
-
 export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandler> => {
   let { loginRedirect } = createAuthorizeHandlers(options);
 
   let { port, audience, scope, store, clientId } = options;
   let personQuery = createPersonQuery(store);
-
 
   return {
     ['/heartbeat']: function *(_, res) {
