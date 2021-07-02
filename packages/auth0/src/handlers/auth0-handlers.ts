@@ -32,7 +32,7 @@ const createPersonQuery = (store: Store) => (predicate: Predicate<Person>) => {
 export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandler> => {
   let { loginRedirect } = createAuthorizeHandlers(options);
 
-  let { port, audience, scope, store, clientId } = options;
+  let { audience, scope, store, clientId } = options;
   let personQuery = createPersonQuery(store);
 
   return {
@@ -55,11 +55,13 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     ['/login']: function* (req, res) {
       let { redirect_uri } = req.query as QueryParams;
 
-      assert(!!port, `no port assigned`);
+      let service = options.services.get().find(({ name }) => name === 'auth0' );
+      assert(!!service, `did not find auth0 service in set of running services`);
+
       assert(!!clientId, `no clientId assigned`);
 
       let html = loginView({
-        port,
+        port: Number(new URL(service.url).port),
         scope,
         redirectUri: redirect_uri,
         clientId,
@@ -84,11 +86,13 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       if(!user) {
         let { redirect_uri } = req.query as QueryParams;
 
-        assert(!!port, `no port assigned`);
+        let service = options.services.get().find(({ name }) => name === 'auth0' );
+        assert(!!service, `did not find auth0 service in set of running services`);
+
         assert(!!clientId, `no clientId assigned`);
 
         let html = loginView({
-          port,
+          port: Number(new URL(service.url).port),
           scope,
           redirectUri: redirect_uri,
           clientId,
@@ -131,4 +135,3 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     },
   };
 };
-

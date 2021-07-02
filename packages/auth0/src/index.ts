@@ -40,11 +40,11 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers>): S
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const auth0: Simulator<Options> = (slice, options) => {
-  let { options: { services = {} } } = slice.get();
   let store = slice.slice('store');
+  let services = slice.slice('services');
 
   // TODO: this will only work if auth0 has been assigned a static port
-  let handlers = createAuth0Handlers({ ...DefaultOptions, ...options, store, port: services['auth0']?.port });
+  let handlers = createAuth0Handlers({ ...DefaultOptions, ...options, store, services });
 
   return {
     services: { auth0: createAuth0Service(handlers) },

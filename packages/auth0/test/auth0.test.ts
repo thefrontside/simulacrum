@@ -21,30 +21,17 @@ describe('Auth0 simulator', () => {
       simulation = yield client.createSimulation("auth0");
     });
 
-    afterEach(function * () {
-      if(simulation) {
-        client.destroySimulation(simulation);
-      }
-    });
-
     it('starts the simulation', function*() {
       expect(simulation.status).toEqual('running');
     });
   });
 
   describe('authorize', () => {
-    let simulation: Simulation;
 
     beforeEach(function*() {
-      simulation = yield client.createSimulation("auth0", { services: {
+      yield client.createSimulation("auth0", { services: {
         auth0: { port: 4400 }
       } });
-    });
-
-    afterEach(function * () {
-      if(simulation) {
-        client.destroySimulation(simulation);
-      }
     });
 
     it('should authorize', function *() {
@@ -80,23 +67,17 @@ describe('Auth0 simulator', () => {
   describe('login', () => {
     let simulation: Simulation;
     let person: {data: Person};
+    let url: string;
 
     beforeEach(function* () {
-      simulation = yield client.createSimulation("auth0", { services: {
-        auth0: { port: 4400 }
-      } });
+      simulation = yield client.createSimulation("auth0");
+      url = simulation.services[0].url;
 
       person = yield client.given(simulation, "person");
     });
 
-    afterEach(function * () {
-      if(simulation) {
-        client.destroySimulation(simulation);
-      }
-    });
-
     it('should login with valid credentials', function*(){
-      let res: Response = yield fetch(`https://localhost:4400/usernamepassword/login`, {
+      let res: Response = yield fetch(`${url}/usernamepassword/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -112,7 +93,7 @@ describe('Auth0 simulator', () => {
     });
 
     it('should fail with invalid credentials', function*(){
-      let res: Response = yield fetch(`https://localhost:4400/usernamepassword/login`, {
+      let res: Response = yield fetch(`${url}/usernamepassword/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -153,12 +134,6 @@ describe('Auth0 simulator', () => {
           password: person.data.password,
         })
       });
-    });
-
-    afterEach(function * () {
-      if(simulation) {
-        client.destroySimulation(simulation);
-      }
     });
 
     it('should post to /login/callback', function* () {
