@@ -25,7 +25,7 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
 
     let id = newid();
     let simulation = atom.slice("simulations").slice(id);
-    simulation.set({ id, status: 'new', simulator, options, scenarios: {}, store: {} });
+    simulation.set({ id, status: 'new', simulator, options, services: [], scenarios: {}, store: {} });
 
     return scope.spawn(simulation.filter(({ status }) => status !== 'new').expect());
   }

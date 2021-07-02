@@ -57,6 +57,7 @@ export type SimulationState =
     simulator: string,
     options: SimulationOptions;
     scenarios: Record<string, ScenarioState>;
+    services: [];
     store: StoreState;
   } |
   {
@@ -77,6 +78,7 @@ export type SimulationState =
     simulator: string,
     options: SimulationOptions;
     scenarios: Record<string, ScenarioState>;
+    services: [];
     store: StoreState;
     error: Error
   }

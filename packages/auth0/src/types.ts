@@ -1,4 +1,5 @@
-import { Store } from '@simulacrum/server';
+import { SimulationState, Store } from '@simulacrum/server';
+import { Slice } from '@effection/atom';
 
 export interface Options {
   scope: string;
@@ -6,6 +7,7 @@ export interface Options {
   audience: string;
   clientId?: string;
   store: Store;
+  services: Slice<SimulationState['services']>;
 }
 
 export type ResponseModes = 'query' | 'web_message' | 'fragment';
