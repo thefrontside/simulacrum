@@ -58,10 +58,12 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       let service = options.services.get().find(({ name }) => name === 'auth0' );
       assert(!!service, `did not find auth0 service in set of running services`);
 
+      let url = new URL(service.url);
+
       assert(!!clientId, `no clientId assigned`);
 
       let html = loginView({
-        port: Number(new URL(service.url).port),
+        domain: `${url.host}:${url.port}`,
         scope,
         redirectUri: redirect_uri,
         clientId,
@@ -89,10 +91,12 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         let service = options.services.get().find(({ name }) => name === 'auth0' );
         assert(!!service, `did not find auth0 service in set of running services`);
 
+        let url = new URL(service.url);
+
         assert(!!clientId, `no clientId assigned`);
 
         let html = loginView({
-          port: Number(new URL(service.url).port),
+          domain: `${url.host}:${url.port}`,
           scope,
           redirectUri: redirect_uri,
           clientId,
