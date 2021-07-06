@@ -1,0 +1,4 @@
+- schema development
+ - infinite generators
+- app development
+ - known state, scenarios
