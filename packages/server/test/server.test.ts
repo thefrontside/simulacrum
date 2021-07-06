@@ -3,8 +3,8 @@ import { Client, Simulation } from '@simulacrum/client';
 import { assert } from 'assert-ts';
 import fetch from 'cross-fetch';
 import expect from 'expect';
-import getPort from 'get-port';
 
+import getPort from 'get-port';
 import { echo } from '../src/echo';
 import { createHttpApp } from '../src/http';
 import { ServerOptions } from '../src/interfaces';

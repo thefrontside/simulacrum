@@ -1,8 +1,12 @@
 import { Operation, Stream, Task, on, sleep, spawn } from 'effection';
-import { main, exec, daemon, StdIO } from '@effection/node';
+import { main } from '@effection/main';
+import { exec, daemon, StdIO } from '@effection/process';
 import { watch } from 'chokidar';
 
 main(function*(scope) {
+  if (!process.env.PORT) process.env.PORT = '3000';
+  if (!process.env.NODE_ENV) process.env.NODE_ENV = 'development';
+
   let watcher = watch('./src/**/*.ts', { ignoreInitial: true, ignored: 'dist' });
   try {
     let process: Task = yield spawn(buildAndRun);
