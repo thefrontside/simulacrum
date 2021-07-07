@@ -157,7 +157,6 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       }
 
       let user = personQuery(([, person]) => {
-        console.log({ person });
         assert(!!person.email, `no email defined on person scenario`);
 
         return person.email.toLowerCase() === username.toLowerCase();

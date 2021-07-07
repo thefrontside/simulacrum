@@ -46,7 +46,7 @@ describe('Auth0 simulator', () => {
     });
   });
 
-  describe('authorize', () => {
+  describe('/authorize', () => {
     beforeEach(function*() {
       let simulation: Simulation = yield client.createSimulation("auth0");
 
@@ -84,7 +84,7 @@ describe('Auth0 simulator', () => {
     tenant: "localhost:4400",
   };
 
-  describe('login', () => {
+  describe('/login', () => {
     let simulation: Simulation;
     let person: {data: Person};
     let url: string;
@@ -169,6 +169,67 @@ describe('Auth0 simulator', () => {
 
       expect(res.status).toBe(200);
       expect(res.statusText).toBe('OK');
+    });
+  });
+
+  describe('/oauth/token', () => {
+    let simulation: Simulation;
+    let person: {data: Person};
+    let url: string;
+    let code: string;
+
+    beforeEach(function* () {
+      // this is a big setup and duplicates the other tests unfortunately
+      // maybe the duplication should be removed and have 1 set up and multiple cases
+      simulation = yield client.createSimulation("auth0", { services: {
+        auth0: { port: 4400 }, frontend: { port: 3000 }
+      } });
+
+      person = yield client.given(simulation, "person");
+
+      url = simulation.services[0].url;
+
+      // prime the server with the nonce field
+      yield fetch(`${url}/usernamepassword/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...Fields,
+          username: person.data.email,
+          password: person.data.password,
+        })
+      });
+
+      let res: Response = yield fetch(`https://localhost:4400/login/callback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `wctx=${encodeURIComponent(JSON.stringify({
+          ...Fields
+        }))}`
+      });
+
+      code = new URL(res.url).searchParams.get('code') as string;
+    });
+
+    it('should return a valid token', function* () {
+      let res: Response = yield fetch(`${url}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code,
+          username: person.data.email,
+          password: person.data.password,
+        })
+      });
+
+      expect(res.ok).toBe(true);
     });
   });
 });
