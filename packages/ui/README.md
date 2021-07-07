@@ -36,8 +36,8 @@ In order to run an https service from localhost you need locally-trusted develop
 brew install mkcert
 brew install nss  # for firefox
 
-mkdir -p ~/.simulacrum/certificates
-cd ~/.simulacrum/certificates
+mkdir -p ~/.simulacrum/certs
+cd ~/.simulacrum/certs
 
 mkcert -install   # Created a new local CA at the location returned from mkcert -CAROOT
 mkcert localhost  # Using the local CA at CAROOT, create a new certificate valid for the following names
