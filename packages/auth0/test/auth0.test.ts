@@ -180,8 +180,6 @@ describe('Auth0 simulator', () => {
     let code: string;
 
     beforeEach(function* () {
-      // this is a big setup and duplicates the other tests unfortunately
-      // maybe the duplication should be removed and have 1 set up and multiple cases
       simulation = yield client.createSimulation("auth0", { services: {
         auth0: { port: 4400 }, frontend: { port: 3000 }
       } });
