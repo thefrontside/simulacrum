@@ -28,11 +28,7 @@ describe('Auth0 simulator', () => {
               },
 
             },
-            scenarios: {
-              *person(store, faker) {
-                return yield person(store, faker);
-              }
-            }
+            scenarios: { person }
           };
         }
       }
