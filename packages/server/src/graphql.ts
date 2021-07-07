@@ -1,14 +1,21 @@
 import { main } from '@effection/node';
 import { envelop, useSchema } from '@envelop/core';
+import { useGraphQLMiddleware } from '@envelop/graphql-middleware';
 import { json } from 'express';
+import { IMiddlewareFunction } from 'graphql-middleware';
 import graphQLPlaygroundMiddlewareExpress from 'graphql-playground-middleware-express';
 
 import { createSimulationServer, Server, createHttpApp } from '.';
 import { schema as starwarsSchema } from './starwars-schema';
 
+const graphQLMiddleware: IMiddlewareFunction = async (resolve, source, args, context, info) => {
+  return resolve(source, args, context, info);
+};
+
 const { parse, validate, schema, contextFactory, execute } = envelop({
   plugins: [
-    useSchema(starwarsSchema)
+    useSchema(starwarsSchema),
+    useGraphQLMiddleware([graphQLMiddleware])
   ]
 })();
 
