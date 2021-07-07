@@ -5,6 +5,7 @@ import { auth0 } from '../src';
 import fetch from 'cross-fetch';
 import { stringify } from 'querystring';
 import { createHttpApp, person, Person } from '@simulacrum/server';
+import { decode, encode } from 'base64-url';
 
 describe('Auth0 simulator', () => {
   let client: Client;
@@ -175,7 +176,7 @@ describe('Auth0 simulator', () => {
   describe('/oauth/token', () => {
     let simulation: Simulation;
     let person: {data: Person};
-    let url: string;
+    let authUrl: string;
     let code: string;
 
     beforeEach(function* () {
@@ -187,10 +188,10 @@ describe('Auth0 simulator', () => {
 
       person = yield client.given(simulation, "person");
 
-      url = simulation.services[0].url;
+      authUrl = simulation.services[0].url;
 
       // prime the server with the nonce field
-      yield fetch(`${url}/usernamepassword/login`, {
+      yield fetch(`${authUrl}/usernamepassword/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -216,20 +217,38 @@ describe('Auth0 simulator', () => {
     });
 
     it('should return a valid token', function* () {
-      let res: Response = yield fetch(`${url}/oauth/token`, {
+      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           ...Fields,
-          code,
-          username: person.data.email,
-          password: person.data.password,
+          code
         })
       });
 
       expect(res.ok).toBe(true);
+    });
+
+
+    it('should return a 401 responsive with invalid credentials', function* () {
+      let [nonce] = decode(code).split(":");
+
+      let invalidCode = encode(`${nonce}:invalid-user`);
+
+      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code: invalidCode
+        })
+      });
+
+      expect(res.status).toBe(401);
     });
   });
 });
