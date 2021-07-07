@@ -1,5 +1,4 @@
-import { Operation, Stream, Task, on, sleep, spawn } from 'effection';
-import { main } from '@effection/main';
+import { Operation, Stream, Task, main, on, sleep, spawn } from 'effection';
 import { exec, daemon, StdIO } from '@effection/process';
 import { watch } from 'chokidar';
 
