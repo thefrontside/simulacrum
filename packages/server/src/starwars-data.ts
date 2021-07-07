@@ -10,7 +10,7 @@ export interface Character {
 }
 
 export interface Human {
-  type: 'Human';
+  __typename: 'Human';
   id: string;
   name: string;
   friends: ReadonlyArray<string>;
@@ -19,7 +19,7 @@ export interface Human {
 }
 
 export interface Droid {
-  type: 'Droid';
+  __typename: 'Droid';
   id: string;
   name: string;
   friends: ReadonlyArray<string>;
@@ -36,7 +36,7 @@ export interface Droid {
  */
 
 const luke: Human = {
-  type: 'Human',
+  __typename: 'Human',
   id: '1000',
   name: 'Luke Skywalker',
   friends: ['1002', '1003', '2000', '2001'],
@@ -45,7 +45,7 @@ const luke: Human = {
 };
 
 const vader: Human = {
-  type: 'Human',
+  __typename: 'Human',
   id: '1001',
   name: 'Darth Vader',
   friends: ['1004'],
@@ -54,7 +54,7 @@ const vader: Human = {
 };
 
 const han: Human = {
-  type: 'Human',
+  __typename: 'Human',
   id: '1002',
   name: 'Han Solo',
   friends: ['1000', '1003', '2001'],
@@ -62,7 +62,7 @@ const han: Human = {
 };
 
 const leia: Human = {
-  type: 'Human',
+  __typename: 'Human',
   id: '1003',
   name: 'Leia Organa',
   friends: ['1000', '1002', '2000', '2001'],
@@ -71,7 +71,7 @@ const leia: Human = {
 };
 
 const tarkin: Human = {
-  type: 'Human',
+  __typename: 'Human',
   id: '1004',
   name: 'Wilhuff Tarkin',
   friends: ['1001'],
@@ -87,7 +87,7 @@ const humanData: { [id: string]: Human } = {
 };
 
 const threepio: Droid = {
-  type: 'Droid',
+  __typename: 'Droid',
   id: '2000',
   name: 'C-3PO',
   friends: ['1000', '1002', '1003', '2001'],
@@ -96,7 +96,7 @@ const threepio: Droid = {
 };
 
 const artoo: Droid = {
-  type: 'Droid',
+  __typename: 'Droid',
   id: '2001',
   name: 'R2-D2',
   friends: ['1000', '1002', '1003'],

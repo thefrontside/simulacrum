@@ -126,14 +126,6 @@ const characterInterface: GraphQLInterfaceType = new GraphQLInterfaceType({
       description: 'All secrets about their past.',
     },
   }),
-  resolveType(character) {
-    switch (character.type) {
-      case 'Human':
-        return humanType.name;
-      case 'Droid':
-        return droidType.name;
-    }
-  },
 });
 
 /**
