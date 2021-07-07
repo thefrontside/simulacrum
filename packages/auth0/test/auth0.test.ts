@@ -4,14 +4,38 @@ import { createTestServer, Client, Simulation } from './helpers';
 import { auth0 } from '../src';
 import fetch from 'cross-fetch';
 import { stringify } from 'querystring';
-import { Person } from '@simulacrum/server';
-import nock from 'nock';
+import { createHttpApp, person, Person } from '@simulacrum/server';
 
 describe('Auth0 simulator', () => {
   let client: Client;
+  let frontendUrl: string;
+  let auth0Url: string;
+
   beforeEach(function*() {
     client = yield createTestServer({
-      simulators: { auth0 }
+      simulators: {
+        auth0: (slice, options) => {
+          let { services } = auth0(slice, options);
+
+          return {
+            services: {
+              ...services,
+              frontend: {
+                protocol: 'http',
+                app: createHttpApp().get('/', function * (_, res) {
+                  res.status(200).send('ok');
+                })
+              },
+
+            },
+            scenarios: {
+              *person(store, faker) {
+                return yield person(store, faker);
+              }
+            }
+          };
+        }
+      }
     });
   });
 
@@ -27,17 +51,17 @@ describe('Auth0 simulator', () => {
   });
 
   describe('authorize', () => {
-
     beforeEach(function*() {
-      yield client.createSimulation("auth0", { services: {
-        auth0: { port: 4400 }
-      } });
+      let simulation: Simulation = yield client.createSimulation("auth0");
+
+      auth0Url = simulation.services[0].url;
+      frontendUrl = simulation.services[1].url;
     });
 
     it('should authorize', function *() {
-      let res: Response = yield fetch(`https://localhost:4400/authorize?${stringify({
+      let res: Response = yield fetch(`${auth0Url}/authorize?${stringify({
         client_id: "1234",
-        redirect_uri: "http://localhost:3000",
+        redirect_uri: frontendUrl,
         response_type: "code",
         response_mode: "query",
         state: "MVpFN0JXWGNFUVNVQnJjNGlXZWFNbGd2V3M2MC5VRkwyV1VKNW9wRTZVVw==",
@@ -113,11 +137,9 @@ describe('Auth0 simulator', () => {
     let simulation: Simulation;
     let person: {data: Person};
 
-    let scope = nock('http://localhost:3000').get(/\/\?code=*/).reply(200);
-
     beforeEach(function* () {
       simulation = yield client.createSimulation("auth0", { services: {
-        auth0: { port: 4400 }
+        auth0: { port: 4400 }, frontend: { port: 3000 }
       } });
 
       person = yield client.given(simulation, "person");
@@ -150,8 +172,7 @@ describe('Auth0 simulator', () => {
       });
 
       expect(res.status).toBe(200);
-
-      expect(scope.isDone()).toBe(true);
+      expect(res.statusText).toBe('OK');
     });
   });
 });

@@ -43,7 +43,6 @@ export const auth0: Simulator<Options> = (slice, options) => {
   let store = slice.slice('store');
   let services = slice.slice('services');
 
-  // TODO: this will only work if auth0 has been assigned a static port
   let handlers = createAuth0Handlers({ ...DefaultOptions, ...options, store, services });
 
   return {

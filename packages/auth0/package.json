@@ -38,8 +38,7 @@
     "effection": "2.0.0-preview.14",
     "jsesc": "^3.0.2",
     "jsonwebtoken": "^8.5.1",
-    "html-entities": "^2.3.2",
-    "nock": "^13.1.0"
+    "html-entities": "^2.3.2"
   },
   "devDependencies": {
     "@effection/mocha": "2.0.0-preview.11",
@@ -51,7 +50,6 @@
     "@types/jsesc": "^2.5.1",
     "@types/jsonwebtoken": "^8.5.1",
     "@types/mocha": "^8.2.1",
-    "@types/nock": "^11.1.0",
     "@types/ws": "^7.4.4",
     "@types/cookie-session": "^2.0.42",
     "expect": "^26.6.2",
