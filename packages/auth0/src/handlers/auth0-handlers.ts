@@ -4,8 +4,10 @@ import { createAuthorizeHandlers } from './authorize';
 import { loginView } from '../views/login';
 import { assert } from 'assert-ts';
 import { stringify } from 'querystring';
-import { encode } from "base64-url";
+import { decode, encode } from "base64-url";
 import { userNamePasswordForm } from '../views/username-password';
+import { expiresAt } from '../auth/date';
+import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
 
 export type Routes =
   | '/heartbeat'
@@ -13,7 +15,16 @@ export type Routes =
   | '/login'
   | '/usernamepassword/login'
   | '/login/callback'
+  | '/oauth/token'
+
   type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
+
+const getServiceUrlFromOptions = (options: Options) => {
+  let service = options.services.get().find(({ name }) => name === 'auth0' );
+  assert(!!service, `did not find auth0 service in set of running services`);
+
+  return new URL(service.url);
+};
 
 const createPersonQuery = (store: Store) => (predicate: Predicate<Person>) => {
   let people = store.slice('people').get() ?? [];
@@ -63,7 +74,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       assert(!!clientId, `no clientId assigned`);
 
       let html = loginView({
-        domain: `${url.host}:${url.port}`,
+        domain: url.host,
         scope,
         redirectUri: redirect_uri,
         clientId,
@@ -88,15 +99,12 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       if(!user) {
         let { redirect_uri } = req.query as QueryParams;
 
-        let service = options.services.get().find(({ name }) => name === 'auth0' );
-        assert(!!service, `did not find auth0 service in set of running services`);
-
-        let url = new URL(service.url);
+        let url = getServiceUrlFromOptions(options);
 
         assert(!!clientId, `no clientId assigned`);
 
         let html = loginView({
-          domain: `${url.host}:${url.port}`,
+          domain: url.host,
           scope,
           redirectUri: redirect_uri,
           clientId,
@@ -136,6 +144,53 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       let routerUrl = `${redirect_uri}?${qs}`;
 
       return res.status(302).redirect(routerUrl);
+    },
+
+    ['/oauth/token']: function* (req, res) {
+      let { code } = req.body;
+
+      let [nonce, username] = decode(code).split(":");
+
+      if (!username) {
+        res.status(400).send(`no nonce in store for ${code}`);
+        return;
+      }
+
+      let user = personQuery(([, person]) => {
+        console.log({ person });
+        assert(!!person.email, `no email defined on person scenario`);
+
+        return person.email.toLowerCase() === username.toLowerCase();
+      });
+
+      if(!user) {
+        res.status(401).send('Unauthorized');
+        return;
+      }
+
+      let url = getServiceUrlFromOptions(options).toString();
+
+      let idTokenData = {
+        alg: "RS256",
+        typ: "JWT",
+        iss: url,
+        exp: expiresAt(),
+        iat: Date.now(),
+        mail: username,
+        aud: clientId,
+        sub: user.id,
+        nonce,
+      };
+
+      let idToken = createJsonWebToken(idTokenData);
+
+      res.status(200).json({
+        access_token: createAuthJWT(url, audience),
+        id_token: idToken,
+        scope,
+        expires_in: 86400,
+        token_type: "Bearer",
+      });
     },
   };
 };
