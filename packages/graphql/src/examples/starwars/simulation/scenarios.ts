@@ -1,26 +1,10 @@
-import { Slice } from '@effection/atom';
 import { Store, Faker } from '@simulacrum/server';
 import { Operation } from 'effection';
 
+import { records } from './context';
 import { droidNames, droidFunctions, humanNames, planetNames } from './data';
 import { Character, Episode } from '../schema/types';
 
-// atom doesn't quite work right in the sense that we can't make a
-// deep slice and have it create parents on demand.
-export function records<TRecord = unknown>(store: Store, key: string): Slice<Record<string, TRecord>> {
-  // create and initialize the graphql slice
-  let graphql = store.slice("graphql");
-  if (!graphql.get()) {
-    graphql.set({});
-  }
-
-  // create and initialize our records within the graphql slice
-  let slice = graphql.slice(key);
-  if (!slice.get()) {
-    slice.set({});
-  }
-  return slice;
-}
 
 export type ManyScenarioParams = {
   n?: number;
