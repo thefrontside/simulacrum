@@ -10,7 +10,7 @@ export interface Options {
   services: Slice<SimulationState['services']>;
 }
 
-export type ResponseModes = 'query' | 'web_message' | 'fragment';
+export type ResponseModes = 'query' | 'web_message';
 
 export type QueryParams = {
   state: string;

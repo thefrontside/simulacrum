@@ -53,6 +53,7 @@
     "@types/ws": "^7.4.4",
     "@types/cookie-session": "^2.0.42",
     "expect": "^26.6.2",
+    "keygrip": "^1.1.0",
     "mocha": "^8.0.0",
     "rimraf": "^3.0.2",
     "ts-node": "^9.1.1",
