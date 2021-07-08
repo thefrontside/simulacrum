@@ -7,6 +7,17 @@ import { stringify } from 'querystring';
 import { createHttpApp, person, Person } from '@simulacrum/server';
 import { decode, encode } from 'base64-url';
 
+import Keygrip from 'keygrip';
+
+const createSessionCookie = <T>(data: T): string => {
+  let cookie = Buffer.from(JSON.stringify(data)).toString('base64');
+
+  let kg = Keygrip(['shhh']);
+  let hash = kg.sign(`session=${cookie}`);
+
+  return `session=${cookie};session.sig=${hash};`;
+};
+
 describe('Auth0 simulator', () => {
   let client: Client;
   let frontendUrl: string;
@@ -74,7 +85,7 @@ describe('Auth0 simulator', () => {
       });
     });
 
-    describe.only('response_mode=web_message', () => {
+    describe('response_mode=web_message', () => {
       beforeEach(function*() {
         let simulation: Simulation = yield client.createSimulation("auth0");
 
@@ -82,10 +93,9 @@ describe('Auth0 simulator', () => {
         frontendUrl = simulation.services[1].url;
       });
 
-      it('should authorize', function *() {
-        let cookie = Buffer.from(JSON.stringify({ "username": "bob" })).toString('base64');
-
-        let kg = Keygrip(['testKey']);
+      it('should return the web_message html', function *() {
+        // /authorize web_message expects there to be a username in the session
+        let cookie = createSessionCookie({ username: 'bob' });
 
         let res: Response = yield fetch(`${auth0Url}/authorize?${stringify({
           redirect_uri: frontendUrl,
@@ -93,11 +103,15 @@ describe('Auth0 simulator', () => {
           state: "MVpFN0JXWGNFUVNVQnJjNGlXZWFNbGd2V3M2MC5VRkwyV1VKNW9wRTZVVw==",
           nonce: "dDJ6NX5aUFU3SlM4TEozQThyR0V0fjdjRlJDZ0YzfjNDcEV3OWIzWWVYbQ==",
           auth0Client: "eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xLjAifQ==",
-        })}`);
+        })}`, {
+          credentials: 'same-origin',
+          headers: {
+            cookie
+          }
+        });
 
         expect(res.ok).toBe(true);
-
-        console.dir({ res }, { depth: 333 });
+        expect(res.headers.get('content-type')).toBe('text/html; charset=utf-8');
       });
     });
   });
