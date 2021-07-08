@@ -44,8 +44,10 @@
     "@frontside/typescript": "^1.1.1",
     "@simulacrum/client": "0.3.0",
     "@types/mocha": "^8.2.1",
+    "@types/node-fetch": "^2.5.11",
     "expect": "^26.6.2",
     "mocha": "^8.0.0",
+    "node-fetch": "^2.6.1",
     "rimraf": "^3.0.2",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3"
