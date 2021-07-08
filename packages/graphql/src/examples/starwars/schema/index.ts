@@ -6,100 +6,34 @@ import {
   GraphQLInterfaceType,
   GraphQLObjectType } from 'graphql';
 
-import { getFriends, getHero, getHuman, getDroid } from './starwars-data';
+import { Context, Droid, Episode, Human } from './types';
 
 /**
- * This is designed to be an end-to-end test, demonstrating
- * the full GraphQL stack.
+ * A simple schema for testing and documentation.
  *
- * We will create a GraphQL schema that describes the major
- * characters in the original Star Wars trilogy.
- *
- * NOTE: This may contain spoilers for the original Star
- * Wars trilogy.
+ * Resolvers should be pure; that is they should only rely on what is in 'Context'.
+ * This allows us to swap the real context for one that is backed by simulation.
  */
 
-/**
- * Using our shorthand to describe type systems, the type system for our
- * Star Wars example is:
- *
- * ```graphql
- * enum Episode { NEW_HOPE, EMPIRE, JEDI }
- *
- * interface Character {
- *   id: String!
- *   name: String
- *   friends: [Character]
- *   appearsIn: [Episode]
- * }
- *
- * type Human implements Character {
- *   id: String!
- *   name: String
- *   friends: [Character]
- *   appearsIn: [Episode]
- *   homePlanet: String
- * }
- *
- * type Droid implements Character {
- *   id: String!
- *   name: String
- *   friends: [Character]
- *   appearsIn: [Episode]
- *   primaryFunction: String
- * }
- *
- * type Query {
- *   hero(episode: Episode): Character
- *   human(id: String!): Human
- *   droid(id: String!): Droid
- * }
- * ```
- *
- * We begin by setting up our schema.
- */
-
-/**
- * The original trilogy consists of three movies.
- *
- * This implements the following type system shorthand:
- * ```graphql
- * enum Episode { NEW_HOPE, EMPIRE, JEDI }
- * ```
- */
 const episodeEnum = new GraphQLEnumType({
   name: 'Episode',
   description: 'One of the films in the Star Wars Trilogy',
   values: {
     NEW_HOPE: {
-      value: 4,
+      value: Episode.NEW_HOPE,
       description: 'Released in 1977.',
     },
     EMPIRE: {
-      value: 5,
+      value: Episode.EMPIRE,
       description: 'Released in 1980.',
     },
     JEDI: {
-      value: 6,
+      value: Episode.JEDI,
       description: 'Released in 1983.',
     },
   },
 });
 
-/**
- * Characters in the Star Wars trilogy are either humans or droids.
- *
- * This implements the following type system shorthand:
- * ```graphql
- * interface Character {
- *   id: String!
- *   name: String
- *   friends: [Character]
- *   appearsIn: [Episode]
- *   secretBackstory: String
- * }
- * ```
- */
 const characterInterface: GraphQLInterfaceType = new GraphQLInterfaceType({
   name: 'Character',
   description: 'A character in the Star Wars Trilogy',
@@ -128,21 +62,7 @@ const characterInterface: GraphQLInterfaceType = new GraphQLInterfaceType({
   }),
 });
 
-/**
- * We define our human type, which implements the character interface.
- *
- * This implements the following type system shorthand:
- * ```graphql
- * type Human : Character {
- *   id: String!
- *   name: String
- *   friends: [Character]
- *   appearsIn: [Episode]
- *   secretBackstory: String
- * }
- * ```
- */
-const humanType = new GraphQLObjectType({
+const humanType = new GraphQLObjectType<Human, Context>({
   name: 'Human',
   description: 'A humanoid creature in the Star Wars universe.',
   fields: () => ({
@@ -158,7 +78,7 @@ const humanType = new GraphQLObjectType({
       type: new GraphQLList(characterInterface),
       description:
         'The friends of the human, or an empty list if they have none.',
-      resolve: (human) => getFriends(human),
+      resolve: (human, _args, { store }) => store.getFriends(human),
     },
     appearsIn: {
       type: new GraphQLList(episodeEnum),
@@ -179,22 +99,7 @@ const humanType = new GraphQLObjectType({
   interfaces: [characterInterface],
 });
 
-/**
- * The other type of character in Star Wars is a droid.
- *
- * This implements the following type system shorthand:
- * ```graphql
- * type Droid : Character {
- *   id: String!
- *   name: String
- *   friends: [Character]
- *   appearsIn: [Episode]
- *   secretBackstory: String
- *   primaryFunction: String
- * }
- * ```
- */
-const droidType = new GraphQLObjectType({
+const droidType = new GraphQLObjectType<Droid, Context>({
   name: 'Droid',
   description: 'A mechanical creature in the Star Wars universe.',
   fields: () => ({
@@ -210,7 +115,7 @@ const droidType = new GraphQLObjectType({
       type: new GraphQLList(characterInterface),
       description:
         'The friends of the droid, or an empty list if they have none.',
-      resolve: (droid) => getFriends(droid),
+      resolve: (droid, _args, { store }) => store.getFriends(droid),
     },
     appearsIn: {
       type: new GraphQLList(episodeEnum),
@@ -231,35 +136,9 @@ const droidType = new GraphQLObjectType({
   interfaces: [characterInterface],
 });
 
-/**
- * This is the type that will be the root of our query, and the
- * entry point into our schema. It gives us the ability to fetch
- * objects by their IDs, as well as to fetch the undisputed hero
- * of the Star Wars trilogy, R2-D2, directly.
- *
- * This implements the following type system shorthand:
- * ```graphql
- * type Query {
- *   hero(episode: Episode): Character
- *   human(id: String!): Human
- *   droid(id: String!): Droid
- * }
- * ```
- */
-const queryType = new GraphQLObjectType({
+const queryType = new GraphQLObjectType<undefined, Context>({
   name: 'Query',
   fields: () => ({
-    hero: {
-      type: characterInterface,
-      args: {
-        episode: {
-          description:
-            'If omitted, returns the hero of the whole saga. If provided, returns the hero of that particular episode.',
-          type: episodeEnum,
-        },
-      },
-      resolve: (_source, { episode }) => getHero(episode),
-    },
     human: {
       type: humanType,
       args: {
@@ -268,7 +147,7 @@ const queryType = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString),
         },
       },
-      resolve: (_source, { id }) => getHuman(id),
+      resolve: (_source, { id }, { store }) => store.getHuman(id),
     },
     droid: {
       type: droidType,
@@ -278,15 +157,15 @@ const queryType = new GraphQLObjectType({
           type: new GraphQLNonNull(GraphQLString),
         },
       },
-      resolve: (_source, { id }) => getDroid(id),
+      resolve: (_source, { id }, { store }) => store.getDroid(id),
     },
+    characters: {
+      type: new GraphQLList(characterInterface),
+      resolve: (_source, _args, { store }) => store.getCharacters(),
+    }
   }),
 });
 
-/**
- * Finally, we construct our schema (whose starting query type is the query
- * type we defined above) and export it.
- */
 export const schema: GraphQLSchema = new GraphQLSchema({
   query: queryType,
   types: [humanType, droidType],
