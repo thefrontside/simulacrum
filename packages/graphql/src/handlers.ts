@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import graphQLPlaygroundMiddlewareExpress from 'graphql-playground-middleware-express';
 import { MiddlewareOptions } from 'graphql-playground-html';
 
-import { GraphQLOptions } from './types';
+import { Options } from './types';
 
 export function playground(options: MiddlewareOptions = {}): HttpHandler {
   return function*(req, res) {
@@ -12,7 +12,7 @@ export function playground(options: MiddlewareOptions = {}): HttpHandler {
   };
 }
 
-export function graphql(options: GraphQLOptions): HttpHandler {
+export function graphql(options: Options): HttpHandler {
   let { parse, validate, schema, contextFactory, execute } = envelop({
     plugins: [
       useSchema(options.schema),

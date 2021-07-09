@@ -8,7 +8,7 @@
     "prepack": "tsc --build tsconfig.dist.json",
     "build": "npm run prepack",
     "lint": "eslint src",
-    "test": "echo noop",
+    "test": "echo skip",
     "start": "node dist/start.js",
     "watch": "PORT=5000 ts-node -P ./tsconfig.watch.json ./watch.ts"
   },

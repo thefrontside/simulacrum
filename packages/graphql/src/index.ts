@@ -1,22 +1,10 @@
-import { createHttpApp, Scenarios, Service, Simulator } from '@simulacrum/server';
+import { createHttpApp, Service, Simulator } from '@simulacrum/server';
 import { json } from 'express';
-import { GraphQLSchema } from 'graphql';
 
 import { playground, graphql as graphQLHandler } from './handlers';
-import { ContextCreator, DynamicImport, GraphQLOptions, Options } from './types';
+import { Options, SimulatorOptions } from './types';
 
-function dynamicImport<TExport>(options: DynamicImport) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let result = require(options.module)[options.export] as TExport;
-
-  if (!result) {
-    console.warn(`export not found: "${JSON.stringify(options)}"`);
-  }
-
-  return result;
-}
-
-export function createGraphQLService(options: GraphQLOptions): Service {
+export function createGraphQLService(options: Options): Service {
   return {
     protocol: 'https',
     app: createHttpApp()
@@ -26,16 +14,18 @@ export function createGraphQLService(options: GraphQLOptions): Service {
   };
 }
 
-export const graphql: Simulator<Options> = (state, options) => {
-  let store = state.slice('store');
+export function createGraphQLSimulator({ schema, createContext, scenarios }: SimulatorOptions): Simulator {
+  return (state) => {
+    let store = state.slice('store');
 
-  return {
-    services: {
-      graphql: createGraphQLService({
-        schema: dynamicImport<GraphQLSchema>(options.schema),
-        context: dynamicImport<ContextCreator<unknown>>(options.context)(store),
-      })
-    },
-    scenarios: dynamicImport<Scenarios>(options.scenarios)
+    return {
+      services: {
+        graphql: createGraphQLService({
+          schema,
+          context: createContext?.(store),
+        })
+      },
+      scenarios,
+    };
   };
-};
+}

@@ -1,21 +1,17 @@
-import { Store } from '@simulacrum/server';
+import { Scenarios, Store } from '@simulacrum/server';
 import { GraphQLSchema } from 'graphql';
 
+export type ContextCreator<TContext> = (store: Store) => TContext;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface GraphQLOptions<TContext = any> {
+export interface Options<TContext = any> {
   schema: GraphQLSchema;
   context: TContext;
 }
 
-export type ContextCreator<TContext> = (store: Store) => TContext;
-
-export interface DynamicImport {
-  module: string;
-  export: string;
-}
-
-export interface Options {
-  schema: DynamicImport;
-  context: DynamicImport;
-  scenarios: DynamicImport;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface SimulatorOptions<TContext = any> {
+  schema: GraphQLSchema;
+  scenarios: Scenarios;
+  createContext?: ContextCreator<TContext>;
 }
