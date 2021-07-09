@@ -34,6 +34,7 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers>): S
           .get('/u/login', handlers['/usernamepassword/login'])
           .post('/usernamepassword/login', handlers['/usernamepassword/login'])
           .post('/login/callback', handlers['/login/callback'])
+          .post('/oauth/token', handlers['/oauth/token'])
 
   } as const;
 };
