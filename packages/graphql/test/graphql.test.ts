@@ -7,7 +7,6 @@ import _fetch, { RequestInit } from 'node-fetch';
 
 import { createTestServer, Client, Simulation } from './helpers';
 import { graphql } from '../src';
-import { droidNames } from '../src/examples/starwars/simulation/data';
 
 // ignore ssl errors for the purposes of these tests
 const agent = new https.Agent({
@@ -47,15 +46,15 @@ describe('GraphQL simulator', () => {
         simulation = yield client.createSimulation("graphql", {
           options: {
             schema: {
-              module: "@simulacrum/graphql/dist/examples/starwars",
+              module: "@simulacrum/graphql-starwars",
               export: "schema",
             },
             context: {
-              module: "@simulacrum/graphql/dist/examples/starwars",
-              export: "context",
+              module: "@simulacrum/graphql-starwars",
+              export: "createSimulationContext",
             },
             scenarios: {
-              module: "@simulacrum/graphql/dist/examples/starwars",
+              module: "@simulacrum/graphql-starwars",
               export: "scenarios",
             }
           }
@@ -130,7 +129,7 @@ describe('GraphQL simulator', () => {
               expect(result.errors).toBeUndefined();
               expect(result.data?.characters).toHaveLength(1);
               expect(result.data?.characters[0].__typename).toEqual("Droid");
-              expect(droidNames).toContain(result.data?.characters[0].name);
+              expect(typeof result.data?.characters[0].name).toEqual("string");
             });
 
             it("returns stable data", function*() {

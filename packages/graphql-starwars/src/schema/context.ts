@@ -1,4 +1,4 @@
-import { Droid, Episode, Human, StarWarsStore } from './types';
+import { Context, Droid, Episode, Human, StarWarsStore } from './types';
 
 /**
  * This is an example of a real store to accompany the schema.
@@ -102,3 +102,6 @@ export const store: StarWarsStore = {
   },
 };
 
+export const createContext = (): Context => ({
+  store,
+});

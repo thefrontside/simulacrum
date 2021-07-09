@@ -2,7 +2,6 @@ import { Slice } from '@effection/atom';
 import { Store } from '@simulacrum/server';
 
 import { Character, Context } from "../schema/types";
-import { ContextCreator } from "../../../types";
 
 // atom doesn't quite work right in the sense that we can't make a
 // deep slice and have it create parents on demand.
@@ -22,7 +21,7 @@ export function records<TRecord = unknown>(store: Store, key: string): Slice<Rec
 }
 
 
-export const context: ContextCreator<Context> = (store) => {
+export const createSimulationContext = (store: Store): Context => {
   let characters = records<Character>(store, 'characters');
 
   return {
