@@ -9,6 +9,8 @@ import express from 'express';
 import { Options } from './types';
 import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
+import { createOpenIdHandlers } from './handlers/openid-handlers';
+
 
 const publicDir = path.join(process.cwd(), 'src', 'views', 'public');
 
@@ -18,7 +20,7 @@ const DefaultOptions = {
   scope: "openid profile email offline_access",
 };
 
-const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers>): Service => {
+const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & ReturnType<typeof createOpenIdHandlers>): Service => {
   return {
     protocol: 'https',
     app: createHttpApp()
@@ -35,19 +37,23 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers>): S
           .post('/usernamepassword/login', handlers['/usernamepassword/login'])
           .post('/login/callback', handlers['/login/callback'])
           .post('/oauth/token', handlers['/oauth/token'])
+          .get('/.well-known/jwks.json', handlers['/.well-known/jwks.json'])
+          .get('/.well-known/openid-cofiguration', handlers['/.well-known/openid-cofiguration'])
 
   } as const;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const auth0: Simulator<Options> = (slice, options) => {
   let store = slice.slice('store');
   let services = slice.slice('services');
 
-  let handlers = createAuth0Handlers({ ...DefaultOptions, ...options, store, services });
+  let handlersOptions = { ...DefaultOptions, ...options, store, services };
+
+  let auth0Handlers = createAuth0Handlers(handlersOptions);
+  let openIdHandlers = createOpenIdHandlers(handlersOptions);
 
   return {
-    services: { auth0: createAuth0Service(handlers) },
+    services: { auth0: createAuth0Service({ ...auth0Handlers, ...openIdHandlers }) },
     scenarios: {
       /**
        * Here we just wrap the internal `person` scenario to augment
