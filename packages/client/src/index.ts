@@ -1,4 +1,4 @@
-import { Deferred, Task, createChannel, run, sleep, Subscription } from 'effection';
+import { createFuture, Task, createChannel, run, sleep, Subscription } from 'effection';
 import { createClient as createWSClient, SubscribePayload } from 'graphql-ws';
 import webSocketImpl from 'isomorphic-ws';
 import { GraphQLError } from 'graphql';
@@ -72,15 +72,15 @@ export function createClient(serverURL: string): Client {
     return {
       run(scope: Task) {
         let { send, close, stream } = createChannel<Result<T>>();
-        let { promise, resolve, reject } = Deferred<void>();
+        let { future, resolve } = createFuture<void>();
         scope.spawn(function*() {
           let unsubscribe = ws.subscribe<Result<T>>(payload, {
             next: send,
-            complete: () => resolve(),
-            error: reject
+            complete: () => resolve({ state: "completed", value: undefined }),
+            error: () => null
           });
           try {
-            yield promise;
+            yield future;
           } finally {
             close();
             unsubscribe();

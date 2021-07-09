@@ -1,4 +1,4 @@
-import { main } from '@effection/node';
+import { main } from 'effection';
 import { createSimulationServer, Server } from '@simulacrum/server';
 import { auth0 } from '.';
 

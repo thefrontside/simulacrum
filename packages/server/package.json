@@ -10,7 +10,7 @@
     "build": "npm run prepack",
     "lint": "eslint src test watch.ts",
     "start": "node dist/start.js",
-    "watch": "PORT=3000 NODE_ENV=development ts-node -P ./tsconfig.watch.json ./watch.ts"
+    "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
   },
   "repository": {
     "type": "git",
@@ -27,13 +27,13 @@
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
-    "@effection/atom": "2.0.0-preview.13",
-    "@effection/node": "2.0.0-preview.14",
+    "@effection/atom": "^2.0.0-beta.3",
+    "@effection/process": "^2.0.0-beta.3",
     "@simulacrum/ui": "0.0.2",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "cors": "^2.8.5",
-    "effection": "2.0.0-preview.14",
+    "effection": "^2.0.0-beta.3",
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "faker": "^5.5.0",
@@ -45,7 +45,7 @@
     "ws": "^7.4.4"
   },
   "devDependencies": {
-    "@effection/mocha": "2.0.0-preview.11",
+    "@effection/mocha": "^2.0.0-beta.3",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",

@@ -1,4 +1,4 @@
-import { main } from '@effection/node';
+import { main } from 'effection';
 
 import { echo } from './echo';
 import { createSimulationServer, Server } from './server';
