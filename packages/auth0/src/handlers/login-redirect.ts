@@ -3,8 +3,8 @@ import { Options, QueryParams } from '../types';
 import { stringify } from "querystring";
 import { Middleware } from '@simulacrum/server';
 
-export const createAuthorizeHandlers = (options: Options): Record<'loginRedirect', Middleware> => ({
-  loginRedirect: function* (req: Request, res: Response) {
+export const createLoginRedirectHandler = (options: Options): Middleware =>
+  function* loginRedirect (req: Request, res: Response) {
     let {
       client_id,
       redirect_uri,
@@ -34,5 +34,4 @@ export const createAuthorizeHandlers = (options: Options): Record<'loginRedirect
         audience: options.audience,
       })}`
     );
-  }
-});
+  };

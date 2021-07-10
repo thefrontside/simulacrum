@@ -1,6 +1,7 @@
-import { HttpHandler, Person, Store } from '@simulacrum/server';
+import { HttpHandler, Middleware, Person, Store } from '@simulacrum/server';
 import { Options, QueryParams, ResponseModes } from '../types';
-import { createAuthorizeHandlers } from './authorize';
+import { createLoginRedirectHandler } from './login-redirect';
+import { createWebMessageHandler } from './web-message';
 import { loginView } from '../views/login';
 import { assert } from 'assert-ts';
 import { stringify } from 'querystring';
@@ -41,10 +42,13 @@ const createPersonQuery = (store: Store) => (predicate: Predicate<Person>) => {
 };
 
 export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandler> => {
-  let { loginRedirect } = createAuthorizeHandlers(options);
-
   let { audience, scope, store, clientId } = options;
   let personQuery = createPersonQuery(store);
+
+  let authorizeHandlers: Record<ResponseModes, Middleware> = {
+    query: createLoginRedirectHandler(options),
+    web_message: createWebMessageHandler()
+  };
 
   return {
     ['/heartbeat']: function *(_, res) {
@@ -54,13 +58,13 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     ['/authorize']: function *(req, res) {
       let responseMode = req.query.response_mode as ResponseModes;
 
-      switch(responseMode) {
-        case 'query':
-          yield loginRedirect(req, res);
-          break;
-        default:
-          throw new Error(`unknown response_mode ${responseMode}`);
-      }
+      assert(['query', 'web_message'].includes(responseMode), `unknown response_mode ${responseMode}`);
+
+      let handler = authorizeHandlers[responseMode];
+
+      yield handler(req, res);
+
+      return;
     },
 
     ['/login']: function* (req, res) {
