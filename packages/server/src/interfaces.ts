@@ -1,5 +1,5 @@
-import { Operation } from 'effection';
-import { Slice } from '@effection/atom';
+import type { Operation } from 'effection';
+import type { Slice } from '@effection/atom';
 import type { HttpApp } from './http';
 import type { Faker } from './faker';
 

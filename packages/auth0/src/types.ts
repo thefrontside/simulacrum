@@ -1,5 +1,5 @@
-import { SimulationState, Store } from '@simulacrum/server';
-import { Slice } from '@effection/atom';
+import type { SimulationState, Store } from '@simulacrum/server';
+import type { Slice } from '@effection/atom';
 
 export interface Options {
   scope: string;
