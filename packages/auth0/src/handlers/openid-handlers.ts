@@ -1,7 +1,7 @@
 import type { HttpHandler } from '@simulacrum/server';
 import { Options } from 'src/types';
 import { JWKS } from '../auth/constants';
-import { getSericeUrl } from './get-service-url';
+import { getServiceUrl } from './get-service-url';
 
 type Routes =
   | '/jwks.json'
@@ -16,7 +16,7 @@ export const createOpenIdHandlers = (options: Options): Record<OpenIdRoutes, Htt
     },
 
     ['/.well-known/openid-cofiguration']: function* (_, res) {
-      let url = getSericeUrl(options).toString().replace(/\/$/, '');
+      let url = getServiceUrl(options).toString().replace(/\/$/, '');
 
       res.json({
         issuer: url,

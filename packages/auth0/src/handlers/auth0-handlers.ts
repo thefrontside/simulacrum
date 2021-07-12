@@ -9,7 +9,7 @@ import { decode, encode } from "base64-url";
 import { userNamePasswordForm } from '../views/username-password';
 import { expiresAt } from '../auth/date';
 import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
-import { getSericeUrl } from './get-service-url';
+import { getServiceUrl } from './get-service-url';
 
 export type Routes =
   | '/heartbeat'
@@ -71,7 +71,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     ['/login']: function* (req, res) {
       let { redirect_uri } = req.query as QueryParams;
 
-      let url = getSericeUrl(options);
+      let url = getServiceUrl(options);
 
       assert(!!clientId, `no clientId assigned`);
 
