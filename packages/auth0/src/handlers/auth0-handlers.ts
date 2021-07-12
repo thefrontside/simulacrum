@@ -9,6 +9,7 @@ import { decode, encode } from "base64-url";
 import { userNamePasswordForm } from '../views/username-password';
 import { expiresAt } from '../auth/date';
 import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
+import { getServiceUrl } from './get-service-url';
 
 export type Routes =
   | '/heartbeat'
@@ -18,7 +19,7 @@ export type Routes =
   | '/login/callback'
   | '/oauth/token'
 
-  type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
+type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
 
 const getServiceUrlFromOptions = (options: Options) => {
   let service = options.services.get().find(({ name }) => name === 'auth0' );
@@ -70,10 +71,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     ['/login']: function* (req, res) {
       let { redirect_uri } = req.query as QueryParams;
 
-      let service = options.services.get().find(({ name }) => name === 'auth0' );
-      assert(!!service, `did not find auth0 service in set of running services`);
-
-      let url = new URL(service.url);
+      let url = getServiceUrl(options);
 
       assert(!!clientId, `no clientId assigned`);
 
