@@ -8,6 +8,7 @@ export interface Options {
   clientId?: string;
   store: Store;
   services: Slice<SimulationState['services']>;
+  rulesDirectory?: string;
 }
 
 export type ResponseModes = 'query' | 'web_message';
