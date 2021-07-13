@@ -1,13 +1,14 @@
-import type { UserData } from 'auth0';
 import path from "path";
 import vm from "vm";
 import assert from "assert-ts";
 import { parseRulesFiles } from './parse-rules-files';
+import { RuleContext, RuleUser } from './types';
 
-type RulesRunner = (user: UserData, context: Record<string, unknown>) => void;
+export type RulesRunner = <A, I>(user: RuleUser, context: RuleContext<A, I>) => void;
 
 export function createRulesRunner (rulesPath?: string): RulesRunner {
-  let callback = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let callback = (_user: RuleUser, _context: RuleContext<unknown, unknown>) => {};
 
   if(typeof rulesPath === 'undefined') {
     return callback;
@@ -19,7 +20,7 @@ export function createRulesRunner (rulesPath?: string): RulesRunner {
     return callback;
   }
 
-  return (user: UserData, context: Record<string, unknown>) => {
+  return <A, I>(user: RuleUser, context: RuleContext<A, I>) => {
     console.debug(`applying ${rules.length} rules`);
 
     let vmContext = vm.createContext({

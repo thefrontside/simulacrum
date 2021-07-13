@@ -16,7 +16,7 @@ export interface Person {
   name: string;
   email?: string;
   password?: string;
-  avatar?: string;
+  picture?: string;
 }
 
 export type OptionalParams<T extends { id: string }> = Partial<Omit<T, 'id'>>;

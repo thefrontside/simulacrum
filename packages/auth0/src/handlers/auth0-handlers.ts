@@ -10,6 +10,7 @@ import { userNamePasswordForm } from '../views/username-password';
 import { expiresAt } from '../auth/date';
 import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
 import { getServiceUrl } from './get-service-url';
+import { createRulesRunner } from 'src/rules/rules-runner';
 
 export type Routes =
   | '/heartbeat'
@@ -43,13 +44,15 @@ const createPersonQuery = (store: Store) => (predicate: Predicate<Person>) => {
 };
 
 export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandler> => {
-  let { audience, scope, store, clientId } = options;
+  let { audience, scope, store, clientId, rulesDirectory } = options;
   let personQuery = createPersonQuery(store);
+  let rulesRunner = createRulesRunner(rulesDirectory);
 
   let authorizeHandlers: Record<ResponseModes, Middleware> = {
     query: createLoginRedirectHandler(options),
     web_message: createWebMessageHandler()
   };
+
 
   return {
     ['/heartbeat']: function *(_, res) {
@@ -183,12 +186,20 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         nonce,
       };
 
+      assert(!!clientId, 'no clientId in options');
+
+      let accessToken = {
+        scope,
+      };
+
+      rulesRunner(user, { clientID: clientId, accessToken, idToken: idTokenData });
+
       let idToken = createJsonWebToken(idTokenData);
 
       res.status(200).json({
+        ...accessToken,
         access_token: createAuthJWT(url, audience),
         id_token: idToken,
-        scope,
         expires_in: 86400,
         token_type: "Bearer",
       });

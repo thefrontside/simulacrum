@@ -7,16 +7,16 @@ import path from "path";
 
 export function parseRulesFiles(rulesPath: string): {code: string, filename: string}[] {
   let ruleFiles = fs
-  .readdirSync(RulesPath)
+  .readdirSync(rulesPath)
   .filter((f) => path.extname(f) === ".js");
 
   return ruleFiles
-    .map((p) => {
-      let filename = path.join(RulesPath, p);
+    .map((r) => {
+      let filename = path.join(rulesPath, r);
 
       let jsonFile = `${extensionlessFileName(filename)}.json`;
 
-      assert(!!jsonFile, `no corresponding rule file for ${p}`);
+      assert(!!jsonFile, `no corresponding rule file for ${r}`);
 
       let rawRule = fs.readFileSync(jsonFile, 'utf8');
 
