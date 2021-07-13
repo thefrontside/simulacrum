@@ -6,6 +6,7 @@ import fetch from 'cross-fetch';
 import { stringify } from 'querystring';
 import { createHttpApp, person, Person } from '@simulacrum/server';
 import { decode, encode } from 'base64-url';
+import jwt from 'jsonwebtoken';
 
 import Keygrip from 'keygrip';
 
@@ -223,9 +224,14 @@ describe('Auth0 simulator', () => {
     let code: string;
 
     beforeEach(function* () {
-      simulation = yield client.createSimulation("auth0", { services: {
-        auth0: { port: 4400 }, frontend: { port: 3000 }
-      } });
+      simulation = yield client.createSimulation("auth0", {
+        options: {
+          rulesDirectory: 'test/rules'
+        },
+        services: {
+          auth0: { port: 4400 }, frontend: { port: 3000 }
+        }
+     });
 
       person = yield client.given(simulation, "person");
 
@@ -290,6 +296,25 @@ describe('Auth0 simulator', () => {
       });
 
       expect(res.status).toBe(401);
+    });
+
+    it('should have ran the rules', function* () {
+      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code
+        })
+      });
+
+      let token = yield res.json();
+
+      let idToken = jwt.decode(token.id_token, { complete: true });
+
+      expect(idToken?.payload.picture).toContain('https://cdn.fakercloud.com/avatars');
     });
   });
 });
