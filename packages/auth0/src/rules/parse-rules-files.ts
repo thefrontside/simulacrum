@@ -1,4 +1,3 @@
-import type { Rule } from 'auth0';
 import { extensionlessFileName } from './extensionless-file-name';
 import { assert } from 'assert-ts';
 import fs from "fs";
@@ -24,7 +23,7 @@ export function parseRulesFiles(rulesPath: string): {code: string, filename: str
         enabled,
         order = 0,
         stage = "login_success",
-      }: Rule = JSON.parse(rawRule);
+      } = JSON.parse(rawRule);
 
       if (!enabled) {
         return undefined;

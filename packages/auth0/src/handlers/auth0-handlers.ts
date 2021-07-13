@@ -10,7 +10,8 @@ import { userNamePasswordForm } from '../views/username-password';
 import { expiresAt } from '../auth/date';
 import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
 import { getServiceUrl } from './get-service-url';
-import { createRulesRunner } from 'src/rules/rules-runner';
+import { createRulesRunner } from '../rules/rules-runner';
+import { RuleUser } from '../rules/types';
 
 export type Routes =
   | '/heartbeat'
@@ -52,7 +53,6 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     query: createLoginRedirectHandler(options),
     web_message: createWebMessageHandler()
   };
-
 
   return {
     ['/heartbeat']: function *(_, res) {
@@ -125,6 +125,8 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       req.session.username = username;
 
+      console.log({ u: req.session.username });
+
       store.slice('auth0').set({
         [nonce]: {
           username,
@@ -192,11 +194,17 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         scope,
       };
 
-      rulesRunner(user, { clientID: clientId, accessToken, idToken: idTokenData });
+      let userData = {} as RuleUser;
+      let context = { clientID: clientId, accessToken, idToken: idTokenData };
+
+      rulesRunner(userData, context);
+
+      console.log({ userData });
 
       let idToken = createJsonWebToken(idTokenData);
 
       res.status(200).json({
+        ...userData,
         ...accessToken,
         access_token: createAuthJWT(url, audience),
         id_token: idToken,

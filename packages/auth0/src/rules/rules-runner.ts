@@ -1,6 +1,7 @@
 import path from "path";
 import vm from "vm";
-import assert from "assert-ts";
+import fs from 'fs';
+import { assert } from "assert-ts";
 import { parseRulesFiles } from './parse-rules-files';
 import { RuleContext, RuleUser } from './types';
 
@@ -13,6 +14,12 @@ export function createRulesRunner (rulesPath?: string): RulesRunner {
   if(typeof rulesPath === 'undefined') {
     return callback;
   }
+
+  let fullPath = path.join(process.cwd(), rulesPath);
+
+  console.dir({ fullPath });
+
+  assert(fs.existsSync(fullPath), `no rules directory at ${fullPath}`);
 
   let rules = parseRulesFiles(rulesPath);
 
