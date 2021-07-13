@@ -18,6 +18,6 @@ export function createAuthJWT(authNamespace: string, audience: string): string {
   return createJsonWebToken({
     [`${authNamespace}`]: 'decorate token',
     aud: audience,
-    iss: `${authNamespace}/`,
+    iss: authNamespace,
   });
 }
