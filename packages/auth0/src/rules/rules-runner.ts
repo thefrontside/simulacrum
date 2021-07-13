@@ -17,8 +17,6 @@ export function createRulesRunner (rulesPath?: string): RulesRunner {
 
   let fullPath = path.join(process.cwd(), rulesPath);
 
-  console.dir({ fullPath });
-
   assert(fs.existsSync(fullPath), `no rules directory at ${fullPath}`);
 
   let rules = parseRulesFiles(rulesPath);

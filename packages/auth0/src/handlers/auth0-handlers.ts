@@ -125,8 +125,6 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       req.session.username = username;
 
-      console.log({ u: req.session.username });
-
       store.slice('auth0').set({
         [nonce]: {
           username,
@@ -199,13 +197,9 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       rulesRunner(userData, context);
 
-      console.log({ userData });
-
-      let idToken = createJsonWebToken(idTokenData);
+      let idToken = createJsonWebToken({ ...userData, ...context.idToken, ...context.accessToken });
 
       res.status(200).json({
-        ...userData,
-        ...accessToken,
         access_token: createAuthJWT(url, audience),
         id_token: idToken,
         expires_in: 86400,
