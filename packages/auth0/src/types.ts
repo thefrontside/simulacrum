@@ -5,9 +5,10 @@ export interface Options {
   scope: string;
   port?: number;
   audience: string;
-  clientId?: string;
+  clientId: string;
   store: Store;
   services: Slice<SimulationState['services']>;
+  rulesDirectory?: string;
 }
 
 export type ResponseModes = 'query' | 'web_message';
