@@ -55,7 +55,6 @@ export function createClient(serverURL: string): Client {
   wsurl.protocol = 'ws';
   let url = wsurl.toString();
   let ws = createWSClient({ url, webSocketImpl });
-
   let scope = run<void>(function*() {
     try {
       yield;
