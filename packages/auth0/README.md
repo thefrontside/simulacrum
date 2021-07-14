@@ -2,16 +2,14 @@
 
 ## Table of Contents
 
-- [Auth0 simulator](#auth0-simulator)
-  - [Table of Contents](#table-of-contents)
-  - [Quick Start](#quick-start)
-    - [Graphql](#graphql)
-    - [Code](#code)
-  - [Configuration](#configuration)
-    - [Options](#options)
-    - [Services](#services)
-  - [Rules](#rules)
-  - [Endpoints](#endpoints)
+- [Quick Start](#quick-start)
+  - [Graphql](#graphql)
+  - [Code](#code)
+- [Configuration](#configuration)
+  - [Options](#options)
+  - [Services](#services)
+- [Rules](#rules)
+- [Endpoints](#endpoints)
 
 Please read the [main README](../../README.md) for more background on simulacrum.
 
@@ -118,7 +116,7 @@ main(function* () {
 
   console.log(`simulation server running at ${url}`);
 
-  let client = yield createClient(url);
+  let client = createClient(url);
 
   let simulation = yield client.createSimulation(url, {
     options: {
@@ -202,7 +200,9 @@ If we want to run these rules files then we would add the `rulesDirectory` field
 ```ts
 let simulation = yield client.createSimulation(url, {
   options: {
-    rulesDirectory: "test/rules",
+    options: {
+      rulesDirectory: "test/rules",
+    },
   },
 });
 ```
