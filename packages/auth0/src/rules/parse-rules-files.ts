@@ -36,9 +36,5 @@ export function parseRulesFiles(rulesPath: string): {code: string, filename: str
       return { code, filename, order, stage };
     })
     .flatMap(x => !!x ? x : [])
-    .sort((left, right) => {
-      assert(!!left && !!right, `either left or right is underfined`);
-
-      return left.order - right.order;
-    }) ?? [];
+    .sort((left, right) => left.order - right.order) ?? [];
 }
