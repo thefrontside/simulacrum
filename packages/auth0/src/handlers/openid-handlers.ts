@@ -5,7 +5,7 @@ import { getServiceUrl } from './get-service-url';
 
 type Routes =
   | '/jwks.json'
-  | '/openid-cofiguration'
+  | '/openid-configuration'
 
 export type OpenIdRoutes = `${`/.well-known`}${Routes}`
 
@@ -15,7 +15,7 @@ export const createOpenIdHandlers = (options: Options): Record<OpenIdRoutes, Htt
       res.json(JWKS);
     },
 
-    ['/.well-known/openid-cofiguration']: function* (_, res) {
+    ['/.well-known/openid-configuration']: function* (_, res) {
       let url = getServiceUrl(options).toString().replace(/\/$/, '');
 
       res.json({

@@ -210,4 +210,4 @@ The following endpoints have been assigned handlers:
 - `/oauth/token`
 - `/v2/logout`
 - `/.well-known/jwks.json`
-- `/.well-known/openid-cofiguration`
+- `/.well-known/openid-configuration`
