@@ -60,7 +60,7 @@ mutation {
 }
 ```
 
-This mutation creates your first simulation, and runs it in memory. Every time you start the server, you will need to apply these mutations. This can also be down programmatically which will be your likely interface while writing tests.
+This mutation creates your first simulation, and runs it in memory. Every time you start the server, you will need to apply these mutations. This can also be done programmatically which will be your likely interface while writing tests.
 
 ![create simulation](./docs/create-simulation.png).
 
