@@ -20,6 +20,7 @@ export type Routes =
   | '/usernamepassword/login'
   | '/login/callback'
   | '/oauth/token'
+  | '/v2/logout'
 
 type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
 
@@ -206,5 +207,13 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         token_type: "Bearer",
       });
     },
+
+    ['/v2/logout']: function *(req, res) {
+      assert(typeof req.query.returnTo === 'string', `unexpected ${req.query.returnTo} for returnTo`);
+
+      req.session = null;
+
+      res.redirect(req.query.returnTo);
+    }
   };
 };

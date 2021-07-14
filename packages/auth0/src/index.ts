@@ -37,6 +37,7 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & R
           .post('/usernamepassword/login', handlers['/usernamepassword/login'])
           .post('/login/callback', handlers['/login/callback'])
           .post('/oauth/token', handlers['/oauth/token'])
+          .get('/v2/logout', handlers['/v2/logout'])
           .get('/.well-known/jwks.json', handlers['/.well-known/jwks.json'])
           .get('/.well-known/openid-cofiguration', handlers['/.well-known/openid-cofiguration'])
 
