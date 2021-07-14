@@ -317,4 +317,22 @@ describe('Auth0 simulator', () => {
       expect(idToken?.payload.picture).toContain('https://cdn.fakercloud.com/avatars');
     });
   });
+
+  describe('/v2/logout', () => {
+    beforeEach(function*() {
+      let simulation: Simulation = yield client.createSimulation("auth0");
+
+      auth0Url = simulation.services[0].url;
+      frontendUrl = simulation.services[1].url;
+    });
+
+    it('should authorize', function *() {
+      let res: Response = yield fetch(`${auth0Url}/v2/logout?${stringify({
+        returnTo: frontendUrl
+      })}`);
+
+      expect(res.redirected).toBe(true);
+      expect(res.url.replace(/\/$/, '')).toBe(frontendUrl.replace(/\/$/, ''));
+    });
+  });
 });
