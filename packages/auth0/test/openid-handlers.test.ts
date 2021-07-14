@@ -35,7 +35,7 @@ describe('openid routes', () => {
     });
 
     it('returns the openid configuration', function * () {
-      let res: Response = yield fetch(`${auth0Url}/.well-known/openid-cofiguration`);
+      let res: Response = yield fetch(`${auth0Url}/.well-known/openid-configuration`);
 
       let json: { token_endpoint: string } = yield res.json();
 
