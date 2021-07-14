@@ -41,10 +41,9 @@ import { Client, createClient } from '@simulacrum/client';
 let client = createClient('http://localhost:4000');
 let simulation = await client.createSimulation("auth0");
 // =>
-// {
-//   services: {
-//     name: 'auth0',
-//     url: 'http://localhost:4400'
+// services:{
+//   auth0:{
+//     port: 4400 
 //   }
 // }
 //
