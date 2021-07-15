@@ -1,4 +1,4 @@
-import { main } from '@effection/node';
+import { main } from 'effection';
 import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
 

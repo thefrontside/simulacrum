@@ -1,6 +1,6 @@
-import { main } from '@effection/node';
 import { createSimulationServer, Server } from '@simulacrum/server';
 import { schema, createSimulationContext, scenarios } from '@simulacrum/graphql-starwars';
+import { main } from 'effection';
 
 import { createGraphQLSimulator } from '.';
 
