@@ -8,6 +8,7 @@ const port = Number(process.env.PORT) || 4000; // port for the main simulation s
 main(function* () {
   // starts up the overall simulation server
   let server = yield createSimulationServer({
+    seed: 2, // this is a data seed passed to `faker`
     port,
     simulators: { auth0 },
   });
@@ -31,10 +32,14 @@ main(function* () {
     },
   });
 
+  console.log(`auth0 service running at ${simulation.services[0].url}`);
+
   let person = yield client.given(simulation, "person");
 
   console.log(`store populated with user`);
-  console.log(`username = ${person.data.email} password = ${person.data.password}`);
+  console.log(
+    `username = ${person.data.email} password = ${person.data.password}`
+  );
 
   yield; // this keeps the server running, a function of effection
 });
