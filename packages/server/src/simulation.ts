@@ -91,6 +91,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
             data
           }));
         } catch (error) {
+          console.error(error);
           slice.update(state => ({
             ...state,
             status: 'failed',
@@ -112,6 +113,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       // all spun up, we can just wait.
       yield;
     } catch (error) {
+      console.error(error);
       slice.update((state) => ({
         ...state,
         status: "failed",
