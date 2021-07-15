@@ -3,7 +3,7 @@ import { createSimulationServer } from "@simulacrum/server";
 import { auth0 } from "@simulacrum/auth0";
 import { createClient } from "@simulacrum/client";
 
-const port = Number(process.env.PORT) || 4000;
+const port = Number(process.env.PORT) || 4000; // port for the main simulation service
 
 main(function* () {
   // starts up the overall simulation server
@@ -26,11 +26,11 @@ main(function* () {
     },
     services: {
       auth0: {
-        port: 4400,
+        port: 4400, // port for the auth0 service itself
       },
     },
   });
-  console.log(simulation);
+
   let person = yield client.given(simulation, "person");
 
   console.log(`store populated with user`);
