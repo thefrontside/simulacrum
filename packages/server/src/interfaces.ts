@@ -7,7 +7,7 @@ export type Services = Record<string, Service>;
 
 export type Scenarios = Record<string, Scenario>;
 
-export type Effects = (slice: Slice<SimulationState>, faker: Faker) => Operation<void>;
+export type Effects = (store: Store, faker: Faker) => Operation<void>;
 
 export interface Behaviors {
   services: Record<string, Service>;

@@ -55,8 +55,8 @@ export const auth0: Simulator<Options> = (slice, options) => {
   return {
     services: { auth0: createAuth0Service({ ...auth0Handlers, ...openIdHandlers }) },
     scenarios: { person },
-    *effects(slice, faker) {
-      yield createUserFromPerson(slice, faker);
+    *effects(store, faker) {
+      yield createUserFromPerson(store, faker);
     },
   };
 };

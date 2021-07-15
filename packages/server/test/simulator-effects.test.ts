@@ -20,8 +20,8 @@ describe('simulator effects', () => {
       scenarios: {
         person: createPerson
       },
-      * effects(slice) {
-        yield onPerson(slice.slice('store'), function* (slice) {
+      * effects(store) {
+        yield onPerson(store, function* (slice) {
           let newPerson = slice.get();
 
           people[newPerson.id] = newPerson;

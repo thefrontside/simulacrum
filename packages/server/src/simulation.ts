@@ -105,7 +105,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       }));
 
       if(typeof effects !== 'undefined') {
-        yield spawn(effects(slice, faker));
+        yield spawn(effects(store, faker));
       }
 
       slice.update(state => ({

@@ -1,13 +1,10 @@
 
-import { Slice } from '@effection/atom';
-import { onPerson, SimulationState, Faker } from '@simulacrum/server';
+import { onPerson, Faker, Store } from '@simulacrum/server';
 import { Operation } from 'effection';
 
 import { human, records } from './scenarios';
 
-export function *createHumanFromPerson(slice: Slice<SimulationState>, faker: Faker): Operation<void> {
-  let store = slice.slice('store');
-
+export function *createHumanFromPerson(store: Store, faker: Faker): Operation<void> {
   yield onPerson(store, function *(person) {
     let { id, name } = person.get();
     let characters = records(store).slice('characters').get();
