@@ -1,6 +1,8 @@
 import { Slice } from '@effection/atom';
 import { Operation } from 'effection';
 import { v4 } from 'uuid';
+
+import { map, Effect } from '../effect';
 import { Faker } from '../faker';
 import { Behaviors, Store } from "../interfaces";
 
@@ -41,7 +43,11 @@ export function person(store: Store, faker: Faker, params: OptionalParams<Person
   };
 }
 
-function records(store: Store): Slice<Record<string, Record<string, unknown>>> {
+export function *onPerson(store: Store, effect: Effect<Person>): Operation<void> {
+  yield map<Person>(records(store) as Slice<Record<string, Person>>, effect);
+}
+
+function records(store: Store): Slice<Record<string, Person>> {
   let people = store.slice("people");
 
   // atom doesn't quite work right in the sense that we can't make a
@@ -49,5 +55,5 @@ function records(store: Store): Slice<Record<string, Record<string, unknown>>> {
   if (!people.get()) {
     people.set({});
   }
-  return people;
+  return people as unknown as Slice<Record<string, Person>>;
 }

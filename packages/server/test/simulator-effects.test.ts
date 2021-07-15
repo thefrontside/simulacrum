@@ -1,7 +1,6 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import { Simulator } from '../src/interfaces';
-import { person as createPerson } from '../src/simulators/person';
-import { map } from '../src/effect';
+import { onPerson, person as createPerson } from '../src/simulators/person';
 import { Client, Simulation } from '@simulacrum/client';
 import type { Person } from '../src/simulators/person';
 import { createTestServer } from './helpers';
@@ -16,13 +15,13 @@ describe('simulator effects', () => {
   beforeEach(function* () {
     people = {};
 
-    let test: Simulator = (slice) => ({
+    let test: Simulator = () => ({
       services: {},
       scenarios: {
         person: createPerson
       },
-      * effects() {
-        yield map(slice.slice('store', 'people'), function* (slice) {
+      * effects(slice) {
+        yield onPerson(slice.slice('store'), function* (slice) {
           let newPerson = slice.get();
 
           people[newPerson.id] = newPerson;
