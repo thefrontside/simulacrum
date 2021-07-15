@@ -36,7 +36,7 @@ This will open a graphql graphiql editor.
 Enter the following mutation:
 
 ```ts
-mutation {
+mutation CreateSimulation {
  createSimulation(simulator: "auth0",
   options: {
     options:{
@@ -77,7 +77,7 @@ Use the values returned from the query to update your configuration in the clien
 Create a fake user whose credentials can be used for authentication with this query.
 
 ```graphql
-mutation {
+mutation CreatePerson {
   given(a: "person", simulation: "6fbe024f-2316-4265-a6e8-d65a837e308a")
 }
 ```
@@ -100,7 +100,7 @@ import { createSimulationServer, Server } from "@simulacrum/server";
 import { auth0 } from ".";
 import { createClient } from "@simulacrum/client";
 
-const port = Number(process.env.PORT) ?? 4400;
+const port = Number(process.env.PORT) ?? 4000; // port for the main simulation service
 
 // effection is a structured concurrency library and
 // this will help us handle errors and shutting down
@@ -118,25 +118,24 @@ main(function* () {
 
   let client = createClient(url);
 
-  let simulation = yield client.createSimulation(url, {
+  let simulation = yield client.createSimulation("auth0", {
     options: {
-      options: {
-        audience: "[your audience]",
-        scope: "[your scope]",
-        clientId: "[your client-id]",
-      },
-      services: {
-        auth0: {
-          port: 4400,
-        },
+      audience: "[your audience]",
+      scope: "[your scope]",
+      clientId: "[your client-id]",
+    },
+    services: {
+      auth0: {
+        port: 4400, // port for the auth0 service itself
       },
     },
   });
 
+  console.log(`auth0 service running at ${simulation.services[0].url}`);
   let person = yield client.given(simulation, "person");
 
   console.log(`store populated with user`);
-  console.log(`username = ${person.email} password = ${person.password}`);
+  console.log(`username = ${person.data.email} password = ${person.data.password}`);
 
   yield;
 });
@@ -144,22 +143,20 @@ main(function* () {
 
 ## Configuration
 
-Both the graphql `createSimulation` mutation and the `@simulacrum/client` take an optional `options` object.
+Both the graphql `createSimulation` mutation and the `@simulacrum/client` take an optional `options` and `services` object.
 
 ```ts
 // A snippet from the previous `Code` example.
-let simulation = yield client.createSimulation(url, {
+let simulation = yield client.createSimulation("auth0", {
   options: {
-    options: {
-      audience: "[your audience]",
-      scope: "[your scope]",
-      clientId: "[your client-id]",
-      rulesDirectory: "test/rules",
-    },
-    services: {
-      auth0: {
-        port: 4400,
-      },
+    audience: "[your audience]",
+    scope: "[your scope]",
+    clientId: "[your client-id]",
+    rulesDirectory: "test/rules",
+  },
+  services: {
+    auth0: {
+      port: 4400,
     },
   },
 });
@@ -200,9 +197,7 @@ If we want to run these rules files then we would add the `rulesDirectory` field
 ```ts
 let simulation = yield client.createSimulation(url, {
   options: {
-    options: {
-      rulesDirectory: "test/rules",
-    },
+    rulesDirectory: "test/rules",
   },
 });
 ```
