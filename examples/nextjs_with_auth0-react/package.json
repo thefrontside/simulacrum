@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "standup": "npm run sim & npm run dev",
     "sim": "node ./simulator-server.mjs",
     "dev": "next dev",
     "build": "next build",
