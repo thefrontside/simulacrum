@@ -41,18 +41,20 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
 
         for (let handler of service.app.handlers) {
           app[handler.method](handler.path, (request, response) => {
-            scope.spawn(function*() {
-              try {
-                yield handler.handler(request, response);
-              } catch(err) {
-                console.error(err);
+            if (scope.state === 'running') {
+              scope.spawn(function*() {
+                try {
+                  yield handler.handler(request, response);
+                } catch(err) {
+                  console.error(err);
 
-                response.status(500);
-                response.write('server error');
-              } finally {
-                response.end();
-              }
-            });
+                  response.status(500);
+                  response.write('server error');
+                } finally {
+                  response.end();
+                }
+              });
+            }
           });
         }
 

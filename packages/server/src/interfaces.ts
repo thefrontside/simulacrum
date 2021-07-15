@@ -3,9 +3,13 @@ import type { Slice } from '@effection/atom';
 import type { HttpApp } from './http';
 import type { Faker } from './faker';
 
+export type Services = Record<string, Service>;
+
+export type Scenarios = Record<string, Scenario>;
+
 export interface Behaviors {
-  services: Record<string, Service>;
-  scenarios: Record<string, Scenario>;
+  services: Services;
+  scenarios: Scenarios;
   effects?: () => Operation<void>;
 }
 
