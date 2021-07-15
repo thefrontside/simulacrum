@@ -7,10 +7,12 @@ export type Services = Record<string, Service>;
 
 export type Scenarios = Record<string, Scenario>;
 
+export type Effects = (slice: Slice<SimulationState>, faker: Faker) => Operation<void>;
+
 export interface Behaviors {
-  services: Services;
-  scenarios: Scenarios;
-  effects?: () => Operation<void>;
+  services: Record<string, Service>;
+  scenarios: Record<string, Scenario>;
+  effects?: Effects;
 }
 
 export type Params = Record<string, unknown>;
@@ -54,6 +56,11 @@ export interface SimulationOptions {
   }>
 }
 
+export interface ServiceState {
+  name: string;
+  url: string;
+}
+
 export type SimulationState =
   {
     id: string;
@@ -61,7 +68,7 @@ export type SimulationState =
     simulator: string,
     options: SimulationOptions;
     scenarios: Record<string, ScenarioState>;
-    services: [];
+    services: Record<string, ServiceState>;
     store: StoreState;
   } |
   {
@@ -69,10 +76,7 @@ export type SimulationState =
     status: 'running',
     simulator: string,
     options: SimulationOptions;
-    services: {
-      name: string;
-      url: string;
-    }[];
+    services: Record<string, ServiceState>;
     scenarios: Record<string, ScenarioState>;
     store: StoreState;
   } |
@@ -82,7 +86,7 @@ export type SimulationState =
     simulator: string,
     options: SimulationOptions;
     scenarios: Record<string, ScenarioState>;
-    services: [];
+    services: Record<string, ServiceState>;
     store: StoreState;
     error: Error
   }

@@ -11,6 +11,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
   return slice => function*(scope) {
     try {
       let store = slice.slice("store");
+      let services = slice.slice("services");
       let simulatorName = slice.get().simulator;
       let simulator = simulators[simulatorName];
       assert(simulator, `unknown simulator ${simulatorName}`);
@@ -67,11 +68,13 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         };
       });
 
-      let services: {name: string; url: string; }[] = [];
       for (let { name, protocol, create } of servers) {
         let server: Server = yield create;
         let address = server.address;
-        services.push({ name, url: `${protocol}://localhost:${address.port}` });
+        services.slice(name).set({
+          name,
+          url: `${protocol}://localhost:${address.port}`
+        });
       }
 
       let { scenarios, effects } = behaviors;
@@ -102,13 +105,12 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       }));
 
       if(typeof effects !== 'undefined') {
-        yield spawn(effects());
+        yield spawn(effects(slice, faker));
       }
 
       slice.update(state => ({
         ...state,
         status: 'running',
-        services
       }));
 
       // all spun up, we can just wait.
@@ -118,7 +120,6 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         ...state,
         status: "failed",
         error,
-        services: []
       }));
     }
   };
