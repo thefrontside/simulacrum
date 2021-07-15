@@ -33,8 +33,8 @@ describe('GraphQL simulator', () => {
             ...scenarios,
             person
           },
-          *effects(slice, faker) {
-            yield effects.createHumanFromPerson(slice, faker);
+          *effects(store, faker) {
+            yield effects.createHumanFromPerson(store, faker);
           }
         })
       }
