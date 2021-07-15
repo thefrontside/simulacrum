@@ -231,7 +231,7 @@ An optional [`rulesDirectory` field](#rules) can specify a directory of [auth0 r
 The `services` object configures simulators to start on specific ports.
 
 ```ts
-let simulation = yield client.createSimulation(url, {
+let simulation = yield client.createSimulation("auth0", {
   options: {
     services: {
       auth0: {

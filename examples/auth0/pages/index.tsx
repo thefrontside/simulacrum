@@ -1,6 +1,6 @@
 import { useUser } from "@auth0/nextjs-auth0";
 
-export default function Index() {
+export default function Index(): JSX.Element {
   let { user, error, isLoading } = useUser();
 
   if (isLoading) return <div>Loading...</div>;
