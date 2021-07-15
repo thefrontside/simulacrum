@@ -1,14 +1,14 @@
 import { describe, it, beforeEach } from '@effection/mocha';
+import { createHttpApp, person, Person } from '@simulacrum/server';
+import fetch from 'cross-fetch';
 import expect from 'expect';
+import { stringify } from 'querystring';
 import { createTestServer, Client, Simulation } from './helpers';
 import { auth0 } from '../src';
-import fetch from 'cross-fetch';
-import { stringify } from 'querystring';
-import { createHttpApp, person, Person } from '@simulacrum/server';
 import { decode, encode } from 'base64-url';
 import jwt from 'jsonwebtoken';
-
 import Keygrip from 'keygrip';
+import { createUserFromPerson } from '../src/effects/user';
 
 const createSessionCookie = <T>(data: T): string => {
   let cookie = Buffer.from(JSON.stringify(data)).toString('base64');
@@ -39,9 +39,11 @@ describe('Auth0 simulator', () => {
                   res.status(200).send('ok');
                 })
               },
-
             },
-            scenarios: { person }
+            scenarios: { person },
+            *effects(slice, faker) {
+              yield createUserFromPerson(slice, faker);
+            },
           };
         }
       }
