@@ -1,6 +1,7 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import { Service } from '@simulacrum/client';
-import { schema, createSimulationContext, scenarios } from '@simulacrum/graphql-starwars';
+import { createSimulationContext, effects, scenarios, schema } from '@simulacrum/graphql-starwars';
+import { person } from '@simulacrum/server';
 import expect from 'expect';
 import { ExecutionResult } from 'graphql';
 import https from 'https';
@@ -28,7 +29,13 @@ describe('GraphQL simulator', () => {
         graphql: createGraphQLSimulator({
           schema,
           createContext: createSimulationContext,
-          scenarios,
+          scenarios: {
+            ...scenarios,
+            person
+          },
+          *effects(slice, faker) {
+            yield effects.createHumanFromPerson(slice, faker);
+          }
         })
       }
     });
@@ -119,6 +126,25 @@ describe('GraphQL simulator', () => {
             });
             expect(errors).toBeUndefined();
             expect(data?.droid.name).toEqual(result.data?.characters[0].name);
+          });
+        });
+
+        describe("effects", () => {
+          let result: ExecutionResult;
+
+          beforeEach(function*() {
+            yield client.given(simulation, "person", { name: 'Owen Lars' });
+
+            result = yield fetchGraphQL("/", {
+              query: "{ characters { __typename id name } }",
+            });
+          });
+
+          it("runs the specified effects", function*() {
+            expect(result.errors).toBeUndefined();
+            expect(result.data?.characters).toHaveLength(1);
+            expect(result.data?.characters[0].__typename).toEqual("Human");
+            expect(result.data?.characters[0].name).toEqual("Owen Lars");
           });
         });
       });

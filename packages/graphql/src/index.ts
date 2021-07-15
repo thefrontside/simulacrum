@@ -14,7 +14,7 @@ export function createGraphQLService(options: Options): Service {
   };
 }
 
-export function createGraphQLSimulator({ schema, createContext, scenarios }: SimulatorOptions): Simulator {
+export function createGraphQLSimulator({ schema, scenarios,createContext, effects }: SimulatorOptions): Simulator {
   return (state) => {
     let store = state.slice('store');
 
@@ -26,6 +26,7 @@ export function createGraphQLSimulator({ schema, createContext, scenarios }: Sim
         })
       },
       scenarios,
+      effects,
     };
   };
 }
