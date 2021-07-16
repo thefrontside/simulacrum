@@ -1,6 +1,6 @@
 {
-  "name": "auth0",
-  "version": "0.1.0",
+  "name": "@simulacrum-examples/nextjs-with-auth0-react",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "standup": "npm run sim & npm run dev",
@@ -21,6 +21,9 @@
     "react-dom": "17.0.2"
   },
   "devDependencies": {
+    "@simulacrum/auth0": "0.0.0",
+    "@simulacrum/client": "0.3.0",
+    "@simulacrum/server": "0.2.0",
     "@types/react": "17.0.14",
     "eslint": "7.30.0",
     "eslint-config-next": "11.0.1",
