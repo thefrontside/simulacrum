@@ -12,7 +12,7 @@ import { noCache } from './middleware/no-cache';
 import { createOpenIdHandlers } from './handlers/openid-handlers';
 
 
-const publicDir = path.join(process.cwd(), 'src', 'views', 'public');
+const publicDir = path.join(__dirname, 'views', 'public');
 
 const DefaultOptions = {
   clientId: '00000000000000000000000000000000',

@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
-    "prepack": "tsc --build tsconfig.dist.json",
+    "prepack": "tsc --build tsconfig.dist.json && copy \"./src/views/**/*.png\" ./dist/views/",
     "build": "npm run prepack",
     "lint": "eslint src test",
     "start": "node dist/start.js",
@@ -53,6 +53,7 @@
     "@types/jsonwebtoken": "^8.5.1",
     "@types/mocha": "^8.2.1",
     "@types/ws": "^7.4.4",
+    "copy": "^0.3.2",
     "expect": "^26.6.2",
     "keygrip": "^1.1.0",
     "mocha": "^8.0.0",
