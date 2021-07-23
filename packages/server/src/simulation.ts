@@ -45,7 +45,6 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
               try {
                 yield handler.handler(request, response);
               } catch(err) {
-                console.error(err);
 
                 response.status(500);
                 response.write('server error');
@@ -57,11 +56,22 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         }
 
         let { protocol } = service;
+        let { port, debug } = serviceOptions[name] ?? {};
+
+        if (debug) {
+          scope.spawn(function* () {
+            yield slice.filter(s => s.status === 'failed').forEach(function *(state) {
+              assert(state.status === 'failed');
+
+              console.error(state.error);
+            });
+          });
+        }
 
         return {
           name,
           protocol,
-          create: createServer(app, { protocol, port: serviceOptions[name]?.port })
+          create: createServer(app, { protocol, port })
         };
       });
 
@@ -91,7 +101,6 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
             data
           }));
         } catch (error) {
-          console.error(error);
           slice.update(state => ({
             ...state,
             status: 'failed',

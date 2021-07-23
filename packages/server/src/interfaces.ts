@@ -46,7 +46,8 @@ export interface ServerState {
 export interface SimulationOptions {
   options?: Record<string, unknown>;
   services?: Record<string, {
-    port?: number
+    port?: number;
+    debug?: boolean;
   }>
 }
 
