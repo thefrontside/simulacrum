@@ -44,10 +44,10 @@ export interface ServerState {
 }
 
 export interface SimulationOptions {
+  debug?: boolean;
   options?: Record<string, unknown>;
   services?: Record<string, {
     port?: number;
-    debug?: boolean;
   }>
 }
 

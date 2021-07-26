@@ -4,6 +4,7 @@ import webSocketImpl from 'isomorphic-ws';
 import { GraphQLError } from 'graphql';
 
 export interface SimulationOptions {
+  debug?: boolean
   options?: Record<string, unknown>;
   services?: Record<string,{
     port?: number
