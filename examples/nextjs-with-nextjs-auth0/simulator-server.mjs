@@ -8,7 +8,6 @@ const port = Number(process.env.PORT) || 4000; // port for the main simulation s
 main(function* () {
   // starts up the overall simulation server
   let server = yield createSimulationServer({
-    seed: 2, // this is a data seed passed to `faker`
     port,
     simulators: { auth0 },
   });

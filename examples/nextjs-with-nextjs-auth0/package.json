@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "sim": "node ./simulator-server.mjs",
-    "dev": "next dev",
+    "dev": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
