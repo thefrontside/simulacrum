@@ -2,14 +2,16 @@
 
 ## Table of Contents
 
-- [Quick Start](#quick-start)
-  - [Graphql](#graphql)
-  - [Code](#code)
-- [Configuration](#configuration)
-  - [Options](#options)
-  - [Services](#services)
-- [Rules](#rules)
-- [Endpoints](#endpoints)
+- [Auth0 simulator](#auth0-simulator)
+  - [Table of Contents](#table-of-contents)
+  - [Quick Start](#quick-start)
+    - [Graphql](#graphql)
+    - [Code](#code)
+  - [Configuration](#configuration)
+    - [Options](#options)
+    - [Services](#services)
+  - [Rules](#rules)
+  - [Endpoints](#endpoints)
 
 Please read the [main README](../../README.md) for more background on simulacrum.
 
@@ -135,10 +137,66 @@ main(function* () {
   let person = yield client.given(simulation, "person");
 
   console.log(`store populated with user`);
-  console.log(`username = ${person.data.email} password = ${person.data.password}`);
+  console.log(
+    `username = ${person.data.email} password = ${person.data.password}`
+  );
 
   yield;
 });
+```
+
+The `client` is also expected to be run in many different contexts, and, as such, supports async/await as well.
+
+```js
+import { main } from "effection";
+import { createSimulationServer } from "@simulacrum/server";
+import { auth0 } from "@simulacrum/auth0";
+import { createClient } from "@simulacrum/client";
+
+const port = Number(process.env.PORT) || 4000; // port for the main simulation service
+
+main(function* startServer() {
+  // the simulation server needs to run within the scope
+  // of an effection context
+  let server = yield createSimulationServer({
+    port,
+    simulators: { auth0 },
+  });
+
+  let url = `http://localhost:${server.address.port}`;
+
+  console.log(`simulation server running at ${url}`);
+
+  yield setupClient({ url });
+});
+
+// the client is expected to run anywhere and does not expect
+// the effection scope, as such, it also can be used with async/await
+async function setupClient({ url }) {
+  let client = createClient(url);
+
+  let simulation = await client.createSimulation("auth0", {
+    options: {
+      audience: "https://your-audience/",
+      scope: "openid profile read:shows",
+      clientId: "YOUR_AUTH0_CLIENT_ID",
+    },
+    services: {
+      auth0: {
+        port: 4400, // port for the auth0 service itself
+      },
+    },
+  });
+
+  console.log(`auth0 service running at ${simulation.services[0].url}`);
+
+  let person = await client.given(simulation, "person");
+
+  console.log(`store populated with user`);
+  console.log(
+    `username = ${person.data.email} password = ${person.data.password}`
+  );
+}
 ```
 
 ## Configuration
