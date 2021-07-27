@@ -1,5 +1,5 @@
 ---
-"@simulacrum/auth0": minor
+"@simulacrum/auth0-simulator": minor
 ---
 
 Add the initial rules-runner code

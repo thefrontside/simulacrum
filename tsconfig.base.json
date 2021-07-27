@@ -5,7 +5,7 @@
     "composite": true,
     "declarationMap": true,
     "paths": {
-      "@simulacrum/auth0": ["packages/auth0/src"],
+      "@simulacrum/auth0-simulator": ["packages/auth0/src"],
       "@simulacrum/client": ["packages/client/src"],
       "@simulacrum/server": ["packages/server/src"]
     }
