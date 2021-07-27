@@ -2,12 +2,21 @@ import type { HttpHandler } from '@simulacrum/server';
 import { Options } from 'src/types';
 import { JWKS } from '../auth/constants';
 import { getServiceUrl } from './get-service-url';
+import { removeTrailingSlash } from './url';
 
 type Routes =
   | '/jwks.json'
   | '/openid-configuration'
 
 export type OpenIdRoutes = `${`/.well-known`}${Routes}`
+
+export interface OpenIdConfiguration {
+  issuer: string;
+  authorization_endpoint: string;
+  token_endpoint: string;
+  userinfo_endpoint: string;
+  jwks_uri: string;
+}
 
 export const createOpenIdHandlers = (options: Options): Record<OpenIdRoutes, HttpHandler> => {
   return {
@@ -16,10 +25,10 @@ export const createOpenIdHandlers = (options: Options): Record<OpenIdRoutes, Htt
     },
 
     ['/.well-known/openid-configuration']: function* (_, res) {
-      let url = getServiceUrl(options).toString().replace(/\/$/, '');
+      let url = removeTrailingSlash(getServiceUrl(options).toString());
 
       res.json({
-        issuer: url,
+        issuer: `${url}/`,
         authorization_endpoint: [url, "authorize"].join('/'),
         token_endpoint: [url, "oauth", "token"].join('/'),
         userinfo_endpoint: [url, "userinfo"].join('/'),

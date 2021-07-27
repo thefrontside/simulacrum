@@ -76,7 +76,7 @@ export const loginView = ({
             var button = document.querySelector('#sumbit');
 
             submit.addEventListener('click', function(e) {
-              let nonce = new URLSearchParams(window.location.search).get('nonce');
+              let params = new URLSearchParams(window.location.search);
 
               var username = document.querySelector('#username');
               var password = document.querySelector('#password');
@@ -87,11 +87,11 @@ export const loginView = ({
                   password: password.value,
                   realm: 'Username-Password-Authentication',
                   scope: '${scope}',
-                  nonce: nonce
+                  nonce: params.get('nonce'),
+                  state: params.get('state')
                 },
                 function(err, authResult) {
                   if (err) {
-
                     [username, password].forEach(e => e.classList.add('border-red-500'));
                     document.querySelector('.error').classList.remove('hidden');
                   }
