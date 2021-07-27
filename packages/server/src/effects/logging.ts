@@ -7,8 +7,8 @@ export const loggingEffect = (): Effect<SimulationState> => slice => function*(s
   let task: Task = yield spawn();
 
   yield slice.slice('debug').forEach(function*(shouldLogErrors) {
+    yield task.halt();
     if (shouldLogErrors) {
-      yield task.halt();
       task = yield spawn(function* () {
         yield slice.filter(({ status }) => status === 'failed').forEach(function *(state) {
           assert(state.status === 'failed');
