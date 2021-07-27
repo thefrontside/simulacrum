@@ -1,7 +1,5 @@
 # Simulacrum Server with Auth0 Interfaced With Nextjs
 
-:exclamation: Note this is still in progress and may not work. :exclamation:
-
 This uses the [nextjs-auth0](https://github.com/auth0/nextjs-auth0) package. It is setup using those instructions with the `AUTH0_ISSUER_BASE_URL` pointing at our simulacrum service instead of the Auth0 API. This greatly improves the experience around testing locally, and then changing an environment variable to test in "staging" or moving to "production".
 
 ## Getting Started
