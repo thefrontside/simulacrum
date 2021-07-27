@@ -17,14 +17,6 @@ const Header = (): React.ReactElement => {
           {user ? (
             <>
               <li>
-                <Link href="/profile">
-                  <a>Profile</a>
-                </Link>
-              </li>{" "}
-              <li>
-                <a href="/profile-ssr">Profile (SSR)</a>
-              </li>{" "}
-              <li>
                 <a href="/api/auth/logout" data-testid="logout">
                   Logout
                 </a>
