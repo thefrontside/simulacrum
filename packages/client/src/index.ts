@@ -108,6 +108,7 @@ export function createClient(serverURL: string): Client {
 mutation CreateSimulation($simulator: String, $options: JSON) {
   createSimulation(simulator: $simulator, options: $options) {
     id
+    debug
     simulators
     status
     services {
