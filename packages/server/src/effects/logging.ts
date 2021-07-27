@@ -1,20 +1,23 @@
 import type { SimulationState } from 'src/interfaces';
 import { Effect } from '../effect';
 import { assert } from 'assert-ts';
+import { spawn, Task } from 'effection';
 
 export const loggingEffect = (): Effect<SimulationState> => slice => function*(scope) {
-  let simulation = slice.get();
-  let { debug = false } = simulation.options;
+  let task: Task = yield spawn();
 
-  if (debug) {
-    scope.spawn(function* () {
-      yield slice.filter(({ status }) => status === 'failed').forEach(function *(state) {
-        assert(state.status === 'failed');
+  yield slice.slice('debug').forEach(function*(shouldLogErrors) {
+    if (shouldLogErrors) {
+      yield task.halt();
+      task = yield spawn(function* () {
+        yield slice.filter(({ status }) => status === 'failed').forEach(function *(state) {
+          assert(state.status === 'failed');
 
-        console.error(state.error);
-      });
-    });
-  } else {
-    scope.halt();
-  }
+          console.error(state.error);
+        });
+      }).within(scope);
+    } else if (!shouldLogErrors) {
+      task.halt();
+    }
+  });
 };

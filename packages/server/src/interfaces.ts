@@ -54,8 +54,9 @@ export interface SimulationOptions {
 export type SimulationState =
   {
     id: string;
-    status: 'new',
-    simulator: string,
+    status: 'new';
+    debug: boolean;
+    simulator: string;
     options: SimulationOptions;
     scenarios: Record<string, ScenarioState>;
     services: [];
@@ -63,8 +64,9 @@ export type SimulationState =
   } |
   {
     id: string,
-    status: 'running',
-    simulator: string,
+    status: 'running';
+    debug: boolean;
+    simulator: string;
     options: SimulationOptions;
     services: {
       name: string;
@@ -75,8 +77,9 @@ export type SimulationState =
   } |
   {
     id: string,
-    status: 'failed',
-    simulator: string,
+    status: 'failed';
+    debug: boolean;
+    simulator: string;
     options: SimulationOptions;
     scenarios: Record<string, ScenarioState>;
     services: [];

@@ -21,6 +21,7 @@ export interface Client {
 
 export interface Simulation {
   id: string;
+  debug: boolean;
   status: 'new' | 'running' | 'failed',
   services: Service[];
 }
@@ -67,7 +68,6 @@ export function createClient(serverURL: string): Client {
       }
     }
   });
-
 
   function subscribe<T>(payload: SubscribePayload): Runnable<Subscription<Result<T>>> {
     return {
