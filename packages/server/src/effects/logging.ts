@@ -16,8 +16,6 @@ export const loggingEffect = (): Effect<SimulationState> => slice => function*(s
           console.error(state.error);
         });
       }).within(scope);
-    } else if (!shouldLogErrors) {
-      task.halt();
     }
   });
 };

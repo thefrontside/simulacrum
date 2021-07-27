@@ -1,3 +1,3 @@
 ---
-"@simulacrum/auth0": patch
+"@simulacrum/auth0-simulator": patch
 ---
