@@ -13,13 +13,17 @@ describe('openid routes', () => {
     client = yield createTestServer({
       simulators: {
         auth0
-      }
+      },
     });
   });
 
   describe('/.well-known/*', () => {
     beforeEach(function*() {
-      let simulation: Simulation = yield client.createSimulation("auth0");
+      let simulation: Simulation = yield client.createSimulation("auth0", {
+        services: {
+          auth0: { port: 4400 }
+        }
+      });
 
       auth0Url = simulation.services[0].url;
     });
@@ -41,7 +45,13 @@ describe('openid routes', () => {
 
       expect(res.ok).toBe(true);
 
-      expect(json.token_endpoint).toContain('/oauth/token');
+      expect(json).toEqual({
+        issuer: 'https://localhost:4400/',
+        authorization_endpoint: 'https://localhost:4400/authorize',
+        token_endpoint: 'https://localhost:4400/oauth/token',
+        userinfo_endpoint: 'https://localhost:4400/userinfo',
+        jwks_uri: 'https://localhost:4400/.well-known/jwks.json'
+      });
     });
   });
 });

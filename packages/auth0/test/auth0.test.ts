@@ -9,6 +9,7 @@ import { decode, encode } from 'base64-url';
 import jwt from 'jsonwebtoken';
 
 import Keygrip from 'keygrip';
+import { removeTrailingSlash } from '../src/handlers/url';
 
 const createSessionCookie = <T>(data: T): string => {
   let cookie = Buffer.from(JSON.stringify(data)).toString('base64');
@@ -263,19 +264,31 @@ describe('Auth0 simulator', () => {
       code = new URL(res.url).searchParams.get('code') as string;
     });
 
-    it('should return a valid token', function* () {
-      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...Fields,
-          code
-        })
+    describe('valid token', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let token: any;
+      beforeEach(function * () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...Fields,
+            code
+          })
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        token = jwt.decode(json.id_token, { complete: true });
       });
 
-      expect(res.ok).toBe(true);
+      it('should return an iss field with a forward slash', function* () {
+        expect(token.payload.iss).toBe('https://localhost:4400/');
+      });
     });
 
 
@@ -332,7 +345,7 @@ describe('Auth0 simulator', () => {
       })}`);
 
       expect(res.redirected).toBe(true);
-      expect(res.url.replace(/\/$/, '')).toBe(frontendUrl.replace(/\/$/, ''));
+      expect(removeTrailingSlash(res.url)).toBe(removeTrailingSlash(frontendUrl));
     });
   });
 });
