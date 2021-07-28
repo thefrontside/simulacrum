@@ -32,7 +32,7 @@ is just connects over HTTP and so can be used from any language.
 
 To create a simulation in a simulacrum server with one of its
 available simulators. In this case, we'll assume that there is an
-`auth0` simualtor on the server that we can use to create a simulation.
+`auth0` simulator on the server that we can use to create a simulation.
 
 
 ``` javascript

@@ -1,0 +1,32 @@
+{
+  "name": "@simulacrum-examples/nextjs-with-auth0-react",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "standup": "npm run sim & npm run dev",
+    "sim": "node ./simulator-server.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "workspaces": [
+    "../../packages/*"
+  ],
+  "dependencies": {
+    "@auth0/auth0-react": "^1.6.0",
+    "effection": "^2.0.0-beta.3",
+    "next": "11.0.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "devDependencies": {
+    "@simulacrum/auth0": "0.0.0",
+    "@simulacrum/client": "0.3.0",
+    "@simulacrum/server": "0.2.0",
+    "@types/react": "17.0.14",
+    "eslint": "7.30.0",
+    "eslint-config-next": "11.0.1",
+    "typescript": "4.3.5"
+  }
+}
