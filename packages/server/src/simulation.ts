@@ -31,7 +31,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
           app.use(function(req, res, next) {
             assert(middlewareHandlerIsOperation(handler), 'invalid middleware function');
 
-            scope.spawn(handler(req, res))
+            scope.run(handler(req, res))
             .then(next)
             .catch(next);
           });
@@ -41,7 +41,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
 
         for (let handler of service.app.handlers) {
           app[handler.method](handler.path, (request, response) => {
-            scope.spawn(function*() {
+            scope.run(function*() {
               try {
                 yield handler.handler(request, response);
               } catch(err) {

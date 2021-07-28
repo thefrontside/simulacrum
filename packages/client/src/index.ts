@@ -72,11 +72,11 @@ export function createClient(serverURL: string): Client {
     return {
       run(scope: Task) {
         let { send, close, stream } = createChannel<Result<T>>();
-        let { future, resolve } = createFuture<void>();
-        scope.spawn(function*() {
+        let { future, produce } = createFuture<void>();
+        scope.run(function*() {
           let unsubscribe = ws.subscribe<Result<T>>(payload, {
             next: send,
-            complete: () => resolve({ state: "completed", value: undefined }),
+            complete: () => produce({ state: "completed", value: undefined }),
             error: () => null
           });
           try {
@@ -92,7 +92,7 @@ export function createClient(serverURL: string): Client {
   }
 
   async function query<T>(field: string, payload: SubscribePayload): Promise<T> {
-    return scope.spawn(function*(child) {
+    return scope.run(function*(child) {
       yield sleep(10);
       let subscription = subscribe<Record<string, T>>(payload).run(child);
       let result: Result<Record<string, T>> = yield subscription.expect();
@@ -135,7 +135,7 @@ mutation DestroySimulation($id: String!) {
       variables: { id }
     }),
     state<T = unknown>() {
-      let child = scope.spawn();
+      let child = scope.run();
 
       let subscription = subscribe<T>({
           query: `subscription { state }`
@@ -143,7 +143,7 @@ mutation DestroySimulation($id: String!) {
 
       let iterator = {
         next() {
-          return child.spawn(function*() {
+          return child.run(function*() {
             let next: IteratorResult<Result<{ state: T }>> = yield subscription.next();
             if (next.done) {
               return { done: true };

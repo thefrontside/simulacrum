@@ -27,7 +27,7 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
     let simulation = atom.slice("simulations").slice(id);
     simulation.set({ id, status: 'new', simulator, options, services: [], scenarios: {}, store: {} });
 
-    return scope.spawn(simulation.filter(({ status }) => status !== 'new').expect());
+    return scope.run(simulation.filter(({ status }) => status !== 'new').expect());
   }
 };
 
@@ -59,7 +59,7 @@ export const given: Resolver<GivenParameters, ScenarioState> = {
     let scenario = simulation.slice('scenarios').slice(id);
     scenario.set({ id, status: 'new', name: scenarioName, params });
 
-    return scope.spawn(scenario.filter(({ status }) => status !== 'new').expect());
+    return scope.run(scenario.filter(({ status }) => status !== 'new').expect());
   }
 };
 
@@ -70,7 +70,7 @@ interface StateParameters {
 export const state: Subscriber<StateParameters, ServerState> = {
   subscribe(_args, { scope, atom }) {
     let queue = createQueue<ServerState>();
-    scope.spawn(atom.forEach(queue.push));
+    scope.run(atom.forEach(queue.push));
     return {
       [Symbol.asyncIterator]: () => ({
         async next(): Promise<IteratorResult<ServerState>> {

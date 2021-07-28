@@ -79,8 +79,8 @@ export function createWebSocket(ws: WS): Resource<WebSocket> {
         close: (code, reason) => ws.close(code, reason),
         onMessage(cb) {
           // spawn a task to dispatch each message asynchronously.
-          scope.spawn(on<WS.MessageEvent>(ws, 'message').forEach(message => {
-            scope.spawn(cb(message.data.toString()));
+          scope.run(on<WS.MessageEvent>(ws, 'message').forEach(message => {
+            scope.run(cb(message.data.toString()));
           }));
         }
       };

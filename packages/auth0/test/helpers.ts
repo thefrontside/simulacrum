@@ -10,7 +10,7 @@ export function createTestServer(options: ServerOptions): Resource<Client> {
       let server: Server = yield createSimulationServer(options);
       let { port } = server.address;
       let client = createClient(`http://localhost:${port}`);
-      scope.spawn(function*() {
+      scope.run(function*() {
         try {
           yield;
         } finally {
