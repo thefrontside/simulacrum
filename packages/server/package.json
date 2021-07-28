@@ -27,13 +27,13 @@
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
-    "@effection/atom": "^2.0.0-beta.3",
-    "@effection/process": "^2.0.0-beta.3",
+    "@effection/atom": "^2.0.0-beta.6",
+    "@effection/process": "^2.0.0-beta.6",
     "@simulacrum/ui": "0.0.2",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "cors": "^2.8.5",
-    "effection": "^2.0.0-beta.3",
+    "effection": "^2.0.0-beta.6",
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
     "faker": "^5.5.0",
@@ -45,7 +45,7 @@
     "ws": "^7.4.4"
   },
   "devDependencies": {
-    "@effection/mocha": "^2.0.0-beta.3",
+    "@effection/mocha": "^2.0.0-beta.6",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",

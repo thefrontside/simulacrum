@@ -7,11 +7,11 @@ main(function* (scope: Task) {
 
   let watcher = watch(['../server/src/**/*.ts', './src/**/*.ts'], { ignoreInitial: true, ignored: 'dist' });
   try {
-    let process: Task = scope.spawn(buildAndRun);
+    let process: Task = scope.run(buildAndRun);
 
     yield on(watcher, 'all').forEach(() => {
       process.halt();
-      process = scope.spawn(function*() {
+      process = scope.run(function*() {
         yield sleep(10);
         console.log('rebuilding.....');
         yield buildAndRun;

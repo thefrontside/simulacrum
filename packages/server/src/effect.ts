@@ -21,7 +21,7 @@ export function map<A>(slice: Slice<Record<string, A>>, effect: Effect<A>): Oper
           // see comment above
           if (value) {
             if (!effects.has(key)) {
-              effects.set(key, scope.spawn(effect(slice.slice(key))));
+              effects.set(key, scope.run(effect(slice.slice(key))));
             }
             keep.add(key);
           }
