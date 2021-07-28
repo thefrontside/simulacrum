@@ -1,5 +1,13 @@
 # Changelog
 
+## \[0.4.0]
+
+- Automatically detect platform (nodejs, browser) and use appropriate
+  WebSocket library
+  - [fc7f579](https://github.com/thefrontside/simulacrum/commit/fc7f579d4cd31f498de9b39f5f0e02b6379ce109) Add changeset on 2021-05-29
+- upgrade to effection@2.0.0-beta.6
+  - [6c7387b](https://github.com/thefrontside/simulacrum/commit/6c7387bc9740e62a032e7133a18cff2888d38858) upgrade to effection@2.0.0-beta.6 on 2021-07-28
+
 ## \[0.3.0]
 
 - require a single root simulator for each simulation

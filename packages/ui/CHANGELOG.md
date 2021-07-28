@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.1.0]
+
+- upgrade to effection@2.0.0-beta.6
+  - [6c7387b](https://github.com/thefrontside/simulacrum/commit/6c7387bc9740e62a032e7133a18cff2888d38858) upgrade to effection@2.0.0-beta.6 on 2021-07-28
+
 ## \[0.0.2]
 
 - create proper npm packages that actually work

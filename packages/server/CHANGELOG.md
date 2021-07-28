@@ -1,5 +1,19 @@
 # Changelog
 
+## \[0.3.0]
+
+- upgrade to effection@2.0.0-beta.6
+  - [6c7387b](https://github.com/thefrontside/simulacrum/commit/6c7387bc9740e62a032e7133a18cff2888d38858) upgrade to effection@2.0.0-beta.6 on 2021-07-28
+- Add the ability to create https services
+  - [deab6be](https://github.com/thefrontside/simulacrum/commit/deab6beec9ff27b3b43874d711433b696adeeccb) add changeset on 2021-06-09
+- Add a `use` function to `createHttpApp` that adds express middleware that are operations.
+  - [0400220](https://github.com/thefrontside/simulacrum/commit/0400220c37c36ae0f523e927d2198dc5888ef6df) add middleware test on 2021-06-09
+- a `services` field added to the `createSimulation` options argument where a port can be assigned.
+  - [211637e](https://github.com/thefrontside/simulacrum/commit/211637e2c650b1f6590bda9ff30a2538ed2e8a0e) add changeset on 2021-06-16
+  - [093ad85](https://github.com/thefrontside/simulacrum/commit/093ad85ae80a0ccd13f6e69ac4d2ee964aeebe83) add service options to createSimulation options on 2021-06-24
+- Add the ability to add scenario parameters and basic passive effects implementation.
+  - [a5bcb89](https://github.com/thefrontside/simulacrum/commit/a5bcb89ae54f05ce873ea9e2f2218cd3f33597bd) add changeset on 2021-05-28
+
 ## \[0.2.0]
 
 - require a single root simulator for each simulation
