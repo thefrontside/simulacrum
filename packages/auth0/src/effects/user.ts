@@ -5,10 +5,10 @@ import { userQuery, user } from '../scenarios/user';
 
 export function *createUserFromPerson(store: Store, faker: Faker): Operation<void> {
   yield onPerson(store, function *(person) {
-    let { id, email, password } = person.get();
-    let existingUser = userQuery(store)(user => user.__personId === id);
+    let { email, password } = person.get();
+    let existingUser = userQuery(store)(user => user.email === email);
     if (!existingUser) {
-      yield user(store, faker, { email, password, __personId: id });
+      yield user(store, faker, { email, password });
     }
   });
 }

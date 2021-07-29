@@ -14,7 +14,6 @@ export interface User {
   id: string;
   email?: string;
   password?: string;
-  __personId?: string;
 }
 
 export interface Auth0State {
@@ -30,7 +29,6 @@ export function *user(store: Store, faker: Faker, params: OptionalParams<User> =
     id,
     email: params.email ?? faker.internet.email().toLowerCase(),
     password: params.password ?? faker.internet.password(),
-    __personId: params.__personId,
   };
 
   slice.set(attrs);
