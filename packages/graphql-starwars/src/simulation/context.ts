@@ -1,28 +1,10 @@
-import { Slice } from '@effection/atom';
 import { Store } from '@simulacrum/server';
 
-import { Character, Context } from "../schema/types";
-
-// atom doesn't quite work right in the sense that we can't make a
-// deep slice and have it create parents on demand.
-export function records<TRecord = unknown>(store: Store, key: string): Slice<Record<string, TRecord>> {
-  // create and initialize the graphql slice
-  let graphql = store.slice("graphql");
-  if (!graphql.get()) {
-    graphql.set({});
-  }
-
-  // create and initialize our records within the graphql slice
-  let slice = graphql.slice(key);
-  if (!slice.get()) {
-    slice.set({});
-  }
-  return slice;
-}
-
+import { records } from './scenarios';
+import { Context } from "../schema/types";
 
 export const createSimulationContext = (store: Store): Context => {
-  let characters = records<Character>(store, 'characters');
+  let characters = records(store).slice('characters');
 
   return {
     store: {

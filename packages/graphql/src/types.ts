@@ -1,4 +1,4 @@
-import { Scenarios, Store } from '@simulacrum/server';
+import { Effects, Scenarios, Store } from '@simulacrum/server';
 import { GraphQLSchema } from 'graphql';
 
 export type ContextCreator<TContext> = (store: Store) => TContext;
@@ -14,4 +14,5 @@ export interface SimulatorOptions<TContext = any> {
   schema: GraphQLSchema;
   scenarios: Scenarios;
   createContext?: ContextCreator<TContext>;
+  effects?: Effects;
 }

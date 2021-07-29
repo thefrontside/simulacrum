@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { SimulationState, ScenarioState, ServerState, SimulationOptions } from "../interfaces";
+import { SimulationState, ScenarioState, ServerState, SimulationOptions, ServiceState } from "../interfaces";
 import { OperationContext } from "./context";
 import { createQueue } from '../queue';
 
@@ -19,15 +19,24 @@ export interface CreateSimulationParameters {
   options?: SimulationOptions;
 }
 
-export const createSimulation: Resolver<CreateSimulationParameters, SimulationState> = {
+type SimulationStateResolveType = Omit<SimulationState, 'services'> & {
+  services: ServiceState[];
+}
+
+export const createSimulation: Resolver<CreateSimulationParameters, SimulationStateResolveType> = {
   resolve({ simulator, options = {} }, ctx) {
     let { atom, scope, newid } = ctx;
 
     let id = newid();
     let simulation = atom.slice("simulations").slice(id);
-    simulation.set({ id, status: 'new', simulator, options, services: [], scenarios: {}, store: {} });
+    simulation.set({ id, status: 'new', simulator, options, services: {}, scenarios: {}, store: {} });
 
-    return scope.spawn(simulation.filter(({ status }) => status !== 'new').expect());
+    return scope
+      .spawn(simulation.filter(({ status }) => status !== 'new').expect())
+      .then(({ services, ...simulation }) => ({
+        ...simulation,
+        services: Object.values(services),
+      }));
   }
 };
 

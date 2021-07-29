@@ -12,6 +12,7 @@ import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
 import { getServiceUrl } from './get-service-url';
 import { createRulesRunner } from '../rules/rules-runner';
 import { RuleUser } from '../rules/types';
+import { records, userQuery } from '../scenarios/user';
 
 export type Routes =
   | '/heartbeat'
@@ -25,7 +26,7 @@ export type Routes =
 type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
 
 const getServiceUrlFromOptions = (options: Options) => {
-  let service = options.services.get().find(({ name }) => name === 'auth0' );
+  let service = options.services.slice('auth0').get();
   assert(!!service, `did not find auth0 service in set of running services`);
 
   return new URL(service.url);
@@ -100,7 +101,9 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       assert(!!nonce, 'no nonce in /usernamepassword/login');
       assert(!!req.session, "no session");
 
-      let user = personQuery(([, person]) => person.email?.toLowerCase() === username.toLowerCase() && person.password === password);
+      let user = userQuery(store)(
+        (user) => user.email?.toLowerCase() === username.toLowerCase() && user.password === password
+      );
 
       if(!user) {
         let { redirect_uri } = req.query as QueryParams;
@@ -126,10 +129,10 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       req.session.username = username;
 
-      store.slice('auth0').set({
+      records(store).slice('nonce').set({
         [nonce]: {
+          nonce,
           username,
-          nonce
         }
       });
 
@@ -141,7 +144,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let { redirect_uri, state, nonce } = wctx;
 
-      let { username } = store.slice('auth0', nonce).get();
+      let { username } = records(store).slice('nonce').slice(nonce).get();
 
       let encodedNonce = encode(`${nonce}:${username}`);
 
