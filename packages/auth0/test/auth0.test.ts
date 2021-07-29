@@ -41,9 +41,7 @@ describe('Auth0 simulator', () => {
               },
             },
             scenarios: { person },
-            *effects(slice, faker) {
-              yield createUserFromPerson(slice, faker);
-            },
+            effects: createUserFromPerson,
           };
         }
       }
