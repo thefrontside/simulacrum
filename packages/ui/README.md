@@ -4,17 +4,14 @@ A Web application to manage a simulacrum server
 
 ### Development
 
-To start the web application in development mode, first start your
-`@simulacrum/server`. For example to start the dev server on port
-5000, run from the server directory:
+To start the web application in development mode, first start your `@simulacrum/server`. For example to start the dev server on port 5000, run from the server directory:
 
 ``` shell
 > PORT=5000 npm start
 Simulation server running on http://localhost:5000
 ```
 
-Now you can start your development client and point it at the
-development server. from the `packages/ui` directory:
+Now you can start your development client and point it at the development server. from the `packages/ui` directory:
 
 ```
 > npm start
