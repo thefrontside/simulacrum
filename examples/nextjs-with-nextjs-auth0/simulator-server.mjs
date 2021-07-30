@@ -1,6 +1,6 @@
 import { main } from "effection";
 import { createSimulationServer } from "@simulacrum/server";
-import { auth0 } from "@simulacrum/auth0";
+import { auth0 } from "@simulacrum/auth0-simulator";
 import { createClient } from "@simulacrum/client";
 
 const port = Number(process.env.PORT) || 4000; // port for the main simulation service

@@ -15,13 +15,13 @@
   "dependencies": {
     "@auth0/nextjs-auth0": "^1.5.0",
     "assert-ts": "^0.3.3",
-    "effection": "^2.0.0-beta.3",
+    "effection": "^2.0.0-beta.5",
     "next": "11.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
   "devDependencies": {
-    "@simulacrum/auth0": "0.0.0",
+    "@simulacrum/auth0-simulator": "0.1.0",
     "@simulacrum/client": "0.4.0",
     "@simulacrum/server": "0.3.0",
     "@types/react": "17.0.14",
