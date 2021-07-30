@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/auth0-simulator",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Simulate Auth0",
   "main": "dist/index.js",
   "scripts": {
@@ -30,7 +30,7 @@
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
     "@effection/process": "^2.0.0-beta.5",
-    "@simulacrum/server": "0.3.0",
+    "@simulacrum/server": "0.3.1",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "base64-url": "^2.3.3",
@@ -46,7 +46,7 @@
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
-    "@simulacrum/client": "0.4.0",
+    "@simulacrum/client": "0.5.0",
     "@types/base64-url": "^2.2.0",
     "@types/cookie-session": "^2.0.42",
     "@types/jsesc": "^2.5.1",
