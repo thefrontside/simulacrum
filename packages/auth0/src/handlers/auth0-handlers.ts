@@ -61,7 +61,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     },
 
     ['/authorize']: function *(req, res) {
-      let responseMode = req.query.response_mode as ResponseModes;
+      let responseMode = (req.query.response_mode ?? 'query') as ResponseModes;
 
       assert(['query', 'web_message'].includes(responseMode), `unknown response_mode ${responseMode}`);
 
