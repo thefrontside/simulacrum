@@ -61,6 +61,17 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     },
 
     ['/authorize']: function *(req, res) {
+      let currentUser = req.query.currentUser as string | undefined;
+
+      assert(!!req.session, "no session");
+
+      if(currentUser) {
+        // the request is a silent login.
+        // We fake an existing login by
+        // adding the user to the session
+        req.session.username = currentUser;
+      }
+
       let responseMode = (req.query.response_mode ?? 'query') as ResponseModes;
 
       assert(['query', 'web_message'].includes(responseMode), `unknown response_mode ${responseMode}`);
@@ -68,8 +79,6 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       let handler = authorizeHandlers[responseMode];
 
       yield handler(req, res);
-
-      return;
     },
 
     ['/login']: function* (req, res) {

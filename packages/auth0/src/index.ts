@@ -50,6 +50,8 @@ export const auth0: Simulator<Options> = (slice, options) => {
 
   let handlersOptions = { ...DefaultOptions, ...options, store, services };
 
+  console.dir({ options });
+
   let auth0Handlers = createAuth0Handlers(handlersOptions);
   let openIdHandlers = createOpenIdHandlers(handlersOptions);
 
