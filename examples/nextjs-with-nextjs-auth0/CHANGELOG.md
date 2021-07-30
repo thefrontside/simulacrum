@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.0.3]
+
+- rollback effection to beta-5.
+  - Bumped due to a bump in @simulacrum/client.
+  - [793c074](https://github.com/thefrontside/simulacrum/commit/793c074c73d4958a9db5231b7ffdd54b5f103d4a) rollback effection to beta-5 on 2021-07-30
+
 ## \[0.0.2]
 
 - Fix auth0-simulator dependencies in examples
