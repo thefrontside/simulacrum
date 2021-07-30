@@ -34,7 +34,6 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
       services: [],
       scenarios: {},
       store: {},
-      debug: !!options.debug
     });
 
     return scope.spawn(simulation.filter(({ status }) => status !== 'new').expect());

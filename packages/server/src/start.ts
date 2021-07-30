@@ -13,6 +13,7 @@ main(function* () {
   });
 
   let server: Server = yield createSimulationServer({
+    debug: true,
     port,
     seed: 1,
     simulators: {

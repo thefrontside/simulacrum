@@ -3,13 +3,14 @@ import { Resource, spawn } from "effection";
 import { ServerState, Simulator } from "./interfaces";
 import { map } from './effect';
 import { simulation } from './simulation';
-import { loggingEffect } from './effects/logging';
+import { createLogger } from './effects/logging';
 
 export function createEffects(atom: Slice<ServerState>, available: Record<string, Simulator>): Resource<void> {
   return {
+    name: 'server effects',
     *init() {
       yield spawn(map(atom.slice('simulations'), simulation(available)));
-      yield spawn(map(atom.slice('simulations'), loggingEffect()));
+      yield createLogger(atom);
     }
   };
 }

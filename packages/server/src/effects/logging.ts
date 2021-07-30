@@ -1,21 +1,26 @@
-import type { SimulationState } from 'src/interfaces';
-import { Effect } from '../effect';
+import type { ServerState } from 'src/interfaces';
+import { map } from '../effect';
 import { assert } from 'assert-ts';
-import { spawn, Task } from 'effection';
+import { Operation, spawn, Task } from 'effection';
+import { Slice } from '@effection/atom';
 
-export const loggingEffect = (): Effect<SimulationState> => slice => function*(scope) {
-  let task: Task = yield spawn();
+export function createLogger(slice: Slice<ServerState>): Operation<void> {
+  return {
+    name: 'logger',
+    *init(scope) {
+      let task: Task = yield spawn();
 
-  yield slice.slice('debug').forEach(function*(shouldLogErrors) {
-    yield task.halt();
-    if (shouldLogErrors) {
-      task = yield spawn(function* () {
-        yield slice.filter(({ status }) => status === 'failed').forEach(function *(state) {
-          assert(state.status === 'failed');
-
-          console.error(state.error);
-        });
-      }).within(scope);
+      yield spawn(slice.slice("debug").forEach(function*(shouldLogErrors) {
+        yield task.halt();
+        if (shouldLogErrors) {
+          task = yield spawn(map(slice.slice("simulations"), function*(simulation) {
+            yield simulation.filter(({ status }) => status === 'failed').forEach(state => {
+              assert(state.status === 'failed');
+              console.error(state.error);
+            });
+          })).within(scope);
+        }
+      }));
     }
-  });
-};
+  };
+}

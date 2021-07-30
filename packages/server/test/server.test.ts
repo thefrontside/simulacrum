@@ -128,18 +128,6 @@ describe('@simulacrum/server', () => {
     });
   });
 
-  describe('debug', () => {
-    beforeEach(function*() {
-      simulation = yield client.createSimulation("echo", {
-        debug: true
-      });
-    });
-
-    it('sets the debug flag', function * () {
-      expect(simulation.debug).toBe(true);
-    });
-  });
-
   describe('createSimulation() with parameters', () => {
     let response: Response;
     let body: string;
@@ -229,6 +217,3 @@ hello world`);
     });
   });
 });
-
-
-

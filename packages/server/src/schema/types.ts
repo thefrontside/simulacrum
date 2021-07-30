@@ -21,7 +21,6 @@ export const types = [
     definition(t) {
       t.id('id');
       t.nonNull.string('status');
-      t.boolean('debug');
       t.nonNull.list.field('services', {
         type: 'Service'
       });
