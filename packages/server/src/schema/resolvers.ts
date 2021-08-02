@@ -24,8 +24,17 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
     let { atom, scope, newid } = ctx;
 
     let id = newid();
-    let simulation = atom.slice("simulations").slice(id);
-    simulation.set({ id, status: 'new', simulator, options, services: [], scenarios: {}, store: {} });
+    let simulation = atom.slice("simulations", id);
+
+    simulation.set({
+      id,
+      status: 'new',
+      simulator,
+      options,
+      services: [],
+      scenarios: {},
+      store: {},
+    });
 
     return scope.run(simulation.filter(({ status }) => status !== 'new').expect());
   }
@@ -33,7 +42,7 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
 
 export const destroySimulation: Resolver<{ id: string; }, boolean> = {
   async resolve({ id }, { atom }) {
-    let simulation = atom.slice("simulations").slice(id);
+    let simulation = atom.slice("simulations", id);
     if (simulation.get()) {
       simulation.remove();
       return true;

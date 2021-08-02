@@ -27,6 +27,7 @@ describe('webocket transport', () => {
     expect(first).toEqual({
       done: false,
       value: {
+        debug: false,
         simulations: {}
       }
     });

@@ -67,7 +67,6 @@ export function createClient(serverURL: string): Client {
     }
   });
 
-
   function subscribe<T>(payload: SubscribePayload): Runnable<Subscription<Result<T>>> {
     return {
       run(scope: Task) {

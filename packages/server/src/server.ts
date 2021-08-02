@@ -16,13 +16,20 @@ import { stableIds } from './faker';
 import { createWebSocketTransport } from './websocket-transport';
 import { Resource } from 'effection';
 
-export function createSimulationServer(options: ServerOptions = { simulators: {} }): Resource<Server> {
-  let { port } = options;
+const defaults = {
+  simulators: {},
+  debug: false
+};
+
+export function createSimulationServer(options: ServerOptions = defaults): Resource<Server> {
+  let { simulators, debug, port, seed } = { ...defaults, ...options };
+
   return {
     *init(scope) {
-      let newid = options.seed ? stableIds(options.seed) : v4;
+      let newid = seed ? stableIds(seed) : v4;
 
       let atom = createAtom<ServerState>({
+        debug: !!debug,
         simulations: {}
       });
 
@@ -38,7 +45,7 @@ export function createSimulationServer(options: ServerOptions = { simulators: {}
 
       yield createWebSocketTransport(context, server.http);
 
-      yield createEffects(atom, options.simulators);
+      yield createEffects(atom, simulators);
 
       return server;
     }

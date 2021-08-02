@@ -26,6 +26,7 @@ export interface ServerOptions {
   simulators: Record<string, Simulator<any>>;
   port?: number;
   seed?: number;
+  debug?: boolean;
 }
 
 export interface Service {
@@ -40,21 +41,22 @@ export type StoreState = Record<string, Record<string, Record<string, any>>>;
 export type Store = Slice<StoreState>;
 
 export interface ServerState {
+  debug: boolean;
   simulations: Record<string, SimulationState>;
 }
 
 export interface SimulationOptions {
   options?: Record<string, unknown>;
   services?: Record<string, {
-    port?: number
+    port?: number;
   }>
 }
 
 export type SimulationState =
   {
     id: string;
-    status: 'new',
-    simulator: string,
+    status: 'new';
+    simulator: string;
     options: SimulationOptions;
     scenarios: Record<string, ScenarioState>;
     services: [];
@@ -62,8 +64,8 @@ export type SimulationState =
   } |
   {
     id: string,
-    status: 'running',
-    simulator: string,
+    status: 'running';
+    simulator: string;
     options: SimulationOptions;
     services: {
       name: string;
@@ -74,8 +76,8 @@ export type SimulationState =
   } |
   {
     id: string,
-    status: 'failed',
-    simulator: string,
+    status: 'failed';
+    simulator: string;
     options: SimulationOptions;
     scenarios: Record<string, ScenarioState>;
     services: [];

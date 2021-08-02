@@ -45,7 +45,6 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
               try {
                 yield handler.handler(request, response);
               } catch(err) {
-                console.error(err);
 
                 response.status(500);
                 response.write('server error');
