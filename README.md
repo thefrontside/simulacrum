@@ -41,6 +41,10 @@ person.name // => Paul Waters
 person.email // => paul.waters@gmail.com
 ```
 
+If you have an application that uses `auth0`, check out [`@simulacrum/auth0-simulator`](./packages/auth0) on how you can get started.
+
+We also have complete examples for [`nextjs with auth0 react`](./examples/nextjs-with-auth0-react) and [`nextjs with nextjs auth0`](./examples/nextjs-with-nextjs-auth0).
+
 ## Development
 
 ```
