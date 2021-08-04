@@ -28,7 +28,6 @@ This quick start assumes you have your own app with auth0. Check out [`nextjs wi
 Let's start our server.
 
 ```bash
-npm install @simulacrum/auth0-simulator
 PORT=4000 npx auth0-simulator  # this will start a test simulacrum server at http://localhost:4000
 ```
 
