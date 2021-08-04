@@ -1,0 +1,38 @@
+{
+  "name": "@simulacrum/cypress",
+  "version": "0.0.1",
+  "description": "Cypress simulacrum commands",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": "https://github.com/thefrontside/simulacrum.git",
+  "author": "Frontside Engineering <engineering@frontside.com>",
+  "license": "MIT",
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "README.md"
+  ],
+  "dependencies": {
+    "@simulacrum/auth0": "^0.2.1",
+    "@auth0/auth0-spa-js": "^1.16.1",
+    "cypress": "^8.1.0"
+  },
+  "scripts": {
+    "start": "cd ../../examples/nextjs-with-nextjs-auth0 && npm install && npm run dev -- -p 3000",
+    "cypress:run": "npx cypress run --spec 'cypress/integration/*.spec.ts'",
+    "test": "start-server-and-test 'npm run start' http://localhost:3000 cypress:run",
+    "prepack": "tsc --build",
+    "lint":  "eslint \"src/**/*.ts\""
+  },
+  "devDependencies": {
+    "@frontside/eslint-config": "^2.0.0",
+    "@frontside/tsconfig": "^1.2.0",
+    "@frontside/typescript": "^1.1.1",
+    "start-server-and-test": "^1.11.7",
+    "ts-node": "^9.1.1"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}

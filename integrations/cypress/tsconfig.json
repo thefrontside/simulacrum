@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig-base.json",
+  "compilerOptions": {
+    "types": ["cypress"],
+    "outDir": "dist/",
+    "rootDir": "./src",
+    "declarationDir": "dist"
+  },
+  "include": [
+    "src/*.ts"
+  ],
+  "references": [
+    { "path" : "../../packages/auth0/tsconfig.esm.json" }
+  ]
+}
