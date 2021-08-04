@@ -15,9 +15,10 @@
   ],
   "scripts": {
     "cypress:open": "cypress open",
-    "start": "cd ../../examples/nextjs-with-nextjs-auth0 && npm install && npm run dev -- -p 3000",
-    "cypress:run": "npx cypress run --spec 'cypress/integration/*.spec.ts'",
-    "test": "start-server-and-test 'npm run start' http://localhost:3000 cypress:run",
+    "start:server": "cd ../../examples/nextjs-with-auth0-react && npm install && npm run dev",
+    "cypress:run": "npx cypress run --headless 'cypress/integration/*.ts'",
+    "start:auth0": "PORT=4000 npx auth0-simulator",
+    "test": "npm-run-all --parallel start:auth0 start:server cypress:run",
     "build": "npm run prepack",
     "prepack": "tsc --build tsconfig.dist.json",
     "lint":  "eslint \"src/**/*.ts\""
@@ -31,7 +32,7 @@
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
-    "start-server-and-test": "^1.11.7"
+    "npm-run-all": "^4.1.5"
   },
   "volta": {
     "extends": "../../package.json"
