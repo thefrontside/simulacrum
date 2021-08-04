@@ -1,5 +1,5 @@
 {
-  "name": "@simulacrum/cypress",
+  "name": "@simulacrum/cypress-auth0",
   "version": "0.0.1",
   "description": "Cypress simulacrum commands",
   "main": "dist/index.js",
@@ -21,10 +21,9 @@
     "test": "npm-run-all --parallel start:auth0 start:server cypress:run",
     "build": "npm run prepack",
     "prepack": "tsc --build tsconfig.dist.json",
-    "lint":  "eslint \"src/**/*.ts\""
+    "lint": "eslint \"src/**/*.ts\""
   },
   "dependencies": {
-    "@simulacrum/auth0-simulator": "^0.2.1",
     "@auth0/auth0-spa-js": "^1.16.1",
     "cypress": "^8.1.0"
   },
