@@ -1,5 +1,4 @@
-import type { Auth0ClientOptions } from '@auth0/auth0-spa-js';
-import { Auth0Client } from '@auth0/auth0-spa-js';
+import { Auth0Client, Auth0ClientOptions } from '@auth0/auth0-spa-js';
 
 const Auth0ConfigDefaults: Pick<Auth0ClientOptions, 'connection' | 'scope'> = {
   connection: 'Username-Password-Authentication',
@@ -14,8 +13,7 @@ const Auth0ConfigFixed: Pick<Auth0ClientOptions, 'cacheLocation' | 'useRefreshTo
 const Auth0Config: Auth0ClientOptions = {
   ...Auth0ConfigDefaults,
   audience: Cypress.env('audience'),
-  client_id: Cypress.env('clientId'),
-  connection: Cypress.env('connection'),
+  client_id: Cypress.env('client_id'),
   domain: Cypress.env('domain'),
   scope: Cypress.env('scope'),
   ...Auth0ConfigFixed

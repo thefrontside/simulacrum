@@ -14,6 +14,7 @@
     "README.md"
   ],
   "scripts": {
+    "cypress:open": "cypress open",
     "start": "cd ../../examples/nextjs-with-nextjs-auth0 && npm install && npm run dev -- -p 3000",
     "cypress:run": "npx cypress run --spec 'cypress/integration/*.spec.ts'",
     "test": "start-server-and-test 'npm run start' http://localhost:3000 cypress:run",

@@ -3,6 +3,7 @@
   "version": "0.2.3",
   "description": "Simulate Auth0",
   "main": "dist/index.js",
+  "bin": "bin/index.js",
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
