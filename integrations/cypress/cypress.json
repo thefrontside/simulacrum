@@ -8,6 +8,6 @@
   "pluginsFile": "cypress/plugins/index.js",
   "screenshotsFolder": "cypress/screenshots",
   "videosFolder": "cypress/videos",
-  "supportFile": "cypress/support/index.js",
+  "supportFile": "cypress/support/index.ts",
   "configFile": "cypress/tsconfig.json"
 }
