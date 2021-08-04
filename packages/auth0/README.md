@@ -21,6 +21,8 @@ If this does not meet your needs then please create a github issue to start a co
 
 ## Quick Start
 
+This quick start assumes you have your own app with auth0. Check out [`nextjs with auth0 react`](./examples/nextjs-with-auth0-react) and [`nextjs with nextjs auth0`](./examples/nextjs-with-nextjs-auth0) for more complete examples that provides a barebone application.
+
 ### Graphql
 
 Let's start our server.
@@ -62,7 +64,7 @@ mutation CreateSimulation {
 }
 ```
 
-This mutation creates your first simulation, and runs it in memory. Every time you start the server, you will need to apply these mutations. This can also be done programmatically which will be your likely interface while writing tests.
+This mutation creates your first simulation. Every time you start the server, you will need to apply these mutations. This can also be done programmatically which will be your likely interface while writing tests.
 
 ![create simulation](./docs/create-simulation.png).
 
@@ -99,14 +101,12 @@ The following examples are written in Typescript, but using Typescript is not a 
 ```ts
 import { main } from "effection";
 import { createSimulationServer, Server } from "@simulacrum/server";
-import { auth0 } from ".";
+import { auth0 } from "@simulacrum/auth0-simulator";
 import { createClient } from "@simulacrum/client";
 
 const port = Number(process.env.PORT) ?? 4000; // port for the main simulation service
 
-// effection is a structured concurrency library and
-// this will help us handle errors and shutting down
-// the server gracefully
+// effection is a structured concurrency library and this will help us handle errors and shutting down the server gracefully
 main(function* () {
   let server: Server = yield createSimulationServer({
     seed: 1,
