@@ -14,17 +14,26 @@ interface Token {
 declare global {
   namespace Cypress {
     interface Chainable {
-      login({ currentUser }: { currentUser: string }): Promise<Token>
+      login({ currentUser }: { currentUser: string }): Promise<Token>;
+      logout(): Promise<void>;
     }
   }
 }
 
 Cypress.Commands.add('login', async ({ currentUser }: {currentUser: string}) => {
   Cypress.log({
-    name: 'loginViaAuth0',
+    name: 'auth0-simulator-login',
   });
 
   await auth0Client.getTokenSilently({ ignoreCache: true, currentUser });
+});
+
+Cypress.Commands.add('logout', async () => {
+  Cypress.log({
+    name: 'auth0-simulator-logout',
+  });
+
+  await auth0Client.logout();
 });
 
 export {};
