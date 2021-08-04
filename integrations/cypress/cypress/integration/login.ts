@@ -22,11 +22,9 @@ describe('login', () => {
 
   beforeEach(async () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let { domain, ...auth0Options } = configJson as Auth0ClientOptions;
+    let { domain, ...auth0Options } = configJson as Omit<Auth0ClientOptions, 'client_id'> & { clientId: string };
 
     let port = Number(configJson.domain.split(':').slice(-1)[0]);
-
-    console.dir({ auth0Options });
 
     simulation = await client.createSimulation("auth0", {
       options: {
