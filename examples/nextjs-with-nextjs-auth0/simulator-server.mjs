@@ -23,6 +23,7 @@ main(function* () {
       audience: "https://your-audience/",
       scope: "openid profile read:shows",
       clientId: "YOUR_AUTH0_CLIENT_ID",
+      rulesDirectory: "./rules",
     },
     services: {
       auth0: {

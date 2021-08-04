@@ -14,14 +14,27 @@ const Header = (): React.ReactElement => {
               <a>Home</a>
             </Link>
           </li>
+          <li>
+            <Link href="/private">
+              <a>Private Route</a>
+            </Link>
+          </li>
           {user ? (
             <>
+              <li>
+                <Link href={"/profile"}>
+                  <a>Profile</a>
+                </Link>
+              </li>
               <li>
                 <button
                   onClick={() => logout({ returnTo: window.location.origin })}
                 >
                   Log out
                 </button>
+              </li>
+              <li>
+                <img src={user?.picture} style={{ height: "50px" }} />
               </li>
             </>
           ) : (

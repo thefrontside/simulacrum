@@ -21,3 +21,5 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 Click on the login link, and enter the information from the user created in your simulation. It is output in your console running the simulation.
 
 Now you are logged in!
+
+TODO make note on windows for running with the env var
