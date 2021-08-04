@@ -14,8 +14,18 @@ const Header = (): React.ReactElement => {
               <a>Home</a>
             </Link>
           </li>
+          <li>
+            <Link href="/private">
+              <a>Private Route</a>
+            </Link>
+          </li>
           {user ? (
             <>
+              <li>
+                <Link href="/profile">
+                  <a>Profile</a>
+                </Link>
+              </li>
               <li>
                 <a href="/api/auth/logout" data-testid="logout">
                   Logout
