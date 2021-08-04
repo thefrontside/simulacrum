@@ -24,13 +24,17 @@ describe('login', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let { domain, ...auth0Options } = configJson as Auth0ClientOptions;
 
+    let port = Number(configJson.domain.split(':').slice(-1)[0]);
+
+    console.dir({ auth0Options });
+
     simulation = await client.createSimulation("auth0", {
       options: {
         ...auth0Options
       },
       services: {
         auth0: {
-          port: 4400
+          port
         }
       }
     });
@@ -44,6 +48,8 @@ describe('login', () => {
   describe('log in', () => {
     it('should get token without signing in', () => {
       cy.login({ currentUser: person.email });
+
+      cy.visit('/');
 
       cy.contains('Log out');
     });
