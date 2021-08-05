@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
-    "prepack": "tsc --build tsconfig.dist.json && copy \"./src/views/**/*.png\" ./dist/views/",
+    "prepack": "tsc --build tsconfig.dist.json && copy-cli \"./src/views/**/*.png\" ./dist/views/",
     "build": "npm run prepack",
     "lint": "eslint src test",
     "start": "node dist/start.js",
@@ -29,20 +29,20 @@
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
-    "@effection/process": "^2.0.0-beta.5",
+    "@effection/process": "^2.0.0-beta.8",
     "@simulacrum/server": "0.3.1",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "base64-url": "^2.3.3",
     "cookie-session": "^1.4.0",
-    "effection": "^2.0.0-beta.5",
+    "effection": "^2.0.0-beta.8",
     "html-entities": "^2.3.2",
     "jsesc": "^3.0.2",
     "jsonwebtoken": "^8.5.1"
   },
   "devDependencies": {
-    "@effection/atom": "^2.0.0-beta.5",
-    "@effection/mocha": "^2.0.0-beta.5",
+    "@effection/atom": "^2.0.0-beta.8",
+    "@effection/mocha": "^2.0.0-beta.8",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
