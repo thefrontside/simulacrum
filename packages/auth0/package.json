@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@effection/atom": "^2.0.0-beta.8",
-    "@effection/mocha": "^2.0.0-beta.8",
+    "@effection/mocha": "2.0.0-beta.7",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
