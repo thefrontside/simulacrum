@@ -57,14 +57,12 @@ export const auth0: Simulator<Options> = (slice, options) => {
     services: { auth0: createAuth0Service({ ...auth0Handlers, ...openIdHandlers }) },
     scenarios: {
       /**
-       * Here we just wrap the internal `person` scenario to augment
-       * it with a username and password
-       * but what we really need to have some way to _react_ to the person
+       * Here we just export the internal `person` scenario so that it can be
+       * used with the a standalone auth0 simulator. However,
+       * what we really need to have some way to _react_ to the person
        * having been created and augment the record at that point.
        */
-      *person(store, faker) {
-        return yield person(store, faker);
-      }
+      person
     }
   };
 };
