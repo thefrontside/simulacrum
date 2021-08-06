@@ -2,8 +2,9 @@
 /// <reference types="cypress" />
 
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
-import { createClient, Simulation } from '@simulacrum/client';
+import { Client, createClient, Simulation } from '@simulacrum/client';
 import { auth0Client } from './auth';
+import { assert } from 'assert-ts';
 
 export interface Person { email: string; password: string }
 
@@ -28,9 +29,9 @@ declare global {
   }
 }
 
-const port = process.env.PORT || 4000;
+const ClientPort = process.env.PORT || 4000;
 
-let client = createClient(`http://localhost:${port}`);
+const ClientMap: Map<string, Client> = new Map();
 
 Cypress.Commands.add('out', (msg: string) => {
   cy.task('log', msg);
@@ -38,8 +39,19 @@ Cypress.Commands.add('out', (msg: string) => {
 
 Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
   Cypress.log({
-    name: 'auth0-simulator-create=simulation',
+    name: 'auth0-simulator-create-simulation',
   });
+
+  let client: Client | undefined;
+
+  if(ClientMap.has(Cypress.spec.name)) {
+    client = ClientMap.get(Cypress.spec.name);
+  } else {
+    client = createClient(`http://localhost:${ClientPort}`);
+    ClientMap.set(Cypress.spec.name, client);
+  }
+
+  assert(typeof client !== 'undefined', 'no client created in createSimulation');
 
   let { domain, client_id, ...auth0Options } = options;
 
@@ -63,6 +75,10 @@ Cypress.Commands.add('given', { prevSubject: true }, (simulation: Simulation, at
     name: 'auth0-simulator-given',
   });
 
+  let client = ClientMap.get(Cypress.spec.name);
+
+  assert(typeof client !== 'undefined', 'no client in given');
+
   return cy.wrap(client.given(simulation, "person", attrs).then(scenario => scenario.data));
 });
 
@@ -70,8 +86,6 @@ Cypress.Commands.add('login', { prevSubject: 'optional' }, (person) => {
   Cypress.log({
     name: 'auth0-simulator-login',
   });
-
-  cy.out(JSON.stringify(person));
 
   return cy.wrap(auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email }));
 });
@@ -83,5 +97,6 @@ Cypress.Commands.add('logout', () => {
 
   return cy.wrap(auth0Client.logout());
 });
+
 
 export { };
