@@ -22,7 +22,8 @@ declare global {
       createSimulation(options: Auth0ClientOptions): Chainable<Simulation>;
       login({ currentUser }: { currentUser: string }): Chainable<Token>;
       logout(): Chainable<void>;
-      given(simulation: Simulation, attrs?: Partial<Person>): Chainable<Person>
+      given(attrs?: Partial<Person>): Chainable<Person>;
+      out<S = unknown>(msg: string): Chainable<S>
     }
   }
 }
@@ -30,6 +31,10 @@ declare global {
 const port = process.env.PORT || 4000;
 
 let client = createClient(`http://localhost:${port}`);
+
+Cypress.Commands.add('out', (msg: string) => {
+  cy.task('log', msg);
+});
 
 Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
   Cypress.log({
@@ -53,10 +58,12 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
   }));
 });
 
-Cypress.Commands.add('given', (simulation: Simulation, attrs: Partial<Person> = {}) => {
+Cypress.Commands.add('given', { prevSubject: true }, (simulation: Simulation, attrs: Partial<Person> = {}) => {
   Cypress.log({
     name: 'auth0-simulator-given',
   });
+
+  cy.out(JSON.stringify(simulation));
 
   return cy.wrap(client.given(simulation, "person", attrs).then(scenario => scenario.data));
 });
