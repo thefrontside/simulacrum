@@ -9,5 +9,6 @@
   "screenshotsFolder": "cypress/screenshots",
   "videosFolder": "cypress/videos",
   "supportFile": "cypress/support/index.ts",
-  "configFile": "cypress/tsconfig.json"
+  "configFile": "cypress/tsconfig.json",
+  "chromeWebSecurity": false
 }

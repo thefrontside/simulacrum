@@ -14,24 +14,27 @@
     "README.md"
   ],
   "scripts": {
-    "cypress:open": "cypress open",
+    "cypress:browser": "cypress open",
+    "cypress:open": "npm-run-all --parallel start:auth0 start:server cypress:browser",
     "start:server": "cd ../../examples/nextjs-with-auth0-react && npm install && npm run dev",
-    "cypress:run": "npx cypress run --headless 'cypress/integration/*.ts'",
+    "cypress:run": "npx cypress run --spec 'cypress/integration/*.ts'",
     "start:auth0": "PORT=4000 npx auth0-simulator",
-    "test": "npm-run-all --parallel start:auth0 start:server cypress:run",
+    "test:e2e": "start-server-and-test 'npm run start:server' http://localhost:3000 cypress:run",
+    "test": "npm-run-all --parallel start:auth0 test:e2e",
     "build": "npm run prepack",
     "prepack": "tsc --build tsconfig.dist.json",
     "lint": "eslint \"src/**/*.ts\""
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.16.1",
-    "cypress": "^8.1.0"
+    "cypress": "^8.2.0"
   },
   "devDependencies": {
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^1.1.1",
-    "npm-run-all": "^4.1.5"
+    "npm-run-all": "^4.1.5",
+    "start-server-and-test": "^1.13.1"
   },
   "volta": {
     "extends": "../../package.json"
