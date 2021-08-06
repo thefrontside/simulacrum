@@ -181,7 +181,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         iss: url,
         exp: expiresAt(),
         iat: Date.now(),
-        mail: username,
+        email: username,
         aud: clientId,
         sub: user.id,
         nonce,

@@ -289,6 +289,10 @@ describe('Auth0 simulator', () => {
       it('should return an iss field with a forward slash', function* () {
         expect(token.payload.iss).toBe('https://localhost:4400/');
       });
+
+      it('token sould contain a valid email', function* () {
+        expect(token.payload.email).toBe(person.data.email);
+      });
     });
 
 
