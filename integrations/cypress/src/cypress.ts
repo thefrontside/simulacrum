@@ -20,7 +20,7 @@ declare global {
   namespace Cypress {
     interface Chainable {
       createSimulation(options: Auth0ClientOptions): Chainable<Simulation>;
-      login(): Chainable<Token>;
+      login(person?: Person): Chainable<Token>;
       logout(): Chainable<void>;
       given(attrs?: Partial<Person>): Chainable<Person>;
       out<S = unknown>(msg: string): Chainable<S>
@@ -70,6 +70,8 @@ Cypress.Commands.add('login', { prevSubject: 'optional' }, (person) => {
   Cypress.log({
     name: 'auth0-simulator-login',
   });
+
+  cy.out(JSON.stringify(person));
 
   return cy.wrap(auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email }));
 });
