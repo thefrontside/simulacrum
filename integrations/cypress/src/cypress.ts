@@ -40,8 +40,6 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
 
   let port = Number(domain.split(':').slice(-1)[0]);
 
-  cy.log(JSON.stringify({ domain, client_id, ...auth0Options }));
-
   return cy.wrap(client.createSimulation("auth0", {
     options: {
       ...auth0Options,
