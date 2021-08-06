@@ -13,7 +13,7 @@ const Auth0ConfigFixed: Pick<Auth0ClientOptions, 'cacheLocation' | 'useRefreshTo
 const Auth0Config: Auth0ClientOptions = {
   ...Auth0ConfigDefaults,
   audience: Cypress.env('audience'),
-  client_id: Cypress.env('clientId'),
+  client_id: Cypress.env('client_id'),
   domain: Cypress.env('domain'),
   scope: Cypress.env('scope'),
   ...Auth0ConfigFixed
