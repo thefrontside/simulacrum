@@ -5,9 +5,12 @@
   "scripts": {
     "sim": "node ./simulator-server.mjs",
     "dev": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" next dev",
+    "boop": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "workspaces": [
     "../../packages/*"
@@ -21,10 +24,12 @@
     "react-dom": "17.0.2"
   },
   "devDependencies": {
+    "@bigtest/cypress": "^0.0.4",
     "@simulacrum/auth0-simulator": "0.2.3",
     "@simulacrum/client": "0.5.1",
     "@simulacrum/server": "0.3.2",
     "@types/react": "17.0.14",
+    "cypress": "^8.1.0",
     "eslint": "7.30.0",
     "eslint-config-next": "11.0.1",
     "typescript": "4.3.5"

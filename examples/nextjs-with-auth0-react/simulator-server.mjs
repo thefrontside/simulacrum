@@ -32,7 +32,9 @@ main(function* () {
       },
     });
     console.log(`auth0 service running at ${simulation.services[0].url}`);
+
     let person = yield client.given(simulation, "person");
+
     console.log(`store populated with user`);
     console.log(
       `username = ${person.data.email} password = ${person.data.password}`
