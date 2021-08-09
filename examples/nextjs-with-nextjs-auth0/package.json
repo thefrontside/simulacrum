@@ -3,14 +3,15 @@
   "version": "0.0.5",
   "private": true,
   "scripts": {
+    "standup": "npm run sim & npm run dev",
     "sim": "node ./simulator-server.mjs",
     "dev": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" next dev",
-    "boop": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "cypress:run": "cypress run",
+    "test": "start-server-and-test standup http://localhost:3000 cypress:run"
   },
   "workspaces": [
     "../../packages/*"
@@ -32,6 +33,7 @@
     "cypress": "^8.1.0",
     "eslint": "7.30.0",
     "eslint-config-next": "11.0.1",
+    "start-server-and-test": "^1.13.1",
     "typescript": "4.3.5"
   }
 }
