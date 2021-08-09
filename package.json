@@ -4,6 +4,7 @@
   "description": "Composable simulations for testing, development, and application previews",
   "scripts": {
     "clean": "npm run clean -ws",
+    "eslint": "eslint",
     "test": "npm run test -ws",
     "build": "npm run prepack -ws",
     "prepack": "npm run prepack -ws",
