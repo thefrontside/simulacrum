@@ -16,7 +16,6 @@
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
-  "bin": "bin/index.js",
   "files": [
     "bin/**/*",
     "dist/**/*"
