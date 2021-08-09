@@ -17,5 +17,6 @@ jobs:
       - name: Run linters
         uses: wearerequired/lint-action@v1
         with:
+          eslint_command_prefix: npm
           eslint: true
           auto_fix: true
