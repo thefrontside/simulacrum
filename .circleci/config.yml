@@ -53,10 +53,16 @@ jobs:
           command: mkcert -install && mkcert localhost
           working_directory: ~/.simulacrum/certs
       - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
+      - node/install:
+          node-version: 14.17.0
+      # install and tsc build the ./packages/*
+      - node/install-packages:
+          with-cache: false
+      - run: npm run build
+      # install and run the example test
       - node/install-packages:
           cache-path: ~/project/<< parameters.example >>/node_modules
           app-dir: << parameters.example >>
-          with-cache: false
       - run:
           working_directory: << parameters.example >>
           command: npm run test
