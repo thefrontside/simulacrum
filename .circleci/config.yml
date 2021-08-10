@@ -41,22 +41,22 @@ jobs:
       example:
         type: string
     docker:
-      - image: cimg/node:15.14.0
+      - image: cypress/base:14
     steps:
       - checkout
       - run: wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-linux-amd64
       - run: mv mkcert-v1.4.3-linux-amd64 mkcert
-      - run: export CWD=$(pwd)
-      - run: chmod +x mkcert
-      - run: sudo cp mkcert /usr/local/bin/
+      - run: cp mkcert /usr/local/bin/
+      - run: chmod +x /usr/local/bin/mkcert
       - run: mkdir -p ~/.simulacrum/certs
-      - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
       - run:
-          command: sudo mkcert -install && mkcert localhost
+          command: mkcert -install && mkcert localhost
           working_directory: ~/.simulacrum/certs
+      - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
       - node/install-packages:
           cache-path: ~/project/<< parameters.example >>/node_modules
           app-dir: << parameters.example >>
+          with-cache: false
       - run:
           working_directory: << parameters.example >>
           command: npm run test
