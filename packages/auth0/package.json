@@ -8,7 +8,7 @@
     "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
     "prepack": "tsc --build tsconfig.dist.json && copy \"./src/views/**/*.png\" ./dist/views/",
     "build": "npm run prepack",
-    "lint": "eslint src test",
+    "lint": "eslint src bin test",
     "start": "node dist/start.js",
     "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
   },
@@ -16,6 +16,10 @@
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
+  "files": [
+    "bin/**/*",
+    "dist/**/*"
+  ],
   "keywords": [
     "simulation",
     "emulation",
@@ -35,6 +39,7 @@
     "assert-ts": "^0.3.2",
     "base64-url": "^2.3.3",
     "cookie-session": "^1.4.0",
+    "dedent": "^0.7.0",
     "effection": "^2.0.0-beta.5",
     "html-entities": "^2.3.2",
     "jsesc": "^3.0.2",
@@ -45,8 +50,9 @@
     "@effection/mocha": "^2.0.0-beta.5",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
-    "@frontside/typescript": "^1.1.1",
+    "@frontside/typescript": "^2.0.0",
     "@simulacrum/client": "0.5.0",
+    "@types/dedent": "^0.7.0",
     "@types/base64-url": "^2.2.0",
     "@types/cookie-session": "^2.0.42",
     "@types/jsesc": "^2.5.1",

@@ -19,7 +19,7 @@
   "devDependencies": {
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
-    "@frontside/typescript": "^1.1.1",
+    "@frontside/typescript": "^2.0.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3"
   },

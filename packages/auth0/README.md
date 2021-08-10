@@ -28,9 +28,7 @@ This quick start assumes you have your own app with auth0. Check out [`nextjs wi
 Let's start our server.
 
 ```bash
-npm install
-cd ./packages/auth0 # when running from the simulacrum repo
-PORT=4000 npm run start  # this will start a test simulacrum server at http://localhost:4000
+PORT=4000 npx auth0-simulator  # this will start a test simulacrum server at http://localhost:4000
 ```
 
 Open a browser at [http://localhost:4000](http://localhost:4000).
@@ -96,7 +94,13 @@ You now have a running auth0 server!
 
 An auth0 simulator can be created using the `@simulacrum/client` package. This is how you would apply the mutations programmatically.
 
+```bash
+npm install @simulacrum/client
+npm install @simulacrum/auth0-simulator
+```
+
 The following examples are written in Typescript, but using Typescript is not a requirement. The Auth0 simulator creates a server with a graphql interface. This means that your interactions with the server can be written in any language or framework that can communicate over http / graphql.
+
 
 ```ts
 import { main } from "effection";

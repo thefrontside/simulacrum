@@ -48,7 +48,7 @@
     "@effection/mocha": "^2.0.0-beta.5",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
-    "@frontside/typescript": "^1.1.1",
+    "@frontside/typescript": "^2.0.0",
     "@simulacrum/client": "0.5.0",
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
