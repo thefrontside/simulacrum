@@ -1,7 +1,6 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.3.0
-  cypress: cypress-io/cypress@1
+  node: circleci/node@4.7.0
 jobs:
   test:
     docker:
@@ -55,15 +54,12 @@ jobs:
       - run:
           command: sudo mkcert -install && mkcert localhost
           working_directory: ~/.simulacrum/certs
-      - cypress/install:
-          cache-key: >-
-            cache-{{ arch }}-{{ .Branch }}-{{ checksum "<< parameters.example >>/package.json" }}
-      - cypress/run:
-          cache-key: >-
-            cache-{{ arch }}-{{ .Branch }}-{{ checksum "<< parameters.example >>/package.json" }}
+      - node/install-packages:
+          cache-path: ~/project/<< parameters.example >>/node_modules
+          app-dir: << parameters.example >>
+      - run:
           working_directory: << parameters.example >>
-          start: npm run standup-for-cypress
-          wait-on: "http://localhost:3000"
+          command: npm run test
 
 workflows:
   tests:
