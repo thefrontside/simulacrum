@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/auth0-simulator",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Simulate Auth0",
   "main": "dist/index.js",
   "scripts": {
