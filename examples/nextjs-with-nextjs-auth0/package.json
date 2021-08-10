@@ -3,15 +3,16 @@
   "version": "0.0.5",
   "private": true,
   "scripts": {
-    "standup": "npm run sim & npm run dev",
     "sim": "node ./simulator-server.mjs",
     "dev": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" next dev",
     "build": "next build",
     "start": "next start",
+    "standup": "npm run sim & npm run dev",
+    "standup-for-cypress": "npm run sim cypress & npm run dev",
     "lint": "next lint",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "test": "start-server-and-test standup http://localhost:3000 cypress:run"
+    "test": "start-server-and-test standup-for-cypress http://localhost:3000 cypress:run"
   },
   "workspaces": [
     "../../packages/*"
