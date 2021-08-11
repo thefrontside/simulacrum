@@ -39,5 +39,14 @@
   },
   "volta": {
     "extends": "../../package.json"
+  },
+  "dependencies": {
+    "@effection/react": "2.0.0-beta.13",
+    "effection": "^2.0.0-beta.12",
+    "graphql": "^15.5.0",
+    "history": "^5.0.0",
+    "react-flow-renderer": "^9.6.6",
+    "react-router": "^6.0.0-beta.0",
+    "react-router-dom": "^6.0.0-beta.0"
   }
 }
