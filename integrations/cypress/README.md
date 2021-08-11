@@ -63,54 +63,19 @@ Call login and logout in your test. For example:
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 import type { Client, Scenario, Simulation } from '@simulacrum/client';
 import { createClient } from '@simulacrum/client';
-import configJson from "../../cypress.env.json";
+import config from "../../cypress.env.json";
 
-describe('login', () => {
-  let client: Client;
-  let simulation: Simulation;
-  let person: Person;
+describe('log in', () => {
+  it('should get token without signing in', () => {
+    cy.createSimulation(config)
+      .given()
+      .login()
+      .then(() => {
+         cy.visit('/');
 
-  before(async () => {
-    client = createClient('http://localhost:4000');
-  });
-
-  after(async () => {
-    cy.logout();
-    if(simulation){
-      await client.destroySimulation(simulation);
-    }
-  });
-
-  beforeEach(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let { domain, ...auth0Options } = configJson as Omit<Auth0ClientOptions, 'client_id'> & { clientId: string };
-
-    let port = Number(configJson.domain.split(':').slice(-1)[0]);
-
-    simulation = await client.createSimulation("auth0", {
-      options: {
-        ...auth0Options
-      },
-      services: {
-        auth0: {
-          port
-        }
-      }
-    });
-
-    let { data } = await client.given(simulation, "person") as Scenario<Person>;
-
-    person = data;
-  });
-
-  describe('log in', () => {
-    it('should get token without signing in', () => {
-      cy.login({ currentUser: person.email });
-
-      cy.visit('/');
-
-      cy.contains('Log out');
-    });
+         cy.contains('Log out');
+      })
+      .logout();
   });
 });
 ```
