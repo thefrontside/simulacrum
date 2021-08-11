@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { createClient } from "@simulacrum/client";
+import { createClient } from '@simulacrum/client';
 import {
   Button,
   Heading,
@@ -7,25 +7,25 @@ import {
   Link,
   HTML,
   including,
-} from "@bigtest/cypress";
+} from '@bigtest/cypress';
 
 // need to start up and configure simulation server
-describe("test the login flow", () => {
+describe('test the login flow', () => {
   let client = null;
   let simulation = null;
   let person = null;
 
   before(() => {
-    client = createClient("http://localhost:4000");
+    client = createClient('http://localhost:4000');
   });
 
   beforeEach(async () => {
-    simulation = await client.createSimulation("auth0", {
+    simulation = await client.createSimulation('auth0', {
       options: {
-        audience: "https://your-audience/",
-        scope: "openid profile read:shows",
-        clientId: "YOUR_AUTH0_CLIENT_ID",
-        rulesDirectory: "./rules",
+        audience: 'https://your-audience/',
+        scope: 'openid profile read:shows',
+        clientId: 'YOUR_AUTH0_CLIENT_ID',
+        rulesDirectory: './rules',
       },
       services: {
         auth0: {
@@ -33,51 +33,92 @@ describe("test the login flow", () => {
         },
       },
     });
-    let { data } = await client.given(simulation, "person");
+    let { data } = await client.given(simulation, 'person');
 
     person = data;
   });
 
   afterEach(async () => {
     if (simulation) {
-      console.log("destroy simulation", simulation);
+      console.log('destroy simulation', simulation);
       await client.destroySimulation(simulation);
       simulation = null;
       person = null;
     }
   });
 
-  describe("login from the homepage", () => {
-    beforeEach(() => cy.visit("/"));
+  describe('login from the homepage', () => {
+    beforeEach(() => cy.visit('/'));
 
-    it("login is visible", () => {
-      cy.expect(Link("Login").exists());
+    it('login is visible', () => {
+      cy.expect(Link('Login').exists());
     });
 
-    it("logs in user", () => {
-      cy.do(Link("Login").click());
+    it.skip('logs in user', () => {
+      cy.do(Link('Login').click());
 
-      cy.expect(Heading("Welcome").exists());
+      cy.expect(Heading('Welcome').exists());
 
       cy.do([
-        TextField("Email address").fillIn(person.email),
-        TextField("Password").fillIn(person.password),
-        Button("Sign in").click(),
+        TextField('Email address').fillIn(person.email),
+        TextField('Password').fillIn(person.password),
+        Button('Sign in').click(),
       ]);
 
-      cy.expect(Button("Log out").exists());
+      cy.expect(Button('Log out').exists());
     });
 
-    it("logs in and vists private route", () => {
+    describe.skip('repeated logins', () => {
+      // These next tests are copies to test
+      // that our simulations respond quickly enough
+      it('logs in user a first time', () => {
+        cy.do(Link('Login').click());
+
+        cy.expect(Heading('Welcome').exists());
+      });
+
+      it('logs in user a second time', () => {
+        cy.do(Link('Login').click());
+
+        cy.expect(Heading('Welcome').exists());
+      });
+
+      it('logs in user a third time', () => {
+        cy.do(Link('Login').click());
+
+        cy.expect(Heading('Welcome').exists());
+      });
+
+      it('logs in user a fourth time', () => {
+        cy.do(Link('Login').click());
+
+        cy.expect(Heading('Welcome').exists());
+      });
+
+      it('logs in user a fifth time', () => {
+        cy.do(Link('Login').click());
+
+        cy.expect(Heading('Welcome').exists());
+      });
+
+      it('logs in user a sixth time', () => {
+        cy.do(Link('Login').click());
+
+        cy.expect(Heading('Welcome').exists());
+      });
+      // now continue normal testing
+    });
+
+    it.skip('logs in and visits private route', () => {
       cy.do([
-        Link("Login").click(),
-        TextField("Email address").fillIn(person.email),
-        TextField("Password").fillIn(person.password),
-        Button("Sign in").click(),
-        Link("Private Route").click(),
+        Link('Login').click(),
+        TextField('Email address').fillIn(person.email),
+        TextField('Password').fillIn(person.password),
+        Button('Sign in').click(),
+        Link('Private Route').click(),
       ]);
 
-      cy.expect(HTML({ text: including("This route is private.") }).exists());
+      cy.expect(HTML({ text: including('This route is private.') }).exists());
     });
   });
 });
