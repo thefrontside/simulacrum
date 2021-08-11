@@ -41,17 +41,21 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
 
         for (let handler of service.app.handlers) {
           app[handler.method](handler.path, (request, response) => {
-            scope.run(function*() {
-              try {
-                yield handler.handler(request, response);
-              } catch(err) {
+            // if the scope is already shutting down or shut down
+            // just ignore this request.
+            if (scope.state === 'running') {
+              scope.run(function*() {
+                try {
+                  yield handler.handler(request, response);
+                } catch(err) {
 
-                response.status(500);
-                response.write('server error');
-              } finally {
-                response.end();
-              }
-            });
+                  response.status(500);
+                  response.write('server error');
+                } finally {
+                  response.end();
+                }
+              });
+            }
           });
         }
 
