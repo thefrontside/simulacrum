@@ -49,7 +49,7 @@
       "publish": false,
       "releaseTag": false
     },    
-    "@simulacrum/cypress-auth0": {
+    "@simulacrum/auth0-cypress": {
       "path": "./integrations/cypress",
       "manager": "javascript",
       "dependencies": [
