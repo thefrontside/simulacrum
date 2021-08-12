@@ -1,4 +1,4 @@
-# @simulacrum/cypress-auth0
+# @simulacrum/auth0-cypress
 
 ## Contents
 
@@ -12,7 +12,7 @@
 ### Step 1: Install the addon
 
 ```sh
-npm install @simulacrum/cypress-auth0 --dev
+npm install @simulacrum/auth0-cypress --dev
 ```
 
 ### Step 2: Import the commands
@@ -20,7 +20,7 @@ npm install @simulacrum/cypress-auth0 --dev
 ```js
 // cypress/support/index.js
 
-import '@simulacrum/cypress-auth0';
+import '@simulacrum/auth0-cypress';
 ```
 
 ### Step 3: Configure Auth0
