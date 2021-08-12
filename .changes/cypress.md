@@ -1,5 +1,5 @@
 ---
 "@simulacrum/auth0-simulator": minor
-"@simulacrum/cypress-auth0": minor
+"@simulacrum/auth0-cypress": minor
 ---
-Add @simulacrum/cypress-auth0 package
+Add @simulacrum/auth0-cypress package
