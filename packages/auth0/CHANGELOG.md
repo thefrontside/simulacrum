@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.2.3]
+
+- Increment all of the `effection` and related `@effection` packages. There was an issue in `@effection/core` with `dist` assets and this ensures it won't exist in the user's lock file.
+  - [30d575b](https://github.com/thefrontside/simulacrum/commit/30d575bc652a5329d67568b013f657691d1d86b6) upgrade past @effection/core dist issue on 2021-08-13
+- Add bin script to auth0-simulator so it can be started via npx.
+  - [88292f4](https://github.com/thefrontside/simulacrum/commit/88292f4f7f0f73ad8832943abcf342d7756fa2b5) add bin script to enable npx auth0-simulator via [#113](https://github.com/thefrontside/simulacrum/pull/113) on 2021-08-16
+
 ## \[0.2.2]
 
 - Fix bug where person scenario was not passing parameters down

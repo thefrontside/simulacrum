@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.4]
+
+- Increment all of the `effection` and related `@effection` packages. There was an issue in `@effection/core` with `dist` assets and this ensures it won't exist in the user's lock file.
+  - Bumped due to a bump in @simulacrum/client.
+  - [30d575b](https://github.com/thefrontside/simulacrum/commit/30d575bc652a5329d67568b013f657691d1d86b6) upgrade past @effection/core dist issue on 2021-08-13
+
 ## \[0.1.3]
 
 - Fix bug where person scenario was not passing parameters down

@@ -1,5 +1,13 @@
 # Changelog
 
+## \[0.3.2]
+
+- Increment all of the `effection` and related `@effection` packages. There was an issue in `@effection/core` with `dist` assets and this ensures it won't exist in the user's lock file.
+  - [30d575b](https://github.com/thefrontside/simulacrum/commit/30d575bc652a5329d67568b013f657691d1d86b6) upgrade past @effection/core dist issue on 2021-08-13
+- Ignore simulation service requests if the simulation has already been
+  shut down
+  - [11d7b63](https://github.com/thefrontside/simulacrum/commit/11d7b63340105e7fc6f340d02c6114ac8381c53f) 🐛Ignore requests in the event that the scope is not running on 2021-08-11
+
 ## \[0.3.1]
 
 - rollback effection to beta-5.
