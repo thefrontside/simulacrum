@@ -25,7 +25,7 @@ import '@simulacrum/auth0-cypress';
 
 ### Step 3: Configure Auth0
 
-An example [cypres environment file](./cypress.example.env.json) is in the root of this repo.  Copy it into your project:
+An example [cypres environment file](./cypress.example.env.json) is in the root of this repo. Copy it into your project:
 
 ```bash
 mv ./cypress.example.env.json ./cypress.env.json
@@ -63,7 +63,7 @@ Call login and logout in your test. For example:
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 import type { Client, Scenario, Simulation } from '@simulacrum/client';
 import { createClient } from '@simulacrum/client';
-import config from "../../cypress.env.json";
+import config from '../../cypress.env.json';
 
 describe('log in', () => {
   it('should get token without signing in', () => {
@@ -71,9 +71,9 @@ describe('log in', () => {
       .given()
       .login()
       .then(() => {
-         cy.visit('/');
+        cy.visit('/');
 
-         cy.contains('Log out');
+        cy.contains('Log out');
       })
       .logout();
   });
@@ -90,6 +90,14 @@ You might want to log out after every test.
 
 ```js
 after(async () => {
+  cy.logout();
+});
+```
+
+You may also log out _before_ each test to allow one to inspect the state after a test run.
+
+```js
+beforeEach(async () => {
   cy.logout();
 });
 ```
