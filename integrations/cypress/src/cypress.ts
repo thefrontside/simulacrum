@@ -16,7 +16,6 @@ interface Token {
   id_token: Record<string, any>
 }
 
-
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -33,18 +32,10 @@ const ClientPort = process.env.PORT || 4000;
 
 const ClientMap: Map<string, Client> = new Map();
 
-Cypress.Commands.add('out', (msg: string) => {
-  cy.task('log', msg);
-});
-
 Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
-  Cypress.log({
-    name: 'auth0-simulator-create-simulation',
-  });
-
   let client: Client | undefined;
 
-  if(ClientMap.has(Cypress.spec.name)) {
+  if (ClientMap.has(Cypress.spec.name)) {
     client = ClientMap.get(Cypress.spec.name);
   } else {
     client = createClient(`http://localhost:${ClientPort}`);
@@ -54,6 +45,8 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
   assert(typeof client !== 'undefined', 'no client created in createSimulation');
 
   let { domain, client_id, ...auth0Options } = options;
+
+  assert(typeof domain !== 'undefined', 'domain is a required option');
 
   let port = Number(domain.split(':').slice(-1)[0]);
 
@@ -71,10 +64,6 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
 });
 
 Cypress.Commands.add('given', { prevSubject: true }, (simulation: Simulation, attrs: Partial<Person> = {}) => {
-  Cypress.log({
-    name: 'auth0-simulator-given',
-  });
-
   let client = ClientMap.get(Cypress.spec.name);
 
   assert(typeof client !== 'undefined', 'no client in given');
@@ -83,18 +72,10 @@ Cypress.Commands.add('given', { prevSubject: true }, (simulation: Simulation, at
 });
 
 Cypress.Commands.add('login', { prevSubject: 'optional' }, (person) => {
-  Cypress.log({
-    name: 'auth0-simulator-login',
-  });
-
   return cy.wrap(auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email }));
 });
 
 Cypress.Commands.add('logout', () => {
-  Cypress.log({
-    name: 'auth0-simulator-logout',
-  });
-
   return cy.wrap(auth0Client.logout());
 });
 
