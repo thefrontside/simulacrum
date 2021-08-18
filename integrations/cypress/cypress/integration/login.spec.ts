@@ -1,24 +1,24 @@
 // import { Simulation } from '@simulacrum/client';
 import { Simulation } from '../../../../packages/client/dist';
-import auth0Config from "../../cypress.env.json";
+import auth0Config from '../../cypress.env.json';
 import { Person } from '../../src/cypress';
 
 describe('auth', () => {
-  describe('log in', () => {
+  describe('log in, create person per test', () => {
     it('should get token without signing in', () => {
       cy.createSimulation(auth0Config)
         .given()
         .login()
         .then(() => {
-           cy.visit('/');
+          cy.visit('/');
 
-           cy.contains('Log out');
+          cy.contains('Log out');
         })
         .logout();
     });
   });
 
-  describe('', () => {
+  describe('log in, create person once', () => {
     let simulation: Cypress.Chainable<Simulation>;
     let person: Cypress.Chainable<Person>;
 
@@ -28,12 +28,14 @@ describe('auth', () => {
     });
 
     it('should login', () => {
-      person.login().then(() => {
-        cy.visit('/');
+      person
+        .login()
+        .then(() => {
+          cy.visit('/');
 
-        cy.contains('Log out');
-     })
-     .logout();
+          cy.contains('Log out');
+        })
+        .logout();
     });
   });
 });
