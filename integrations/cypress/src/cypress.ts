@@ -50,17 +50,19 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
 
   let port = Number(domain.split(':').slice(-1)[0]);
 
-  return cy.wrap(client.createSimulation("auth0", {
-    options: {
-      ...auth0Options,
-      clientId: client_id,
-    },
-    services: {
-      auth0: {
-        port
-      }
-    }
-  }));
+  return cy.wrap(
+      client.createSimulation("auth0", {
+        options: {
+          ...auth0Options,
+          clientId: client_id,
+        },
+        services: {
+          auth0: {
+            port,
+          },
+        },
+      })
+  ).then((simulation) => ({ client, simulation }));
 });
 
 Cypress.Commands.add('given', { prevSubject: true }, (simulation: Simulation, attrs: Partial<Person> = {}) => {
