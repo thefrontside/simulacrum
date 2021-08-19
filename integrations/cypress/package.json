@@ -19,8 +19,10 @@
     "start:server": "cd ../../examples/nextjs-with-auth0-react && npm install && npm run dev",
     "cypress:run": "npx cypress run --spec 'cypress/integration/*.ts'",
     "start:auth0": "PORT=4000 npx auth0-simulator",
+    "start:auth0-dev": "cd ../../packages/auth0 && npm run start",
     "test:e2e": "start-server-and-test 'npm run start:server' http://localhost:3000 cypress:run",
     "test": "npm-run-all --parallel start:auth0 test:e2e",
+    "test:ci": "npm-run-all --parallel start:auth0-dev test:e2e",
     "build": "npm run prepack",
     "prepack": "tsc --build tsconfig.dist.json",
     "lint": "eslint \"src/**/*.ts\""
