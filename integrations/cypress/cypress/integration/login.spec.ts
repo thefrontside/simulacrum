@@ -1,10 +1,10 @@
 // import { Simulation } from '@simulacrum/client';
 import { Simulation } from '../../../../packages/client/dist';
-import auth0Config from '../../cypress.env.json';
+import auth0Config from '../../cypress.example.env.json';
 import { Person } from '../../src/cypress';
 
 describe('auth', () => {
-  describe('log in, create person per test', () => {
+  describe.skip('log in, create person per test', () => {
     it('should get token without signing in', () => {
       cy.createSimulation(auth0Config)
         .given()
