@@ -218,11 +218,15 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     },
 
     ['/v2/logout']: function *(req, res) {
+      console.dir(req.headers, { depth: 333 });
+      console.dir(req.query, { depth: 333 });
       assert(typeof req.query.returnTo === 'string', `unexpected ${req.query.returnTo} for returnTo`);
 
       req.session = null;
 
-      res.redirect(req.query.returnTo);
+      let returnToUrl = req.query.returnTo ?? req.headers.referer;
+
+      res.redirect(returnToUrl);
     }
   };
 };

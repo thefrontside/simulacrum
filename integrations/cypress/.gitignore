@@ -1,6 +1,5 @@
 dist
 node_modules
 
-cypress.env.json
 coverage
 cypress/videos
