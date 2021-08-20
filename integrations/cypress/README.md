@@ -25,11 +25,7 @@ import '@simulacrum/auth0-cypress';
 
 ### Step 3: Configure Auth0
 
-An example [cypres environment file](./cypress.example.env.json) is in the root of this repo. Copy it into your project:
-
-```bash
-mv ./cypress.example.env.json ./cypress.env.json
-```
+An example [cypres environment file](./cypress.env.json) is in the root of this repo. You can change the configuration to your auth0 values.
 
 ```json
 // cypress.env.json
