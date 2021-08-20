@@ -62,7 +62,7 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
           },
         },
       })
-  ).then((simulation) => ({ client, simulation }));
+  );
 });
 
 Cypress.Commands.add('given', { prevSubject: true }, (simulation: Simulation, attrs: Partial<Person> = {}) => {
