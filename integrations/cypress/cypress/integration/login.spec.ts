@@ -1,6 +1,6 @@
 // import { Simulation } from '@simulacrum/client';
 import { Simulation } from "../../../../packages/client/dist";
-import auth0Config from "../../cypress.example.env.json";
+import auth0Config from "../../cypress.env.json";
 import { Person } from "../../src/cypress";
 
 describe("auth", () => {
@@ -37,7 +37,7 @@ describe("auth", () => {
     });
   });
 
-  describe("logout in beforeEach", () => {
+  describe.only("logout in beforeEach", () => {
     let simulation: Cypress.Chainable<Simulation>;
     let person: Cypress.Chainable<Person>;
 
