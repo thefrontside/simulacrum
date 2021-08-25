@@ -11,10 +11,10 @@ main(function* () {
 
 function* packageExists(name, tag) {
   let request = yield fetch(`https://registry.npmjs.com/${name}`);
-  let response = yield request.json();
   if (request.status === 404) {
     return "not published";
   } else if (request.status < 400) {
+    let response = yield request.json();
     return response["dist-tags"][tag];
   } else {
     throw new Error("request error");
