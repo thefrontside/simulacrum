@@ -158,7 +158,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let routerUrl = `${redirect_uri}?${qs}`;
 
-      return res.status(302).redirect(routerUrl);
+      res.status(302).redirect(routerUrl);
     },
 
     ['/oauth/token']: function* (req, res) {
