@@ -28,6 +28,7 @@
     "lint": "eslint \"src/**/*.ts\""
   },
   "dependencies": {
+    "@effection/atom": "2.0.0-beta.12",
     "@auth0/auth0-spa-js": "^1.16.1",
     "cypress": "^8.3.0"
   },

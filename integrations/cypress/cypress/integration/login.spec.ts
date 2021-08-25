@@ -1,18 +1,16 @@
-// import { Simulation } from '@simulacrum/client';
+import { describe } from 'mocha';
 import { Simulation } from "../../../../packages/client/dist";
 import auth0Config from "../../cypress.env.json";
 import { Person } from "../../src/cypress";
 
 describe("auth", () => {
-  describe("log in, create person per test", () => {
+  describe.only("log in, create person per test", () => {
     it("should get token without signing in", () => {
       cy.createSimulation(auth0Config)
         .given()
         .login()
-        .then(() => {
-          cy.visit("/");
-          cy.contains("Log out");
-        })
+        .visit("/")
+        .contains("Log out")
         .logout();
     });
   });
@@ -21,7 +19,7 @@ describe("auth", () => {
     let simulation: Cypress.Chainable<Simulation>;
     let person: Cypress.Chainable<Person>;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       simulation = cy.createSimulation(auth0Config);
       person = simulation.given();
     });
@@ -29,45 +27,64 @@ describe("auth", () => {
     it("should login", () => {
       person
         .login()
-        .then(() => {
-          cy.visit("/");
-          cy.contains("Log out");
-        })
+        .visit("/")
+        .contains("Log out")
         .logout();
     });
   });
 
-  describe.only("logout in beforeEach", () => {
+  describe.skip("simulation member var", () => {
     let simulation: Cypress.Chainable<Simulation>;
-    let person: Cypress.Chainable<Person>;
 
     beforeEach(() => {
-      // log out from previous test run
-      if (person) {
-        person.logout();
-      }
-
       simulation = cy.createSimulation(auth0Config);
-      console.dir(simulation);
-      person = simulation.given();
     });
+
 
     it("should login", () => {
-      cy.visit("/");
-      cy.contains("Log in");
-      person.login().then(() => {
-        cy.visit("/");
-        cy.contains("Log out");
-      });
-    });
+      cy.visit("/")
+      .contains("Log in");
 
-    it("should login again ", () => {
-      cy.visit("/");
-      cy.contains("Log in");
-      person.login().then(() => {
-        cy.visit("/");
-        cy.contains("Log out");
-      });
+      assert(!!simulation && typeof simulation.given === 'function', 'no valid simulation for given');
+
+      console.log(typeof simulation.given);
+
+      simulation
+        .given()
+        .login()
+        .visit("/")
+        .contains("Log out");
     });
   });
+
+  // describe.only("logout in beforeEach", () => {
+  //   let simulation: Cypress.Chainable<Simulation>;
+  //   let person: Cypress.Chainable<Person>;
+
+  //   beforeEach(async () => {
+  //     if (person) {
+  //       person.logout();
+  //     }
+  //     simulation = cy.createSimulation(auth0Config);
+  //     person = simulation.given();
+  //   });
+
+  //   it("should login", () => {
+  //     cy.visit("/");
+  //     cy.contains("Log in");
+  //     person.login().then(() => {
+  //       cy.visit("/");
+  //       cy.contains("Log out");
+  //     });
+  //   });
+
+  //   it("should login again ", () => {
+  //     cy.visit("/");
+  //     cy.contains("Log in");
+  //     person.login().then(() => {
+  //       cy.visit("/");
+  //       cy.contains("Log out");
+  //     });
+  //   });
+  // });
 });

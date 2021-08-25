@@ -5,6 +5,13 @@ import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 import { Client, createClient, Simulation } from '@simulacrum/client';
 import { auth0Client } from './auth';
 import { assert } from 'assert-ts';
+import { createAtom } from '@effection/atom';
+
+type TestState = Record<string, {
+  client: Client,
+}>;
+
+const atom = createAtom<TestState>({});
 
 export interface Person { email: string; password: string }
 
@@ -30,55 +37,76 @@ declare global {
 
 const ClientPort = process.env.PORT || 4000;
 
-const ClientMap: Map<string, Client> = new Map();
+function getClientFromSpec (spec: string) {
+  let client: Client;
 
-Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
-  let client: Client | undefined;
-
-  if (ClientMap.has(Cypress.spec.name)) {
-    client = ClientMap.get(Cypress.spec.name);
-  } else {
+  if(typeof atom.slice(spec).get() === 'undefined') {
     client = createClient(`http://localhost:${ClientPort}`);
-    ClientMap.set(Cypress.spec.name, client);
+    atom.set({ [spec]: { client: client } });
   }
 
-  assert(typeof client !== 'undefined', 'no client created in createSimulation');
 
-  let { domain, client_id, ...auth0Options } = options;
+  return atom.slice(spec, 'client').get();
+}
 
-  assert(typeof domain !== 'undefined', 'domain is a required option');
 
-  let port = Number(domain.split(':').slice(-1)[0]);
+Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
+  return new Cypress.Promise((resolve, reject) => {
+    let client = getClientFromSpec(Cypress.spec.name);
 
-  return cy.wrap(
-      client.createSimulation("auth0", {
-        options: {
-          ...auth0Options,
-          clientId: client_id,
+    let { domain, client_id, ...auth0Options } = options;
+
+    assert(typeof domain !== 'undefined', 'domain is a required option');
+
+    let port = Number(domain.split(':').slice(-1)[0]);
+
+    assert(typeof client !== 'undefined', 'no client created in createSimulation');
+
+    client.createSimulation("auth0", {
+      options: {
+        ...auth0Options,
+        clientId: client_id,
+      },
+      services: {
+        auth0: {
+          port,
         },
-        services: {
-          auth0: {
-            port,
-          },
         },
-      })
-  );
-});
+      }).then(resolve).catch(reject);
+    });
+  });
 
-Cypress.Commands.add('given', { prevSubject: true }, (simulation: Simulation, attrs: Partial<Person> = {}) => {
-  let client = ClientMap.get(Cypress.spec.name);
+  Cypress.Commands.add('given', { prevSubject: true }, (simulation: Simulation, attrs: Partial<Person> = {}) => {
+    return new Cypress.Promise((resolve, reject) => {
+      let client = getClientFromSpec(Cypress.spec.name);
 
-  assert(typeof client !== 'undefined', 'no client in given');
+      assert(!!client && typeof client.given === 'function', 'no validclient in given');
 
-  return cy.wrap(client.given(simulation, "person", attrs).then(scenario => scenario.data));
+      client.given(simulation, "person", attrs)
+        .then((scenario) => {
+          resolve(scenario.data);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
 });
 
 Cypress.Commands.add('login', { prevSubject: 'optional' }, (person) => {
-  return cy.wrap(auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email }));
+  return new Cypress.Promise((resolve, reject) => {
+    assert(!!person && typeof person.email !== 'undefined', `no scenario in login`);
+
+    auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email })
+               .then(resolve)
+               .catch(reject);
+  });
 });
 
 Cypress.Commands.add('logout', () => {
-  return cy.wrap(auth0Client.logout());
+  try {
+    auth0Client.logout();
+  } catch (e) {
+  }
 });
 
 
