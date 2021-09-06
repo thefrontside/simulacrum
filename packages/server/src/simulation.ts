@@ -1,4 +1,4 @@
-import { Operation, spawn } from 'effection';
+import { spawn } from 'effection';
 import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
@@ -67,79 +67,80 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
 }
 
 export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
-  return slice => function*(): Operation<void> {
+  return slice => function*() {
     try {
-      let store = slice.slice("store");
-      let simulatorName = slice.get().simulator;
-      let simulator = simulators[simulatorName];
+      yield function * errorBoundary() {
+        let store = slice.slice("store");
+        let simulatorName = slice.get().simulator;
+        let simulator = simulators[simulatorName];
+        assert(simulator, `unknown simulator ${simulatorName}`);
+        let { options = {}, services: serviceOptions = {} } = slice.get().options;
 
-      assert(simulator, `unknown simulator ${simulatorName}`);
+        let behaviors = simulator(slice, options);
 
-      let { options = {}, services: serviceOptions = {} } = slice.get().options;
+        let servers = Object.entries(behaviors.services).map(([name, service]) => {
+          return {
+            name,
+            create: normalizeServiceCreator(service)
+          };
+        });
 
-      let behaviors = simulator(slice, options);
 
-      let servers = Object.entries(behaviors.services).map(([name, service]) => {
-        return {
-          name,
-          create: normalizeServiceCreator(service)
-        };
-      });
+        let services: {name: string; url: string; }[] = [];
+        for (let { name, create } of servers) {
+          let service: Service = yield create(slice, serviceOptions[name] ?? {});
 
-      let services: {name: string; url: string; }[] = [];
-
-      for (let { name, create } of servers) {
-        let service: Service = yield create(slice, serviceOptions[name] ?? {});
-
-        services.push({ name, url: `${service.protocol}://localhost:${service.port}` });
-      }
-
-      let { scenarios, effects } = behaviors;
-
-      // we can support passing a seed to a scenario later, but let's
-      // just hard-code it for now.
-      let faker = createFaker(2);
-
-      yield spawn(map(slice.slice("scenarios"), slice => function*() {
-        try {
-          let { name, params } = slice.get();
-          let fn = scenarios[name];
-          assert(fn, `unknown scenario ${name}`);
-
-          let data = yield fn(store, faker, params);
-          slice.update(state => ({
-            ...state,
-            status: 'running',
-            data
-          }));
-        } catch (error) {
-          slice.update(state => ({
-            ...state,
-            status: 'failed',
-            error: error as Error
-          }));
+          services.push({ name, url: `${service.protocol}://localhost:${service.port}` });
         }
-      }));
 
-      if(typeof effects !== 'undefined') {
-        yield spawn(effects());
-      }
+        let { scenarios, effects } = behaviors;
 
-      slice.update(state => ({
-        ...state,
-        status: 'running',
-        services
-      }));
+        // we can support passing a seed to a scenario later, but let's
+        // just hard-code it for now.
+        let faker = createFaker(2);
 
-      // all spun up, we can just wait.
-      yield;
+        yield spawn(map(slice.slice("scenarios"), slice => function*() {
+          try {
+            let { name, params } = slice.get();
+            let fn = scenarios[name];
+            assert(fn, `unknown scenario ${name}`);
+
+            let data = yield fn(store, faker, params);
+            slice.update(state => ({
+              ...state,
+              status: 'running',
+              data
+            }));
+          } catch (error) {
+            slice.update(state => ({
+              ...state,
+              status: 'failed',
+              error
+            }));
+          }
+        }));
+
+        if(typeof effects !== 'undefined') {
+          yield spawn(effects());
+        }
+
+        slice.update(state => ({
+          ...state,
+          status: 'running',
+          services
+        }));
+
+        // all spun up, we can just wait.
+        yield;
+      };
     } catch (error) {
       slice.update((state) => ({
         ...state,
         status: "failed",
-        error: error as Error,
+        error,
         services: []
       }));
     }
+
   };
 }

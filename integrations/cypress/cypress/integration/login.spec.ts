@@ -4,7 +4,7 @@ import auth0Config from "../../cypress.env.json";
 import { Person } from "../../src/cypress";
 
 describe("auth", () => {
-  describe.only("log in, create person per test", () => {
+  describe("log in, create person per test", () => {
     it("should get token without signing in", () => {
       cy.createSimulation(auth0Config)
         .given()
@@ -15,7 +15,7 @@ describe("auth", () => {
     });
   });
 
-  describe("log in, create person once", () => {
+  describe.only("log in, create person once", () => {
     let simulation: Cypress.Chainable<Simulation>;
     let person: Cypress.Chainable<Person>;
 
@@ -33,21 +33,16 @@ describe("auth", () => {
     });
   });
 
-  describe.skip("simulation member var", () => {
+  describe("simulation member var", () => {
     let simulation: Cypress.Chainable<Simulation>;
 
     beforeEach(() => {
       simulation = cy.createSimulation(auth0Config);
     });
 
-
     it("should login", () => {
       cy.visit("/")
       .contains("Log in");
-
-      assert(!!simulation && typeof simulation.given === 'function', 'no valid simulation for given');
-
-      console.log(typeof simulation.given);
 
       simulation
         .given()

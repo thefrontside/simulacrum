@@ -9,6 +9,7 @@ import { createAtom } from '@effection/atom';
 
 type TestState = Record<string, {
   client: Client,
+  simulation: Simulation
 }>;
 
 const atom = createAtom<TestState>({});
@@ -62,6 +63,7 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
 
     assert(typeof client !== 'undefined', 'no client created in createSimulation');
 
+
     client.createSimulation("auth0", {
       options: {
         ...auth0Options,
@@ -71,10 +73,20 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
         auth0: {
           port,
         },
-        },
-      }).then(resolve).catch(reject);
-    });
+      },
+      key: 'cypress'
+    }).then(simulation => {
+      atom.slice(Cypress.spec.name).update(current => {
+        return {
+          ...current,
+          simulation
+        };
+      });
+
+      resolve(simulation);
+    }).catch(reject);
   });
+});
 
   Cypress.Commands.add('given', { prevSubject: true }, (simulation: Simulation, attrs: Partial<Person> = {}) => {
     return new Cypress.Promise((resolve, reject) => {
@@ -103,10 +115,15 @@ Cypress.Commands.add('login', { prevSubject: 'optional' }, (person) => {
 });
 
 Cypress.Commands.add('logout', () => {
-  try {
-    auth0Client.logout();
-  } catch (e) {
-  }
+  auth0Client.logout();
+  let client = getClientFromSpec(Cypress.spec.name);
+  let simulation = atom.slice(Cypress.spec.name, 'simulation').get();
+
+  assert(typeof simulation !== 'undefined');
+
+  return new Cypress.Promise((resolve, reject) => {
+    client.destroySimulation(simulation).then(resolve).catch(reject);
+  });
 });
 
 
