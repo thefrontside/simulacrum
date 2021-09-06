@@ -26,11 +26,9 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
 
     let id = options.key ?? newid();
 
-    console.log({ id, key: options.key });
     let simulation = atom.slice("simulations", id);
 
     if(!!simulation.get()) {
-      console.log( `about to remove ${{ id, key: options.key }}`);
       simulation.remove();
     }
 

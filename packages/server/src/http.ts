@@ -84,7 +84,7 @@ export interface HttpHandler {
 }
 
 export type RouteHandler = {
-  method: 'get' | 'post' | 'put';
+  method: 'get' | 'post' | 'put' | 'delete';
   path: string;
   handler: HttpHandler;
 }
@@ -99,6 +99,7 @@ export interface HttpApp {
   get(path: string, handler: HttpHandler): HttpApp;
   put(path: string, handler: HttpHandler): HttpApp;
   post(path: string, handler: HttpHandler): HttpApp;
+  delete(path: string, handler: HttpHandler): HttpApp;
   use(middleware: Middleware | RequestHandler): HttpApp;
 }
 
@@ -117,6 +118,7 @@ export function createHttpApp(handlers: RouteHandler[] = [], middleware: (Middle
     get: (path, handler) => appendHandler({ path, handler, method: 'get' }),
     post: (path, handler) => appendHandler({ path, handler, method: 'post' }),
     put: (path, handler) => appendHandler({ path, handler, method: 'put' }),
+    delete: (path, handler) => appendHandler({ path, handler, method: 'delete' }),
     use: (middlewareHandler) => appendMiddleware(middlewareHandler),
   };
 }

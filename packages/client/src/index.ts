@@ -14,7 +14,7 @@ export interface SimulationOptions {
 export interface Client {
   createSimulation(simulator: string, options?: SimulationOptions): Promise<Simulation>;
   destroySimulation(simulation: Simulation): Promise<boolean>;
-  given(simulation: Simulation, scenario: string, params?: Record<string, unknown>): Promise<Scenario>;
+  given<T>(simulation: Simulation, scenario: string, params?: Record<string, unknown>): Promise<Scenario<T>>;
   state<T>(): AsyncIterable<T> & AsyncIterator<T>;
   dispose(): Promise<void>;
 }
@@ -101,7 +101,7 @@ export function createClient(serverURL: string): Client {
   }
 
   return {
-    createSimulation: (simulator: string, options?: Record<string, unknown>) => {
+    createSimulation: async (simulator: string, options?: Record<string, unknown>) => {
       return query<Simulation>("createSimulation", {
         query: `
 mutation CreateSimulation($simulator: String, $options: JSON) {
@@ -119,7 +119,7 @@ mutation CreateSimulation($simulator: String, $options: JSON) {
         variables: { simulator, options }
       });
     },
-    given: (simulation: Simulation, scenario: string, params: Record<string, unknown> = {}) => query<Scenario>("given", {
+    given: <T = unknown>(simulation: Simulation, scenario: string, params: Record<string, unknown> = {}) => query<Scenario<T>>("given", {
       query: `
 mutation Given($simulation: String!, $scenario: String, $params: JSON) {
   given(a: $scenario, simulation: $simulation, params: $params)
