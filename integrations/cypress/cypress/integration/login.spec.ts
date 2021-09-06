@@ -4,25 +4,25 @@ import auth0Config from "../../cypress.env.json";
 import { Person } from "../../src/cypress";
 
 describe("auth", () => {
-  describe.only("log in, create person per test", () => {
+  describe("log in, create person per test", () => {
     it("should get token without signing in", () => {
-      cy.createSimulation(auth0Config)
+      cy.logout()
+        .createSimulation(auth0Config)
         .visit("/")
         .contains("Log out").should('not.exist')
         .given()
         .login()
         .visit("/")
-        .contains("Log out")
-        .logout();
+        .contains("Log out");
     });
   });
 
-  describe.only("log in, create person once", () => {
+  describe("log in, create person once", () => {
     let simulation: Cypress.Chainable<Simulation>;
     let person: Cypress.Chainable<Person>;
 
     beforeEach(() => {
-      simulation = cy.createSimulation(auth0Config);
+      simulation = cy.logout().createSimulation(auth0Config);
       person = simulation.given();
     });
 
@@ -32,16 +32,15 @@ describe("auth", () => {
         .contains("Log out").should('not.exist')
         .login()
         .visit("/")
-        .contains("Log out")
-        .logout();
+        .contains("Log out");
     });
   });
 
-  describe.only("simulation member var", () => {
+  describe("simulation member var", () => {
     let simulation: Cypress.Chainable<Simulation>;
 
     beforeEach(() => {
-      simulation = cy.createSimulation(auth0Config);
+      simulation = cy.logout().createSimulation(auth0Config);
     });
 
     it("should login", () => {
@@ -53,8 +52,7 @@ describe("auth", () => {
         .given()
         .login()
         .visit("/")
-        .contains("Log out")
-        .logout();
+        .contains("Log out");
     });
   });
 
