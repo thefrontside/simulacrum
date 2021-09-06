@@ -7,7 +7,8 @@ export interface SimulationOptions {
   options?: Record<string, unknown>;
   services?: Record<string,{
     port?: number
-  }>
+  }>;
+  key?: string
 }
 
 export interface Client {
