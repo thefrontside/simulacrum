@@ -34,7 +34,6 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & R
           .get('/authorize', handlers['/authorize'])
           .get('/login', handlers['/login'])
           .get('/u/login', handlers['/usernamepassword/login'])
-          .delete('/internal/clear', handlers['/internal/clear'])
           .post('/usernamepassword/login', handlers['/usernamepassword/login'])
           .post('/login/callback', handlers['/login/callback'])
           .post('/oauth/token', handlers['/oauth/token'])

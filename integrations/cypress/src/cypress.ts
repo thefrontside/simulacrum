@@ -6,7 +6,6 @@ import { Client, createClient, Simulation } from '@simulacrum/client';
 import { auth0Client } from './auth';
 import { assert } from 'assert-ts';
 import { createAtom } from '@effection/atom';
-import fetch from 'cross-fetch';
 
 type TestState = Record<string, {
   client: Client;
@@ -66,7 +65,7 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
 
     assert(typeof client !== 'undefined', 'no client created in createSimulation');
 
-    client.createSimulation("auth0", {
+    return client.createSimulation("auth0", {
       options: {
         ...auth0Options,
         clientId: client_id,
@@ -104,7 +103,7 @@ Cypress.Commands.add('given', (attrs: Partial<Person> = {}) => {
 
     assert(!!client && typeof client.given === 'function', 'no valid client in given');
 
-    client.given<Person>(simulation, "person", attrs)
+    return client.given<Person>(simulation, "person", attrs)
       .then((scenario) => {
         atom.slice(Cypress.spec.name).update(current => {
           return {
@@ -129,7 +128,7 @@ Cypress.Commands.add('login', () => {
 
     assert(!!person && typeof person.email !== 'undefined', `no scenario in login`);
 
-    auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email })
+    return auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email })
                .then(() => {
                  console.log('signed in successfully');
                  return resolve();
@@ -143,7 +142,7 @@ Cypress.Commands.add('login', () => {
 
 Cypress.Commands.add('logout', () => {
   return new Cypress.Promise((resolve, reject) => {
-    auth0Client.isAuthenticated().then((isAuthenticated) => {
+    return auth0Client.isAuthenticated().then((isAuthenticated) => {
       console.log({ isAuthenticated });
       if(!isAuthenticated) {
         resolve();
@@ -154,10 +153,6 @@ Cypress.Commands.add('logout', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (auth0Client as any).cookieStorage.remove('auth0.is.authenticated');
 
-      return fetch(`https://${Cypress.env('domain')}/internal/clear`, {
-        method: 'DELETE'
-      });
-    }).then(() => {
       let client = getClientFromSpec(Cypress.spec.name);
 
       let simulation = atom.slice(Cypress.spec.name, 'simulation').get();
