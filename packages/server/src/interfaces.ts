@@ -50,6 +50,7 @@ export interface SimulationOptions {
   services?: Record<string, {
     port?: number;
   }>
+  key?: string;
 }
 
 export type SimulationState =
