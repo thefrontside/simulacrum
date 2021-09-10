@@ -1,4 +1,4 @@
-import { spawn } from 'effection';
+import { spawn, label } from 'effection';
 import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
@@ -9,10 +9,11 @@ import { middlewareHandlerIsOperation, isRequestHandler } from './guards/guards'
 
 export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
   return slice => function*(scope) {
+    let simulatorName = slice.get().simulator;
+    yield label({ name: 'simulation', simulator: simulatorName });
     try {
       yield function * errorBoundary() {
         let store = slice.slice("store");
-        let simulatorName = slice.get().simulator;
         let simulator = simulators[simulatorName];
         assert(simulator, `unknown simulator ${simulatorName}`);
         let { options = {}, services: serviceOptions = {} } = slice.get().options;
@@ -42,10 +43,12 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
 
           for (let handler of service.app.handlers) {
             app[handler.method](handler.path, (request, response) => {
+              console.log({ method: handler.method, path: handler.path, state: scope.state });
               // if the scope is already shutting down or shut down
               // just ignore this request.
               if (scope.state === 'running') {
                 scope.run(function*() {
+                  yield label({ name: 'request', method: handler.method, path: handler.path });
                   try {
                     yield handler.handler(request, response);
                   } catch(err) {
@@ -98,7 +101,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
             slice.update(state => ({
               ...state,
               status: 'failed',
-              error
+              error: error as Error
             }));
           }
         }));
@@ -120,7 +123,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       slice.update((state) => ({
         ...state,
         status: "failed",
-        error,
+        error: error as Error,
         services: []
       }));
     }

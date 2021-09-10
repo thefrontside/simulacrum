@@ -1,7 +1,7 @@
 import type { ServerOptions as SSLOptions } from 'https';
 import type { AddressInfo } from 'net';
 import type { Service } from './interfaces';
-import { Operation, once, Resource, spawn } from 'effection';
+import { Operation, once, Resource, spawn, label } from 'effection';
 import { Request, Response, Application, RequestHandler } from 'express';
 import { createServer as createHttpsServer } from 'https';
 import { Server as HTTPServer, createServer as createHttpServer } from 'http';
@@ -46,6 +46,8 @@ const createAppServer = (app: Application, options: ServerOptions) => {
 
 export function createServer(app: Application, options: ServerOptions): Resource<Server> {
   return {
+    name: 'http-server',
+    labels: { protocol: options.protocol },
     *init() {
 
       let server = createAppServer(app, options);
@@ -69,9 +71,13 @@ export function createServer(app: Application, options: ServerOptions): Resource
         yield once(server, 'listening');
       }
 
+      let address = server.address() as AddressInfo;
+
+      yield label({ port: address.port });
+
       return {
         http: server,
-        address: server.address() as AddressInfo
+        address
       };
     }
   };
