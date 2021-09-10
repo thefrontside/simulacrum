@@ -6,6 +6,7 @@ import { ResourceServiceCreator, Service, ServiceCreator, SimulationState, Simul
 import { createServer, Server } from './http';
 import { createFaker } from './faker';
 import { middlewareHandlerIsOperation, isRequestHandler } from './guards/guards';
+import { Slice } from '@effection/atom';
 
 function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreator {
   if(typeof service === 'function') {
@@ -68,8 +69,8 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
   };
 }
 
-export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
-  return slice => function*() {
+function createSimulation (slice: Slice<SimulationState>, simulators: Record<string, Simulator>) {
+  return spawn(function* () {
     try {
       yield function * errorBoundary() {
         let simulatorName = slice.get().simulator;
@@ -144,10 +145,18 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       slice.update((state) => ({
         ...state,
         status: "failed",
-        error,
+        error: error as Error,
         services: []
       }));
     }
+  });
+}
 
+export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
+  return function* (slice) {
+    let simulationTask = yield createSimulation(slice, simulators);
+    yield slice.filter(({ status }) => status == "destroying").expect();
+    yield simulationTask.halt();
+    slice.slice("status").set("halted");
   };
 }
