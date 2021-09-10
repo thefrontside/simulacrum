@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.0.6]
+
+- Upgrade effection to 2.0.0-beta.15
+  - Bumped due to a bump in @simulacrum/server.
+  - [938e9bf](https://github.com/thefrontside/simulacrum/commit/938e9bfcabfcdc5806ecba01a909432b3de29971) Upgrade effection on 2021-09-07
+
 ## \[0.0.5]
 
 - Increment all of the `effection` and related `@effection` packages. There was an issue in `@effection/core` with `dist` assets and this ensures it won't exist in the user's lock file.
