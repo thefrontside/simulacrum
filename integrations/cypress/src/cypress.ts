@@ -6,6 +6,7 @@ import { Client, createClient, Simulation } from '@simulacrum/client';
 import { auth0Client } from './auth';
 import { assert } from 'assert-ts';
 import { createAtom } from '@effection/atom';
+import { reject } from 'cypress/types/bluebird';
 
 type TestState = Record<string, {
   client: Client;
@@ -30,7 +31,7 @@ declare global {
   namespace Cypress {
     interface Chainable {
       createSimulation(options: Auth0ClientOptions): Chainable<Simulation>;
-      login(person?: Person): Chainable<Token>;
+      login(person?: Partial<Person>): Chainable<Token>;
       logout(): Chainable<void>;
       given(attrs?: Partial<Person>): Chainable<Person>;
       out<S = unknown>(msg: string): Chainable<S>
@@ -128,7 +129,7 @@ Cypress.Commands.add('login', () => {
 
     assert(!!person && typeof person.email !== 'undefined', `no scenario in login`);
 
-    return auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email })
+    return auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email, test: Cypress.currentTest.title })
                .then(() => {
                  console.log('signed in successfully');
                  return resolve();
@@ -139,6 +140,28 @@ Cypress.Commands.add('login', () => {
                });
   });
 });
+
+Cypress.Commands.add('logout', () => {
+  return new Cypress.Promise((resolve, reject) => {
+    let client = getClientFromSpec(Cypress.spec.name);
+
+    let simulation = atom.slice(Cypress.spec.name, 'simulation').get();
+
+    if(!client || !simulation) {
+      console.log('no client or simulation');
+      resolve();
+      return;
+    }
+
+    return client.destroySimulation(simulation).then(() => {
+      atom.slice(Cypress.spec.name).remove();
+
+      console.log('we are finished');
+      resolve();
+    }).catch(reject);
+  });
+});
+
 
 Cypress.Commands.add('logout', () => {
   return new Cypress.Promise((resolve, reject) => {
