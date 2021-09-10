@@ -10,5 +10,6 @@
   "videosFolder": "cypress/videos",
   "supportFile": "cypress/support/index.ts",
   "configFile": "cypress/tsconfig.json",
-  "chromeWebSecurity": false
+  "chromeWebSecurity": false,
+  "execTimeout": 10000
 }

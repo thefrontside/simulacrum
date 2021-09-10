@@ -1,4 +1,4 @@
-import { spawn } from 'effection';
+import { spawn, label } from 'effection';
 import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
@@ -71,7 +71,6 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
     try {
       yield function * errorBoundary() {
         let store = slice.slice("store");
-        let simulatorName = slice.get().simulator;
         let simulator = simulators[simulatorName];
         assert(simulator, `unknown simulator ${simulatorName}`);
         let { options = {}, services: serviceOptions = {} } = slice.get().options;
@@ -115,7 +114,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
             slice.update(state => ({
               ...state,
               status: 'failed',
-              error
+              error: error as Error
             }));
           }
         }));
@@ -137,7 +136,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       slice.update((state) => ({
         ...state,
         status: "failed",
-        error,
+        error: error as Error,
         services: []
       }));
     }
