@@ -30,6 +30,7 @@ export function map<A>(slice: Slice<Record<string, A>>, effect: Effect<A>): Oper
 
       for (let [key, effect] of effects.entries()) {
         if (!keep.has(key)) {
+          effects.delete(key);
           effect.halt();
         }
       }

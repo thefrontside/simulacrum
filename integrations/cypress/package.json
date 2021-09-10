@@ -1,0 +1,46 @@
+{
+  "name": "@simulacrum/auth0-cypress",
+  "version": "0.0.1",
+  "description": "Cypress simulacrum commands",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": "https://github.com/thefrontside/simulacrum.git",
+  "author": "Frontside Engineering <engineering@frontside.com>",
+  "license": "MIT",
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "README.md"
+  ],
+  "scripts": {
+    "cypress:browser": "cypress open",
+    "cypress:open": "npm-run-all --parallel start:auth0 start:server cypress:browser",
+    "start:server": "cd ../../examples/nextjs-with-auth0-react && npm install && npm run dev",
+    "cypress:run": "npx cypress run --spec 'cypress/integration/*.ts'",
+    "start:auth0": "PORT=4000 npx auth0-simulator",
+    "start:auth0-dev": "PORT=4000 node ../../packages/auth0/bin/index.js",
+    "test:e2e": "start-server-and-test 'npm run start:server' http://localhost:3000 cypress:run",
+    "test": "npm-run-all --parallel start:auth0 test:e2e",
+    "test:ci": "npm-run-all --parallel start:auth0-dev test:e2e",
+    "build": "npm run prepack",
+    "prepack": "tsc --build tsconfig.dist.json",
+    "lint": "eslint \"src/**/*.ts\""
+  },
+  "dependencies": {
+    "@auth0/auth0-spa-js": "^1.16.1",
+    "@effection/atom": "2.0.0-beta.15",
+    "cross-fetch": "^3.1.0",
+    "cypress": "^8.3.0"
+  },
+  "devDependencies": {
+    "@frontside/eslint-config": "^2.0.0",
+    "@frontside/tsconfig": "^1.2.0",
+    "@frontside/typescript": "^1.1.1",
+    "npm-run-all": "^4.1.5",
+    "start-server-and-test": "^1.13.1"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}
