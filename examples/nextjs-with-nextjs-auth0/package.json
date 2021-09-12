@@ -7,7 +7,12 @@
     "dev": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "standup": "npm run sim & npm run dev",
+    "standup-for-cypress": "npm run sim cypress & npm run dev",
+    "lint": "next lint",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test": "start-server-and-test standup-for-cypress http://localhost:3000 cypress:run"
   },
   "workspaces": [
     "../../packages/*"
@@ -21,12 +26,18 @@
     "react-dom": "17.0.2"
   },
   "devDependencies": {
+    "@bigtest/cypress": "^0.0.4",
     "@simulacrum/auth0-simulator": "0.2.3",
     "@simulacrum/client": "0.5.1",
     "@simulacrum/server": "0.3.2",
     "@types/react": "17.0.14",
+    "cypress": "^8.1.0",
     "eslint": "7.30.0",
     "eslint-config-next": "11.0.1",
+    "start-server-and-test": "^1.13.1",
     "typescript": "4.3.5"
+  },
+  "volta": {
+    "extends": "../../package.json"
   }
 }
