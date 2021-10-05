@@ -84,6 +84,26 @@ export type SimulationState =
     services: [];
     store: StoreState;
     error: Error
+  } |
+  {
+    id: string;
+    status: 'destroying';
+    simulator: string;
+    options: SimulationOptions;
+    scenarios: Record<string, ScenarioState>;
+    services: [];
+    store: StoreState;
+    error: Error;
+  } |
+  {
+    id: string;
+    status: 'halted';
+    simulator: string;
+    options: SimulationOptions;
+    scenarios: Record<string, ScenarioState>;
+    services: [];
+    store: StoreState;
+    error: Error;
   }
 
 export type ScenarioState =
