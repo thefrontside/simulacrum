@@ -37,3 +37,5 @@ site
 
 # Sensitive credentials
 *-credentials.yaml
+./cypress/videos
+./cypress/screenshots
