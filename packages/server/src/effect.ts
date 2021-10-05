@@ -9,7 +9,7 @@ export function map<A>(slice: Slice<Record<string, A>>, effect: Effect<A>): Oper
   return function* (scope) {
     let effects = new Map<string, Task>();
 
-    function synchronize(record: Record<string, A>) {
+    function* synchronize(record: Record<string, A>) {
       let keep = new Set<string>();
 
       // the checks for non-null `record` and `value`
@@ -31,12 +31,12 @@ export function map<A>(slice: Slice<Record<string, A>>, effect: Effect<A>): Oper
       for (let [key, effect] of effects.entries()) {
         if (!keep.has(key)) {
           effects.delete(key);
-          effect.halt();
+          yield effect.halt();
         }
       }
     }
 
-    synchronize(slice.get());
+    yield synchronize(slice.get());
 
     yield slice.forEach(synchronize);
   };

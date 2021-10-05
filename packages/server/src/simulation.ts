@@ -1,4 +1,5 @@
 import { spawn, label } from 'effection';
+import { Slice } from '@effection/atom';
 import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
@@ -66,8 +67,10 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
   };
 }
 
-export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
-  return slice => function*() {
+function createSimulation (slice: Slice<SimulationState>, simulators: Record<string, Simulator>) {
+  return spawn(function* (scope) {
+    let simulatorName = slice.get().simulator;
+    yield label({ name: 'simulation', simulator: simulatorName });
     try {
       yield function * errorBoundary() {
         let store = slice.slice("store");
@@ -140,6 +143,14 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         services: []
       }));
     }
+  });
+}
 
+export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
+  return function* (slice) {
+    let simulationTask = yield createSimulation(slice, simulators);
+    yield slice.filter(({ status }) => status == "destroying").expect();
+    yield simulationTask.halt();
+    slice.slice("status").set("halted");
   };
 }
