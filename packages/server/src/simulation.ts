@@ -1,4 +1,4 @@
-import { label, spawn } from 'effection';
+import { spawn, label } from 'effection';
 import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
@@ -71,6 +71,8 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
 
 function createSimulation (slice: Slice<SimulationState>, simulators: Record<string, Simulator>) {
   return spawn(function* () {
+    let simulatorName = slice.get().simulator;
+    yield label({ name: 'simulation', simulator: simulatorName });
     try {
       yield function * errorBoundary() {
         let simulatorName = slice.get().simulator;

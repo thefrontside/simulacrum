@@ -32,6 +32,7 @@ export function map<A>(slice: Slice<Record<string, A>>, effect: Effect<A>): Oper
         if (!keep.has(key)) {
           effects.delete(key);
           yield effect.halt();
+        }
       }
     }
 
