@@ -15,7 +15,36 @@ main(function*() {
 
   let url = `http://localhost:${server.address.port}`;
 
-  console.log(dedent`Started Simulacrum simulation server on ${url}. `);
+  console.log(dedent`Started Simulacrum simulation server on ${url}. 
+  GraphiQL interface is running on ${url}/graphql.
+  
+  To start ldap simulator send the following mutation to the GraphQL server.
+  
+  mutation CreateSimulation {
+    createSimulation(simulator: "ldap",
+     options: {
+       options:{
+         baseDN: "ou=users,dc=hp.com",
+         bindDn: "admin@hp.com",
+         bindPassword: "password",
+         groupDN:"ou=groups,dc=hp.com"
+       },
+       services:{
+         ldap:{
+           port: 389
+         }
+       }
+     }) {
+       id
+       status
+       services {
+         url
+         name
+       }
+     }
+   }
+ `);
+
 
   yield;
 });
