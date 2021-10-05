@@ -1,7 +1,7 @@
 import type { ServerOptions as SSLOptions } from 'https';
 import type { AddressInfo } from 'net';
 import type { LegacyServiceCreator } from './interfaces';
-import { Operation, once, Resource, spawn } from 'effection';
+import { Operation, once, Resource, spawn, createFuture } from 'effection';
 import { Request, Response, Application, RequestHandler } from 'express';
 import { createServer as createHttpsServer } from 'https';
 import { Server as HTTPServer, createServer as createHttpServer } from 'http';
@@ -61,7 +61,9 @@ export function createServer(app: Application, options: ServerOptions): Resource
         try {
           yield;
         } finally {
-          server.close();
+          let { future, resolve, reject } = createFuture<void>();
+          server.close((err) => err ? reject(err) : resolve());
+          yield future;
         }
       });
 
