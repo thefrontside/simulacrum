@@ -1,10 +1,10 @@
-import type { Operation } from 'effection';
+import type { Operation, Resource } from 'effection';
 import type { Slice } from '@effection/atom';
 import type { HttpApp } from './http';
 import type { Faker } from './faker';
 
 export interface Behaviors {
-  services: Record<string, Service>;
+  services: Record<string, ServiceCreator>;
   scenarios: Record<string, Scenario>;
   effects?: () => Operation<void>;
 }
@@ -29,11 +29,25 @@ export interface ServerOptions {
   debug?: boolean;
 }
 
-export interface Service {
+export interface LegacyServiceCreator {
   protocol: 'http' | 'https';
   app: HttpApp;
   port?: number;
 }
+
+export interface Service {
+  port: number;
+  protocol: string;
+}
+
+export interface ServiceOptions {
+  port?: number;
+}
+
+
+export type ResourceServiceCreator = (slice: Slice<SimulationState>, options: ServiceOptions) => Resource<Service>;
+
+export type ServiceCreator = ResourceServiceCreator | LegacyServiceCreator;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type StoreState = Record<string, Record<string, Record<string, any>>>;
@@ -47,9 +61,7 @@ export interface ServerState {
 
 export interface SimulationOptions {
   options?: Record<string, unknown>;
-  services?: Record<string, {
-    port?: number;
-  }>
+  services?: Record<string, ServiceOptions>
 }
 
 export type SimulationState =

@@ -1,24 +1,20 @@
-import { spawn } from 'effection';
+import { Operation, spawn } from 'effection';
 import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
-import { SimulationState, Simulator } from './interfaces';
+import { ResourceServiceCreator, Service, ServiceCreator, SimulationState, Simulator } from './interfaces';
 import { createServer, Server } from './http';
 import { createFaker } from './faker';
 import { middlewareHandlerIsOperation, isRequestHandler } from './guards/guards';
 
-export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
-  return slice => function*(scope) {
-    try {
-      let store = slice.slice("store");
-      let simulatorName = slice.get().simulator;
-      let simulator = simulators[simulatorName];
-      assert(simulator, `unknown simulator ${simulatorName}`);
-      let { options = {}, services: serviceOptions = {} } = slice.get().options;
+function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreator {
+  if(typeof service === 'function') {
+    return service;
+  }
 
-      let behaviors = simulator(slice, options);
-
-      let servers = Object.entries(behaviors.services).map(([name, service]) => {
+  return function resource(slice, options) {
+    return {
+      *init(scope) {
         let app = express();
 
         for(let handler of service.app.middleware) {
@@ -59,20 +55,43 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
           });
         }
 
-        let { protocol } = service;
+        let server: Server = yield createServer(app, { protocol: service.protocol, port: options.port });
 
         return {
+          port: server.address.port,
+          protocol: service.protocol
+        };
+      }
+    };
+  };
+}
+
+export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
+  return slice => function*(): Operation<void> {
+    try {
+      let store = slice.slice("store");
+      let simulatorName = slice.get().simulator;
+      let simulator = simulators[simulatorName];
+
+      assert(simulator, `unknown simulator ${simulatorName}`);
+
+      let { options = {}, services: serviceOptions = {} } = slice.get().options;
+
+      let behaviors = simulator(slice, options);
+
+      let servers = Object.entries(behaviors.services).map(([name, service]) => {
+        return {
           name,
-          protocol,
-          create: createServer(app, { protocol, port: serviceOptions[name]?.port })
+          create: normalizeServiceCreator(service)
         };
       });
 
       let services: {name: string; url: string; }[] = [];
-      for (let { name, protocol, create } of servers) {
-        let server: Server = yield create;
-        let address = server.address;
-        services.push({ name, url: `${protocol}://localhost:${address.port}` });
+
+      for (let { name, create } of servers) {
+        let service: Service = yield create(slice, serviceOptions[name] ?? {});
+
+        services.push({ name, url: `${service.protocol}://localhost:${service.port}` });
       }
 
       let { scenarios, effects } = behaviors;
@@ -97,7 +116,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
           slice.update(state => ({
             ...state,
             status: 'failed',
-            error
+            error: error as Error
           }));
         }
       }));
@@ -118,7 +137,7 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
       slice.update((state) => ({
         ...state,
         status: "failed",
-        error,
+        error: error as Error,
         services: []
       }));
     }

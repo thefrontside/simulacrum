@@ -1,4 +1,4 @@
-import type { Simulator, Service } from '@simulacrum/server';
+import type { Simulator, LegacyServiceCreator } from '@simulacrum/server';
 import { createHttpApp } from '@simulacrum/server';
 import { urlencoded, json } from 'express';
 import { createAuth0Handlers } from './handlers/auth0-handlers';
@@ -20,7 +20,7 @@ const DefaultOptions = {
   scope: "openid profile email offline_access",
 };
 
-const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & ReturnType<typeof createOpenIdHandlers>): Service => {
+const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & ReturnType<typeof createOpenIdHandlers>): LegacyServiceCreator => {
   return {
     protocol: 'https',
     app: createHttpApp()
