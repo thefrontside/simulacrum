@@ -32,7 +32,6 @@ export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAP
   return {
     name: 'LDAPServer',
     *init() {
-
       let port = options.port ?? (yield getPort());
       let baseDN = options.baseDN;
       let bindDn = options.bindDn;
@@ -178,6 +177,7 @@ export function createLdapService<T extends UserData>(options: LDAPOptions, stat
           ...options,
           users
         });
+
         return {
           port: server.port,
           protocol: 'ldap',
