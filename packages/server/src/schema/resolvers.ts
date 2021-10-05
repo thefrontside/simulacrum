@@ -4,6 +4,7 @@ import { OperationContext } from "./context";
 import { createQueue } from '../queue';
 
 import { assert } from 'assert-ts';
+import { sleep } from '@effection/core';
 
 export interface Resolver<Args, Result> {
   resolve(args: Args, context: OperationContext): Promise<Result>;
@@ -20,11 +21,18 @@ export interface CreateSimulationParameters {
 }
 
 export const createSimulation: Resolver<CreateSimulationParameters, SimulationState> = {
-  resolve({ simulator, options = {} }, ctx) {
+  async resolve({ simulator, options = {} }, ctx) {
     let { atom, scope, newid } = ctx;
 
-    let id = newid();
+    let id = options.key ?? newid();
+
     let simulation = atom.slice("simulations", id);
+
+    if(!!simulation.get()) {
+      simulation.remove();
+    }
+
+    await scope.run(sleep(5));
 
     simulation.set({
       id,
