@@ -33,6 +33,9 @@
     "react-use": "^15.3.3"
   },
   "devDependencies": {
+    "@interactors/with-cypress": "^0.1.2",
+    "@simulacrum/auth0-cypress": "../../integrations/cypress",
+    "@simulacrum/auth0-simulator": "../../packages/auth0",
     "@testing-library/jest-dom": "^5.10.1",
     "@testing-library/react": "^10.4.1",
     "@testing-library/user-event": "^12.0.7",
@@ -45,13 +48,14 @@
     "start-server-and-test": "^1.10.11"
   },
   "scripts": {
+    "sim": "export PORT=4000 && auth0-simulator",
     "start": "backstage-cli app:serve",
     "build": "backstage-cli app:build",
     "test": "backstage-cli test",
     "lint": "backstage-cli lint",
     "clean": "backstage-cli clean",
-    "test:e2e": "cross-env PORT=3001 start-server-and-test start http://localhost:3001 cy:dev",
-    "test:e2e:ci": "cross-env PORT=3001 start-server-and-test start http://localhost:3001 cy:run",
+    "test:e2e": "start-server-and-test start http://localhost:3000 cy:dev",
+    "test:e2e:ci": "start-server-and-test start http://localhost:3000 cy:run",
     "cy:dev": "cypress open",
     "cy:run": "cypress run"
   },

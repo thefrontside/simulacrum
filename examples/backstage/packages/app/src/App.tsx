@@ -25,11 +25,29 @@ import { entityPage } from './components/catalog/EntityPage';
 import { searchPage } from './components/search/SearchPage';
 import { Root } from './components/Root';
 
-import { AlertDisplay, OAuthRequestDialog } from '@backstage/core-components';
+import {
+  AlertDisplay,
+  OAuthRequestDialog,
+  SignInPage,
+  SignInProviderConfig,
+} from '@backstage/core-components';
 import { createApp, FlatRoutes } from '@backstage/core-app-api';
+import { auth0AuthApiRef } from '@backstage/core-plugin-api';
+
+const githubProvider: SignInProviderConfig = {
+  id: 'auth0-auth-provider',
+  title: 'Auth0',
+  message: 'Sign in using Auth0',
+  apiRef: auth0AuthApiRef,
+};
 
 const app = createApp({
   apis,
+  components: {
+    SignInPage: props => (
+      <SignInPage {...props} auto provider={githubProvider} />
+    ),
+  },
   bindRoutes({ bind }) {
     bind(catalogPlugin.externalRoutes, {
       createComponent: scaffolderPlugin.routes.root,
