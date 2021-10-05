@@ -14,11 +14,12 @@ function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
   return () => {
     return {
       *init() {
-        let port = Number(process.env.PORT || 389);
-        let baseDN = ldapOptions.baseDN; //'ou=users,dc=hp.com';
-        let bindDn = ldapOptions.bindDN; //'admin@hp.com';
-        let bindPassword = ldapOptions.bindPassword; // 'password';
-        let groupDN = ldapOptions.groupDN; //'ou=groups,dc=hp.com';
+        console.dir({ ldapOptions });
+        let port = Number(ldapOptions.port);
+        let baseDN = ldapOptions.baseDN;
+        let bindDn = ldapOptions.bindDN;
+        let bindPassword = ldapOptions.bindPassword;
+        let groupDN = ldapOptions.groupDN;
 
 
         let log = {
