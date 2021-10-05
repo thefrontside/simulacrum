@@ -14,13 +14,11 @@ function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
   return () => {
     return {
       *init() {
-        console.dir({ ldapOptions });
         let port = Number(ldapOptions.port);
         let baseDN = ldapOptions.baseDN;
-        let bindDn = ldapOptions.bindDN;
+        let bindDn = ldapOptions.bindDn;
         let bindPassword = ldapOptions.bindPassword;
         let groupDN = ldapOptions.groupDN;
-
 
         let log = {
           debug: () => undefined,
@@ -32,7 +30,7 @@ function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
         let server = createServer({ log });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         server.search(baseDN, function (req: any, res: any, next: any) {
-          console.log(dedent`--- User Search ---'
+          console.log(dedent`--- User Search ---
           dn:     ${req.dn.toString()}
           scope:  ${req.scope}
           filter: ${req.filter.toString()}
@@ -110,7 +108,7 @@ function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
           console.log(dedent`LDAP test server running on port ${port});
 
           BindDN: bindDn = ${bindDn} cn=${bindDn},${baseDN}
-          Bind Password: ${bindPassword};
+          Bind Password: ${bindPassword}
 
           UserBaseDN:    ${bindDn}
           `);
