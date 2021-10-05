@@ -6,7 +6,8 @@
     "node": "14 || 16"
   },
   "scripts": {
-    "dev": "concurrently \"yarn start\" \"yarn start-backend\"",
+    "dev": "concurrently \"yarn sim\" \"yarn start\" \"yarn start-backend\"",
+    "sim": "yarn workspace app sim",
     "start": "yarn workspace app start",
     "start-backend": "yarn workspace backend start",
     "build": "lerna run build",
@@ -16,6 +17,7 @@
     "clean": "backstage-cli clean && lerna run clean",
     "diff": "lerna run diff --",
     "test": "lerna run test --since origin/master -- --coverage",
+    "test:e2e": "concurrently \"yarn dev\" \"yarn workspace app cy:run\"",
     "test:all": "lerna run test -- --coverage",
     "lint": "lerna run lint --since origin/master --",
     "lint:all": "lerna run lint --",

@@ -51,7 +51,12 @@ techdocs:
 
 auth:
   # see https://backstage.io/docs/auth/ to learn about auth providers
-  providers: {}
+  providers:
+    auth0:
+      development:
+        clientId: YOUR_AUTH0_CLIENT_ID
+        clientSecret: YOUR_AUTH0_CLIENT_SECRET
+        domain: localhost:4400
 
 scaffolder:
   github:
