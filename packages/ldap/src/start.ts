@@ -53,7 +53,6 @@ main(function*() {
     options: {
       baseDN: "ou=users,dc=org.com",
       bindDn: "admin@org.com",
-      bindPassword: "password",
       groupDN:"ou=groups,dc=org.com"
     },
     services: {
