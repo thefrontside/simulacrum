@@ -34,7 +34,7 @@ import {
 import { createApp, FlatRoutes } from '@backstage/core-app-api';
 import { auth0AuthApiRef } from '@backstage/core-plugin-api';
 
-const githubProvider: SignInProviderConfig = {
+const auth0Provider: SignInProviderConfig = {
   id: 'auth0-auth-provider',
   title: 'Auth0',
   message: 'Sign in using Auth0',
@@ -45,7 +45,7 @@ const app = createApp({
   apis,
   components: {
     SignInPage: props => (
-      <SignInPage {...props} auto provider={githubProvider} />
+      <SignInPage {...props} auto provider={auth0Provider} />
     ),
   },
   bindRoutes({ bind }) {
