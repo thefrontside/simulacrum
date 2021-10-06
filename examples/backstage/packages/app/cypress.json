@@ -1,5 +1,5 @@
 {
-  "baseUrl": "http://localhost:3000",
+  "baseUrl": "http://localhost:7000",
   "fixturesFolder": false,
   "pluginsFile": false,
   "chromeWebSecurity": false,
