@@ -8,8 +8,11 @@ import getPort from 'get-port';
 import { echo } from '../src/echo';
 import { createHttpApp } from '../src/http';
 import { ServerOptions } from '../src/interfaces';
+import udp from 'dgram';
+import buffer from 'buffer';
 
 import { createTestServer } from './helpers';
+import { on, once, spawn, Stream, onEmit } from 'effection';
 
 describe('@simulacrum/server', () => {
   let simulation: Simulation;
@@ -47,7 +50,35 @@ describe('@simulacrum/server', () => {
                 protocol: 'https',
                 app: app(times)
               },
+              ["echo.udp"](slice, options) {
+                return {
+                  *init() {
+                    let socket = udp.createSocket('udp4');
 
+                    socket.bind(options.port);
+
+                    yield once(socket, 'listening');
+
+                    yield spawn(function *() {
+                      try {
+                        yield onEmit<[Buffer, udp.RemoteInfo]>(socket, 'message').forEach(([message, info]) => {
+                          socket.send(message, info.port);
+                        });
+                      } finally {
+                        yield new Promise<void>((resolve) => {
+                          socket.close(resolve);
+                        });
+                      }
+                    });
+
+
+                    return {
+                      port: socket.address().port,
+                      protocol: 'udp'
+                    };
+                  }
+                };
+              }
             },
             scenarios: {}
           };
@@ -68,7 +99,8 @@ describe('@simulacrum/server', () => {
     it('has the echo service', function* () {
       expect(simulation.services).toEqual([
         { name: 'echo', url: expect.stringMatching('http://localhost') },
-        { name: 'echo.secure', url: expect.stringMatching('https://localhost') }
+        { name: 'echo.secure', url: expect.stringMatching('https://localhost') },
+        { name: 'echo.udp', url: expect.stringMatching('udp://localhost') }
       ]);
     });
 
@@ -85,6 +117,29 @@ describe('@simulacrum/server', () => {
 
       it('gives you back what you gave it', function*() {
         expect(body).toEqual("hello world");
+      });
+    });
+
+    describe('ResourceServiceCreator', () => {
+      it('should create a udp service', function * (){
+        let client = udp.createSocket('udp4');
+        try {
+          let response: Stream<string, void> = yield on<Buffer>(client, 'message').map(b => b.toString()).buffered();
+
+          let message = buffer.Buffer.from('Hello');
+
+          let service = simulation.services.find(s => s.name === 'echo.udp');
+
+          assert(!!service, `no service found`);
+
+          let { port } = new URL(service.url);
+
+          client.send(message, Number(port));
+
+          expect(yield response.first()).toBe("Hello");
+        } finally {
+          client.close();
+        }
       });
     });
 

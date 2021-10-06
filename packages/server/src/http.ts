@@ -1,6 +1,6 @@
 import type { ServerOptions as SSLOptions } from 'https';
 import type { AddressInfo } from 'net';
-import type { Service } from './interfaces';
+import type { LegacyServiceCreator } from './interfaces';
 import { Operation, once, Resource, spawn } from 'effection';
 import { Request, Response, Application, RequestHandler } from 'express';
 import { createServer as createHttpsServer } from 'https';
@@ -15,7 +15,7 @@ export interface Server {
 
 export interface ServerOptions {
   port?: number;
-  protocol: Service['protocol'];
+  protocol: LegacyServiceCreator['protocol'];
 }
 
 const createAppServer = (app: Application, options: ServerOptions) => {
