@@ -16,7 +16,8 @@
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/acmecorp"
   ],
   "keywords": [
     "simulation",
