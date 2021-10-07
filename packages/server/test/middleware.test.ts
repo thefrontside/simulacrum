@@ -5,13 +5,15 @@ import { createTestServer } from './helpers';
 import expect from 'expect';
 import { createHttpApp, createLoggingMiddleware, Logger } from '../src';
 import fetch from 'cross-fetch';
+import { json } from 'express';
 
-describe.only('simulator effects', () => {
+describe('middleware logging', () => {
   let client: Client;
   let simulation: Simulation;
   let msg = '';
 
   let createApp = (...loggers: Logger[]) => createHttpApp()
+  .use(json())
   .use(createLoggingMiddleware(...loggers))
   .post('/', function * (_, res){
     res.status(200).json({ a: 'ok' });
@@ -46,7 +48,6 @@ describe.only('simulator effects', () => {
 
     let response = yield fetch(`${url.toString()}?q=a&b=c`, { method: 'POST', body: JSON.stringify({ msg: "hello world" }) });
 
-    console.log(msg);
     expect(response.status).toBe(200);
     expect(msg).toContain('/?q=a&b=c');
     expect(msg).toContain('POST');
