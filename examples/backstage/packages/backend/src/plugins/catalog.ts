@@ -2,7 +2,8 @@ import { NextCatalogBuilder, createRouter, AnnotateLocationEntityProcessor } fro
 import { Router } from 'express';
 import { PluginEnvironment } from '../types';
 import { ScmIntegrations } from '@backstage/integration';
-import { LdapOrgReaderProcessor } from '@backstage/plugin-catalog-backend-module-ldap';
+import { LdapProcessor } from '../processors/ldap-processor';
+import { userTransformer } from '../processors/user-transformer';
 
 export default async function createPlugin(env: PluginEnvironment): Promise<Router> {
   let builder = new NextCatalogBuilder(env);
@@ -10,12 +11,11 @@ export default async function createPlugin(env: PluginEnvironment): Promise<Rout
   let integrations = ScmIntegrations.fromConfig(config);
 
   builder.replaceProcessors([
-    LdapOrgReaderProcessor.fromConfig(config, { logger }),
+    LdapProcessor.fromConfig(config, { logger, userTransformer }),
     new AnnotateLocationEntityProcessor({ integrations }),
   ]);
 
-  let { entitiesCatalog, locationsCatalog, locationService, processingEngine, locationAnalyzer } =
-    await builder.build();
+  let { entitiesCatalog, locationsCatalog, locationService, processingEngine, locationAnalyzer } = await builder.build();
 
   await processingEngine.start();
 
