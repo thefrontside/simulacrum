@@ -82,9 +82,6 @@ catalog:
               rdn: 'uid'
               name: 'uid'
               displayName: 'cn'
-              email: 'email'
-              co: 'co'
-              memberOf: 'memberOf'
             paged: true
           groups:
             dn: ou=groups,dc=org.com
