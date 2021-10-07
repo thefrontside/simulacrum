@@ -25,6 +25,8 @@ export function createSimulationServer(options: ServerOptions = defaults): Resou
   let { simulators, debug, port, seed } = { ...defaults, ...options };
 
   return {
+    name: 'simulacrum server',
+    labels: { simulators: Object.keys(options.simulators).join(",") },
     *init(scope) {
       let newid = seed ? stableIds(seed) : v4;
 
