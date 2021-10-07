@@ -72,15 +72,22 @@ catalog:
       providers:
         - target: ldap://localhost:389
           bind:
-            dn: cn=admin@hp.com,ou=users,dc=hp.com
+            dn: cn=admin@org.com,ou=users,dc=org.com
             secret: password
           users:
-            dn: ou=users,dc=hp.com
+            dn: ou=users,dc=org.com
             options:
               filter: (uid=*)
+            map:
+              rdn: 'uid'
+              name: 'uid'
+              displayName: 'cn'
+              email: 'email'
+              co: 'co'
+              memberOf: 'memberOf'
             paged: true
           groups:
-            dn: ou=groups,dc=hp.com
+            dn: ou=groups,dc=org.com
   locations:
     - type: ldap-org
       target: ldap://localhost:389
