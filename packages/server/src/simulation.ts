@@ -70,7 +70,7 @@ function normalizeServiceCreator(name: string, service: ServiceCreator): Resourc
 }
 
 function createSimulation (slice: Slice<SimulationState>, simulators: Record<string, Simulator>) {
-  return spawn(function* (scope) {
+  return spawn(function* () {
     let simulatorName = slice.get().simulator;
     yield label({ name: 'simulation', simulator: simulatorName });
     try {
