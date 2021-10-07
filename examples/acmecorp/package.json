@@ -1,0 +1,21 @@
+{
+  "name": "@acmecorp/simulation-server",
+  "version": "1.0.0",
+  "description": "Simulate Acme Corp Backend Services",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node bin/start.ts"
+  },
+  "author": "Charles Lowell <cowboyd@frontside.io>",
+  "license": "ISC",
+  "devDependencies": {
+    "@frontside/tsconfig": "^1.2.0",
+    "@frontside/graphgen": "^1.1.0",
+    "@simulacrum/auth0-simulator": "^0.2.3",
+    "@simulacrum/server": "^0.3.2",
+    "@types/faker": "5.5.8",
+    "faker": "5.5.3",
+    "effection": "^2.0.0-beta.22",
+    "typescript": "^4.4.3"
+  }
+}
