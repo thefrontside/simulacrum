@@ -1,5 +1,5 @@
 import type { Simulator, LegacyServiceCreator } from '@simulacrum/server';
-import { createHttpApp } from '@simulacrum/server';
+import { createHttpApp, createLoggingMiddleware } from '@simulacrum/server';
 import { urlencoded, json } from 'express';
 import { createAuth0Handlers } from './handlers/auth0-handlers';
 import { person } from '@simulacrum/server';
@@ -10,6 +10,7 @@ import { Options } from './types';
 import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
 import { createOpenIdHandlers } from './handlers/openid-handlers';
+import { label } from 'effection';
 
 
 const publicDir = path.join(__dirname, 'views', 'public');
@@ -30,6 +31,9 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & R
           .use(noCache())
           .use(json())
           .use(urlencoded({ extended: true }))
+          .use(createLoggingMiddleware(function * (message) {
+            yield label({ name: 'auth0-logging-middleware', log: message });
+          }))
           .get('/heartbeat', handlers['/heartbeat'])
           .get('/authorize', handlers['/authorize'])
           .get('/login', handlers['/login'])
