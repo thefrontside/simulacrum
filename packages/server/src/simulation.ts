@@ -8,13 +8,15 @@ import { createServer, Server } from './http';
 import { createFaker } from './faker';
 import { middlewareHandlerIsOperation, isRequestHandler } from './guards/guards';
 
-function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreator {
+function normalizeServiceCreator(name: string, service: ServiceCreator): ResourceServiceCreator {
   if(typeof service === 'function') {
     return service;
   }
 
   return function resource(slice, options) {
     return {
+      name: 'service',
+      labels: { id: name, type: 'legacy', protocol: service.protocol },
       *init(scope) {
         let app = express();
 
@@ -83,7 +85,7 @@ function createSimulation (slice: Slice<SimulationState>, simulators: Record<str
         let servers = Object.entries(behaviors.services).map(([name, service]) => {
           return {
             name,
-            create: normalizeServiceCreator(service)
+            create: normalizeServiceCreator(name, service)
           };
         });
 
