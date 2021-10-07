@@ -88,8 +88,6 @@ function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
 
           let employee = employees.filter(u => u.id === commonName)?.[0];
 
-          console.dir({ employee });
-
           if (typeof employee === 'undefined') {
             console.log('could not find employee');
             return next(new NoSuchObjectError(req.dn.toString()));
