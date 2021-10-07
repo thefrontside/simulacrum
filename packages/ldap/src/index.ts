@@ -5,6 +5,8 @@ import { ResourceServiceCreator } from '@simulacrum/server';
 import { employees } from './employees';
 import dedent from 'dedent';
 import { person } from '@simulacrum/server';
+import { spawn } from 'effection';
+import getPort from 'get-port';
 
 const DefaultOptions: Partial<LDAPOptions> = {
   port: 389
@@ -12,11 +14,12 @@ const DefaultOptions: Partial<LDAPOptions> = {
 
 employees.forEach(e => e.id = e.email);
 
-function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
+export function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
   return () => {
     return {
+      name: 'ldap service',
       *init() {
-        let port = Number(ldapOptions.port);
+          let port = ldapOptions.port ?? (yield getPort());
         let baseDN = ldapOptions.baseDN;
         let bindDn = ldapOptions.bindDn;
         let bindPassword = ldapOptions.bindPassword;
@@ -116,6 +119,14 @@ function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
           `);
         });
 
+        yield spawn(function* shutdown() {
+          try {
+            yield;
+          } finally {
+            yield new Promise(resolve => server.unbind(resolve));
+          }
+        });
+
         return {
           port,
           protocol: 'ldap'
@@ -143,4 +154,3 @@ export const ldap: Simulator<LDAPOptions> = (slice, options) => {
     }
   };
 };
-

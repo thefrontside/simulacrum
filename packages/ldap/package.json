@@ -20,6 +20,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "get-port": "5.1.1",
     "ldapjs": "^2.3.1",
     "seedrandom": "^3.0.5"
   },

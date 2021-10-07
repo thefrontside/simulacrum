@@ -4,7 +4,8 @@
   "description": "Simulate Acme Corp Backend Services",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node bin/start.ts"
+    "start": "ts-node bin/start.ts",
+    "watch": "nodemon"
   },
   "author": "Charles Lowell <cowboyd@frontside.io>",
   "license": "ISC",
@@ -14,8 +15,11 @@
     "@simulacrum/auth0-simulator": "^0.2.3",
     "@simulacrum/server": "^0.3.2",
     "@types/faker": "5.5.8",
+    "@types/seedrandom": "3.0.1",
     "faker": "5.5.3",
     "effection": "^2.0.0-beta.22",
+    "nodemon": "latest",
+    "seedrandom": "3.0.5",
     "typescript": "^4.4.3"
   }
 }

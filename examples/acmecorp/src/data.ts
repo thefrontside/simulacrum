@@ -1,7 +1,19 @@
-import { createGraph, createVertex, Vertex } from '@frontside/graphgen';
+import { createGraph, createVertex, Distribution, Vertex } from '@frontside/graphgen';
 import { createFaker } from './faker';
 
-export default function createData() {
+export interface UserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  displayName: string;
+  title: string;
+  co: string;
+  c: string;
+  st: string;
+  l: string;
+}
+
+export function createData(): Vertex<UserData>[] {
   let graph = createGraph({
     types: {
       vertex: [{
@@ -13,7 +25,7 @@ export default function createData() {
               let faker = createFaker(seed);
               let firstName = faker.name.firstName();
               let lastName = faker.name.lastName();
-              let email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@hp.com`;
+              let email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@acmecorp.com`;
               let displayName = `${firstName} ${lastName}`;
 
               let title = faker.name.jobTitle();
@@ -23,16 +35,16 @@ export default function createData() {
               let l = faker.address.city();
               return { firstName, lastName, email, displayName, title, co, c, st, l };
             }
-          }
+          } as Distribution<UserData>;
         },
         relationships: []
       }]
     }
   });
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 1000; i++) {
     createVertex(graph, 'User');
   }
 
-  return Object.values(graph.vertices) as Vertex[];
+  return Object.values(graph.vertices) as Vertex<UserData>[];
 }
