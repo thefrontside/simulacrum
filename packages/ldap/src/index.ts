@@ -10,6 +10,8 @@ const DefaultOptions: Partial<LDAPOptions> = {
   port: 389
 };
 
+employees.forEach(e => e.id = e.email);
+
 function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
   return () => {
     return {
@@ -63,9 +65,9 @@ function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         server.compare(groupDN, (req: any, res: any) => {
           console.log('--- Compare ---');
-          console.log('DN: ' + req.dn.toString());
-          console.log('attribute name: ' + req.attribute);
-          console.log('attribute value: ' + req.value);
+          console.log(`DN: ${req.dn.toString()}`);
+          console.log(`attribute name: ${req.attribute}`);
+          console.log(`attribute value: ${req.value}`);
 
           res.end(true);
         });
@@ -73,8 +75,8 @@ function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         server.bind(baseDN, function (req: any, res: any, next: any) {
           console.log('--- Bind ---');
-          console.log('bind DN: ' + req.dn.toString());
-          console.log('bind PW: ' + req.credentials);
+          console.log(`bind DN: ${req.dn.toString()}`);
+          console.log(`bind PW: ${req.credentials}`);
 
           let commonName = req.dn.rdns[0].attrs.cn.value;
           if (!commonName) {
@@ -85,6 +87,8 @@ function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
           console.log('verify:', commonName, password);
 
           let employee = employees.filter(u => u.id === commonName)?.[0];
+
+          console.dir({ employee });
 
           if (typeof employee === 'undefined') {
             console.log('could not find employee');
