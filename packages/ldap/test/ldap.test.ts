@@ -30,10 +30,10 @@ describe('Auth0 simulator', () => {
     beforeEach(function*() {
       simulation = yield client.createSimulation("ldap", {
         options: {
-          baseDN: "ou=users,dc=hp.com",
-          bindDn: "admin@hp.com",
+          baseDN: "ou=users,dc=org.com",
+          bindDn: "admin@org.com",
           bindPassword: "password",
-          groupDN:"ou=groups,dc=hp.com"
+          groupDN:"ou=groups,dc=org.com"
         },
         services: {
           ldap: {

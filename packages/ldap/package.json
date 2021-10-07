@@ -9,7 +9,7 @@
     "prepack": "tsc --build tsconfig.dist.json",
     "build": "npm run prepack",
     "lint": "eslint src test",
-    "start": "node dist/start.js",
+    "start": "PORT=4000 node dist/start.js",
     "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
   },
   "keywords": [

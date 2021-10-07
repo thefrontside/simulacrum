@@ -2,6 +2,7 @@ import { main } from 'effection';
 import { createSimulationServer, Server } from '@simulacrum/server';
 import { ldap } from '.';
 import dedent from 'dedent';
+import { createClient } from '@simulacrum/client';
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : undefined;
 
@@ -24,10 +25,10 @@ main(function*() {
     createSimulation(simulator: "ldap",
      options: {
        options:{
-         baseDN: "ou=users,dc=hp.com",
-         bindDn: "admin@hp.com",
+         baseDN: "ou=users,dc=org.com",
+         bindDn: "admin@org.com",
          bindPassword: "password",
-         groupDN:"ou=groups,dc=hp.com"
+         groupDN:"ou=groups,dc=org.com"
        },
        services:{
          ldap:{
@@ -45,6 +46,23 @@ main(function*() {
    }
  `);
 
+ let client = createClient(url);
+
+ let simulation = yield client.createSimulation("ldap", {
+    options: {
+      baseDN: "ou=users,dc=org.com",
+      bindDn: "admin@org.com",
+      bindPassword: "password",
+      groupDN:"ou=groups,dc=org.com"
+    },
+    services: {
+      ldap: {
+        port: 389
+      }
+    }
+  });
+
+  console.dir({ simulation }, { depth: 33 });
 
   yield;
 });

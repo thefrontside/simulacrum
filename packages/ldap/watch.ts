@@ -49,10 +49,8 @@ function* buildAndRun() {
     yield executeAndOut('prepack');
 
     let server: StdIO = yield daemon('node dist/start.js');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    yield spawn(writeOut(server.stdout as any, process.stdout));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    yield spawn(writeOut(server.stderr as any, process.stderr));
+    yield spawn(writeOut(server.stdout, process.stdout));
+    yield spawn(writeOut(server.stderr, process.stderr));
   } catch (err) {
     console.error(err);
   }
