@@ -1,4 +1,4 @@
-import { describe, it, beforeEach } from '@effection/mocha';
+import { describe, it, beforeEach, afterEach } from '@effection/mocha';
 import type { Simulator } from '../src/interfaces';
 import type { Client, Simulation } from '@simulacrum/client';
 import { createTestServer } from './helpers';
