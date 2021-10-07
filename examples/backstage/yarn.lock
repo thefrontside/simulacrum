@@ -2121,7 +2121,7 @@
     exec-sh "^0.3.2"
     minimist "^1.2.0"
 
-"@cypress/request@^2.88.6":
+"@cypress/request@^2.88.5", "@cypress/request@^2.88.6":
   version "2.88.6"
   resolved "https://registry.yarnpkg.com/@cypress/request/-/request-2.88.6.tgz#a970dd675befc6bdf8a8921576c01f51cc5798e9"
   integrity sha512-z0UxBE/+qaESAHY9p9sM2h8Y4XqtsbDCt0/DPOrqA/RZgKi4PkxdpXyK4wCCnSk1xHqWHZZAE+gV6aDAR6+caQ==
@@ -2208,6 +2208,15 @@
     "@effection/events" "2.0.0-beta.15"
     "@effection/subscription" "2.0.0-beta.15"
 
+"@effection/channel@2.0.0-beta.21":
+  version "2.0.0-beta.21"
+  resolved "https://registry.yarnpkg.com/@effection/channel/-/channel-2.0.0-beta.21.tgz#05e1dc7ad99ac9ec3285fdde593365a880a115dc"
+  integrity sha512-kAS0TYbotru+lZMP/tpq+cTCRCNLYkNhFm+W/rfNQAXY0uBfwmMfeOKNTt3YtDotk43jUkHpU8/AfsWN7nqP4w==
+  dependencies:
+    "@effection/core" "2.0.0-beta.17"
+    "@effection/events" "2.0.0-beta.21"
+    "@effection/stream" "2.0.0-beta.6"
+
 "@effection/channel@2.0.0-beta.9":
   version "2.0.0-beta.9"
   resolved "https://registry.yarnpkg.com/@effection/channel/-/channel-2.0.0-beta.9.tgz#207dbecb5276c31236be0580502b4b91f7af4eae"
@@ -2222,6 +2231,11 @@
   resolved "https://registry.yarnpkg.com/@effection/core/-/core-2.0.0-beta.13.tgz#8f4a3f380040f2502b691dacd0e8dd5027b3c9c6"
   integrity sha512-24hc/KaoUWGBVIPs2RxPiwMubvoCuL6VzTQeKkrw4pXg/usz5xWQkxO5zqFYPf2F9rjEashEie+t/Ck8lS9bhA==
 
+"@effection/core@2.0.0-beta.17":
+  version "2.0.0-beta.17"
+  resolved "https://registry.yarnpkg.com/@effection/core/-/core-2.0.0-beta.17.tgz#b2e1d2147dac0b3a40b8c480d4754a84fb15e9d1"
+  integrity sha512-vgbPCZgoYu6ds3/+9Bdy7G7j9jGjhy5ZMzDyLdRE1nisb5lBiNdpsZtpewCKMwPxLlWJJ+ttuPUPHfUdcERAcA==
+
 "@effection/core@2.0.0-beta.8":
   version "2.0.0-beta.8"
   resolved "https://registry.yarnpkg.com/@effection/core/-/core-2.0.0-beta.8.tgz#ca2f96ff393b35af6391e3573f5cd998cd5b513c"
@@ -2235,6 +2249,14 @@
     "@effection/core" "2.0.0-beta.13"
     "@effection/subscription" "2.0.0-beta.15"
 
+"@effection/events@2.0.0-beta.21":
+  version "2.0.0-beta.21"
+  resolved "https://registry.yarnpkg.com/@effection/events/-/events-2.0.0-beta.21.tgz#6cc649306bcb23687242c2808ef1afa196cf726c"
+  integrity sha512-tgQGEprsyB61SeQEa05ySIa75YzvIat7ImHX2cuzTZ0PbdI93rLW/MuWeZqqhCD9oNN1lgdgyyPiaNhogpddkQ==
+  dependencies:
+    "@effection/core" "2.0.0-beta.17"
+    "@effection/stream" "2.0.0-beta.6"
+
 "@effection/events@2.0.0-beta.9":
   version "2.0.0-beta.9"
   resolved "https://registry.yarnpkg.com/@effection/events/-/events-2.0.0-beta.9.tgz#5f04d382870346b08bf3b7d1d3b0c5bf4ad3f0e1"
@@ -2243,22 +2265,22 @@
     "@effection/core" "2.0.0-beta.8"
     "@effection/subscription" "2.0.0-beta.9"
 
-"@effection/fetch@2.0.0-beta.16":
-  version "2.0.0-beta.16"
-  resolved "https://registry.yarnpkg.com/@effection/fetch/-/fetch-2.0.0-beta.16.tgz#5bce1c53582b688b23b77a915561dc0a91418dd0"
-  integrity sha512-q3qGDqZlk+RRCrut4XsTX7o8TCFKhjCe0WfpbakZ5DEzzbHZOJtOaQrMi2Rzdp7mqwx4JWKinh5yugcbGltMRg==
+"@effection/fetch@2.0.0-beta.20":
+  version "2.0.0-beta.20"
+  resolved "https://registry.yarnpkg.com/@effection/fetch/-/fetch-2.0.0-beta.20.tgz#904d9012821601dbaff502c9252503c5764e34a7"
+  integrity sha512-m+dP9wGzD4CCctxO/6JnzUxYAqnej+rFYQ+v56iB4SA8bCew96C+voQdVtqUsEphxYxXFsT+DQwIeAG9tBDfPg==
   dependencies:
-    "@effection/core" "2.0.0-beta.13"
+    "@effection/core" "2.0.0-beta.17"
     abort-controller "^3.0.0"
     cross-fetch "^3.0.4"
     node-fetch "^2.6.1"
 
-"@effection/main@2.0.0-beta.15":
-  version "2.0.0-beta.15"
-  resolved "https://registry.yarnpkg.com/@effection/main/-/main-2.0.0-beta.15.tgz#227a5801e3fe3613aa995ef646f74c0a9798913d"
-  integrity sha512-0Z1IR7ShuYnD/I0AqS8wP/FxN+qiMzOweG8U1Euufxme0GXsAFjguFdE4hjvTZAsznSb8yq04lIWc0+5gmcIJQ==
+"@effection/main@2.0.0-beta.19":
+  version "2.0.0-beta.19"
+  resolved "https://registry.yarnpkg.com/@effection/main/-/main-2.0.0-beta.19.tgz#86caa871457aefdafc7b82c1ad7008940b290f28"
+  integrity sha512-k0djKyDmPZmEzxGML1XIdJy1q4ku+Y/SivoqPy5aTeMrb8kCNN7tSAWveLi3JzeVryl13AJhRtlWDC8ALnaWCw==
   dependencies:
-    "@effection/core" "2.0.0-beta.13"
+    "@effection/core" "2.0.0-beta.17"
     chalk "^4.1.2"
     stacktrace-parser "^0.1.10"
 
@@ -2271,15 +2293,14 @@
     chalk "^4.1.1"
     stacktrace-parser "^0.1.10"
 
-"@effection/process@2.0.0-beta.15":
-  version "2.0.0-beta.15"
-  resolved "https://registry.yarnpkg.com/@effection/process/-/process-2.0.0-beta.15.tgz#23d738a8e0770c988fbfa894aecf239649dbad8a"
-  integrity sha512-oGo8tNtMz2ajJ4KhCOLbTTl/o02fK1X+zCL2f305p4INRWr24fvT4c4AzRBcvMBo5pJdthS2D4Dv6NzJ7AnhIQ==
+"@effection/process@2.0.0-beta.21":
+  version "2.0.0-beta.21"
+  resolved "https://registry.yarnpkg.com/@effection/process/-/process-2.0.0-beta.21.tgz#9da766c63ab39c9344dbb19d0ebb4a13f89dd6cd"
+  integrity sha512-SaZCG4cnIs8Rg6tLxw9KBGwSmcYug7OkPAHHjuMUlWRRkno2yfrQsPaVBZH9Wh2bgBJUoRt2H2+BY2VLLTL3nw==
   dependencies:
-    "@effection/channel" "2.0.0-beta.15"
-    "@effection/core" "2.0.0-beta.13"
-    "@effection/events" "2.0.0-beta.15"
-    "@effection/subscription" "2.0.0-beta.15"
+    "@effection/core" "2.0.0-beta.17"
+    "@effection/events" "2.0.0-beta.21"
+    "@effection/stream" "2.0.0-beta.6"
     cross-spawn "^7.0.3"
     ctrlc-windows "^2.0.0"
     shellwords "^0.1.1"
@@ -2297,12 +2318,27 @@
     ctrlc-windows "^2.0.0"
     shellwords "^0.1.1"
 
+"@effection/stream@2.0.0-beta.6":
+  version "2.0.0-beta.6"
+  resolved "https://registry.yarnpkg.com/@effection/stream/-/stream-2.0.0-beta.6.tgz#5e72cefcb403ba2d3f53650e1147128429afdb03"
+  integrity sha512-8P1wOVPqrJdAimja5GpUrf7f4qW2kjDGYN+8TDDZcBgK1KzMufzI6W1GHld9RnSNB62m2ziOxCPNmCwk0QbdCA==
+  dependencies:
+    "@effection/core" "2.0.0-beta.17"
+    "@effection/subscription" "2.0.0-beta.19"
+
 "@effection/subscription@2.0.0-beta.15":
   version "2.0.0-beta.15"
   resolved "https://registry.yarnpkg.com/@effection/subscription/-/subscription-2.0.0-beta.15.tgz#e71f470e30d2f12d298fec1b6ab39a14b80637c1"
   integrity sha512-QJ74JCjrBMH92O+y1OXWVo+8p7j37GFe9AQFnhbi6pmgGIx8zbNwCfm9iKrZzjpu0yCiPZYy9p5XFt7BQidzFQ==
   dependencies:
     "@effection/core" "2.0.0-beta.13"
+
+"@effection/subscription@2.0.0-beta.19":
+  version "2.0.0-beta.19"
+  resolved "https://registry.yarnpkg.com/@effection/subscription/-/subscription-2.0.0-beta.19.tgz#41aa206a58bff9306bc744306c35d42434723b64"
+  integrity sha512-jcUObcf8uumowpaK0Lkc9ZtVYaQpMBZIl3NEXzIhop51Jez0YTy3UlIaDLcR5xMM7FY+TxWH2AeVp0c9Ec4mpQ==
+  dependencies:
+    "@effection/core" "2.0.0-beta.17"
 
 "@effection/subscription@2.0.0-beta.9":
   version "2.0.0-beta.9"
@@ -3959,14 +3995,14 @@
 "@simulacrum/auth0-simulator@../../packages/auth0":
   version "0.2.3"
   dependencies:
-    "@effection/process" "2.0.0-beta.15"
+    "@effection/process" "2.0.0-beta.21"
     "@simulacrum/server" "0.3.2"
     "@types/faker" "^5.1.7"
     assert-ts "^0.3.2"
     base64-url "^2.3.3"
     cookie-session "^1.4.0"
     dedent "^0.7.0"
-    effection "2.0.0-beta.16"
+    effection "2.0.0-beta.22"
     html-entities "^2.3.2"
     jsesc "^3.0.2"
     jsonwebtoken "^8.5.1"
@@ -7566,6 +7602,53 @@ ctrlc-windows@^2.0.0:
     "@mapbox/node-pre-gyp" "^1.0.5"
     neon-cli "^0.8.1"
 
+cypress@^7.3.0:
+  version "7.7.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-7.7.0.tgz#0839ae28e5520536f9667d6c9ae81496b3836e64"
+  integrity sha512-uYBYXNoI5ym0UxROwhQXWTi8JbUEjpC6l/bzoGZNxoKGsLrC1SDPgIDJMgLX/MeEdPL0UInXLDUWN/rSyZUCjQ==
+  dependencies:
+    "@cypress/request" "^2.88.5"
+    "@cypress/xvfb" "^1.2.4"
+    "@types/node" "^14.14.31"
+    "@types/sinonjs__fake-timers" "^6.0.2"
+    "@types/sizzle" "^2.3.2"
+    arch "^2.2.0"
+    blob-util "^2.0.2"
+    bluebird "^3.7.2"
+    cachedir "^2.3.0"
+    chalk "^4.1.0"
+    check-more-types "^2.24.0"
+    cli-cursor "^3.1.0"
+    cli-table3 "~0.6.0"
+    commander "^5.1.0"
+    common-tags "^1.8.0"
+    dayjs "^1.10.4"
+    debug "^4.3.2"
+    enquirer "^2.3.6"
+    eventemitter2 "^6.4.3"
+    execa "4.1.0"
+    executable "^4.1.1"
+    extract-zip "2.0.1"
+    figures "^3.2.0"
+    fs-extra "^9.1.0"
+    getos "^3.2.1"
+    is-ci "^3.0.0"
+    is-installed-globally "~0.4.0"
+    lazy-ass "^1.6.0"
+    listr2 "^3.8.3"
+    lodash "^4.17.21"
+    log-symbols "^4.0.0"
+    minimist "^1.2.5"
+    ospath "^1.2.2"
+    pretty-bytes "^5.6.0"
+    ramda "~0.27.1"
+    request-progress "^3.0.0"
+    supports-color "^8.1.1"
+    tmp "~0.2.1"
+    untildify "^4.0.0"
+    url "^0.11.0"
+    yauzl "^2.10.0"
+
 cypress@^8.3.0:
   version "8.5.0"
   resolved "https://registry.yarnpkg.com/cypress/-/cypress-8.5.0.tgz#5712ca170913f8344bf167301205c4217c1eb9bd"
@@ -8294,17 +8377,18 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
-effection@2.0.0-beta.16:
-  version "2.0.0-beta.16"
-  resolved "https://registry.yarnpkg.com/effection/-/effection-2.0.0-beta.16.tgz#920772f61dbb8d76f591a9df20ae0f19c3ea1bd5"
-  integrity sha512-/IULKt+XmU0CJcInN8YCs+UoKKZeapD08f0uE8DAfFVJqY86rgyAPt0vSXmIFQXkKLdV7ZI75dmz8duZBFxdQg==
+effection@2.0.0-beta.22:
+  version "2.0.0-beta.22"
+  resolved "https://registry.yarnpkg.com/effection/-/effection-2.0.0-beta.22.tgz#ee02e260b67c37788a0fb7aa279f4ce5627ec085"
+  integrity sha512-/6qc8ZTjiNJhTYGvNaqqpvpWQ28vlR1f3FQ1yCl7KVX3he/ZbfU6h9mO+FrJxWauYOIFXuksulImpQttQZbDbg==
   dependencies:
-    "@effection/channel" "2.0.0-beta.15"
-    "@effection/core" "2.0.0-beta.13"
-    "@effection/events" "2.0.0-beta.15"
-    "@effection/fetch" "2.0.0-beta.16"
-    "@effection/main" "2.0.0-beta.15"
-    "@effection/subscription" "2.0.0-beta.15"
+    "@effection/channel" "2.0.0-beta.21"
+    "@effection/core" "2.0.0-beta.17"
+    "@effection/events" "2.0.0-beta.21"
+    "@effection/fetch" "2.0.0-beta.20"
+    "@effection/main" "2.0.0-beta.19"
+    "@effection/stream" "2.0.0-beta.6"
+    "@effection/subscription" "2.0.0-beta.19"
 
 effection@2.0.0-beta.9:
   version "2.0.0-beta.9"
@@ -10051,7 +10135,7 @@ graphlib@^2.1.8:
   dependencies:
     lodash "^4.17.15"
 
-graphql-language-service-interface@^2.8.2:
+graphql-language-service-interface@2.8.2, graphql-language-service-interface@^2.8.2:
   version "2.8.2"
   resolved "https://registry.yarnpkg.com/graphql-language-service-interface/-/graphql-language-service-interface-2.8.2.tgz#b3bb2aef7eaf0dff0b4ea419fa412c5f66fa268b"
   integrity sha512-otbOQmhgkAJU1QJgQkMztNku6SbJLu/uodoFOYOOtJsizTjrMs93vkYaHCcYnLA3oi1Goj27XcHjMnRCYQOZXQ==
@@ -10061,7 +10145,7 @@ graphql-language-service-interface@^2.8.2:
     graphql-language-service-utils "^2.5.1"
     vscode-languageserver-types "^3.15.1"
 
-graphql-language-service-parser@^1.9.0:
+graphql-language-service-parser@1.9.0, graphql-language-service-parser@^1.9.0:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/graphql-language-service-parser/-/graphql-language-service-parser-1.9.0.tgz#79af21294119a0a7e81b6b994a1af36833bab724"
   integrity sha512-B5xPZLbBmIp0kHvpY1Z35I5DtPoDK9wGxQVRDIzcBaiIvAmlTrDvjo3bu7vKREdjFbYKvWNgrEWENuprMbF17Q==

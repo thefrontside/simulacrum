@@ -10,7 +10,7 @@
     "build": "npm run prepack",
     "lint": "eslint src test watch.ts",
     "start": "node dist/start.js",
-    "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
+    "watch": "nodemon"
   },
   "repository": {
     "type": "git",
@@ -59,6 +59,7 @@
     "expect": "^26.6.2",
     "get-port": "^5.1.1",
     "mocha": "^8.0.0",
+    "nodemon": "^2.0.13",
     "rimraf": "^3.0.2",
     "ts-node": "^9.1.1"
   },
