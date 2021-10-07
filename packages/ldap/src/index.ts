@@ -178,6 +178,14 @@ export function createLdapService<T extends UserData>(options: LDAPOptions, stat
           users
         });
 
+        yield spawn(function* shutdown() {
+          try {
+            yield;
+          } finally {
+            yield new Promise(resolve => server.unbind(resolve));
+          }
+        });
+
         return {
           port: server.port,
           protocol: 'ldap',

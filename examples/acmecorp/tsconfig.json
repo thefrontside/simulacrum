@@ -1,3 +1,4 @@
 {
-  "extends": "@frontside/tsconfig"
+  "extends": "@frontside/tsconfig",
+  "include": ["src"]
 }
