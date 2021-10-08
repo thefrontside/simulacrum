@@ -20,6 +20,24 @@ export function createAcmecorpSimulationServer(): Operation<Server> {
       acmecorp: ((state, options) => {
         let people = createData();
 
+        people.unshift({
+          id: 777,
+          type: 'User',
+          data: {
+              firstName: 'admin',
+              lastName: 'admin',
+              email: 'admin@org.com',
+              password: 'password',
+              displayName: 'Louvenia Ledner',
+              title: 'Principal Brand Facilitator',
+              co: 'Fiji',
+              c: 'AD',
+              st: 'MN',
+              l: 'Lake Jodyshire',
+              avatar: 'blank.png'
+          }
+        });
+
         state.update(state => ({
           ...state,
           store: {

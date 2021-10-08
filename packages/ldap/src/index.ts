@@ -14,7 +14,13 @@ const DefaultOptions: Partial<LDAPOptions> = {
 };
 
 
-export function createLdapService(ldapOptions: LDAPOptions, state: Slice<SimulationState>): ResourceServiceCreator {
+interface UserData{
+  id: string | number;
+  email: string;
+  password: string;
+}
+
+export function createLdapService<T extends UserData>(ldapOptions: LDAPOptions, state: Slice<SimulationState>): ResourceServiceCreator {
   return () => {
     let server: Server;
 
@@ -28,21 +34,7 @@ export function createLdapService(ldapOptions: LDAPOptions, state: Slice<Simulat
           let bindPassword = ldapOptions.bindPassword;
           let groupDN = ldapOptions.groupDN;
           let users = state.slice('store', 'people').get();
-          let employees = Object.values(users).map(u => ({ ...u.data, id: u.email }));
-
-          employees.unshift({
-            id: 'admin@org.com',
-            firstName: 'admin',
-            lastName: 'admin',
-            email: 'admin@org.com',
-            password: 'password',
-            displayName: 'Louvenia Ledner',
-            title: 'Principal Brand Facilitator',
-            co: 'Fiji',
-            c: 'AD',
-            st: 'MN',
-            l: 'Lake Jodyshire',
-          });
+          let employees = Object.values(users).map(u => ({ ...u, id: u.email })) as T[];
 
           let log = {
             debug: () => undefined,
