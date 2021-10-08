@@ -5,6 +5,7 @@ export interface UserData {
   firstName: string;
   lastName: string;
   email: string;
+  password: string;
   displayName: string;
   title: string;
   co: string;
@@ -33,7 +34,8 @@ export function createData(): Vertex<UserData>[] {
               let c = faker.address.countryCode(co);
               let st = faker.address.stateAbbr();
               let l = faker.address.city();
-              return { firstName, lastName, email, displayName, title, co, c, st, l };
+              let password = faker.internet.password();
+              return { firstName, lastName, email, displayName, title, co, c, st, l, password };
             }
           } as Distribution<UserData>;
         },

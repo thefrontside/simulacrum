@@ -1,29 +1,48 @@
 import { createServer, InvalidCredentialsError, NoSuchObjectError, OperationsError } from 'ldapjs';
 import { LDAPOptions } from './types';
-import type { Simulator } from '@simulacrum/server';
+import type { SimulationState, Simulator } from '@simulacrum/server';
 import { ResourceServiceCreator } from '@simulacrum/server';
-import { employees } from './employees';
 import dedent from 'dedent';
 import { person } from '@simulacrum/server';
 import { spawn } from 'effection';
 import getPort from 'get-port';
+import { Vertex } from '@frontside/graphgen';
+import { Slice } from '@effection/atom';
+
 
 const DefaultOptions: Partial<LDAPOptions> = {
   port: 389
 };
 
-employees.forEach(e => e.id = e.email);
 
-export function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCreator {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createLdapService(ldapOptions: LDAPOptions, state: Slice<SimulationState>): ResourceServiceCreator {
   return () => {
     return {
       name: 'ldap service',
       *init() {
-          let port = ldapOptions.port ?? (yield getPort());
+        let port = ldapOptions.port ?? (yield getPort());
         let baseDN = ldapOptions.baseDN;
         let bindDn = ldapOptions.bindDn;
         let bindPassword = ldapOptions.bindPassword;
         let groupDN = ldapOptions.groupDN;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let users = state.slice('store', 'users').get().users as unknown as Vertex<any>[];
+        let employees = users.map(u => ({ ...u.data, id: u.data.email }));
+
+        employees.unshift({
+          id: 'admin@org.com',
+          firstName: 'admin',
+          lastName: 'admin',
+          email: 'admin@org.com',
+          password: 'password',
+          displayName: 'Louvenia Ledner',
+          title: 'Principal Brand Facilitator',
+          co: 'Fiji',
+          c: 'AD',
+          st: 'MN',
+          l: 'Lake Jodyshire',
+        });
 
         let log = {
           debug: () => undefined,
@@ -89,6 +108,7 @@ export function createLdapService(ldapOptions: LDAPOptions): ResourceServiceCrea
           let password = req.credentials;
           console.log('verify:', commonName, password);
 
+
           let employee = employees.filter(u => u.id === commonName)?.[0];
 
           if (typeof employee === 'undefined') {
@@ -141,7 +161,7 @@ export const ldap: Simulator<LDAPOptions> = (slice, options) => {
 
   return {
     services: {
-      ldap: createLdapService(ldapOptions),
+      ldap: createLdapService(ldapOptions, slice),
     },
     scenarios: {
       /**

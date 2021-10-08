@@ -58,6 +58,13 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
           });
         }
 
+        console.dir({ options });
+
+        // TODO: kill this with fire
+        if(service.protocol === 'https') {
+          options.port = 4400;
+        }
+
         let server: Server = yield createServer(app, { protocol: service.protocol, port: options.port });
 
         return {
