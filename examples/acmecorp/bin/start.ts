@@ -13,7 +13,7 @@ main(function*() {
 
   let simulation = yield client.createSimulation("acmecorp");
 
-  console.dir({ simulation }, { depth: 33 });
+  console.dir({ simulation }, { depth: 3 });
 
   yield;
 });

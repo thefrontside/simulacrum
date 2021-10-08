@@ -6,8 +6,9 @@
     "declarationMap": true,
     "paths": {
       "@simulacrum/auth0-simulator": ["packages/auth0/src"],
+      "@simulacrum/ldap-simulator": ["packages/ldap/src"],
       "@simulacrum/client": ["packages/client/src"],
-      "@simulacrum/server": ["packages/server/src"]
+      "@simulacrum/server": ["packages/server/src"],
     }
   }
 }

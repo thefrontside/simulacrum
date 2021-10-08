@@ -11,11 +11,12 @@ import { Vertex } from '@frontside/graphgen';
 export function toRecord<
   T extends Vertex,
   K extends keyof Vertex
->(array: T[], selector: K): Record<T[K], Vertex> {
+>(array: T[], selector: K): Record<T[K], Vertex['data']> {
   return array.reduce((acc, item) => (acc[item[selector]] = item.data, acc), {} as Record<T[K], Vertex>);
 }
 
 export function createAcmecorpSimulationServer(): Operation<Server> {
+  console.log(process.env.PORT);
   return createSimulationServer({
     port: process.env.PORT ? Number(process.env.PORT) : undefined,
     simulators: {
@@ -31,10 +32,7 @@ export function createAcmecorpSimulationServer(): Operation<Server> {
           }
         }));
 
-        console.dir({ s: state.slice('store', 'people') });
-
         console.log(`username = ${people[0].data.email}, password = ${people[0].data.password}`);
-
 
         let auth0 = auth0Simulator(state, {
           ...options,

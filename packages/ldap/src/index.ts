@@ -6,7 +6,6 @@ import dedent from 'dedent';
 import { person } from '@simulacrum/server';
 import { spawn } from 'effection';
 import getPort from 'get-port';
-import { Vertex } from '@frontside/graphgen';
 import { Slice } from '@effection/atom';
 
 
@@ -15,7 +14,6 @@ const DefaultOptions: Partial<LDAPOptions> = {
 };
 
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createLdapService(ldapOptions: LDAPOptions, state: Slice<SimulationState>): ResourceServiceCreator {
   return () => {
     return {
@@ -26,9 +24,10 @@ export function createLdapService(ldapOptions: LDAPOptions, state: Slice<Simulat
         let bindDn = ldapOptions.bindDn;
         let bindPassword = ldapOptions.bindPassword;
         let groupDN = ldapOptions.groupDN;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let users = state.slice('store', 'people').get() as unknown as Vertex<any>[];
-        let employees = users.map(u => ({ ...u.data, id: u.data.email }));
+        let users = state.slice('store', 'people').get();
+        let employees = Object.values(users).map(u => ({ ...u.data, id: u.email }));
+
+        console.dir({ employees });
 
         employees.unshift({
           id: 'admin@org.com',

@@ -44,7 +44,7 @@ export function createData(): Vertex<UserData>[] {
     }
   });
 
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 3; i++) {
     createVertex(graph, 'User');
   }
 
