@@ -1,7 +1,0 @@
-{
-  "baseUrl": "http://localhost:7000",
-  "fixturesFolder": false,
-  "pluginsFile": false,
-  "chromeWebSecurity": false,
-  "defaultCommandTimeout": 20000
-}
