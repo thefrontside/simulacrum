@@ -9,10 +9,10 @@ import { Vertex } from '@frontside/graphgen';
 // herminia.kautzer@acmecorp.com, password = Bq2c8aUY58vNFqi
 
 export function toRecord<
-  T extends { [K in keyof T]: string | number | symbol | Vertex['data'] }, // added constraint
-  K extends keyof T
->(array: T[], selector: K): Record<T[K], T> {
-  return array.reduce((acc, item) => (acc[item[selector]] = item, acc), {} as Record<T[K], T>);
+  T extends Vertex,
+  K extends keyof Vertex
+>(array: T[], selector: K): Record<T[K], Vertex> {
+  return array.reduce((acc, item) => (acc[item[selector]] = item.data, acc), {} as Record<T[K], Vertex>);
 }
 
 export function createAcmecorpSimulationServer(): Operation<Server> {
@@ -30,6 +30,8 @@ export function createAcmecorpSimulationServer(): Operation<Server> {
             },
           }
         }));
+
+        console.dir({ s: state.slice('store', 'people') });
 
         console.log(`username = ${people[0].data.email}, password = ${people[0].data.password}`);
 
