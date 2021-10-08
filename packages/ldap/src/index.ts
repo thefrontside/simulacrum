@@ -27,7 +27,7 @@ export function createLdapService(ldapOptions: LDAPOptions, state: Slice<Simulat
         let bindPassword = ldapOptions.bindPassword;
         let groupDN = ldapOptions.groupDN;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let users = state.slice('store', 'users').get().users as unknown as Vertex<any>[];
+        let users = state.slice('store', 'people').get() as unknown as Vertex<any>[];
         let employees = users.map(u => ({ ...u.data, id: u.data.email }));
 
         employees.unshift({
