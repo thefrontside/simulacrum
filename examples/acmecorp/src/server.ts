@@ -6,8 +6,6 @@ export { Server } from '@simulacrum/server';
 import { createData } from './data';
 import { Vertex } from '@frontside/graphgen';
 
-// herminia.kautzer@acmecorp.com, password = Bq2c8aUY58vNFqi
-
 export function toRecord<
   T extends Vertex,
   K extends keyof Vertex
@@ -16,7 +14,6 @@ export function toRecord<
 }
 
 export function createAcmecorpSimulationServer(): Operation<Server> {
-  console.log(process.env.PORT);
   return createSimulationServer({
     port: process.env.PORT ? Number(process.env.PORT) : undefined,
     simulators: {
@@ -31,8 +28,6 @@ export function createAcmecorpSimulationServer(): Operation<Server> {
             },
           }
         }));
-
-        console.log(`username = ${people[0].data.email}, password = ${people[0].data.password}`);
 
         let auth0 = auth0Simulator(state, {
           ...options,
