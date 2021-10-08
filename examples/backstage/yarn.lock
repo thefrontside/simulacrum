@@ -5492,7 +5492,7 @@ assert-ts@^0.2.2:
   resolved "https://registry.yarnpkg.com/assert-ts/-/assert-ts-0.2.2.tgz#afaa987cce8ef8c653d07032f562f8350ec9723f"
   integrity sha512-aoktTqvPejI9G0+wNOomh44acAJ/KMp4YAw5yW3tM1MESxEBuAlWdBG3Q9QGV6YMv7pEfzor8822B5WinXcmPg==
 
-assert-ts@^0.3.2:
+assert-ts@^0.3.2, assert-ts@^0.3.4:
   version "0.3.4"
   resolved "https://registry.yarnpkg.com/assert-ts/-/assert-ts-0.3.4.tgz#a452d6c9fc88e543bffded343a32deb48573ddf2"
   integrity sha512-CQtNOdOCzzZfE3TF9a1vFTcz4ZfJYM6iHoWYCkpFY3wdk6CkFvevuLwpOFVL/KMJ9vCNIbeidWH5uo/Y8sLVWg==

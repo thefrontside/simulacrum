@@ -2,10 +2,11 @@
   "name": "@acmecorp/simulation-server",
   "version": "1.0.0",
   "description": "Simulate Acme Corp Backend Services",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
     "start": "ts-node bin/start.ts",
-    "watch": "nodemon"
+    "watch": "nodemon",
+    "prepack": "tsc"
   },
   "author": "Charles Lowell <cowboyd@frontside.io>",
   "license": "ISC",
