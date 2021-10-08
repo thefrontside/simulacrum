@@ -32,6 +32,7 @@ export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAP
   return {
     name: 'LDAPServer',
     *init() {
+
       let port = options.port ?? (yield getPort());
       let baseDN = options.baseDN;
       let bindDn = options.bindDn;
@@ -49,6 +50,7 @@ export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAP
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         log: (..._: unknown[]) => {}
       };
+
 
       let server = createServer({ log: silence });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -177,15 +179,6 @@ export function createLdapService<T extends UserData>(options: LDAPOptions, stat
           ...options,
           users
         });
-
-        yield spawn(function* shutdown() {
-          try {
-            yield;
-          } finally {
-            yield new Promise(resolve => server.unbind(resolve));
-          }
-        });
-
         return {
           port: server.port,
           protocol: 'ldap',
