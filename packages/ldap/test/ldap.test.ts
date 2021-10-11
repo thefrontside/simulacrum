@@ -26,7 +26,7 @@ describe('Auth0 simulator', () => {
     yield client.destroySimulation(simulation);
   });
 
-  describe("Creating a simulation with an Auth0 simulator", () => {
+  describe("Creating a simulation with an ldap simulator", () => {
     beforeEach(function*() {
       simulation = yield client.createSimulation("ldap", {
         options: {
@@ -43,7 +43,7 @@ describe('Auth0 simulator', () => {
       });
     });
 
-    it('starts the simulation', function*() {
+    it('starts the ldap simulation', function*() {
       expect(simulation.status).toEqual('running');
     });
   });
