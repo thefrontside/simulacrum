@@ -1,53 +1,19 @@
 import type { RequestHandler } from 'express';
 import { isGeneratorFunction } from '../guards/guards';
+import { getFormattedDate } from './get-formatted-date';
+import { log } from './template';
 
 export interface Logger {
   (log: string): void;
 }
 
-function safeJSONStringify(o: Record<string, unknown>): string {
-  try {
-    return JSON.stringify(o, null, 4);
-  } catch {
-    return '';
-  }
-}
-
 export function createLoggingMiddleware(...loggers: Logger[]): RequestHandler {
   return function * (req, res) {
-    let timestamp = new Date();
-    let formatted =
-      [timestamp.getFullYear(),
-      (timestamp.getMonth() + 1),
-      timestamp.getDate()].join('-')
-      +
-      " " +
-      [timestamp.getHours(),
-      timestamp.getMinutes(),
-      timestamp.getSeconds()].join(':');
-
+    let date = getFormattedDate();
     let method = req.method;
     let status = res.statusCode;
 
-    let logMessage = `
-
------------------------------------------------
-[${formatted}] 
-
-${method.toUpperCase()}
-
-${req.originalUrl ?? req.url}
-
-query
-${safeJSONStringify(req.query ?? {})}
-
-body
-${safeJSONStringify(req.body ?? {})}
-
-${status}
------------------------------------------------
-
-    `;
+    let logMessage = log({ date, method, req, status });
 
     for(let log of loggers) {
       if(isGeneratorFunction(log)) {
