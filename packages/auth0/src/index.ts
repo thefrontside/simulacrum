@@ -11,6 +11,8 @@ import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
 import { createOpenIdHandlers } from './handlers/openid-handlers';
 import { label } from 'effection';
+import { requestResponseTemplate } from '@simulacrum/server';
+import { Logger } from '@simulacrum/server';
 
 
 const publicDir = path.join(__dirname, 'views', 'public');
@@ -19,6 +21,14 @@ const DefaultOptions = {
   clientId: '00000000000000000000000000000000',
   audience: 'https://thefrontside.auth0.com/api/v1/',
   scope: "openid profile email offline_access",
+};
+
+const l: Logger = function * (req, res) {
+  console.log(requestResponseTemplate(req, res));
+};
+
+const f: Logger = function * (req, res) {
+  yield label({ name: 'auth0-logging-middleware', log: requestResponseTemplate(req, res) });
 };
 
 const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & ReturnType<typeof createOpenIdHandlers>): LegacyServiceCreator => {
@@ -31,9 +41,7 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & R
           .use(noCache())
           .use(json())
           .use(urlencoded({ extended: true }))
-          .use(createLoggingMiddleware(function * (message) {
-            yield label({ name: 'auth0-logging-middleware', log: message });
-          }))
+          .use(createLoggingMiddleware(l, f))
           .get('/heartbeat', handlers['/heartbeat'])
           .get('/authorize', handlers['/authorize'])
           .get('/login', handlers['/login'])
