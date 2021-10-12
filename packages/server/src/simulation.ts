@@ -58,8 +58,6 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
           });
         }
 
-        console.dir({ options });
-
         // TODO: kill this with fire
         if(service.protocol === 'https') {
           options.port = 4400;

@@ -18,7 +18,7 @@ import { default as _faker } from 'faker';
 export type Faker = typeof _faker;
 
 export function createFaker(seed: () => number = seedrandom()): Faker {
-  const faker = new FakerInstance({ locales });
+  let faker = new FakerInstance({ locales });
   faker.seed(seed() * 100000);
   return faker;
 }
@@ -30,12 +30,12 @@ export interface DataFactory<T> {
   (seed: Seed, source: Vertex, graph: Graph, edge: Edge): T
 }
 
-export function withFaker<T>(description: string, factory: (faker: Faker) => DataFactory<T>):  CreateData<T> {
+export function withFaker<T>(description: string, factory: (faker: Faker) => DataFactory<T>): CreateData<T> {
   return (source, graph, edge) => ({
     description,
     sample(seed) {
       let faker = createFaker(seed);
       return factory(faker)(seed, source, graph, edge);
     }
-  })
+  });
 }
