@@ -1,11 +1,9 @@
 import { describe } from 'mocha';
-import { Simulation } from "../../../../packages/client/dist";
 import auth0Config from "../../cypress.env.json";
-import { Person } from "../../src/cypress";
 
 describe("auth", () => {
-  describe.only("log in, create person per test", () => {
-    it("one", () => {
+  describe("log in, create person per test", () => {
+    it("should log in and log out", () => {
       cy
         .createSimulation(auth0Config)
         .visit("/")
@@ -16,98 +14,73 @@ describe("auth", () => {
         .contains("Log out")
         .logout();
     });
-
-    it("two", () => {
-      cy
-        .createSimulation(auth0Config)
-        .visit("/")
-        .contains("Log out").should('not.exist')
-        .given()
-        .login()
-        .visit("/")
-        .contains("Log out");
-        // .logout();
-    });
   });
 
-  describe("log in, create person once", () => {
-    let simulation: Cypress.Chainable<Simulation>;
-    let person: Cypress.Chainable<Person>;
-
+  describe("log in, create simulation and person in beforeEach", () => {
     beforeEach(() => {
-      simulation = cy.createSimulation(auth0Config);
-      person = simulation.given();
+      cy.createSimulation(auth0Config)
+      .given();
     });
 
-    it("should login", () => {
-      person
+    it("should login and logout", () => {
+      cy
         .visit("/")
         .contains("Log out").should('not.exist')
         .login()
         .visit("/")
-        .contains("Log out");
-        // .logout();
+        .contains("Log out")
+        .logout();
     });
   });
 
 
-  describe.skip("use a simulation member variable", () => {
-    // let simulation: Cypress.Chainable<Simulation>;
+  describe("createSimulation in beforeEach and logout in afterEach", () => {
+    beforeEach(() => {
+      cy.createSimulation(auth0Config);
+    });
 
-    // beforeEach(() => {
-    //   simulation = cy;
-    //   console.dir({ simulation });
-    // });
+    afterEach(() => {
+      cy.logout();
+    });
 
-
-    it("should login", () => {
+    it("should login once", () => {
         cy
-        .createSimulation(auth0Config)
         .visit("/")
         .contains("Log out").should('not.exist')
         .given({ email: 'first@gmail.com' })
         .login()
         .visit("/")
         .contains("Log out");
-        // .logout();
     });
 
-    it("should login again", () => {
+    it("should login two times without error", () => {
       cy
-      .createSimulation(auth0Config)
       .visit("/")
       .contains("Log out").should('not.exist')
       .given({ email: 'second@gmail.com' })
       .login()
       .visit("/")
       .contains("Log out");
-      // .logout();
     });
 
-
-    it("should login again and again", () => {
+    it("should login three times without error", () => {
       cy
-      .createSimulation(auth0Config)
       .visit("/")
       .contains("Log out").should('not.exist')
       .given({ email: 'third@gmail.com' })
       .login()
       .visit("/")
       .contains("Log out");
-      // .logout();
-        // .logout();
     });
 
-
-    it("should login again and again and again", () => {
-      cy.wait(1000).createSimulation(auth0Config).visit("/")
+    it("should login four times without error", () => {
+      cy.visit("/")
       .contains("Log in")
       .contains("Log out").should('not.exist')
         .given({ email: 'fourth@gmail.com', password: 'passw0rd' })
         .login()
         .visit("/")
         .contains("Log out");
-        // .logout();
     });
   });
 

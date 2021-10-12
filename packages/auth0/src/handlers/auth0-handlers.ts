@@ -61,13 +61,9 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     },
 
     ['/authorize']: function *(req, res) {
-      console.log('in authorize');
       let currentUser = req.query.currentUser as string | undefined;
 
-      console.dir({ currentUser, test: req.query.test });
-
       assert(!!req.session, "no session");
-
 
       if(currentUser) {
         // the request is a silent login.
