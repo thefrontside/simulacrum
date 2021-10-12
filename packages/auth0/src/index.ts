@@ -23,11 +23,12 @@ const DefaultOptions = {
   scope: "openid profile email offline_access",
 };
 
-const l: Logger = function * (req, res) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const consoleLogger: Logger = function * (req, res) {
   console.log(requestResponseTemplate(req, res));
 };
 
-const f: Logger = function * (req, res) {
+const inspectorLogger: Logger = function * (req, res) {
   yield label({ name: 'auth0-logging-middleware', log: requestResponseTemplate(req, res) });
 };
 
@@ -41,7 +42,7 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & R
           .use(noCache())
           .use(json())
           .use(urlencoded({ extended: true }))
-          .use(createLoggingMiddleware(l, f))
+          .use(createLoggingMiddleware(inspectorLogger))
           .get('/heartbeat', handlers['/heartbeat'])
           .get('/authorize', handlers['/authorize'])
           .get('/login', handlers['/login'])

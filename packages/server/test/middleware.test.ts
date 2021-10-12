@@ -3,7 +3,7 @@ import { Simulator } from '../src/interfaces';
 import { Client, Simulation } from '@simulacrum/client';
 import { createTestServer } from './helpers';
 import expect from 'expect';
-import { createHttpApp, createLoggingMiddleware, Logger } from '../src';
+import { createHttpApp, createLoggingMiddleware, Logger, requestResponseTemplate } from '../src';
 import fetch from 'cross-fetch';
 import { json } from 'express';
 
@@ -20,7 +20,9 @@ describe('middleware logging', () => {
   });
 
   beforeEach(function* () {
-    let app = createApp((log) => msg = log );
+    let app = createApp(function * (req, res) {
+      msg = requestResponseTemplate(req, res);
+    });
 
     let echo: Simulator = () => ({
       services: {
