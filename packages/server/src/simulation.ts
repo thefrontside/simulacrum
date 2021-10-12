@@ -1,4 +1,4 @@
-import { Operation, spawn } from 'effection';
+import { spawn } from 'effection';
 import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
@@ -6,6 +6,7 @@ import { ResourceServiceCreator, Service, ServiceCreator, SimulationState, Simul
 import { createServer, Server } from './http';
 import { createFaker } from './faker';
 import { middlewareHandlerIsOperation, isRequestHandler } from './guards/guards';
+import { Slice } from '@effection/atom';
 
 function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreator {
   if(typeof service === 'function') {
@@ -66,12 +67,12 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
   };
 }
 
-export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
-  return slice => function*(): Operation<void> {
+function createSimulation (slice: Slice<SimulationState>, simulators: Record<string, Simulator>) {
+  return spawn(function* () {
     try {
-      let store = slice.slice("store");
       let simulatorName = slice.get().simulator;
       let simulator = simulators[simulatorName];
+      let store = slice.slice("store");
 
       assert(simulator, `unknown simulator ${simulatorName}`);
 
@@ -141,5 +142,14 @@ export function simulation(simulators: Record<string, Simulator>): Effect<Simula
         services: []
       }));
     }
+  });
+}
+
+export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
+  return function* (slice) {
+    let simulationTask = yield createSimulation(slice, simulators);
+    yield slice.filter(({ status }) => status == "destroying").expect();
+    yield simulationTask.halt();
+    slice.slice("status").set("halted");
   };
 }
