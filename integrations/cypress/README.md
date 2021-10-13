@@ -63,14 +63,14 @@ import config from '../../cypress.env.json';
 
 describe('log in', () => {
   it('should get token without signing in', () => {
-    cy.createSimulation(config)
+    cy
+      .createSimulation(auth0Config)
+      .visit("/")
+      .contains("Log out").should('not.exist')
       .given()
       .login()
-      .then(() => {
-        cy.visit('/');
-
-        cy.contains('Log out');
-      })
+      .visit("/")
+      .contains("Log out")
       .logout();
   });
 });

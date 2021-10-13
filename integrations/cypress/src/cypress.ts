@@ -64,7 +64,7 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
 
     assert(typeof client !== 'undefined', 'no client created in createSimulation');
 
-    return client.createSimulation("auth0", {
+    client.createSimulation("auth0", {
       options: {
         ...auth0Options,
         clientId: client_id,
@@ -83,9 +83,20 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
         };
       });
 
+      Cypress.log({
+        name: 'simulacrum-create-simulation',
+        displayName: 'simulacrum-create-simulation',
+        message: `sumalation created ${JSON.stringify(simulation)}`
+      });
+
       resolve(simulation);
     }).catch((e) => {
-      console.error(e);
+      Cypress.log({
+        name: 'simulacrum-create-simulation',
+        displayName: 'simulacrum-create-simulation',
+        message: `create-simulation failed ${e.message}`
+      });
+
       reject(e);
     });
   });
@@ -97,10 +108,9 @@ Cypress.Commands.add('given', (attrs: Partial<Person> = {}) => {
     let simulation = atom.slice(Cypress.spec.name, 'simulation').get();
 
     assert(!!simulation, 'no sumulation in given');
-
     assert(!!client && typeof client.given === 'function', 'no valid client in given');
 
-    return client.given<Person>(simulation, "person", attrs)
+    client.given<Person>(simulation, "person", attrs)
       .then((scenario) => {
         atom.slice(Cypress.spec.name).update(current => {
           return {
@@ -109,10 +119,21 @@ Cypress.Commands.add('given', (attrs: Partial<Person> = {}) => {
           };
         });
 
+        Cypress.log({
+          name: 'simulacrum-given',
+          displayName: 'simulacrum-given',
+          message: `scenario created with ${JSON.stringify(scenario)}`
+        });
+
         resolve(scenario.data);
       })
       .catch((e) => {
-        console.error(e);
+        Cypress.log({
+          name: 'simulacrum-given',
+          displayName: 'simulacrum-given',
+          message: `given failed ${e.message}`
+        });
+
         reject(e);
       });
   });
@@ -124,9 +145,23 @@ Cypress.Commands.add('login', () => {
 
     assert(!!person && typeof person.email !== 'undefined', `no scenario in login`);
 
-    return auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email, test: Cypress.currentTest.title })
-               .then(resolve)
+    auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email, test: Cypress.currentTest.title })
+               .then(token => {
+                  Cypress.log({
+                    name: 'simulacrum-login',
+                    displayName: 'simulacrum-login',
+                    message: `successfully logged in with token ${JSON.stringify(token)}`
+                  });
+
+                  resolve(token);
+               })
                .catch((e) => {
+                Cypress.log({
+                  name: 'simulacrum-login',
+                  displayName: 'simulacrum-login',
+                  message: `login failed ${e.message}`
+                });
+
                  reject(e);
                });
   });
@@ -145,68 +180,35 @@ Cypress.Commands.add('logout', () => {
     let simulation = atom.slice(Cypress.spec.name, 'simulation').get();
 
     if(!client || !simulation) {
+      Cypress.log({
+        name: 'simulacrum-logout',
+        displayName: 'simulacrum-logout',
+        message: 'no simulation or client'
+      });
       resolve();
       return;
     }
 
-    Cypress.log({
-      name: 'simulacrum-logout',
-      displayName: 'simulacrum-logout-1',
-      message: 'about to destroy'
-    });
+    client.destroySimulation(simulation).then(() => {
+      Cypress.log({
+        name: 'simulacrum-logout',
+        displayName: 'simulacrum-logout',
+        message: 'simulation destroyed'
+      });
 
-    return client.destroySimulation(simulation).then(() => {
-    Cypress.log({
-      name: 'simulacrum-logout',
-      displayName: 'simulacrum-logout-1',
-      message: 'destroyed'
-    });
       atom.slice(Cypress.spec.name).remove();
 
       resolve();
     }).catch(e => {
 
-    Cypress.log({
-      name: 'simulacrum-logout',
-      displayName: 'simulacrum-logout-1',
-      message: 'errored'
-    });
+      Cypress.log({
+        name: 'simulacrum-logout',
+        displayName: 'simulacrum-logout',
+        message: `logout failed with ${e.message}`
+      });
       reject(e);
     });
   });
 });
-
-// Cypress.Commands.add('logout', () => {
-//   return new Cypress.Promise((resolve, reject) => {
-//     return auth0Client.isAuthenticated().then((isAuthenticated) => {
-//       if(!isAuthenticated) {
-//         resolve();
-//         return;
-//       }
-//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//       (auth0Client as any).cacheManager.clearSync();
-//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//       (auth0Client as any).cookieStorage.remove('auth0.is.authenticated');
-
-//       let client = getClientFromSpec(Cypress.spec.name);
-
-//       let simulation = atom.slice(Cypress.spec.name, 'simulation').get();
-
-//       if(!client || !simulation) {
-//         resolve();
-//         return;
-//       }
-
-//       return client.destroySimulation(simulation).then(() => {
-//         atom.slice(Cypress.spec.name).remove();
-
-//         resolve();
-//       });
-//     }).catch((e) => {
-//       console.error(e);
-//       reject(e);
-//     });
-//   });
-// });
 
 export { };

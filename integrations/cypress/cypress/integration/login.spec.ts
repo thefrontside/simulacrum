@@ -19,7 +19,7 @@ describe("auth", () => {
   describe("log in, create simulation and person in beforeEach", () => {
     beforeEach(() => {
       cy.createSimulation(auth0Config)
-      .given();
+        .given();
     });
 
     it("should login and logout", () => {
@@ -44,7 +44,7 @@ describe("auth", () => {
     });
 
     it("should login once", () => {
-        cy
+      cy
         .visit("/")
         .contains("Log out").should('not.exist')
         .given({ email: 'first@gmail.com' })
@@ -55,12 +55,12 @@ describe("auth", () => {
 
     it("should login two times without error", () => {
       cy
-      .visit("/")
-      .contains("Log out").should('not.exist')
-      .given({ email: 'second@gmail.com' })
-      .login()
-      .visit("/")
-      .contains("Log out");
+        .visit("/")
+        .contains("Log out").should('not.exist')
+        .given({ email: 'second@gmail.com' })
+        .login()
+        .visit("/")
+        .contains("Log out");
     });
 
     it("should login three times without error", () => {
@@ -84,34 +84,31 @@ describe("auth", () => {
     });
   });
 
-  // describe("logout in beforeEach", () => {
-  //   let simulation: Cypress.Chainable<Simulation>;
-  //   let person: Cypress.Chainable<Person>;
+  describe("logout in beforeEach", () => {
+    beforeEach(() => {
+      cy.logout()
+        .createSimulation(auth0Config)
+        .given();
+    });
 
-  //   beforeEach(async () => {
-  //     if (person) {
-  //       person.logout();
-  //     }
-  //     simulation = cy.createSimulation(auth0Config);
-  //     person = simulation.given();
-  //   });
+    it("should login once", () => {
+        cy
+          .visit("/")
+          .contains("Log out").should('not.exist')
+          .given({ email: 'first@gmail.com' })
+          .login()
+          .visit("/")
+          .contains("Log out");
+    });
 
-  //   it("should login", () => {
-  //     cy.visit("/");
-  //     cy.contains("Log in");
-  //     person.login().then(() => {
-  //       cy.visit("/");
-  //       cy.contains("Log out");
-  //     });
-  //   });
-
-  //   it("should login again ", () => {
-  //     cy.visit("/");
-  //     cy.contains("Log in");
-  //     person.login().then(() => {
-  //       cy.visit("/");
-  //       cy.contains("Log out");
-  //     });
-  //   });
-  // });
+    it("should login two times without error", () => {
+      cy
+        .visit("/")
+        .contains("Log out").should('not.exist')
+        .given({ email: 'second@gmail.com' })
+        .login()
+        .visit("/")
+        .contains("Log out");
+    });
+  });
 });
