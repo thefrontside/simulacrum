@@ -3,17 +3,11 @@
   "version": "0.2.0",
   "description": "A web UI to work with a Simulacrum Server",
   "main": "index.js",
-  "targets": {
-    "default": {
-      "source": "app/index.html",
-      "distDir": "dist"
-    }
-  },
   "scripts": {
     "test": "echo skip",
-    "prepack": "parcel build --target fame",
-    "start": "parcel serve --target riches",
-    "watch": "parcel watch --target fun",
+    "prepack": "parcel build",
+    "start": "parcel serve",
+    "watch": "parcel watch",
     "build": "npm run prepack",
     "lint": "eslint app index.js",
     "clean": "rimraf dist"
@@ -41,6 +35,12 @@
     "react-dom": "^16.8.0",
     "rimraf": "^3.0.2",
     "typescript": "^4.2.3"
+  },  
+  "targets": {
+    "app": {
+      "source": "app/index.html",
+      "distDir": "./dist"
+    }
   },
   "volta": {
     "extends": "../../package.json"
