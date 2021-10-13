@@ -2,9 +2,7 @@ import { v4 } from 'uuid';
 import { SimulationState, ScenarioState, ServerState, SimulationOptions } from "../interfaces";
 import { OperationContext } from "./context";
 import { createQueue } from '../queue';
-
 import { assert } from 'assert-ts';
-import { sleep } from '@effection/core';
 
 export interface Resolver<Args, Result> {
   resolve(args: Args, context: OperationContext): Promise<Result>;
