@@ -2,13 +2,18 @@
   "name": "@simulacrum/ui",
   "version": "0.2.0",
   "description": "A web UI to work with a Simulacrum Server",
-  "browser": "dist/index.html",
   "main": "index.js",
+  "targets": {
+    "default": {
+      "source": "app/index.html",
+      "distDir": "dist"
+    }
+  },
   "scripts": {
     "test": "echo skip",
-    "prepack": "parcel build app/index.html --target browser",
-    "start": "parcel serve app/index.html --target browser",
-    "watch": "parcel watch app/index.html --target browser",
+    "prepack": "parcel build --target fame",
+    "start": "parcel serve --target riches",
+    "watch": "parcel watch --target fun",
     "build": "npm run prepack",
     "lint": "eslint app index.js",
     "clean": "rimraf dist"
