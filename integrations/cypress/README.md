@@ -4,8 +4,11 @@
 
 - [Installation](#installation)
 - [Usage](#usage)
+  - [createSimulation()(#createSimulation)
+  - [given()](#given)
   - [login()](#login)
   - [logout()](#logout)
+- [examples](./cypress/integration/login.spec.ts)
 
 ## Installation
 
@@ -43,13 +46,57 @@ An example [cypres environment file](./cypress.env.json) is in the root of this 
 Start the simulator
 
 ```shell
-PORT=4000 npx auth0-simulator
+PORT=4000 npx @simulacrum/auth0-simulator
 ```
 
 The following commands are now available in your test suite:
 
+- [createSimulation()](#createSimulation)
+- [given()](#given)
 - [login()](#login)
 - [logout()](#logout)
+
+## createSimulation
+
+`createSimulation` creates the fake auth0 server with your configuration
+
+```ts
+import auth0Config from "../../cypress.env.json";
+
+describe('tests requiring auth')
+  it('should access restricted resource', () => {
+    cy
+      .createSimulation(auth0Config)
+```
+## given
+
+`given` creates a fake user that can be used to log into the fake auth0 server.
+
+### create random user
+
+```ts
+describe('tests requiring auth')
+  it('should access restricted resource', () => {
+    cy
+      .createSimulation(auth0Config)
+      .visit("/")
+      .contains("Log out").should('not.exist')
+      .given() // with no arguments a random user is created
+      .login()
+```
+
+### supply fixed fields
+
+```ts
+describe('tests requiring auth')
+  it('should access restricted resource', () => {
+    cy
+      .createSimulation(auth0Config)
+      .visit("/")
+      .contains("Log out").should('not.exist')
+      .given({ email: 'bob@gmail.com' })
+      .login()
+```
 
 ### login()
 

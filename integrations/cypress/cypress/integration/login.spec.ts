@@ -95,7 +95,6 @@ describe("auth", () => {
         cy
           .visit("/")
           .contains("Log out").should('not.exist')
-          .given({ email: 'first@gmail.com' })
           .login()
           .visit("/")
           .contains("Log out");
