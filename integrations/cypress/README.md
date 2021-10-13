@@ -28,7 +28,7 @@ import '@simulacrum/auth0-cypress';
 
 ### Step 3: Configure Auth0
 
-An example [cypres environment file](./cypress.env.json) is in the root of this repo. You can change the configuration to your auth0 values.
+An example [cypress environment file](./cypress.env.json) is in the root of this repo. You can change the configuration to your auth0 values.
 
 ```json
 // cypress.env.json
@@ -132,7 +132,7 @@ cy.logout();
 You might want to log out after every test.
 
 ```js
-after(async () => {
+afterEach(async () => {
   cy.logout();
 });
 ```
