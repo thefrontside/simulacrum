@@ -19,9 +19,7 @@ jobs:
           working_directory: ~/.simulacrum/certs
       - run: npm -v
       - node/install-packages:
-          app-dir: .
-          cache-version: v1
-          cache-key: package-lock.json
+          cache-version: node-v1-{{ arch }}-{{ .Branch }}-{{ checksum "package-lock.json" }}
       - run: npm run build
       - run: npm run test
   test-integrations:
@@ -44,9 +42,7 @@ jobs:
       - run: npm -v
       # build root first
       - node/install-packages:
-          app-dir: .
-          cache-version: v1
-          cache-key: package-lock.json
+          cache-version: node-v1-{{ arch }}-{{ .Branch }}-{{ checksum "package-lock.json" }}
       - run: npm run build
       # integration test requires the example installed
       - node/install-packages:
