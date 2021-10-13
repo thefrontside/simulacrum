@@ -18,6 +18,8 @@ jobs:
           command: sudo mkcert -install && mkcert localhost
           working_directory: ~/.simulacrum/certs
       - run: npm -v
+      - run: pwd
+      - run: echo $CWD
       - node/install-packages
       - run: npm run build
       - run: npm run test
@@ -39,6 +41,8 @@ jobs:
       - node/install:
           node-version: 14.17.0
       - run: npm -v
+      - run: pwd
+      - run: echo $CWD
       # build root first
       - node/install-packages
       - run: npm run build

@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^1.16.1",
-    "@effection/atom": "2.0.0-beta.15",
+    "@effection/atom": "2.0.1",
     "cross-fetch": "^3.1.0",
     "cypress": "^8.3.0"
   },
