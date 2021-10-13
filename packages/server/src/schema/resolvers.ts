@@ -28,10 +28,6 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
 
     let simulation = atom.slice("simulations", id);
 
-    if(!!simulation.get()) {
-      simulation.remove();
-    }
-
     await scope.run(sleep(5));
 
     simulation.set({
