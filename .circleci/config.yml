@@ -18,9 +18,9 @@ jobs:
           command: sudo mkcert -install && mkcert localhost
           working_directory: ~/.simulacrum/certs
       - run: npm -v
-      - run: pwd
-      - run: ls
       - node/install-packages
+          cache-version: v1
+          cache-path: node_modules
       - run: npm run build
       - run: npm run test
   test-integrations:
@@ -41,10 +41,10 @@ jobs:
       - node/install:
           node-version: 14.17.0
       - run: npm -v
-      - run: pwd
-      - run: ls
       # build root first
       - node/install-packages
+          cache-version: v1
+          cache-path: node_modules
       - run: npm run build
       # integration test requires the example installed
       - node/install-packages:
