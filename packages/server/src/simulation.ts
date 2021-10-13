@@ -1,4 +1,4 @@
-import { spawn } from 'effection';
+import { label, spawn } from 'effection';
 import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
@@ -42,6 +42,8 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
             // just ignore this request.
             if (scope.state === 'running') {
               scope.run(function*() {
+                yield label({ name: 'request', method: handler.method, path: handler.path });
+
                 try {
                   yield handler.handler(request, response);
                 } catch(err) {
@@ -70,70 +72,75 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
 function createSimulation (slice: Slice<SimulationState>, simulators: Record<string, Simulator>) {
   return spawn(function* () {
     try {
-      let simulatorName = slice.get().simulator;
-      let simulator = simulators[simulatorName];
-      let store = slice.slice("store");
+      yield function * errorBoundary() {
+        let simulatorName = slice.get().simulator;
 
-      assert(simulator, `unknown simulator ${simulatorName}`);
+        yield label({ name: 'simulation', simulator: simulatorName });
 
-      let { options = {}, services: serviceOptions = {} } = slice.get().options;
+        let simulator = simulators[simulatorName];
+        let store = slice.slice("store");
 
-      let behaviors = simulator(slice, options);
+        assert(simulator, `unknown simulator ${simulatorName}`);
 
-      let servers = Object.entries(behaviors.services).map(([name, service]) => {
-        return {
-          name,
-          create: normalizeServiceCreator(service)
-        };
-      });
+        let { options = {}, services: serviceOptions = {} } = slice.get().options;
 
-      let services: {name: string; url: string; }[] = [];
+        let behaviors = simulator(slice, options);
 
-      for (let { name, create } of servers) {
-        let service: Service = yield create(slice, serviceOptions[name] ?? {});
+        let servers = Object.entries(behaviors.services).map(([name, service]) => {
+          return {
+            name,
+            create: normalizeServiceCreator(service)
+          };
+        });
 
-        services.push({ name, url: `${service.protocol}://localhost:${service.port}` });
-      }
+        let services: {name: string; url: string; }[] = [];
 
-      let { scenarios, effects } = behaviors;
+        for (let { name, create } of servers) {
+          let service: Service = yield create(slice, serviceOptions[name] ?? {});
 
-      // we can support passing a seed to a scenario later, but let's
-      // just hard-code it for now.
-      let faker = createFaker(2);
-
-      yield spawn(map(slice.slice("scenarios"), slice => function*() {
-        try {
-          let { name, params } = slice.get();
-          let fn = scenarios[name];
-          assert(fn, `unknown scenario ${name}`);
-
-          let data = yield fn(store, faker, params);
-          slice.update(state => ({
-            ...state,
-            status: 'running',
-            data
-          }));
-        } catch (error) {
-          slice.update(state => ({
-            ...state,
-            status: 'failed',
-            error: error as Error
-          }));
+          services.push({ name, url: `${service.protocol}://localhost:${service.port}` });
         }
-      }));
 
-      if(typeof effects !== 'undefined') {
-        yield spawn(effects());
-      }
+        let { scenarios, effects } = behaviors;
 
-      slice.update(state => ({
-        ...state,
-        status: 'running',
-        services
-      }));
+        // we can support passing a seed to a scenario later, but let's
+        // just hard-code it for now.
+        let faker = createFaker(2);
 
-      // all spun up, we can just wait.
-      yield;
+        yield spawn(map(slice.slice("scenarios"), slice => function*() {
+          try {
+            let { name, params } = slice.get();
+            let fn = scenarios[name];
+            assert(fn, `unknown scenario ${name}`);
+
+            let data = yield fn(store, faker, params);
+            slice.update(state => ({
+              ...state,
+              status: 'running',
+              data
+            }));
+          } catch (error) {
+            slice.update(state => ({
+              ...state,
+              status: 'failed',
+              error: error as Error
+            }));
+          }
+        }));
+
+        if(typeof effects !== 'undefined') {
+          yield spawn(effects());
+        }
+
+        slice.update(state => ({
+          ...state,
+          status: 'running',
+          services
+        }));
+
+        // all spun up, we can just wait.
+        yield;
+      };
     } catch (error) {
       slice.update((state) => ({
         ...state,

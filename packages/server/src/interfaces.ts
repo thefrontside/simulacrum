@@ -62,6 +62,7 @@ export interface ServerState {
 export interface SimulationOptions {
   options?: Record<string, unknown>;
   services?: Record<string, ServiceOptions>
+  key?: string;
 }
 
 export type SimulationState =

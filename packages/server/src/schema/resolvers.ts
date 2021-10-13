@@ -2,7 +2,6 @@ import { v4 } from 'uuid';
 import { SimulationState, ScenarioState, ServerState, SimulationOptions } from "../interfaces";
 import { OperationContext } from "./context";
 import { createQueue } from '../queue';
-
 import { assert } from 'assert-ts';
 
 export interface Resolver<Args, Result> {
@@ -20,10 +19,11 @@ export interface CreateSimulationParameters {
 }
 
 export const createSimulation: Resolver<CreateSimulationParameters, SimulationState> = {
-  resolve({ simulator, options = {} }, ctx) {
+  async resolve({ simulator, options = {} }, ctx) {
     let { atom, scope, newid } = ctx;
 
-    let id = newid();
+    let id = options.key ?? newid();
+
     let simulation = atom.slice("simulations", id);
 
     simulation.set({

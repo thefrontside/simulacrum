@@ -26,6 +26,13 @@
       "path": "./packages/ui",
       "manager": "javascript",
       "dependencies": []
+    },    
+    "@simulacrum/auth0-cypress": {
+      "path": "./integrations/cypress",
+      "manager": "javascript",
+      "dependencies": [
+        "@simulacrum/auth0-simulator"
+      ]
     },
     "@simulacrum-examples/nextjs-with-auth0-react": {
       "path": "./examples/nextjs-with-auth0-react",

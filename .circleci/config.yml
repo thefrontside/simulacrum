@@ -4,22 +4,37 @@ orbs:
 jobs:
   test:
     docker:
-      - image: cimg/node:15.14.0
+      - image: cypress/base:14
     steps:
       - checkout
-      - run: wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-linux-amd64 
+      - run: wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-linux-amd64
       - run: mv mkcert-v1.4.3-linux-amd64 mkcert
       - run: export CWD=$(pwd)
       - run: chmod +x mkcert
-      - run: sudo cp mkcert /usr/local/bin/
+      - run: cp mkcert /usr/local/bin/
       - run: mkdir -p ~/.simulacrum/certs
       - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
       - run:
-          command: sudo mkcert -install && mkcert localhost
+          command: mkcert -install && mkcert localhost
           working_directory: ~/.simulacrum/certs
+      - node/install:
+          node-version: 14.17.0
+      - run: npm -v
+      # build root first
       - node/install-packages
       - run: npm run build
-      - run: npm run test
+      # integration test requires the example installed
+      - node/install-packages:
+          app-dir: examples/nextjs-with-auth0-react
+      # run the integration test
+      - node/install-packages:
+          app-dir: integrations/cypress
+      - run:
+          command: npm run build
+          working_directory: integrations/cypress
+      - run:
+          command: npm run test
+          working_directory: integrations/cypress
 
 workflows:
   tests:
