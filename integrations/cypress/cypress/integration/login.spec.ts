@@ -100,7 +100,7 @@ describe("auth", () => {
           .contains("Log out");
     });
 
-    it("should login two times without error", () => {
+    it("should login twice without error", () => {
       cy
         .visit("/")
         .contains("Log out").should('not.exist')
