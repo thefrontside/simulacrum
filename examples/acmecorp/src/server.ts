@@ -1,7 +1,7 @@
 import { createSimulationServer, Server, Simulator } from '@simulacrum/server';
 import { auth0 as auth0Simulator } from '@simulacrum/auth0-simulator';
 import { createLdapService } from '@simulacrum/ldap-simulator';
-import { Operation } from 'effection';
+import { Resource } from 'effection';
 export { Server } from '@simulacrum/server';
 import { createData } from './data';
 import { Vertex } from '@frontside/graphgen';
@@ -13,7 +13,7 @@ export function toRecord<
   return array.reduce((acc, item) => (acc[item[selector]] = item.data, acc), {} as Record<T[K], Vertex>);
 }
 
-export function createAcmecorpSimulationServer(): Operation<Server> {
+export function createAcmecorpSimulationServer(): Resource<Server> {
   return createSimulationServer({
     port: process.env.PORT ? Number(process.env.PORT) : undefined,
     simulators: {

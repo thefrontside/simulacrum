@@ -61,18 +61,6 @@
       ],
       "publish": false,
       "releaseTag": false
-<<<<<<< HEAD
-=======
-    },    
-    "@simulacrum/auth0-cypress": {
-      "path": "./integrations/cypress",
-      "manager": "javascript",
-      "dependencies": [
-        "@simulacrum/auth0-simulator"
-      ],
-      "publish": false,
-      "releaseTag": false
->>>>>>> ec864c6... rename remaining cypress-auth0 => auth0-cypress
     }
   }
 }
