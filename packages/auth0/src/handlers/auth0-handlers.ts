@@ -65,7 +65,6 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       assert(!!req.session, "no session");
 
-
       if(currentUser) {
         // the request is a silent login.
         // We fake an existing login by

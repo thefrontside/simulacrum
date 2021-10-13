@@ -7,6 +7,7 @@ import { person } from '@simulacrum/server';
 import { spawn } from 'effection';
 import getPort from 'get-port';
 import { Slice } from '@effection/atom';
+import { assert } from 'assert-ts';
 
 
 const DefaultOptions: Partial<LDAPOptions> = {
@@ -34,6 +35,9 @@ export function createLdapService<T extends UserData>(ldapOptions: LDAPOptions, 
           let bindPassword = ldapOptions.bindPassword;
           let groupDN = ldapOptions.groupDN;
           let users = state.slice('store', 'people').get();
+
+          assert(!!users, 'no scenarios in people/store');
+
           let employees = Object.values(users).map(u => ({ ...u, id: u.email })) as T[];
 
           let log = {
@@ -143,8 +147,10 @@ export function createLdapService<T extends UserData>(ldapOptions: LDAPOptions, 
             port,
             protocol: 'ldap'
           };
+        } catch(e){
+          console.error(e);
         } finally {
-          server.close(() => console.log('ldap server closed'));
+          server?.close(() => console.log('ldap server closed'));
         }
       }
     };

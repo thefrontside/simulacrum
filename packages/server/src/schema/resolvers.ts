@@ -3,7 +3,6 @@ import { SimulationState, ScenarioState, ServerState, SimulationOptions } from "
 import { OperationContext } from "./context";
 import { createQueue } from '../queue';
 import { assert } from 'assert-ts';
-import { sleep } from '@effection/core';
 
 export interface Resolver<Args, Result> {
   resolve(args: Args, context: OperationContext): Promise<Result>;
@@ -26,13 +25,6 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
     let id = options.key ?? newid();
 
     let simulation = atom.slice("simulations", id);
-
-    if(!!simulation.get()) {
-      console.log( `about to remove ${{ id, key: options.key }}`);
-      simulation.remove();
-    }
-
-    await scope.run(sleep(5));
 
     simulation.set({
       id,

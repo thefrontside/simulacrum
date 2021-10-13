@@ -42,7 +42,7 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & R
           .use(noCache())
           .use(json())
           .use(urlencoded({ extended: true }))
-          .use(createLoggingMiddleware(inspectorLogger))
+          .use(createLoggingMiddleware(consoleLogger, inspectorLogger))
           .get('/heartbeat', handlers['/heartbeat'])
           .get('/authorize', handlers['/authorize'])
           .get('/login', handlers['/login'])
