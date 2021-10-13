@@ -52,7 +52,7 @@ jobs:
           command: npm run build
           working_directory: integrations/cypress
       - run:
-          command: npm run test:ci
+          command: npm run test
           working_directory: integrations/cypress
 
 workflows:
