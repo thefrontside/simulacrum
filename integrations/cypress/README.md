@@ -4,7 +4,7 @@
 
 - [Installation](#installation)
 - [Usage](#usage)
-  - [createSimulation()(#createSimulation)
+  - [createSimulation](#createSimulation)
   - [given()](#given)
   - [login()](#login)
   - [logout()](#logout)
@@ -49,9 +49,19 @@ Start the simulator
 PORT=4000 npx @simulacrum/auth0-simulator
 ```
 
+### Usage with start-server-and-test
+
+Cypress recommends using [start-server-and-test](https://github.com/bahmutov/start-server-and-test) to ensure the test process exits and any servers are shut down.
+
+```shell
+npx start-server-and-test 'npm run start:server' http://localhost:3000 \
+                      'npm run start:auth0' http://localhost:4000 \
+                      cypress:run
+```
+
 The following commands are now available in your test suite:
 
-- [createSimulation()](#createSimulation)
+- [createSimulation](#createSimulation)
 - [given()](#given)
 - [login()](#login)
 - [logout()](#logout)
@@ -94,7 +104,7 @@ describe('tests requiring auth')
       .createSimulation(auth0Config)
       .visit("/")
       .contains("Log out").should('not.exist')
-      .given({ email: 'bob@gmail.com' })
+      .given({ email: 'bob@gmail.com' })  // fixed fields
       .login()
 ```
 
