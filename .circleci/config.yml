@@ -4,26 +4,6 @@ orbs:
 jobs:
   test:
     docker:
-      - image: cimg/node:15.14.0
-    steps:
-      - checkout
-      - run: wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.3/mkcert-v1.4.3-linux-amd64
-      - run: mv mkcert-v1.4.3-linux-amd64 mkcert
-      - run: export CWD=$(pwd)
-      - run: chmod +x mkcert
-      - run: sudo cp mkcert /usr/local/bin/
-      - run: mkdir -p ~/.simulacrum/certs
-      - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
-      - run:
-          command: sudo mkcert -install && mkcert localhost
-          working_directory: ~/.simulacrum/certs
-      - run: npm -v
-      - node/install-packages:
-          cache-version: node-v2-{{ arch }}-{{ .Branch }}-{{ checksum "package-lock.json" }}
-      - run: npm run build
-      - run: npm run test
-  test-integrations:
-    docker:
       - image: cypress/base:14
     steps:
       - checkout
@@ -41,8 +21,7 @@ jobs:
           node-version: 14.17.0
       - run: npm -v
       # build root first
-      - node/install-packages:
-          cache-version: node-v2-{{ arch }}-{{ .Branch }}-{{ checksum "package-lock.json" }}
+      - node/install-packages
       - run: npm run build
       # integration test requires the example installed
       - node/install-packages:
@@ -61,4 +40,3 @@ workflows:
   tests:
     jobs:
       - test
-      - test-integrations
