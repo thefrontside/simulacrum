@@ -23,8 +23,7 @@ jobs:
           version: 7.19.1
       - run: npm -v
       # build root first
-      - node/install-packages:
-          cache-version: v0-node-image-root
+      - node/install-packages
       - run: npm run build
       - run: npm run test
 
@@ -48,16 +47,15 @@ jobs:
           npm-version: 7.19.1
       - run: npm -v
       # build root first
-      - node/install-packages:
-          cache-version: v0-cypress-image-root
+      - node/install-packages
       - run: npm run build
       # integration test requires this example installed
       - node/install-packages:
-          cache-version: v0-cypress-image-examples/nextjs-with-auth0-react
+          with-cache: false
           app-dir: examples/nextjs-with-auth0-react
       # run the integration test
       - node/install-packages:
-          cache-version: v0-cypress-image-integrations/cypress
+          with-cache: false
           app-dir: integrations/cypress
       - run:
           command: npm run build
@@ -87,12 +85,11 @@ jobs:
           node-version: 14.17.0
           npm-version: 7.19.1
       # install and tsc build the ./packages/*
-      - node/install-packages:
-          cache-version: v0-cypress-image-root
+      - node/install-packages
       - run: npm run build
       # install and run the example test
       - node/install-packages:
-          cache-version: v0-cypress-image-<< parameters.example >>
+          with-cache: false
           app-dir: << parameters.example >>
       - run:
           working_directory: << parameters.example >>
