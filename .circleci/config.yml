@@ -17,9 +17,13 @@ jobs:
       - run:
           command: sudo mkcert -install && mkcert localhost
           working_directory: ~/.simulacrum/certs
+      - node/install:
+          node-version: 14.17.0
+          npm-version: 7.19.1
       - run: npm -v
       # build root first
-      - node/install-packages
+      - node/install-packages:
+          cache-version: v0-node-image-root
       - run: npm run build
       - run: npm run test
 
@@ -43,15 +47,16 @@ jobs:
           npm-version: 7.19.1
       - run: npm -v
       # build root first
-      - node/install-packages
+      - node/install-packages:
+          cache-version: v0-cypress-image-root
       - run: npm run build
       # integration test requires this example installed
       - node/install-packages:
-          with-cache: false
+          cache-version: v0-cypress-image-examples/nextjs-with-auth0-react
           app-dir: examples/nextjs-with-auth0-react
       # run the integration test
       - node/install-packages:
-          with-cache: false
+          cache-version: v0-cypress-image-integrations/cypress
           app-dir: integrations/cypress
       - run:
           command: npm run build
@@ -81,12 +86,13 @@ jobs:
           node-version: 14.17.0
           npm-version: 7.19.1
       # install and tsc build the ./packages/*
-      - node/install-packages
+      - node/install-packages:
+          cache-version: v0-cypress-image-root
       - run: npm run build
       # install and run the example test
       - node/install-packages:
+          cache-version: v0-cypress-image-<< parameters.example >>
           app-dir: << parameters.example >>
-          with-cache: false
       - run:
           working_directory: << parameters.example >>
           command: npm run test
