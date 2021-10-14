@@ -19,6 +19,7 @@ jobs:
           working_directory: ~/.simulacrum/certs
       - node/install:
           node-version: 14.17.0
+          npm-version: 7.19.1
       - run: npm -v
       # build root first
       - node/install-packages
@@ -42,6 +43,7 @@ jobs:
           working_directory: ~/.simulacrum/certs
       - node/install:
           node-version: 14.17.0
+          npm-version: 7.19.1
       - run: npm -v
       # build root first
       - node/install-packages
@@ -80,6 +82,7 @@ jobs:
       - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
       - node/install:
           node-version: 14.17.0
+          npm-version: 7.19.1
       # install and tsc build the ./packages/*
       - node/install-packages
       - run: npm run build
