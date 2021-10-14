@@ -1,4 +1,4 @@
-import { createSimulationServer, Server, Simulator } from '@simulacrum/server';
+import { createSimulationServer, Server } from '@simulacrum/server';
 import { auth0 as auth0Simulator } from '@simulacrum/auth0-simulator';
 import { createLdapService } from '@simulacrum/ldap-simulator';
 import { Resource } from 'effection';
@@ -68,7 +68,7 @@ export function createAcmecorpSimulationServer(): Resource<Server> {
           },
           scenarios: {}
         };
-      }) as Simulator
+      })
     }
   });
 }
