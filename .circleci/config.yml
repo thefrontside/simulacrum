@@ -46,8 +46,9 @@ jobs:
       # build root first
       - node/install-packages
       - run: npm run build
-      # integration test requires the example installed
+      # integration test requires this example installed
       - node/install-packages:
+          cache-path: ~/project/examples/nextjs-with-auth0-react/node_modules
           app-dir: examples/nextjs-with-auth0-react
       # run the integration test
       - node/install-packages:
@@ -79,8 +80,7 @@ jobs:
       - node/install:
           node-version: 14.17.0
       # install and tsc build the ./packages/*
-      - node/install-packages:
-          with-cache: false
+      - node/install-packages
       - run: npm run build
       # install and run the example test
       - node/install-packages:
