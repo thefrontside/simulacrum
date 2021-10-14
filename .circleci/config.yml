@@ -17,8 +17,6 @@ jobs:
       - run:
           command: sudo mkcert -install && mkcert localhost
           working_directory: ~/.simulacrum/certs
-      - node/install:
-          node-version: 14.17.0
       - node/install-npm:
           version: 7.19.1
       - run: npm -v
