@@ -35,7 +35,7 @@ export function createLdapService<T extends UserData>(ldapOptions: LDAPOptions, 
         let groupDN = ldapOptions.groupDN;
         let users = state.slice('store', 'people').get();
 
-        assert(!!users, 'no scenarios in people/store');
+        assert(!!users, 'no scenarios in store/people');
 
         let employees = Object.values(users).map(u => ({ ...u, id: u.email })) as T[];
 
@@ -139,7 +139,6 @@ export function createLdapService<T extends UserData>(ldapOptions: LDAPOptions, 
             yield;
           } finally {
             yield new Promise<void>(resolve => {
-              server?.unbind(() => 'unbound');
               server?.close(() => {
                 console.log('ldap server closed');
                 resolve();

@@ -145,7 +145,7 @@ Cypress.Commands.add('login', () => {
 
     assert(!!person && typeof person.email !== 'undefined', `no scenario in login`);
 
-    auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email, test: Cypress.currentTest.title })
+    auth0Client.getTokenSilently({ ignoreCache: true, currentUser: person.email, test: Cypress.spec.name })
                .then(token => {
                   Cypress.log({
                     name: 'simulacrum-login',

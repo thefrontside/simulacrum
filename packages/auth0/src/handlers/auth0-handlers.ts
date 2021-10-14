@@ -209,6 +209,8 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let idToken = createJsonWebToken({ ...userData, ...context.idToken, ...context.accessToken });
 
+      console.dir({ redirect_uri: req.body.redirect_uri });
+
       res.status(200).json({
         access_token: createAuthJWT(url, audience),
         id_token: idToken,

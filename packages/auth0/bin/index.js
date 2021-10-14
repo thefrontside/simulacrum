@@ -1,2 +1,3 @@
 #! /usr/bin/env node
-require("@simulacrum/auth0-simulator/dist/start");
+require('@effection/inspect');
+require('@simulacrum/auth0-simulator/dist/start');
