@@ -37,7 +37,7 @@ export const types = [
             type: 'JSON',
             description: "options to pass to the simulation"
           }),
-          debug: nonNull(booleanArg()),
+          debug: booleanArg(),
         },
         ...createSimulation
       });
