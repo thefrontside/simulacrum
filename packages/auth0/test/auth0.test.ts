@@ -180,7 +180,8 @@ describe('Auth0 simulator', () => {
     let person: {data: Person};
 
     beforeEach(function* () {
-      simulation = yield client.createSimulation("auth0", { services: {
+      simulation = yield client.createSimulation("auth0", {
+        services: {
         auth0: { port: 4400 }, frontend: { port: 3000 }
       } });
 

@@ -49,7 +49,6 @@
   "devDependencies": {
     "@effection/atom": "^2.0.1",
     "@effection/mocha": "^2.0.1",
-    "@effection/inspect": "^2.0.1",
     "@frontside/eslint-config": "^2.0.0",
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^2.0.0",

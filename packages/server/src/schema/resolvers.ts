@@ -16,10 +16,12 @@ export interface Subscriber<Args, TEach, Result = TEach> {
 export interface CreateSimulationParameters {
   simulator: string;
   options?: SimulationOptions;
+  debug?: boolean;
 }
 
 export const createSimulation: Resolver<CreateSimulationParameters, SimulationState> = {
-  async resolve({ simulator, options = {} }, ctx) {
+  async resolve(args, ctx) {
+    let { simulator, options = {}, debug = false } = args;
     let { atom, scope, newid } = ctx;
 
     let id = options.key ?? newid();
@@ -34,6 +36,7 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
       services: [],
       scenarios: {},
       store: {},
+      debug,
     });
 
     return scope.run(simulation.filter(({ status }) => status !== 'new').expect());
