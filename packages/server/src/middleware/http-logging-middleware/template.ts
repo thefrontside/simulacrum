@@ -2,7 +2,7 @@ import { getFormattedDate } from './get-formatted-date';
 import { safeJSONStringify } from './safe-stringify';
 import { Template } from './types';
 
-export const requestResponseTemplate: Template = (req, res, ...logMessages): string => `
+export const requestResponseTemplate: Template = (req, res): string => `
 -----------------------------------------------
 [${getFormattedDate()}] 
 
@@ -17,8 +17,6 @@ body
 ${safeJSONStringify(req.body ?? {})}
 
 ${res.statusCode}
-
-${logMessages.join('\n')}
 -----------------------------------------------
 `;
 

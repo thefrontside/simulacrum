@@ -1,5 +1,5 @@
 import type { Simulator, LegacyServiceCreator } from '@simulacrum/server';
-import { createHttpApp, createLoggingMiddleware } from '@simulacrum/server';
+import { createHttpApp } from '@simulacrum/server';
 import { urlencoded, json } from 'express';
 import { createAuth0Handlers } from './handlers/auth0-handlers';
 import { person } from '@simulacrum/server';
@@ -42,7 +42,8 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & R
           .use(noCache())
           .use(json())
           .use(urlencoded({ extended: true }))
-          .use(createLoggingMiddleware(inspectorLogger))
+          .use(consoleLogger)
+          .use(inspectorLogger)
           .get('/heartbeat', handlers['/heartbeat'])
           .get('/authorize', handlers['/authorize'])
           .get('/login', handlers['/login'])

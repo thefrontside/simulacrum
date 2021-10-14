@@ -30,7 +30,7 @@
     "@frontside/tsconfig": "^1.2.0",
     "@frontside/typescript": "^2.0.0",
     "graphiql": "^1.4.0",
-    "parcel": "next",
+    "parcel": "^2.0.0",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
     "rimraf": "^3.0.2",
