@@ -238,6 +238,8 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         ...context.accessToken
       };
 
+      console.dir({ redirect_uri: req.body.redirect_uri });
+
       res.status(200).json({
         access_token: createJsonWebToken(accessToken),
         id_token: idToken,

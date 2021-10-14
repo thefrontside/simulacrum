@@ -10,6 +10,9 @@ ${req.method.toUpperCase()}
 
 ${req.originalUrl ?? req.url}
 
+headers
+${['referer'].forEach(h => console.log(safeJSONStringify({ [h]: req.headers?.[h] })))}
+
 query
 ${safeJSONStringify(req.query ?? {})}
 
