@@ -48,10 +48,13 @@ jobs:
       - run: npm run build
       # integration test requires this example installed
       - node/install-packages:
+          cache-version: examples-nextjs-with-auth0-react
           cache-path: ~/project/examples/nextjs-with-auth0-react/node_modules
           app-dir: examples/nextjs-with-auth0-react
       # run the integration test
       - node/install-packages:
+          cache-version: integrations-cypress
+          cache-path: ~/project/integrations/cypress/node_modules
           app-dir: integrations/cypress
       - run:
           command: npm run build
@@ -84,8 +87,8 @@ jobs:
       - run: npm run build
       # install and run the example test
       - node/install-packages:
-          cache-path: ~/project/<< parameters.example >>/node_modules
           app-dir: << parameters.example >>
+          with-cache: false
       - run:
           working_directory: << parameters.example >>
           command: npm run test
