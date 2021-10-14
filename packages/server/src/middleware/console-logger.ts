@@ -24,13 +24,18 @@ function safeJSONStringify(o: Record<string, unknown>): string {
 
 export const consoleLogger: Middleware = function *(req, res) {
   console.log(`-----------------------------------------------
-[${getFormattedDate()}] 
+[${getFormattedDate()}]
+
 ${req.method.toUpperCase()}
+
 ${req.originalUrl ?? req.url}
+
 query
 ${safeJSONStringify(req.query ?? {})}
+
 body
 ${safeJSONStringify(req.body ?? {})}
+
 ${res.statusCode}
 -----------------------------------------------`);
 };
