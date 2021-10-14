@@ -34,11 +34,11 @@ jobs:
       - run: mv mkcert-v1.4.3-linux-amd64 mkcert
       - run: export CWD=$(pwd)
       - run: chmod +x mkcert
-      - run: cp mkcert /usr/local/bin/
+      - run: sudo cp mkcert /usr/local/bin/
       - run: mkdir -p ~/.simulacrum/certs
       - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
       - run:
-          command: mkcert -install && mkcert localhost
+          command: sudo mkcert -install && mkcert localhost
           working_directory: ~/.simulacrum/certs
       - node/install:
           node-version: 14.17.0
