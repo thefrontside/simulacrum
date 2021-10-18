@@ -8,5 +8,9 @@
     "rootDir": "src",
     "noEmit": false
   },
+  "include": [
+    "src/**/*.ts",
+    "node_modules/cypress/types"
+  ],
   "exclude": ["test"]
 }
