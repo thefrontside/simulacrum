@@ -9,8 +9,7 @@
     "noEmit": false
   },
   "include": [
-    "src/**/*.ts",
-    "node_modules/cypress/types"
+    "src/**/*.ts"
   ],
   "exclude": ["test"]
 }
