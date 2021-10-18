@@ -2,10 +2,12 @@ import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
 import { createTestServer, Client, Simulation } from './helpers';
 import { ldap } from '../src';
+import { Person } from '@simulacrum/server';
 
 describe('Auth0 simulator', () => {
   let client: Client;
   let simulation: Simulation;
+  let person: Person;
 
   beforeEach(function*() {
     client = yield createTestServer({
@@ -38,9 +40,14 @@ describe('Auth0 simulator', () => {
         services: {
           ldap: {
             port: 389
-          }
-        }
+          },
+        },
+        debug: true
       });
+
+      // person = yield client.given(simulation, "person");
+
+      // console.log(person);
     });
 
     it('starts the ldap simulation', function*() {

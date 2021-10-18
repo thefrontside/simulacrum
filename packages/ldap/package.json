@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Simulate an LDAP server",
   "main": "dist/index.js",
+  "bin": "bin/index.js",
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "NODE_ENV=test mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",

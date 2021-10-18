@@ -9,11 +9,9 @@ import getPort from 'get-port';
 import { Slice } from '@effection/atom';
 import { assert } from 'assert-ts';
 
-
 const DefaultOptions: Partial<LDAPOptions> = {
   port: 389
 };
-
 
 interface UserData{
   id: string | number;
@@ -164,13 +162,14 @@ export const ldap: Simulator<LDAPOptions> = (slice, options) => {
       ldap: createLdapService(ldapOptions, slice),
     },
     scenarios: {
-      /**
-       * Here we just export the internal `person` scenario so that it can be
-       * used with the a standalone auth0 simulator. However,
-       * what we really need to have some way to _react_ to the person
-       * having been created and augment the record at that point.
-       */
       person
-    }
+    },
+    * effects() {
+    yield map(slice.slice('store', 'people'), function* (slice) {
+      let newPerson = slice.get();
+
+      people[newPerson.id] = newPerson;
+    });
+  }
   };
 };
