@@ -8,8 +8,7 @@
     "resolveJsonModule": true
   },
   "include": [
-    "src/**/*.ts",
-    "node_modules/cypress/types"
+    "src/**/*.ts"
   ],
   "references": [
     { "path" : "../../packages/auth0/tsconfig.dist.json" }
