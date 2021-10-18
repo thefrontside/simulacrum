@@ -9,6 +9,7 @@ export interface SimulationOptions {
     port?: number
   }>;
   key?: string
+  debug?: boolean;
 }
 
 export interface Client {
@@ -101,11 +102,11 @@ export function createClient(serverURL: string): Client {
   }
 
   return {
-    createSimulation: async (simulator: string, options?: Record<string, unknown>) => {
+    createSimulation: async (simulator: string, options?: SimulationOptions) => {
       return query<Simulation>("createSimulation", {
         query: `
-mutation CreateSimulation($simulator: String, $options: JSON) {
-  createSimulation(simulator: $simulator, options: $options) {
+mutation CreateSimulation($simulator: String, $options: JSON, $debug: Boolean) {
+  createSimulation(simulator: $simulator, options: $options, debug: $debug) {
     id
     simulators
     status
@@ -116,7 +117,7 @@ mutation CreateSimulation($simulator: String, $options: JSON) {
   }
 }`,
         operationName: 'CreateSimulation',
-        variables: { simulator, options }
+        variables: { simulator, options, debug: !!options?.debug }
       });
     },
     given: <T = unknown>(simulation: Simulation, scenario: string, params: Record<string, unknown> = {}) => query<Scenario<T>>("given", {

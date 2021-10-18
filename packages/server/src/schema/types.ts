@@ -1,4 +1,4 @@
-import { objectType, mutationType, scalarType, nonNull, arg, stringArg, intArg, subscriptionType } from 'nexus';
+import { objectType, mutationType, scalarType, nonNull, arg, stringArg, intArg, subscriptionType, booleanArg } from 'nexus';
 
 import { createSimulation, destroySimulation, given, state } from './operations';
 
@@ -36,7 +36,8 @@ export const types = [
           options: arg({
             type: 'JSON',
             description: "options to pass to the simulation"
-          })
+          }),
+          debug: booleanArg(),
         },
         ...createSimulation
       });
