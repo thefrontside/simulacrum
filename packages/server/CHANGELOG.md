@@ -1,5 +1,19 @@
 # Changelog
 
+## \[0.4.0]
+
+- Upgrade to effection 2.0
+  - [993857e](https://github.com/thefrontside/simulacrum/commit/993857e98b2d74a2cfbca255c5b82573f2db7a80) Upgrade to Effection 2.0 on 2021-10-12
+- Add basic logging middleware component.
+  - [7ea8803](https://github.com/thefrontside/simulacrum/commit/7ea8803081e3ecc9cdbe20fe61a9e5d248d556a8) add basic logging middleware ([#135](https://github.com/thefrontside/simulacrum/pull/135)) on 2021-10-18
+- Create a new ResouceServiceCreator interface for a more generic way of creating services.
+  - [4fe7646](https://github.com/thefrontside/simulacrum/commit/4fe76466480dbd21eeadf15d8910f47bd17c3ffb) add changeset on 2021-10-05
+- - [d0f1cc1](https://github.com/thefrontside/simulacrum/commit/d0f1cc192fd1266bbb1eef2e644f8042546e060b) Upgrade effection to latest buffer / stream APIs on 2021-09-30
+- Upgrade effection to 2.0.0-beta.15
+  - [938e9bf](https://github.com/thefrontside/simulacrum/commit/938e9bfcabfcdc5806ecba01a909432b3de29971) Upgrade effection on 2021-09-07
+- Fix #127. Wait until simulation server is fully stopped in `destroySimulation` request
+  - [b80d20f](https://github.com/thefrontside/simulacrum/commit/b80d20fa0acbe2e2f69e180fefebd2b2554da8e9) wait until simulation server is fully stopped on 2021-10-05
+
 ## \[0.3.2]
 
 - Increment all of the `effection` and related `@effection` packages. There was an issue in `@effection/core` with `dist` assets and this ensures it won't exist in the user's lock file.

@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.3.0]
+
+- update parcel
+  - [cfe0338](https://github.com/thefrontside/simulacrum/commit/cfe0338f8c4b484ac559e228b7e8d9ad4e1f6c2a) update parcel to 2.0.0 on 2021-10-18
+
 ## \[0.2.0]
 
 - rollback effection to beta-5.
