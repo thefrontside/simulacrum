@@ -54,7 +54,7 @@ describe('test the login flow', () => {
       cy.expect(Link('Login').exists());
     });
 
-    it.skip('logs in user', () => {
+    it('logs in user', () => {
       cy.do(Link('Login').click());
 
       cy.expect(Heading('Welcome').exists());
@@ -68,9 +68,10 @@ describe('test the login flow', () => {
       cy.expect(Button('Log out').exists());
     });
 
-    describe.skip('repeated logins', () => {
+    describe('repeated logins', () => {
       // These next tests are copies to test
-      // that our simulations respond quickly enough
+      // that our simulations respond repeatedly
+      // and quickly enough
       it('logs in user a first time', () => {
         cy.do(Link('Login').click());
 
@@ -94,22 +95,9 @@ describe('test the login flow', () => {
 
         cy.expect(Heading('Welcome').exists());
       });
-
-      it('logs in user a fifth time', () => {
-        cy.do(Link('Login').click());
-
-        cy.expect(Heading('Welcome').exists());
-      });
-
-      it('logs in user a sixth time', () => {
-        cy.do(Link('Login').click());
-
-        cy.expect(Heading('Welcome').exists());
-      });
-      // now continue normal testing
     });
 
-    it.skip('logs in and visits private route', () => {
+    it('logs in and visits private route', () => {
       cy.do([
         Link('Login').click(),
         TextField('Email address').fillIn(person.email),
