@@ -2,8 +2,7 @@
   "name": "@simulacrum/auth0-cypress",
   "version": "0.2.1",
   "description": "Cypress simulacrum commands",
-  "main": "dist/index.js",
-  "module": "dist/support/index.js",
+  "main": "dist/support/index.js",
   "types": "dist/support/index.d.ts",
   "repository": "https://github.com/thefrontside/simulacrum.git",
   "author": "Frontside Engineering <engineering@frontside.com>",
@@ -32,7 +31,7 @@
     "@auth0/auth0-spa-js": "^1.16.1",
     "@effection/atom": "2.0.1",
     "cross-fetch": "^3.1.0",
-    "cypress": "^8.3.0"
+    "cypress": "^8.6.0"
   },
   "devDependencies": {
     "@frontside/eslint-config": "^2.0.0",

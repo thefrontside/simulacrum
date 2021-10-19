@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-/// <reference types="cypress" />
 
 import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 import { Client, createClient, Simulation } from '@simulacrum/client';
