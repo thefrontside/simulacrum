@@ -1,5 +1,13 @@
 # Changelog
 
+## \[0.2.1]
+
+- move ./src dir to ./cypress
+  - [3d7d9ff](https://github.com/thefrontside/simulacrum/commit/3d7d9ffb4154faf49aeb62932b786e74665bbbe2) add changeset on 2021-10-19
+- remove cypress paths
+  - [760293c](https://github.com/thefrontside/simulacrum/commit/760293c2b6a04e7475ecca93804c63a34fa95304) remove cypress paths on 2021-10-18
+  - [bd96e40](https://github.com/thefrontside/simulacrum/commit/bd96e40d5717e7d86807d6a6457bbb4f0505747c) add changeset on 2021-10-18
+
 ## \[0.2.0]
 
 - Add includes to tsconfigs.
