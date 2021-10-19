@@ -1,6 +1,6 @@
 import { createServer, InvalidCredentialsError, NoSuchObjectError, OperationsError, Server } from 'ldapjs';
 import { LDAPOptions } from './types';
-import type { SimulationState, Simulator } from '@simulacrum/server';
+import { SimulationState, Simulator } from '@simulacrum/server';
 import { ResourceServiceCreator } from '@simulacrum/server';
 import dedent from 'dedent';
 import { person } from '@simulacrum/server';
@@ -23,6 +23,14 @@ export function createLdapService<T extends UserData>(ldapOptions: LDAPOptions, 
   return () => {
     let server: Server;
 
+    let getUsers = (): T[] => {
+      let users = state.slice('store', 'people').get();
+
+      assert(!!users, 'no scenarios in store/people');
+
+      return Object.values(users).map(u => ({ ...u, id: u.email })) as T[];
+    };
+
     return {
       name: 'ldap service',
       *init() {
@@ -31,11 +39,6 @@ export function createLdapService<T extends UserData>(ldapOptions: LDAPOptions, 
         let bindDn = ldapOptions.bindDn;
         let bindPassword = ldapOptions.bindPassword;
         let groupDN = ldapOptions.groupDN;
-        let users = state.slice('store', 'people').get();
-
-        assert(!!users, 'no scenarios in store/people');
-
-        let employees = Object.values(users).map(u => ({ ...u, id: u.email })) as T[];
 
         let log = {
           debug: () => undefined,
@@ -53,11 +56,13 @@ export function createLdapService<T extends UserData>(ldapOptions: LDAPOptions, 
           filter: ${req.filter.toString()}
           `);
 
-          for (let entry of employees) {
+          let users = getUsers();
+
+          for (let [id, entry] of Object.entries(users)) {
             let groups = [`cn=users,${groupDN}`];
 
-            let employee = {
-              dn: `cn=${entry.id},${baseDN}`,
+            let user = {
+              dn: `cn=${id},${baseDN}`,
               attributes: {
                 objectclass: ['user'],
                 uid: entry.id,
@@ -66,9 +71,9 @@ export function createLdapService<T extends UserData>(ldapOptions: LDAPOptions, 
               },
             };
 
-            if (req.filter.matches(employee.attributes)) {
-              console.log(`Sending ${employee.attributes.email}`);
-              res.send(employee);
+            if (req.filter.matches(user.attributes)) {
+              console.log(`Sending ${user.attributes.email}`);
+              res.send(user);
             }
           }
 
@@ -101,16 +106,17 @@ export function createLdapService<T extends UserData>(ldapOptions: LDAPOptions, 
           let password = req.credentials;
           console.log('verify:', commonName, password);
 
+          let users = getUsers();
 
-          let employee = employees.filter(u => u.id === commonName)?.[0];
+          let user = users.filter(u => u.id === commonName)?.[0];
 
-          if (typeof employee === 'undefined') {
-            console.log('could not find employee');
+          if (typeof user === 'undefined') {
+            console.log('could not find user');
             return next(new NoSuchObjectError(req.dn.toString()));
           }
 
-          if (employee.password !== password) {
-            console.log(`bad password ${password} for ${employee.email}`);
+          if (user.password !== password) {
+            console.log(`bad password ${password} for ${user.email}`);
             return next(new InvalidCredentialsError(req.dn.toString()));
           }
 
@@ -163,13 +169,6 @@ export const ldap: Simulator<LDAPOptions> = (slice, options) => {
     },
     scenarios: {
       person
-    },
-    * effects() {
-    yield map(slice.slice('store', 'people'), function* (slice) {
-      let newPerson = slice.get();
-
-      people[newPerson.id] = newPerson;
-    });
-  }
+    }
   };
 };
