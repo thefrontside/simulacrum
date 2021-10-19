@@ -1,4 +1,4 @@
 ---
-"@simulacrum/ldap-processor": minor
+"@simulacrum/ldap-simulator": minor
 ---
 Add an ldap processor implementation.
