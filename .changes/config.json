@@ -33,7 +33,7 @@
       "dependencies": [
         "@simulacrum/auth0-simulator"
       ],
-      "prepublish": "npm install && npm run build"
+      "prepublish": ["npm install", "npm run build"]
     },
     "@simulacrum-examples/nextjs-with-auth0-react": {
       "path": "./examples/nextjs-with-auth0-react",
