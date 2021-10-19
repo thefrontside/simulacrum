@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/ldap-simulator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Simulate an LDAP server",
   "main": "dist/index.js",
   "bin": "bin/index.js",
