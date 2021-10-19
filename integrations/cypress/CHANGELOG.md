@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.2.2]
+
+- specify typeRoots for @simulacrum/auth0-cypress cypress package
+  - [53e4cef](https://github.com/thefrontside/simulacrum/commit/53e4cef4fd30cc78b53d95e148f29dee519c4aa9) specify typeRoots for @simulacrum/auth0-cypress cypress package on 2021-10-19
+
 ## \[0.2.1]
 
 - move ./src dir to ./cypress
