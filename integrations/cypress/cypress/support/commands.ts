@@ -13,11 +13,6 @@ type TestState = Record<string, {
   person?: Person
 }>;
 
-
-const atom = createAtom<TestState>({});
-
-export interface Person { email: string; password: string }
-
 interface Token {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   access_token: Record<string, any>;
@@ -25,11 +20,10 @@ interface Token {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   id_token: Record<string, any>
 }
-
 declare global {
   namespace Cypress {
-    interface Chainable {
-      createSimulation(options: Auth0ClientOptions): Chainable<Simulation>;
+    interface Chainable<Subject> {
+      createSimulation(options: Auth0ClientOptions): Chainable<Subject>;
       login(person?: Partial<Person>): Chainable<Token>;
       logout(): Chainable<void>;
       given(attrs?: Partial<Person>): Chainable<Person>;
@@ -37,6 +31,11 @@ declare global {
     }
   }
 }
+
+const atom = createAtom<TestState>({});
+
+export interface Person { email: string; password: string }
+
 
 const ClientPort = process.env.PORT || 4000;
 
@@ -50,7 +49,6 @@ function getClientFromSpec (spec: string) {
 
   return atom.slice(spec, 'client').get();
 }
-
 
 Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
   return new Cypress.Promise((resolve, reject) => {

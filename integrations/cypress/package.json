@@ -3,14 +3,17 @@
   "version": "0.2.0",
   "description": "Cypress simulacrum commands",
   "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "module": "dist/support/index.js",
+  "types": "dist/support/index.d.ts",
   "repository": "https://github.com/thefrontside/simulacrum.git",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
   "files": [
     "dist/**/*",
-    "src/**/*",
+    "cypress/**/*",
+    "cypress.env.json",
+    "cypress.json",
+    "CHANGELOG.md",
     "README.md"
   ],
   "scripts": {
