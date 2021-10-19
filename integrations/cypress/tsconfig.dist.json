@@ -5,11 +5,13 @@
   ],
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
+    "types": ["cypress", "node"],
     "noEmit": false
   },
   "include": [
-    "src/**/*.ts"
+    "node_modules/cypress",
+    "cypress/**/*.ts",
+    "cypress.env.json"
   ],
-  "exclude": ["test"]
+  "exclude": ["**/*.spec.ts"]
 }
