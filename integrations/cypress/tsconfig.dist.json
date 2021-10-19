@@ -6,7 +6,8 @@
   "compilerOptions": {
     "outDir": "dist",
     "types": ["cypress", "node"],
-    "noEmit": false
+    "noEmit": false,
+    "typeRoots": ["node_modules/@types", "node_modules/cypress/types"]
   },
   "include": [
     "node_modules/cypress",
