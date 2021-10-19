@@ -26,7 +26,12 @@
       "path": "./packages/ui",
       "manager": "javascript",
       "dependencies": []
-    },    
+    },
+    "@simulacrum/ldap-simulator": {
+      "path": "./packages/ldap",
+      "manager": "javascript",
+      "dependencies": ["@simulacrum/server", "@simulacrum/client"]
+    },
     "@simulacrum/auth0-cypress": {
       "path": "./integrations/cypress",
       "manager": "javascript",

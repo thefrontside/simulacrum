@@ -1,0 +1,34 @@
+{
+  "name": "@simulacrum/ldap-simulator",
+  "version": "0.1.0",
+  "description": "Simulate an LDAP server",
+  "main": "dist/index.js",
+  "bin": "bin/index.js",
+  "scripts": {
+    "clean": "rimraf *.tsbuildinfo dist",
+    "test": "NODE_ENV=test mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
+    "prepack": "tsc --build tsconfig.dist.json",
+    "build": "npm run prepack",
+    "lint": "eslint src test",
+    "start": "PORT=4000 node dist/start.js",
+    "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
+  },
+  "keywords": [
+    "simulation",
+    "LDAP",
+    "emulation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "get-port": "5.1.1",
+    "ldapjs": "^2.3.1",
+    "seedrandom": "^3.0.5",
+    "@simulacrum/server": "^0.4.0"
+  },
+  "devDependencies": {
+    "@types/ldapjs": "^2.2.1",
+    "@types/seedrandom": "^3.0.1",
+    "typescript": "^4.4.3"
+  }
+}
