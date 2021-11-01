@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "start": "docusaurus start",
-    "build": "docusaurus build --out-dir public/interactors",
+    "build": "docusaurus build --out-dir public/simulacrum",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
-    "serve": "docusaurus serve --dir public/interactors"
+    "serve": "docusaurus serve --dir public/simulacrum"
   },
   "dependencies": {
     "@docusaurus/core": "2.0.0-beta.3",
