@@ -10,4 +10,4 @@
 
 [[redirects]]
   from = "/*"
-  to = "/interactors/:splat"
+  to = "/simulacrum/:splat"
