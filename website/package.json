@@ -1,0 +1,38 @@
+{
+  "name": "docs",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "docusaurus start",
+    "build": "docusaurus build --out-dir public/simulacrum",
+    "swizzle": "docusaurus swizzle",
+    "deploy": "docusaurus deploy",
+    "serve": "docusaurus serve --dir public/simulacrum"
+  },
+  "dependencies": {
+    "@docusaurus/core": "2.0.0-beta.3",
+    "@docusaurus/preset-classic": "2.0.0-beta.3",
+    "@mdx-js/react": "^1.5.8",
+    "@vanilla-extract/css": "^1.6.1",
+    "@vanilla-extract/css-utils": "^0.1.1",
+    "@vanilla-extract/webpack-plugin": "^2.1.0",
+    "clsx": "^1.1.1",
+    "downshift": "^6.1.7",
+    "email-validator": "^2.0.4",
+    "jsonp": "^0.2.1",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
