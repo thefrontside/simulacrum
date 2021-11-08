@@ -1,0 +1,27 @@
+{
+  "name": "@simulacrum/stripe-simulator",
+  "version": "0.0.1",
+  "description": "Simulate Stripe API",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha -r ts-node/register --timeout 10000 test/**/*.test.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thefrontside/simulacrum.git"
+  },
+  "keywords": [
+    "simulacrum",
+    "simulation",
+    "stripe"
+  ],
+  "author": "Frontside Engineering <engineering@frontside.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
+  },
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "dependencies": {
+    "@simulacrum/server": "^0.4.0"
+  }
+}
