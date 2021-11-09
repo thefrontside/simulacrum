@@ -4,6 +4,8 @@
   "description": "Simulate Stripe API",
   "main": "dist/index.js",
   "scripts": {
+    "build": "tsc -b tsconfig.dist.json",
+    "start": "PORT=4001 nodemon --exec 'npm run build && node bin/start.mjs'",
     "test": "NODE_ENV=test mocha -r ts-node/register --timeout 10000 test/**/*.test.ts"
   },
   "repository": {
@@ -22,6 +24,12 @@
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
+    "effection": "^2.0.1",
+    "fastify": "^3.21.1",
     "@simulacrum/server": "^0.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.14",
+    "@simulacrum/client": "^0.5.2"
   }
 }

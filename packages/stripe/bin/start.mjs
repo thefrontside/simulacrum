@@ -1,14 +1,14 @@
 import { main } from 'effection';
-import { createSimulationServer, Server} from '@simulacrum/server';
+import { createSimulationServer } from '@simulacrum/server';
 import getPort from 'get-port';
-import { createStripeService } from './create-stripe-service';
+import { createStripeService } from '../dist/stripe-service.js';
 
 main(function* () {
   let port = yield getPort({
     port: !!process.env.PORT ? Number(process.env.PORT) : undefined
   });
 
-  let server: Server = yield createSimulationServer({
+  let server = yield createSimulationServer({
     port,
     seed: 1,
     simulators: {

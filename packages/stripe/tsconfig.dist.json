@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig",
+  "references": [{ "path": "../server/tsconfig.dist.json"}],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "noEmit": false
+  },
+  "exclude": ["test", "bin"]
+}
