@@ -1,4 +1,4 @@
-import { main, MainError } from 'effection';
+import { main, withTimeout, MainError } from 'effection';
 
 import { createClient } from '@simulacrum/client';
 
@@ -13,10 +13,14 @@ main(function* destroy() {
   let client = createClient('http://localhost:4001');
 
   try {
-    if (yield client.destroySimulation({ id })) {
+    if (yield withTimeout(1000, client.destroySimulation({ id }))) {
       console.log(`successfully destroyed simulation ${id}`);
     } else {
       console.log(`simulation '${id}' does not exist or is already destroyed`);
+    }
+  } catch(error) {
+    if (error.name === 'TimeoutError') {
+      fail(error.message);
     }
   } finally {
     yield client.dispose();

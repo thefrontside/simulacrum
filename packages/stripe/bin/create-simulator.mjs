@@ -1,4 +1,4 @@
-import { main, MainError } from 'effection';
+import { main, withTimeout, withLabels, MainError } from 'effection';
 
 import { createClient } from '@simulacrum/client';
 
@@ -14,13 +14,13 @@ main(function*() {
 
 
   try {
-    let simulation = yield client.createSimulation("stripe", {
+    let simulation = yield withTimeout(1000, withLabels(client.createSimulation("stripe", {
       services: {
         stripe: {
           port: Number(port)
         }
       }
-    });
+    }), { name: 'createSimulation' }));
 
     if (simulation.status != 'running') {
       fail(`failed to start simulation`);
@@ -29,6 +29,10 @@ main(function*() {
     console.log(`created simulation: ${simulation.id}`);
     for (let service of simulation.services) {
       console.log(`${service.name}: ${service.url}`);
+    }
+  } catch(error) {
+    if (error.name === 'TimeoutError') {
+      fail(error.message);
     }
   } finally {
     yield client.dispose();
