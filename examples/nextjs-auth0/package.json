@@ -2,7 +2,8 @@
   "name": "nextjs-auth0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "cypress": "cypress",
+    "dev": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" next dev",
     "build": "next build",
     "cypress:open": "npm-run-all --parallel start:auth0 start:server cypress:browser",
     "cypress:run": "npx cypress run --spec 'cypress/integration/*.ts'",

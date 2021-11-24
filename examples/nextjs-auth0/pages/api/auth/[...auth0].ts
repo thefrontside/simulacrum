@@ -12,11 +12,13 @@ const afterCallback = async (_req: NextApiRequest, _res: NextApiResponse, sessio
 
 const getLoginState = (req: NextApiRequest) => {
   let paramRole = req.query?.role ?? "candidate";
+  console.dir({ paramRole });
   return { role: paramRole, returnTo: `/${paramRole}` };
 };
 
 export default handleAuth({
   async login(req, res) {
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>hhjhhhh');
     try {
       await handleLogin(req, res, { getLoginState });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
