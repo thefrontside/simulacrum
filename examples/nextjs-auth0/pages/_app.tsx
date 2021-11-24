@@ -5,7 +5,6 @@ import { UserProvider } from '@auth0/nextjs-auth0';
 function MyApp({ Component, pageProps }: AppProps) {
   let { user } = pageProps;
 
-  console.dir({ user });
   return (
     <UserProvider user={user}>
       <Component {...pageProps} />

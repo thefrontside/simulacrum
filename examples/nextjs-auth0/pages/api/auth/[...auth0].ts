@@ -18,11 +18,11 @@ const getLoginState = (req: NextApiRequest) => {
 
 export default handleAuth({
   async login(req, res) {
-    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>hhjhhhh');
     try {
       await handleLogin(req, res, { getLoginState });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
+      console.error(error);
       res.status(error.status || 500).end(error.message);
     }
   },
@@ -33,6 +33,7 @@ export default handleAuth({
       });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
+      console.error(error);
       res.status(error.status || 500).end(error.message);
     }
   }
