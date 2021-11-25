@@ -8,6 +8,7 @@
   - [given()](#given)
   - [login()](#login)
   - [logout()](#logout)
+- [debugging](#debugging)
 - [examples](./cypress/integration/login.spec.ts)
 
 ## Installation
@@ -154,3 +155,17 @@ beforeEach(async () => {
   cy.logout();
 });
 ```
+
+## debugging
+
+It is possible to hook up express middleware to log each endpoint that is called and any associated querystring or POST data by simply adding the `debug: true` option when calling `createSimulation`:
+
+e.g.
+
+```js
+it("should log in and log out", () => {
+  cy
+    .createSimulation({ ...auth0Config, debug: true })
+```
+
+![debug console output](./docs/out.png)

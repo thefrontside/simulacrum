@@ -12,6 +12,8 @@ type TestState = Record<string, {
   person?: Person
 }>;
 
+type CreateSimulation = Auth0ClientOptions & { debug?: boolean };
+
 interface Token {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   access_token: Record<string, any>;
@@ -22,7 +24,7 @@ interface Token {
 declare global {
   namespace Cypress {
     interface Chainable<Subject> {
-      createSimulation(options: Auth0ClientOptions): Chainable<Subject>;
+      createSimulation(options: CreateSimulation): Chainable<Subject>;
       login(person?: Partial<Person>): Chainable<Token>;
       logout(): Chainable<void>;
       given(attrs?: Partial<Person>): Chainable<Person>;
@@ -49,11 +51,11 @@ function getClientFromSpec (spec: string) {
   return atom.slice(spec, 'client').get();
 }
 
-Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
+Cypress.Commands.add('createSimulation', (options: CreateSimulation) => {
   return new Cypress.Promise((resolve, reject) => {
     let client = getClientFromSpec(Cypress.spec.name);
 
-    let { domain, client_id, ...auth0Options } = options;
+    let { debug = false, domain, client_id, ...auth0Options } = options;
 
     assert(typeof domain !== 'undefined', 'domain is a required option');
 
@@ -71,6 +73,7 @@ Cypress.Commands.add('createSimulation', (options: Auth0ClientOptions) => {
           port,
         },
       },
+      debug,
       key: 'cypress'
     }).then(simulation => {
       atom.slice(Cypress.spec.name).update(current => {
