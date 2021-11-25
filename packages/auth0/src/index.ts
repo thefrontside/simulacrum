@@ -39,9 +39,6 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & R
     .get('/.well-known/jwks.json', handlers['/.well-known/jwks.json'])
     .get('/.well-known/openid-configuration', handlers['/.well-known/openid-configuration']);
 
-  console.log('---------------------------');
-  console.dir({ debug });
-  console.log('---------------------------');
   if(debug) {
     app = app.use(consoleLogger);
   }
