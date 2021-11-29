@@ -1,0 +1,34 @@
+{
+  "name": "nextjs-auth0",
+  "private": true,
+  "scripts": {
+    "cypress": "cypress",
+    "cypress:browser": "cypress open",
+    "dev": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" next dev",
+    "build": "next build",
+    "cypress:open": "npm-run-all --parallel start:auth0 cypress:browser",
+    "cypress:run": "npx cypress run --spec 'cypress/integration/*.ts'",
+    "lint": "next lint",
+    "start": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" next dev",
+    "start:auth0": "PORT=4000 ../../node_modules/.bin/auth0-simulator",
+    "test": "start-server-and-test 'npm run dev' http://localhost:3000 'npm run start:auth0' http://localhost:4000 cypress:run"
+  },
+  "dependencies": {
+    "@auth0/nextjs-auth0": "^1.6.1",
+    "@simulacrum/auth0-cypress": "^0.2.2",
+    "classnames": "^2.3.1",
+    "next": "12.0.4",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "16.11.10",
+    "@types/react": "17.0.36",
+    "cypress": "^9.1.0",
+    "eslint": "7.32.0",
+    "eslint-config-next": "12.0.4",
+    "npm-run-all": "^4.1.5",
+    "start-server-and-test": "^1.14.0",
+    "typescript": "4.5.2"
+  }
+}
