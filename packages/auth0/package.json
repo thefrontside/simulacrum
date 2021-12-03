@@ -49,7 +49,7 @@
   "devDependencies": {
     "@effection/atom": "^2.0.1",
     "@effection/mocha": "^2.0.1",
-    "@frontside/eslint-config": "^3.0.0",
+    "@frontside/eslint-config": "^3.0.1",
     "@frontside/tsconfig": "^3.0.0",
     "@frontside/typescript": "^3.0.0",
     "@simulacrum/client": "0.5.2",

@@ -99,7 +99,8 @@ Cypress.Commands.add('createSimulation', (options: CreateSimulation) => {
 
       reject(e);
     });
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  }) as unknown as Cypress.Chainable<any>;
 });
 
 Cypress.Commands.add('given', (attrs: Partial<Person> = {}) => {
@@ -136,7 +137,7 @@ Cypress.Commands.add('given', (attrs: Partial<Person> = {}) => {
 
         reject(e);
       });
-  });
+  }) as unknown as Cypress.Chainable<Person>;
 });
 
 Cypress.Commands.add('login', () => {
@@ -164,7 +165,7 @@ Cypress.Commands.add('login', () => {
 
                  reject(e);
                });
-  });
+  }) as unknown as Cypress.Chainable<Token>;
 });
 
 Cypress.Commands.add('logout', () => {
@@ -208,7 +209,7 @@ Cypress.Commands.add('logout', () => {
       });
       reject(e);
     });
-  });
+  }) as unknown as Cypress.Chainable<void>;
 });
 
 export { };
