@@ -23,12 +23,12 @@ interface Token {
 }
 declare global {
   namespace Cypress {
-    interface Chainable<Subject> {
-      createSimulation(options: CreateSimulation): Chainable<Subject>;
-      login(person?: Partial<Person>): Chainable<Token>;
+    interface Chainable {
+      createSimulation(options: CreateSimulation): void;
+      login(person?: Partial<Person>): void;
       logout(): Chainable<void>;
-      given(attrs?: Partial<Person>): Chainable<Person>;
-      out<S = unknown>(msg: string): Chainable<S>
+      given(attrs?: Partial<Person>): void;
+      out(msg: string): void
     }
   }
 }
