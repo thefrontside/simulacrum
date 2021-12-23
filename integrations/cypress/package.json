@@ -18,7 +18,7 @@
   "scripts": {
     "cypress:browser": "cypress open",
     "cypress:open": "npm-run-all --parallel start:auth0 start:server cypress:browser",
-    "start:server": "cd ../../examples/nextjs-with-auth0-react && npm install && npm run dev",
+    "start:server": "cd ../../examples/nextjs/auth0-react && npm install && npm run dev",
     "cypress:run": "npx cypress run --spec 'cypress/integration/*.ts'",
     "start:auth0": "PORT=4000 npx auth0-simulator",
     "start:auth0-dev": "PORT=4000 node ../../packages/auth0/bin/index.js",
