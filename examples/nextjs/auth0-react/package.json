@@ -11,7 +11,7 @@
     "lint": "next lint"
   },
   "workspaces": [
-    "../../packages/*"
+    "../../../packages/*"
   ],
   "dependencies": {
     "@auth0/auth0-react": "^1.8.0",
