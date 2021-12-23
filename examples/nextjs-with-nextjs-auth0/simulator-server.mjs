@@ -21,7 +21,7 @@ main(function* () {
   let simulation = yield client.createSimulation("auth0", {
     options: {
       audience: "https://your-audience/",
-      scope: "openid profile read:shows",
+      scope: "openid profile email offline_access",
       clientId: "YOUR_AUTH0_CLIENT_ID",
     },
     services: {
