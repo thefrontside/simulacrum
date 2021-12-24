@@ -7,6 +7,7 @@ import { makeGetClientFromSpec } from '../utils/spec';
 import { makeGiven } from './given';
 import { makeLogin } from './login';
 import { makeLogout } from './logout';
+import { Auth0Result } from 'auth0-js';
 
 declare global {
   namespace Cypress {
@@ -15,7 +16,11 @@ declare global {
       login(person?: Partial<Person>): Chainable<Token>;
       logout(): Chainable<void>;
       given(attrs?: Partial<Person>): Chainable<Person>;
-      out<S = unknown>(msg: string): Chainable<S>
+      out<S = unknown>(msg: string): Chainable<S>;
+      getUserInfo(accessToken: string): Chainable<Person>;
+      getUserTokens(person: Person): Chainable<Auth0Result & { scope: string }>;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      task<T>(event: string, args?: any, options?: Partial<Loggable & Timeoutable>): Chainable<T>
     }
   }
 }

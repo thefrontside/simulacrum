@@ -1,4 +1,4 @@
-import { Auth0ClientOptions } from '@auth0/auth0-spa-js';
+import { AuthOptions } from 'auth0-js';
 import { Client, Simulation } from '@simulacrum/client';
 
 export type TestState = Record<string, {
@@ -7,7 +7,7 @@ export type TestState = Record<string, {
   person?: Person
 }>;
 
-export type CreateSimulation = Auth0ClientOptions & { debug?: boolean };
+export type CreateSimulation = Omit<AuthOptions, 'clientID'> & { debug?: boolean, client_id?: string };
 
 export interface Token {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
