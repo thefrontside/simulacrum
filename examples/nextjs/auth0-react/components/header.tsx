@@ -20,7 +20,7 @@ const Header = (): React.ReactElement => {
                 <button
                   onClick={() => logout({ returnTo: window.location.origin })}
                 >
-                  Log out
+                  Logout
                 </button>
               </li>
             </>

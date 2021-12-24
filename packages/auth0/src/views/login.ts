@@ -36,7 +36,7 @@ export const loginView = ({
               <img alt="frontside" class="bg-transparent object-contain h-16" src="/img/frontside-logo.png" />
             </div>
             <h1 class="flex justify-center text-4xl">Welcome</h1>
-            <h2 class="flex justify-center">Log in to continue to frontside</h2>
+            <h2 class="flex justify-center">Login to continue to frontside</h2>
             <form id="the-form" class="mt-8 space-y-6">
               <div class="rounded-md shadow-sm -space-y-px">
                 <div>

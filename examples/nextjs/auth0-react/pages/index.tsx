@@ -19,7 +19,7 @@ export default function Home(): JSX.Element {
       <Layout>
         Hello {user?.name}{" "}
         <button onClick={() => logout({ returnTo: window.location.origin })}>
-          Log out
+          Logout
         </button>
       </Layout>
     );
