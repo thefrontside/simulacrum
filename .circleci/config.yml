@@ -25,7 +25,7 @@ jobs:
       - run: npm run build
       # integration test requires the example installed
       - node/install-packages:
-          app-dir: examples/nextjs-with-auth0-react
+          app-dir: examples/nextjs/auth0-react
       # run the integration test
       - node/install-packages:
           app-dir: integrations/cypress
