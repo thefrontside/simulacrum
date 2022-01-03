@@ -1,5 +1,5 @@
 {
-  "name": "@simulacrum-examples/nextjs/nextjs-auth0",
+  "name": "@simulacrum-examples/nextjs-with-nextjs-auth0",
   "version": "0.0.6",
   "private": true,
   "scripts": {
