@@ -162,19 +162,37 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     },
 
     ['/oauth/token']: function* (req, res) {
-      let { code } = req.body;
+      let { code, grant_type } = req.body;
 
-      let [nonce, username] = decode(code).split(":");
+      let user: Person | undefined;
+      let nonce: string | undefined;
+      let username: string;
+      let password: string | undefined;
+
+      if (grant_type === 'password') {
+        username = req.body.username;
+        password = req.body.password;
+      } else {
+        assert(typeof code !== 'undefined', 'no code in /oauth/token');
+
+        [nonce, username] = decode(code).split(":");
+      }
 
       if (!username) {
         res.status(400).send(`no nonce in store for ${code}`);
         return;
       }
 
-      let user = personQuery(([, person]) => {
+      user = personQuery(([, person]) => {
         assert(!!person.email, `no email defined on person scenario`);
 
-        return person.email.toLowerCase() === username.toLowerCase();
+        let valid = person.email.toLowerCase() === username.toLowerCase();
+
+        if(typeof password === 'undefined') {
+          return valid;
+        } else {
+          return valid && password === person.password;
+        }
       });
 
       if(!user) {
@@ -193,8 +211,12 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         email: username,
         aud: clientId,
         sub: user.id,
-        nonce,
       };
+
+      if(typeof nonce !== 'undefined') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (idTokenData as any).nonce = nonce;
+      }
 
       assert(!!clientId, 'no clientId in options');
 

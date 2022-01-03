@@ -6,7 +6,7 @@ Cypress.Commands.add('getUserTokens', (person: Person) => {
 
   let auth0ClientSecret = Cypress.env('auth0ClientSecret');
 
-  console.log({ email, password, auth0ClientSecret });
+  console.log({ email, password, auth0ClientSecret, c: Cypress.env('audience'), d: Cypress.env('scope') });
 
   assert([email, password, auth0ClientSecret].every(Boolean), 'email, auth0ClientSecret and password are required');
 
@@ -14,13 +14,16 @@ Cypress.Commands.add('getUserTokens', (person: Person) => {
     auth.client.loginWithDefaultDirectory({
       username: email,
       password,
-      audience: Cypress.env('auth0Audience'),
-      scope: Cypress.env('auth0Scope'),
+      audience: Cypress.env('audience'),
+      scope: Cypress.env('scope'),
       client_secret: auth0ClientSecret,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any, (err, response) => {
       if (err) {
         console.error(err);
+        console.dir({ err }, { depth: 33 });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        console.log((err as any).stack);
         reject(err);
       } else {
         console.dir({ response }, { depth: 33 });
