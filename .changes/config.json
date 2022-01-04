@@ -41,7 +41,7 @@
       "prepublish": ["npm install", "npm run build"]
     },
     "@simulacrum-examples/nextjs-with-auth0-react": {
-      "path": "./examples/nextjs-with-auth0-react",
+      "path": "./examples/nextjs/auth0-react",
       "manager": "javascript",
       "dependencies": [
         "@simulacrum/auth0-simulator",
@@ -52,7 +52,7 @@
       "releaseTag": false
     },
     "@simulacrum-examples/nextjs-with-nextjs-auth0": {
-      "path": "./examples/nextjs-with-nextjs-auth0",
+      "path": "./examples/nextjs/nextjs-auth0",
       "manager": "javascript",
       "dependencies": [
         "@simulacrum/auth0-simulator",

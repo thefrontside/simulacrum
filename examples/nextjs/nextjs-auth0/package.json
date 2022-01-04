@@ -10,7 +10,7 @@
     "lint": "next lint"
   },
   "workspaces": [
-    "../../packages/*"
+    "../../../packages/*"
   ],
   "dependencies": {
     "@auth0/nextjs-auth0": "^1.6.1",

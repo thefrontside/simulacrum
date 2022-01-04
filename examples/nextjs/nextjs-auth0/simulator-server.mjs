@@ -21,7 +21,7 @@ main(function* () {
   let simulation = yield client.createSimulation("auth0", {
     options: {
       audience: "https://your-audience/",
-      scope: "openid profile read:shows",
+      scope: "openid profile email offline_access",
       clientId: "YOUR_AUTH0_CLIENT_ID",
     },
     services: {
@@ -36,7 +36,9 @@ main(function* () {
   let person = yield client.given(simulation, "person");
 
   console.log(`store populated with user`);
-  console.log(`username = ${person.data.email} password = ${person.data.password}`);
+  console.log(
+    `username = ${person.data.email} password = ${person.data.password}`
+  );
 
   yield; // this keeps the server running, a function of effection
 });
