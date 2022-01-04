@@ -21,6 +21,7 @@ export type Routes =
   | '/login/callback'
   | '/oauth/token'
   | '/v2/logout'
+  | '/userinfo'
 
 type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
 
@@ -247,6 +248,13 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       assert(typeof returnToUrl === 'string', `no logical returnTo url`);
 
       res.redirect(returnToUrl);
+    },
+
+
+    ['/userinfo']: function* (req, res) {
+      console.dir({ h: req.headers });
+
+      res.status(200).json({});
     }
   };
 };

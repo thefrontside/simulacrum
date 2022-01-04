@@ -9,6 +9,7 @@ import { makeLogin } from './login';
 import { makeLogout } from './logout';
 import { Auth0Result } from 'auth0-js';
 import './get-user-tokens';
+import './get-user-info';
 
 declare global {
   namespace Cypress {
