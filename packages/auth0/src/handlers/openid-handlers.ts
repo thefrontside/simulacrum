@@ -34,6 +34,6 @@ export const createOpenIdHandlers = (options: Options): Record<OpenIdRoutes, Htt
         userinfo_endpoint: [url, "userinfo"].join('/'),
         jwks_uri: [url, ".well-known", "jwks.json"].join('/'),
       });
-    }
+    },
   };
 };

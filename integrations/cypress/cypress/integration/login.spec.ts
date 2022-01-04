@@ -5,13 +5,13 @@ describe("auth", () => {
   describe("log in, create person per test", () => {
     it("should log in and log out", () => {
       cy
-        .createSimulation(auth0Config)
+        .createSimulation({ ...auth0Config, debug: true })
         .visit("/")
-        .contains("Log out").should('not.exist')
+        .contains("Logout").should('not.exist')
         .given()
         .login()
         .visit("/")
-        .contains("Log out")
+        .contains("Logout")
         .logout();
     });
   });
@@ -25,10 +25,10 @@ describe("auth", () => {
     it("should login and logout", () => {
       cy
         .visit("/")
-        .contains("Log out").should('not.exist')
+        .contains("Logout").should('not.exist')
         .login()
         .visit("/")
-        .contains("Log out")
+        .contains("Logout")
         .logout();
     });
   });
@@ -46,41 +46,41 @@ describe("auth", () => {
     it("should login once", () => {
       cy
         .visit("/")
-        .contains("Log out").should('not.exist')
+        .contains("Logout").should('not.exist')
         .given({ email: 'first@gmail.com' })
         .login()
         .visit("/")
-        .contains("Log out");
+        .contains("Logout");
     });
 
     it("should login two times without error", () => {
       cy
         .visit("/")
-        .contains("Log out").should('not.exist')
+        .contains("Logout").should('not.exist')
         .given({ email: 'second@gmail.com' })
         .login()
         .visit("/")
-        .contains("Log out");
+        .contains("Logout");
     });
 
     it("should login three times without error", () => {
       cy
       .visit("/")
-      .contains("Log out").should('not.exist')
+      .contains("Logout").should('not.exist')
       .given({ email: 'third@gmail.com' })
       .login()
       .visit("/")
-      .contains("Log out");
+      .contains("Logout");
     });
 
     it("should login four times without error", () => {
       cy.visit("/")
-      .contains("Log in")
-      .contains("Log out").should('not.exist')
+      .contains("Login")
+      .contains("Logout").should('not.exist')
         .given({ email: 'fourth@gmail.com', password: 'passw0rd' })
         .login()
         .visit("/")
-        .contains("Log out");
+        .contains("Logout");
     });
   });
 
@@ -94,20 +94,20 @@ describe("auth", () => {
     it("should login once", () => {
         cy
           .visit("/")
-          .contains("Log out").should('not.exist')
+          .contains("Logout").should('not.exist')
           .login()
           .visit("/")
-          .contains("Log out");
+          .contains("Logout");
     });
 
     it("should login twice without error", () => {
       cy
         .visit("/")
-        .contains("Log out").should('not.exist')
+        .contains("Logout").should('not.exist')
         .given({ email: 'second@gmail.com' })
         .login()
         .visit("/")
-        .contains("Log out");
+        .contains("Logout");
     });
   });
 });

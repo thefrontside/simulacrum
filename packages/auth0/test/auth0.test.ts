@@ -10,6 +10,8 @@ import jwt from 'jsonwebtoken';
 
 import Keygrip from 'keygrip';
 import { removeTrailingSlash } from '../src/handlers/url';
+import { Scenario } from '@simulacrum/client';
+import { TokenSet } from 'src/types';
 
 const createSessionCookie = <T>(data: T): string => {
   let cookie = Buffer.from(JSON.stringify(data)).toString('base64');
@@ -351,6 +353,48 @@ describe('Auth0 simulator', () => {
 
       expect(res.redirected).toBe(true);
       expect(removeTrailingSlash(res.url)).toBe(removeTrailingSlash(frontendUrl));
+    });
+  });
+
+  describe('/userinfo', () => {
+    let person: Scenario<Person>;
+    let token: TokenSet;
+
+    beforeEach(function*() {
+      let simulation: Simulation = yield client.createSimulation("auth0");
+
+      auth0Url = simulation.services[0].url;
+      frontendUrl = simulation.services[1].url;
+
+      person = yield client.given(simulation, "person");
+
+      let res: Response = yield fetch(`${auth0Url}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...Fields,
+          username: person.data.email,
+          password: person.data.password,
+          grant_type: 'password'
+        })
+      });
+
+      token = yield res.json();
+    });
+
+    it('should retrieve userinfo from token', function * () {
+      let res: Response = yield fetch(`${auth0Url}/userinfo`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token.access_token}`
+        }
+      });
+
+      let user = yield res.json();
+
+      expect(user.name).toBe(person.data.name);
     });
   });
 });

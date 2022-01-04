@@ -17,26 +17,32 @@
   ],
   "scripts": {
     "cypress:browser": "cypress open",
-    "cypress:open": "npm-run-all --parallel start:auth0 start:server cypress:browser",
-    "start:server": "cd ../../examples/nextjs/auth0-react && npm install && npm run dev",
+    "cypress:open:nextjs-auth0": "npm-run-all --parallel start:auth0 start:server:nextjs-auth0 cypress:browser",
+    "start:server:nextjs-auth0": "cd ../../examples/nextjs/nextjs-auth0 && npm install && npm run dev",
+    "start:server:auth0-react": "cd ../../examples/nextjs/auth0-react && npm install && npm run dev",
     "cypress:run": "npx cypress run --spec 'cypress/integration/*.ts'",
     "start:auth0": "PORT=4000 npx auth0-simulator",
     "start:auth0-dev": "PORT=4000 node ../../packages/auth0/bin/index.js",
-    "test": "start-server-and-test 'npm run start:server' http://localhost:3000 'npm run start:auth0' http://localhost:4000 cypress:run",
+    "test:auth0-react": "start-server-and-test 'npm run start:server:auth0-react' http://localhost:3000 'npm run start:auth0' http://localhost:4000 cypress:run",
+    "test:nextjs-auth0": "start-server-and-test 'npm run start:server:nextjs-auth0' http://localhost:3000 'npm run start:auth0' http://localhost:4000 cypress:run",
+    "test": "npm run test:auth0-react && npm run test:nextjs-auth0",
     "build": "npm run prepack",
     "prepack": "tsc --build tsconfig.dist.json",
     "lint": "eslint \"src/**/*.ts\""
   },
   "dependencies": {
-    "@auth0/auth0-spa-js": "^1.16.1",
     "@effection/atom": "2.0.1",
+    "auth0-js": "^9.18.0",
     "cross-fetch": "^3.1.0",
-    "cypress": "^8.6.0"
+    "cypress": "^8.6.0",
+    "futoin-hkdf": "^1.4.3",
+    "jose": "^2.0.4"
   },
   "devDependencies": {
     "@frontside/eslint-config": "^3.0.0",
     "@frontside/tsconfig": "^3.0.0",
     "@frontside/typescript": "^3.0.0",
+    "@types/auth0-js": "^9.14.5",
     "npm-run-all": "^4.1.5",
     "start-server-and-test": "^1.13.1"
   },

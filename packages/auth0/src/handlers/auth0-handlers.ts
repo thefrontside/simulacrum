@@ -1,5 +1,5 @@
 import { HttpHandler, Middleware, Person, Store } from '@simulacrum/server';
-import { Options, QueryParams, ResponseModes } from '../types';
+import { IdTokenData, Options, QueryParams, ResponseModes } from '../types';
 import { createLoginRedirectHandler } from './login-redirect';
 import { createWebMessageHandler } from './web-message';
 import { loginView } from '../views/login';
@@ -12,6 +12,7 @@ import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
 import { getServiceUrl } from './get-service-url';
 import { createRulesRunner } from '../rules/rules-runner';
 import { RuleUser } from '../rules/types';
+import { decode as decodeToken } from 'jsonwebtoken';
 
 export type Routes =
   | '/heartbeat'
@@ -21,6 +22,7 @@ export type Routes =
   | '/login/callback'
   | '/oauth/token'
   | '/v2/logout'
+  | '/userinfo'
 
 type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
 
@@ -162,19 +164,37 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     },
 
     ['/oauth/token']: function* (req, res) {
-      let { code } = req.body;
+      let { code, grant_type } = req.body;
 
-      let [nonce, username] = decode(code).split(":");
+      let user: Person | undefined;
+      let nonce: string | undefined;
+      let username: string;
+      let password: string | undefined;
+
+      if (grant_type === 'password') {
+        username = req.body.username;
+        password = req.body.password;
+      } else {
+        assert(typeof code !== 'undefined', 'no code in /oauth/token');
+
+        [nonce, username] = decode(code).split(":");
+      }
 
       if (!username) {
         res.status(400).send(`no nonce in store for ${code}`);
         return;
       }
 
-      let user = personQuery(([, person]) => {
+      user = personQuery(([, person]) => {
         assert(!!person.email, `no email defined on person scenario`);
 
-        return person.email.toLowerCase() === username.toLowerCase();
+        let valid = person.email.toLowerCase() === username.toLowerCase();
+
+        if(typeof password === 'undefined') {
+          return valid;
+        } else {
+          return valid && password === person.password;
+        }
       });
 
       if(!user) {
@@ -184,7 +204,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let url = getServiceUrlFromOptions(options).toString();
 
-      let idTokenData = {
+      let idTokenData: IdTokenData = {
         alg: "RS256",
         typ: "JWT",
         iss: url,
@@ -193,8 +213,11 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         email: username,
         aud: clientId,
         sub: user.id,
-        nonce,
       };
+
+      if(typeof nonce !== 'undefined') {
+        idTokenData.nonce = nonce;
+      }
 
       assert(!!clientId, 'no clientId in options');
 
@@ -210,7 +233,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       let idToken = createJsonWebToken({ ...userData, ...context.idToken, ...context.accessToken });
 
       res.status(200).json({
-        access_token: createAuthJWT(url, audience),
+        access_token: createAuthJWT(url, audience, idTokenData.sub),
         id_token: idToken,
         expires_in: 86400,
         token_type: "Bearer",
@@ -225,6 +248,37 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       assert(typeof returnToUrl === 'string', `no logical returnTo url`);
 
       res.redirect(returnToUrl);
+    },
+
+    ['/userinfo']: function* (req, res) {
+      let authorizationHeader = req.headers.authorization;
+
+      assert(!!authorizationHeader, 'no authorization header');
+
+      let [, token] = authorizationHeader.split(' ');
+
+      let { sub } = decodeToken(token, { json: true }) as { sub: string };
+
+      let user = personQuery(([, person]) => {
+        assert(!!person.id, `no email defined on person scenario`);
+
+        return person.id === sub;
+      });
+
+      assert(!!user, 'no user in /userinfo');
+
+      let userinfo = {
+        sub,
+        name: user.name,
+        given_name: user.name,
+        family_name: user.name,
+        email: user.email,
+        email_verified: true,
+        locale: 'en',
+        hd: 'okta.com'
+       };
+
+      res.status(200).json(userinfo);
     }
   };
 };

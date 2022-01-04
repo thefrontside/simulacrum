@@ -14,10 +14,11 @@ export const createJsonWebToken = (
   return sign(payload, privateKey, options);
 };
 
-export function createAuthJWT(authNamespace: string, audience: string): string {
+export function createAuthJWT(authNamespace: string, audience: string, sub: string): string {
   return createJsonWebToken({
     [`${authNamespace}`]: 'decorate token',
     aud: audience,
     iss: authNamespace,
+    sub,
   });
 }
