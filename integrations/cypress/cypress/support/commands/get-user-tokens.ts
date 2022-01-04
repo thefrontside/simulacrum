@@ -1,12 +1,11 @@
 import { Person } from '../types';
 import { auth } from '../auth';
+import { DefaultDirectoryLoginOptions } from 'auth0-js';
 
 Cypress.Commands.add('getUserTokens', (person: Person) => {
   let { email, password } = person;
 
   let auth0ClientSecret = Cypress.env('auth0ClientSecret');
-
-  console.log({ email, password, auth0ClientSecret, c: Cypress.env('audience'), d: Cypress.env('scope') });
 
   assert([email, password, auth0ClientSecret].every(Boolean), 'email, auth0ClientSecret and password are required');
 
@@ -17,16 +16,11 @@ Cypress.Commands.add('getUserTokens', (person: Person) => {
       audience: Cypress.env('audience'),
       scope: Cypress.env('scope'),
       client_secret: auth0ClientSecret,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any, (err, response) => {
+    } as DefaultDirectoryLoginOptions, (err, response) => {
       if (err) {
         console.error(err);
-        console.dir({ err }, { depth: 33 });
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        console.log((err as any).stack);
         reject(err);
       } else {
-        console.dir({ response }, { depth: 33 });
         resolve(response);
       }
     });

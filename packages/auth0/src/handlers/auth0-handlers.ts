@@ -251,7 +251,6 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       res.redirect(returnToUrl);
     },
 
-
     ['/userinfo']: function* (req, res) {
       let authorizationHeader = req.headers.authorization;
 
