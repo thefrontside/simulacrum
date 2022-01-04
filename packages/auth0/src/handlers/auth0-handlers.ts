@@ -13,7 +13,6 @@ import { getServiceUrl } from './get-service-url';
 import { createRulesRunner } from '../rules/rules-runner';
 import { RuleUser } from '../rules/types';
 import { decode as decodeToken } from 'jsonwebtoken';
-import faker from 'faker';
 
 export type Routes =
   | '/heartbeat'
@@ -235,7 +234,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       let idToken = createJsonWebToken({ ...userData, ...context.idToken, ...context.accessToken });
 
       res.status(200).json({
-        access_token: createAuthJWT(url, audience),
+        access_token: createAuthJWT(url, audience, idTokenData.sub),
         id_token: idToken,
         expires_in: 86400,
         token_type: "Bearer",
@@ -260,13 +259,12 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let [, token] = authorizationHeader.split(' ');
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let { email, sub } = decodeToken(token, { json: true }) as any;
+      let { sub } = decodeToken(token, { json: true }) as { sub: string };
 
       let user = personQuery(([, person]) => {
-        assert(!!person.email, `no email defined on person scenario`);
+        assert(!!person.id, `no email defined on person scenario`);
 
-        return person.email.toLowerCase() === email.toLowerCase();
+        return person.id === sub;
       });
 
       assert(!!user, 'no user in /userinfo');
@@ -276,7 +274,6 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         name: user.name,
         given_name: user.name,
         family_name: user.name,
-        picture: faker.internet.avatar(),
         email: user.email,
         email_verified: true,
         locale: 'en',

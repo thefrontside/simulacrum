@@ -28,7 +28,7 @@ export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
 
           assert(!!accessToken, 'no access token in login');
 
-          cy.getUserInfo(idToken).then((user) => {
+          cy.getUserInfo(accessToken).then((user) => {
             assert(typeof expiresIn !== 'undefined', 'no expiresIn in login');
 
             let payload = {

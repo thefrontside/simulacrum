@@ -388,7 +388,7 @@ describe('Auth0 simulator', () => {
       let res: Response = yield fetch(`${auth0Url}/userinfo`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token.id_token}`
+          'Authorization': `Bearer ${token.access_token}`
         }
       });
 
