@@ -1,5 +1,5 @@
 import { HttpHandler, Middleware, Person, Store } from '@simulacrum/server';
-import { Options, QueryParams, ResponseModes } from '../types';
+import { IdTokenData, Options, QueryParams, ResponseModes } from '../types';
 import { createLoginRedirectHandler } from './login-redirect';
 import { createWebMessageHandler } from './web-message';
 import { loginView } from '../views/login';
@@ -204,7 +204,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let url = getServiceUrlFromOptions(options).toString();
 
-      let idTokenData = {
+      let idTokenData: IdTokenData = {
         alg: "RS256",
         typ: "JWT",
         iss: url,
@@ -216,8 +216,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       };
 
       if(typeof nonce !== 'undefined') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (idTokenData as any).nonce = nonce;
+        idTokenData.nonce = nonce;
       }
 
       assert(!!clientId, 'no clientId in options');

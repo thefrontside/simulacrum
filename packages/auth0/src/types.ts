@@ -40,3 +40,15 @@ export interface TokenSet {
 
   [key: string]: unknown;
 }
+
+export interface IdTokenData {
+  alg: string;
+  typ: string;
+  iss: string;
+  exp: number;
+  iat: number;
+  email: string;
+  aud: string;
+  sub: string;
+  nonce?: string;
+}
