@@ -12,6 +12,8 @@ import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
 import { getServiceUrl } from './get-service-url';
 import { createRulesRunner } from '../rules/rules-runner';
 import { RuleUser } from '../rules/types';
+import { decode as decodeToken } from 'jsonwebtoken';
+import faker from 'faker';
 
 export type Routes =
   | '/heartbeat'
@@ -252,9 +254,36 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
 
     ['/userinfo']: function* (req, res) {
-      console.dir({ h: req.headers });
+      let authorizationHeader = req.headers.authorization;
 
-      res.status(200).json({});
+      assert(!!authorizationHeader, 'no authorization header');
+
+      let [, token] = authorizationHeader.split(' ');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let { email, sub } = decodeToken(token, { json: true }) as any;
+
+      let user = personQuery(([, person]) => {
+        assert(!!person.email, `no email defined on person scenario`);
+
+        return person.email.toLowerCase() === email.toLowerCase();
+      });
+
+      assert(!!user, 'no user in /userinfo');
+
+      let userinfo = {
+        sub,
+        name: user.name,
+        given_name: user.name,
+        family_name: user.name,
+        picture: faker.internet.avatar(),
+        email: user.email,
+        email_verified: true,
+        locale: 'en',
+        hd: 'okta.com'
+       };
+
+      res.status(200).json(userinfo);
     }
   };
 };
