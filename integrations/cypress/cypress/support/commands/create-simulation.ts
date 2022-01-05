@@ -10,7 +10,7 @@ export interface MakeCreateSimulationOptions {
 const log = makeCypressLogger('simulacrum-create-simulation');
 
 export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimulationOptions) => (options: CreateSimulation) => {
-  return new Cypress.Promise((resolve, reject) => {
+  return cy.logout().then(() => {
     let client = getClientFromSpec(Cypress.spec.name);
 
     let { debug = false, domain, client_id, ...auth0Options } = options;
@@ -21,7 +21,7 @@ export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimu
 
     assert(typeof client !== 'undefined', 'no client created in createSimulation');
 
-    client.createSimulation("auth0", {
+    return client.createSimulation("auth0", {
       options: {
         ...auth0Options,
         clientId: client_id,
@@ -43,11 +43,12 @@ export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimu
 
       log(`sumalation created ${JSON.stringify(simulation)}`);
 
-      resolve(simulation);
+      return simulation;
     }).catch((e) => {
       log(`create-simulation failed ${e.message}`);
 
-      reject(e);
+      throw e
+      ;
     });
   });
 };
