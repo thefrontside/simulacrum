@@ -29,7 +29,7 @@ export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
         cy.getUserTokens(person).then((response) => {
           let { accessToken, expiresIn, idToken, scope } = response;
 
-          log(`successfully called getUserTokens with ${person.email}`);
+          log(`successfully called getUserTokens with ${person?.email}`);
 
           assert(!!accessToken, 'no access token in login');
 
