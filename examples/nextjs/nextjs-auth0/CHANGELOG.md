@@ -1,5 +1,14 @@
 # Changelog
 
+## \[0.0.7]
+
+- Enable @simulacrum/auth0-cypress to run against nextjs-auth0.
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [79a6f11](https://github.com/thefrontside/simulacrum/commit/79a6f11e6a5d516314182d5466f0d9657465c92e) Get user tokens ([#162](https://github.com/thefrontside/simulacrum/pull/162)) on 2022-01-04
+- Update eslint-config and typescript versions
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [f852573](https://github.com/thefrontside/simulacrum/commit/f852573daefaf3da2675b1233c3c2db38a2b43ba) update eslint-config and typescript on 2021-10-26
+
 ## \[0.0.6]
 
 - Add @simulacrum/auth0-cypress package

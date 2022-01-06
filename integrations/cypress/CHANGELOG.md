@@ -1,5 +1,18 @@
 # Changelog
 
+## \[0.3.0]
+
+- Simplify cypress logging
+  - [9b9d82f](https://github.com/thefrontside/simulacrum/commit/9b9d82f27795f745cd9d23b7d16f42ed0c204b3d) simplify cypress logging ([#163](https://github.com/thefrontside/simulacrum/pull/163)) on 2022-01-06
+- Enable @simulacrum/auth0-cypress to run against nextjs-auth0.
+  - [79a6f11](https://github.com/thefrontside/simulacrum/commit/79a6f11e6a5d516314182d5466f0d9657465c92e) Get user tokens ([#162](https://github.com/thefrontside/simulacrum/pull/162)) on 2022-01-04
+- Add debug option to createSimulation to add express middleware logging
+  - [9df79b5](https://github.com/thefrontside/simulacrum/commit/9df79b53e0891d0d3c7946abd450240d4c6cd032) Add debug option to createSimulation to add express middleware logging on 2021-11-25
+- Update eslint-config and typescript versions
+  - [f852573](https://github.com/thefrontside/simulacrum/commit/f852573daefaf3da2675b1233c3c2db38a2b43ba) update eslint-config and typescript on 2021-10-26
+- Destroy simulation before creating a new one
+  - [5473a01](https://github.com/thefrontside/simulacrum/commit/5473a01f22a3ccae8186ab8b1c7e785a1be9bdfb) Rerun cypress tests ([#164](https://github.com/thefrontside/simulacrum/pull/164)) on 2022-01-06
+
 ## \[0.2.2]
 
 - specify typeRoots for @simulacrum/auth0-cypress cypress package
