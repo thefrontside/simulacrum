@@ -15,10 +15,19 @@ export const makeLogout = ({ atom, getClientFromSpec }: MakeLogoutOptions) => ()
 
     log('in logout');
 
+    if(!client) {
+      log('no client');
+      resolve();
+      return;
+    }
+
     let simulation = atom.slice(Cypress.spec.name, 'simulation').get();
 
-    if(!client || !simulation) {
-      log('no simulation or client');
+    log(JSON.stringify(simulation));
+
+
+    if(!simulation) {
+      log('no simulation');
       resolve();
       return;
     }
@@ -27,7 +36,6 @@ export const makeLogout = ({ atom, getClientFromSpec }: MakeLogoutOptions) => ()
       log('simulation destroyed');
 
       atom.slice(Cypress.spec.name).remove();
-
       resolve();
     }).catch(e => {
       log(`logout failed with ${e.message}`);
