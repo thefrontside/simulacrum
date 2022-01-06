@@ -5,7 +5,7 @@ describe("auth", () => {
   describe("log in, create person per test", () => {
     it("should log in and log out", () => {
       cy
-        .createSimulation(auth0Config)
+        .createSimulation({ ...auth0Config, debug: true })
         .visit("/")
         .contains("Logout").should('not.exist')
         .given()
@@ -83,30 +83,30 @@ describe("auth", () => {
     });
   });
 
-  // describe("logout in beforeEach", () => {
-  //   beforeEach(() => {
-  //     cy.logout()
-  //       .createSimulation(auth0Config)
-  //       .given();
-  //   });
+  describe("logout in beforeEach", () => {
+    beforeEach(() => {
+      cy.logout()
+        .createSimulation(auth0Config)
+        .given();
+    });
 
-  //   it("should login once", () => {
-  //       cy
-  //         .visit("/")
-  //         .contains("Logout").should('not.exist')
-  //         .login()
-  //         .visit("/")
-  //         .contains("Logout");
-  //   });
+    it("should login once", () => {
+        cy
+          .visit("/")
+          .contains("Logout").should('not.exist')
+          .login()
+          .visit("/")
+          .contains("Logout");
+    });
 
-  //   it("should login twice without error", () => {
-  //     cy
-  //       .visit("/")
-  //       .contains("Logout").should('not.exist')
-  //       .given({ email: 'second@gmail.com' })
-  //       .login()
-  //       .visit("/")
-  //       .contains("Logout");
-  //   });
-  // });
+    it("should login twice without error", () => {
+      cy
+        .visit("/")
+        .contains("Logout").should('not.exist')
+        .given({ email: 'second@gmail.com' })
+        .login()
+        .visit("/")
+        .contains("Logout");
+    });
+  });
 });

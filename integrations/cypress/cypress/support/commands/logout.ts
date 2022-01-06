@@ -1,4 +1,5 @@
 import { Slice } from '@effection/atom';
+import { Simulation } from '@simulacrum/client';
 import { GetClientFromSpec, TestState } from '../types';
 import { makeCypressLogger } from '../utils/cypress-logger';
 
@@ -11,28 +12,13 @@ const log = makeCypressLogger('simulacrum-logout');
 
 export const makeLogout = ({ atom, getClientFromSpec }: MakeLogoutOptions) => () => {
   return new Cypress.Promise((resolve, reject) => {
-    let client = getClientFromSpec(Cypress.spec.name);
-
     log('in logout');
 
-    if(!client) {
-      log('no client');
-      resolve();
-      return;
-    }
+    let client = getClientFromSpec(Cypress.spec.name);
 
-    let simulation = atom.slice(Cypress.spec.name, 'simulation').get();
+    assert(typeof client?.createSimulation === 'function', 'no client created in createSimulation');
 
-    log(JSON.stringify(simulation));
-
-
-    if(!simulation) {
-      log('no simulation');
-      resolve();
-      return;
-    }
-
-    client.destroySimulation(simulation).then(() => {
+    client.destroySimulation({ id: 'cypress' } as Simulation).then(() => {
       log('simulation destroyed');
 
       atom.slice(Cypress.spec.name).remove();
