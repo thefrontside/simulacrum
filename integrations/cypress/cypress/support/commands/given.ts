@@ -13,9 +13,9 @@ const log = makeCypressLogger('simulacrum-given');
 export const makeGiven = ({ atom, getClientFromSpec }: MakeGivenOptions) => (attrs: Partial<Person> = {}) => {
   return new Cypress.Promise((resolve, reject) => {
     let client = getClientFromSpec(Cypress.spec.name);
-    assert(typeof client?.given === 'function', 'no valid client in given');
 
     let simulation = atom.slice(Cypress.spec.name, 'simulation').get();
+
     assert(!!simulation, 'no sumulation in given');
 
     log(`creating person with attrs: ${JSON.stringify(attrs)}`);

@@ -22,5 +22,8 @@ export const makeGetClientFromSpec = ({ atom, port }: MakeGetClientFromSpecOptio
     client = atom.slice(spec, 'client').get();
   }
 
+  // probably not needed but....good to know
+  assert(typeof client?.createSimulation === 'function', 'no client created in getClientFromSpec');
+
   return client;
 };

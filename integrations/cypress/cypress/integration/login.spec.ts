@@ -5,7 +5,7 @@ describe("auth", () => {
   describe("log in, create person per test", () => {
     it("should log in and log out", () => {
       cy
-        .createSimulation({ ...auth0Config, debug: true })
+        .createSimulation(auth0Config)
         .visit("/")
         .contains("Logout").should('not.exist')
         .given()
