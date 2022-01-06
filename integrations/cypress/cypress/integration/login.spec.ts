@@ -33,7 +33,6 @@ describe("auth", () => {
     });
   });
 
-
   describe("createSimulation in beforeEach and logout in afterEach", () => {
     beforeEach(() => {
       cy.createSimulation(auth0Config);

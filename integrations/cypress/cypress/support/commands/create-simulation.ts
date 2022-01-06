@@ -1,6 +1,7 @@
 import { Slice } from '@effection/atom';
 import { CreateSimulation, GetClientFromSpec, TestState } from '../types';
 import { makeCypressLogger } from '../utils/cypress-logger';
+import { SimulationId } from './constants';
 
 export interface MakeCreateSimulationOptions {
   atom: Slice<TestState>;
@@ -10,7 +11,7 @@ export interface MakeCreateSimulationOptions {
 const log = makeCypressLogger('simulacrum-create-simulation');
 
 export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimulationOptions) => (options: CreateSimulation) => {
-  return new Cypress.Promise((resolve, reject) => {
+  return cy.logout().then(() => {
     let client = getClientFromSpec(Cypress.spec.name);
 
     let { debug = false, domain, client_id, ...auth0Options } = options;
@@ -19,35 +20,37 @@ export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimu
 
     let port = Number(domain.split(':').slice(-1)[0]);
 
-    assert(typeof client !== 'undefined', 'no client created in createSimulation');
+    log(`creating simulation with options: ${JSON.stringify(options)}`);
 
-    client.createSimulation("auth0", {
-      options: {
-        ...auth0Options,
-        clientId: client_id,
-      },
-      services: {
-        auth0: {
-          port,
+    return new Cypress.Promise((resolve, reject) => {
+      client.createSimulation("auth0", {
+        options: {
+          ...auth0Options,
+          clientId: client_id,
         },
-      },
-      debug,
-      key: 'cypress'
-    }).then(simulation => {
-      atom.slice(Cypress.spec.name).update(current => {
-        return {
-          ...current,
-          simulation
-        };
+        services: {
+          auth0: {
+            port,
+          },
+        },
+        debug,
+        key: SimulationId
+      }).then(simulation => {
+        atom.slice(Cypress.spec.name).update(current => {
+          return {
+            ...current,
+            simulation
+          };
+        });
+
+        log(`sumalation created ${JSON.stringify(simulation)}`);
+
+        resolve(simulation);
+      }).catch((e) => {
+        log(`create-simulation failed ${e.message}`);
+
+        reject(e);
       });
-
-      log(`sumalation created ${JSON.stringify(simulation)}`);
-
-      resolve(simulation);
-    }).catch((e) => {
-      log(`create-simulation failed ${e.message}`);
-
-      reject(e);
     });
   });
 };
