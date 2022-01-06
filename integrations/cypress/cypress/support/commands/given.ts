@@ -1,11 +1,14 @@
 import { Slice } from '@effection/atom';
 import { GetClientFromSpec, Person, TestState } from '../types';
 import { assert } from 'assert-ts';
+import { makeCypressLogger } from '../utils/cypress-logger';
 
 export interface MakeGivenOptions {
   atom: Slice<TestState>;
   getClientFromSpec: GetClientFromSpec;
 }
+
+const log = makeCypressLogger('simulacrum-given');
 
 export const makeGiven = ({ atom, getClientFromSpec }: MakeGivenOptions) => (attrs: Partial<Person> = {}) => {
   return new Cypress.Promise((resolve, reject) => {
@@ -24,20 +27,12 @@ export const makeGiven = ({ atom, getClientFromSpec }: MakeGivenOptions) => (att
           };
         });
 
-        Cypress.log({
-          name: 'simulacrum-given',
-          displayName: 'simulacrum-given',
-          message: `scenario created with ${JSON.stringify(scenario)}`
-        });
+        log(`scenario created with ${JSON.stringify(scenario)}`);
 
         resolve(scenario.data);
       })
       .catch((e) => {
-        Cypress.log({
-          name: 'simulacrum-given',
-          displayName: 'simulacrum-given',
-          message: `given failed ${e.message}`
-        });
+        log(`given failed ${e.message}`);
 
         reject(e);
       });

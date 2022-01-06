@@ -1,10 +1,13 @@
 import { Slice } from '@effection/atom';
 import { TestState } from '../types';
 import { assert } from 'assert-ts';
+import { makeCypressLogger } from '../utils/cypress-logger';
 
 export interface MakeLoginOptions {
   atom: Slice<TestState>;
 }
+
+const log = makeCypressLogger('simulacrum-login');
 
 export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
 
@@ -12,8 +15,8 @@ export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
 
   try {
     cy.getCookie(sessionCookieName).then((cookieValue) => {
-      /* Skip logging in again if session already exists */
       if (cookieValue) {
+        log('Skip logging in again if session already exists');
         return true;
       } else {
         cy.clearCookies();
@@ -25,6 +28,8 @@ export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
 
         cy.getUserTokens(person).then((response) => {
           let { accessToken, expiresIn, idToken, scope } = response;
+
+          log(`successfully called getUserTokens with ${person?.email}`);
 
           assert(!!accessToken, 'no access token in login');
 
@@ -42,6 +47,8 @@ export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
             };
 
             cy.task<string>('encrypt', payload).then((encryptedSession) => {
+              log('successfully encrypted session');
+
               cy.setCookie(sessionCookieName, encryptedSession);
             });
           });

@@ -1,10 +1,14 @@
 import { Slice } from '@effection/atom';
 import { CreateSimulation, GetClientFromSpec, TestState } from '../types';
+import { makeCypressLogger } from '../utils/cypress-logger';
 
 export interface MakeCreateSimulationOptions {
   atom: Slice<TestState>;
   getClientFromSpec: GetClientFromSpec;
 }
+
+const log = makeCypressLogger('simulacrum-create-simulation');
+
 export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimulationOptions) => (options: CreateSimulation) => {
   return new Cypress.Promise((resolve, reject) => {
     let client = getClientFromSpec(Cypress.spec.name);
@@ -37,19 +41,11 @@ export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimu
         };
       });
 
-      Cypress.log({
-        name: 'simulacrum-create-simulation',
-        displayName: 'simulacrum-create-simulation',
-        message: `sumalation created ${JSON.stringify(simulation)}`
-      });
+      log(`sumalation created ${JSON.stringify(simulation)}`);
 
       resolve(simulation);
     }).catch((e) => {
-      Cypress.log({
-        name: 'simulacrum-create-simulation',
-        displayName: 'simulacrum-create-simulation',
-        message: `create-simulation failed ${e.message}`
-      });
+      log(`create-simulation failed ${e.message}`);
 
       reject(e);
     });
