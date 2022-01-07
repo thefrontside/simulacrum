@@ -1,0 +1,67 @@
+{
+  "name": "auth0-react-sample",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npm-run-all --parallel spa api-server",
+    "build": "react-scripts build",
+    "cypress:ci": "cypress run --headless",
+    "cypress:open": "cypress open",
+    "test": "react-scripts test --env=jest-environment-jsdom-sixteen",
+    "eject": "react-scripts eject",
+    "spa": "react-scripts start",
+    "server": "node server.js",
+    "server:dev": "nodemon server.js",
+    "api-server": "node api-server.js",
+    "api-server:dev": "nodemon api-server.js",
+    "dev": "npm-run-all --parallel spa api-server:dev",
+    "prod": "npm-run-all --parallel server api-server"
+  },
+  "dependencies": {
+    "@auth0/auth0-react": "^1.8.0",
+    "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@fortawesome/react-fontawesome": "^0.1.16",
+    "cors": "^2.8.5",
+    "effection": "2.0.2",
+    "express": "^4.17.2",
+    "express-jwt": "^6.1.0",
+    "helmet": "^5.0.1",
+    "highlight.js": "^11.4.0",
+    "jwks-rsa": "^2.0.5",
+    "morgan": "^1.10.0",
+    "npm-run-all": "^4.1.5",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^6.2.1",
+    "react-scripts": "^5.0.0",
+    "reactstrap": "^9.0.1"
+  },
+  "devDependencies": {
+    "@frontside/tsconfig": "^3.0.0",
+    "@simulacrum/client": "^0.5.3",
+    "@testing-library/jest-dom": "^5.16.1",
+    "@testing-library/react": "^12.1.2",
+    "cypress": "^8.6.0",
+    "es-cookies": "^2.1.18",
+    "jest-environment-jsdom-sixteen": "^2.0.0",
+    "jest-fetch-mock": "^3.0.3",
+    "nodemon": "^2.0.15",
+    "typescript": "^4.4.3"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
