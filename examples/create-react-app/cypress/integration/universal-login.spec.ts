@@ -1,5 +1,4 @@
-import type { Client, Scenario, Simulation } from '@simulacrum/client';
-import { createClient } from '@simulacrum/client'
+import { Client, createClient, Scenario, Simulation } from '@simulacrum/client';
 import configJson from "../../src/auth_config.json";
 
 interface Person { email: string; password: string }
@@ -77,19 +76,5 @@ describe('login', () => {
   
       cy.get('.nav-link').should('contain', 'External API');
     })
-  })
-
-  describe('normal flow', () => {
-    it('should get token without signing in and access restricted route',  () => {
-      cy.login({currentUser: person.email});
-  
-      cy.visit('/external-api');
-  
-      cy.url().should('include', '/external-api');
-
-      cy.contains('Ping API').click();
-
-      cy.contains('Your access token was successfully validated')
-    });
-  })
+  });
 });

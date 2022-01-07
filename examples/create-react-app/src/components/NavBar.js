@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink as RouterNavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import {
@@ -10,7 +10,6 @@ import {
   NavbarBrand,
   Nav,
   NavItem,
-  NavLink,
   Button,
   UncontrolledDropdown,
   DropdownToggle,
@@ -45,10 +44,10 @@ const NavBar = () => {
             <Nav className="mr-auto" navbar>
               <NavItem>
                 <NavLink
-                  tag={RouterNavLink}
+                  tag={NavLink}
                   to="/"
                   end
-                  className="router-link-exact-active"
+                  className={({ isActive }) => (isActive ? "router-link-exact-active" : "")}
                 >
                   Home
                 </NavLink>
@@ -56,10 +55,10 @@ const NavBar = () => {
               {isAuthenticated && (
                 <NavItem>
                   <NavLink
-                    tag={RouterNavLink}
+                    tag={NavLink}
                     to="/external-api"
                     end
-                    className="router-link-exact-active"
+                    className={({ isActive }) => (isActive ? "router-link-exact-active" : "")}
                   >
                     External API
                   </NavLink>
@@ -92,10 +91,8 @@ const NavBar = () => {
                   <DropdownMenu>
                     <DropdownItem header>{user.name}</DropdownItem>
                     <DropdownItem
-                      tag={RouterNavLink}
+                      tag={NavLink}
                       to="/profile"
-                      className="dropdown-profile"
-                      activeClassName="router-link-exact-active"
                     >
                       <FontAwesomeIcon icon="user" className="mr-3" /> Profile
                     </DropdownItem>
@@ -143,22 +140,22 @@ const NavBar = () => {
                 </NavItem>
                 <NavItem>
                   <FontAwesomeIcon icon="user" className="mr-3" />
-                  <RouterNavLink
+                  <NavLink
                     to="/profile"
-                    activeClassName="router-link-exact-active"
+                    className={({ isActive }) => (isActive ? "router-link-exact-active" : "")}
                   >
                     Profile
-                  </RouterNavLink>
+                  </NavLink>
                 </NavItem>
                 <NavItem>
                   <FontAwesomeIcon icon="power-off" className="mr-3" />
-                  <RouterNavLink
+                  <NavLink
                     to="#"
                     id="qsLogoutBtn"
                     onClick={() => logoutWithRedirect()}
                   >
                     Log out
-                  </RouterNavLink>
+                  </NavLink>
                 </NavItem>
               </Nav>
             )}

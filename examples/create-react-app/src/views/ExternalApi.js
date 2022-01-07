@@ -160,7 +160,7 @@ export const ExternalApiComponent = () => {
               </li>
               <li>
                 by specifying it in the <code>auth_config.json</code> file (see
-                the <code>auth_config.json.example</code> file for an example of
+                the <code>auth_config.json</code> file for an example of
                 where it should go)
               </li>
             </ul>
