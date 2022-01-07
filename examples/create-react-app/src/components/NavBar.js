@@ -47,8 +47,8 @@ const NavBar = () => {
                 <NavLink
                   tag={RouterNavLink}
                   to="/"
-                  exact
-                  activeClassName="router-link-exact-active"
+                  end
+                  className="router-link-exact-active"
                 >
                   Home
                 </NavLink>
@@ -58,8 +58,8 @@ const NavBar = () => {
                   <NavLink
                     tag={RouterNavLink}
                     to="/external-api"
-                    exact
-                    activeClassName="router-link-exact-active"
+                    end
+                    className="router-link-exact-active"
                   >
                     External API
                   </NavLink>
