@@ -41,6 +41,10 @@ const checkJwt = jwt({
   algorithms: ["RS256"],
 });
 
+app.head('/', (req, res) => {
+  res.status(200).send(req.headers);
+});
+
 app.get("/api/external", checkJwt, (req, res) => {
   res.send({
     msg: "Your access token was successfully validated!",

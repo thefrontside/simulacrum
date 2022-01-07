@@ -1,12 +1,9 @@
-import { Client, createClient, Scenario, Simulation } from '@simulacrum/client';
-import configJson from "../../src/auth_config.json";
-
-interface Person { email: string; password: string }
+import appConfig from "../../src/auth_config.json";
 
 describe('login', () => {
   describe('@simulacrum/auth0-cypress', () => {
     it('should get token without signing in and access restricted route',  () => {
-      cy.createSimulation(configJson)
+      cy.createSimulation(appConfig)
         .given()
         .login()
         .visit('/external-api')
