@@ -50,6 +50,8 @@ export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
             cy.task<string>('encrypt', payload).then((encryptedSession) => {
               log('successfully encrypted session');
 
+              console.dir({ encryptedSession });
+
               cy.setCookie(sessionCookieName, encryptedSession);
             });
           });
