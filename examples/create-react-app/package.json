@@ -1,13 +1,14 @@
 {
-  "name": "@simulacrum-examples/auth0-react-sample",
+  "name": "@simulacrum-examples/create-react-app",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "concurrently --kill-others \"npm run spa\" \"npm run api-server\" \"npm run start:auth0\"",
-    "build": "react-scripts build",
+    "start:e2e": "concurrently --kill-others \"npm run spa\" \"npm run api-server\" \"PORT=4000 ../../packages/auth0/bin/index.js\"",
     "start:auth0": "node ./simulator-server.mjs",
+    "build": "react-scripts build",
     "cypress:ci": "cypress run --headless",
-    "cypress:open": "AUTH0_DOMAIN=localhost:4400 cypress open",
+    "cypress:open": "cypress open",
     "test": "react-scripts test --env=jest-environment-jsdom-sixteen",
     "eject": "react-scripts eject",
     "spa": "react-scripts start",
@@ -17,8 +18,9 @@
     "api-server:dev": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" nodemon api-server.js",
     "dev": "npm-run-all --parallel spa api-server:dev",
     "prod": "npm-run-all --parallel server api-server",
-    "test:browser": "start-server-and-test 'start' '3000|3001|4000' 'cypress:open'",
-    "test:ci": "start-server-and-test 'start' '3000|3001|4000' 'cypress:ci'"
+    "test:browser": "start-server-and-test 'start:e2e' '3000|3001|4000' 'cypress:open'",
+    "test:ci": "start-server-and-test 'start:e2e' '3000|3001|4000' 'cypress:ci'",
+    "watch:tsc": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.json --watch"
   },
   "dependencies": {
     "@auth0/auth0-react": "^1.8.0",
