@@ -2,6 +2,7 @@ import { Slice } from '@effection/atom';
 import { TestState } from '../types';
 import { assert } from 'assert-ts';
 import { makeCypressLogger } from '../utils/cypress-logger';
+import { getConfig } from '../utils/config';
 
 export interface MakeLoginOptions {
   atom: Slice<TestState>;
@@ -10,13 +11,12 @@ export interface MakeLoginOptions {
 const log = makeCypressLogger('simulacrum-login');
 
 export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
-
-  let sessionCookieName = Cypress.env('auth0SessionCookieName');
+  let { sessionCookieName, cookieSecret, audience } = getConfig();
 
   try {
     cy.getCookie(sessionCookieName).then((cookieValue) => {
       if (cookieValue) {
-        log('Skip logging in again if session already exists');
+        log('Skip logging in again, session already exists');
         return true;
       } else {
         cy.clearCookies();
@@ -37,7 +37,8 @@ export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
             assert(typeof expiresIn !== 'undefined', 'no expiresIn in login');
 
             let payload = {
-              secret: Cypress.env('auth0CookieSecret'),
+              secret: cookieSecret,
+              audience,
               user,
               idToken,
               accessToken,

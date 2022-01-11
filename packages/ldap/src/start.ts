@@ -48,7 +48,7 @@ main(function*() {
 
  let client = createClient(url);
 
- let simulation = yield client.createSimulation("ldap", {
+ yield client.createSimulation("ldap", {
     options: {
       baseDN: "ou=users,dc=org.com",
       bindDn: "admin@org.com",
@@ -61,8 +61,6 @@ main(function*() {
       }
     }
   });
-
-  console.dir({ simulation }, { depth: 33 });
 
   yield;
 });
