@@ -7,7 +7,7 @@ const ENCRYPTION_INFO = 'JWE CEK';
 
 const deriveKey = (secret: string) => hkdf(secret, BYTE_LENGTH, { info: ENCRYPTION_INFO, hash: 'SHA-256' });
 
-export function encrypt(arg: EncryptPayload) {
+export function encrypt(arg: EncryptPayload): Promise<string> {
   let { secret, ...thingToEncrypt } = arg;
   let epochNow = (Date.now() / 1000) | 0;
 

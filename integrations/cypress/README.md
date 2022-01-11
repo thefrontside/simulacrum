@@ -27,7 +27,35 @@ npm install @simulacrum/auth0-cypress --dev
 import '@simulacrum/auth0-cypress';
 ```
 
-### Step 3: Configure Auth0
+### Step 3: Register the encrypt task
+
+We need to register an encrypt [cypress task](https://docs.cypress.io/api/commands/task).
+
+#### ESM
+
+```js
+// cypress/plugins/index.js
+
+import { encrypt } from '../support/utils/encrypt';
+
+export default (on) => {
+  on('task', { encrypt });
+};
+```
+
+#### commonjs
+
+```js
+// cypress/plugins/index.js
+
+const { encrypt } = require('@simulacrum/auth0-cypress');
+
+module.exports = (on, config) => {
+  on('task', { encrypt });
+}
+```
+
+### Step 4: Configure Auth0
 
 An example [cypress environment file](./cypress.env.json) is in the root of this repo. You can change the configuration to your auth0 values.
 
