@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.4.0]
+
+- Make encrypt typescript and exportable after transpilation
+  - [4446e54](https://github.com/thefrontside/simulacrum/commit/4446e54539f7f75dbaed160a99fb6c77758c67f6) Make encrypt typescript ([#167](https://github.com/thefrontside/simulacrum/pull/167)) on 2022-01-11
+
 ## \[0.3.1]
 
 - Give default values to the cypress environment variables.
