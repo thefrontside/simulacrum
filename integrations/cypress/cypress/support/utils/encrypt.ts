@@ -1,18 +1,18 @@
 import hkdf from 'futoin-hkdf';
-import { EncryptJWT } from 'jose';
+import { EncryptJWT, JWTPayload } from 'jose';
+import { SessionCookie } from '../types';
 
 const BYTE_LENGTH = 32;
 const ENCRYPTION_INFO = 'JWE CEK';
 
 const deriveKey = (secret: string) => hkdf(secret, BYTE_LENGTH, { info: ENCRYPTION_INFO, hash: 'SHA-256' });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function encrypt(arg: any) {
+export function encrypt(arg: SessionCookie) {
   let { secret, ...thingToEncrypt } = arg;
   console.dir({ thingToEncrypt });
   let epochNow = (Date.now() / 1000) | 0;
 
-  return new EncryptJWT(thingToEncrypt)
+  return new EncryptJWT(thingToEncrypt as unknown as JWTPayload)
     .setProtectedHeader({
       alg: 'dir',
       enc: 'A256GCM',
