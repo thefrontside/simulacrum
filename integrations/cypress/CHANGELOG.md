@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.3.1]
+
+- Give default values to the cypress environment variables.
+  - [22adebf](https://github.com/thefrontside/simulacrum/commit/22adebf310772f6df15474851ec8382739d15bb4) create defaults for auth0-cypress environment variables ([#165](https://github.com/thefrontside/simulacrum/pull/165)) on 2022-01-11
+
 ## \[0.3.0]
 
 - Simplify cypress logging
