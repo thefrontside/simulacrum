@@ -20,3 +20,14 @@ export interface Token {
 export interface Person { email: string; password: string }
 
 export type GetClientFromSpec = (spec: string) => Client;
+
+export interface EncryptPayload {
+  secret: string,
+  audience: string,
+  user: Person,
+  idToken?: string,
+  accessToken?: string,
+  accessTokenScope: string,
+  accessTokenExpiresAt: number
+  createdAt: number,
+}
