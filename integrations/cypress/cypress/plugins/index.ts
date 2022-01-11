@@ -1,5 +1,5 @@
 import { encrypt } from '../support/utils/encrypt';
 
-module.exports = (on) => {
+export default (on: Cypress.PluginEvents) => {
   on('task', { encrypt });
 };

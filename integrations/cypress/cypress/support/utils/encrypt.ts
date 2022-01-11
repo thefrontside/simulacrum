@@ -1,15 +1,14 @@
 import hkdf from 'futoin-hkdf';
 import { EncryptJWT, JWTPayload } from 'jose';
-import { SessionCookie } from '../types';
+import { EncryptPayload } from '../types';
 
 const BYTE_LENGTH = 32;
 const ENCRYPTION_INFO = 'JWE CEK';
 
 const deriveKey = (secret: string) => hkdf(secret, BYTE_LENGTH, { info: ENCRYPTION_INFO, hash: 'SHA-256' });
 
-export function encrypt(arg: SessionCookie) {
+export function encrypt(arg: EncryptPayload) {
   let { secret, ...thingToEncrypt } = arg;
-  console.dir({ thingToEncrypt });
   let epochNow = (Date.now() / 1000) | 0;
 
   return new EncryptJWT(thingToEncrypt as unknown as JWTPayload)
