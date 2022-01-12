@@ -7,6 +7,23 @@
   "repository": "https://github.com/thefrontside/simulacrum.git",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
+  "exports": {
+    ".": {
+      "import": "./dist/support/index.js",
+      "require": "./dist/support/index.js"
+    },
+    "./encrypt": {
+      "import": "./dist/support/utils/encrypt.js",
+      "require": "./dist/support/utils/encrypt.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/support/index.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist/**/*",
     "cypress/**/*",
