@@ -1,5 +1,5 @@
 import { Person } from '../types';
-import { auth } from '../auth';
+import { auth } from './authorization_code/auth';
 import { DefaultDirectoryLoginOptions } from 'auth0-js';
 import { makeCypressLogger } from '../utils/cypress-logger';
 import { getConfig } from '../utils/config';

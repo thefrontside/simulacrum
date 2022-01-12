@@ -5,7 +5,7 @@ import { makeCreateSimulation } from './create-simulation';
 import { CreateSimulation, Person, TestState, Token } from '../types';
 import { makeGetClientFromSpec } from '../utils/spec';
 import { makeGiven } from './given';
-import { makeLogin } from './login';
+import { makeLogin } from './authorization_code';
 import { makeLogout } from './logout';
 import { Auth0Result } from 'auth0-js';
 import './get-user-tokens';

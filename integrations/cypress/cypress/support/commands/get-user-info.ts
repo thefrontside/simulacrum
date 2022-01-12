@@ -1,4 +1,4 @@
-import { auth } from '../auth';
+import { auth } from './authorization_code/auth';
 
 Cypress.Commands.add('getUserInfo', (accessToken) => {
   return new Cypress.Promise((resolve, reject) => {
