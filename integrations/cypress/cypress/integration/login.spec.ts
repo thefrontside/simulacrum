@@ -17,24 +17,24 @@ describe("auth", () => {
     });
   });
 
-  // describe("log in, create simulation and person in beforeEach", () => {
-  //   beforeEach(() => {
-  //     cy.createSimulation(auth0Config)
-  //       .given();
-  //   });
+  describe("log in, create simulation and person in beforeEach", () => {
+    beforeEach(() => {
+      cy.createSimulation(auth0Config)
+        .given();
+    });
 
-  //   it("should login and logout", () => {
-  //     cy
-  //       .visit("/")
-  //       .get('[data-testid=home]').should('exist')
-  //       .get('[data-testid=logout]')
-  //       .should('not.exist')
-  //       .login()
-  //       .visit("/")
-  //       .get('[data-testid=logout]').should('exist')
-  //       .logout();
-  //   });
-  // });
+    it("should login and logout", () => {
+      cy
+        .visit("/")
+        .get('[data-testid=home]').should('exist')
+        .get('[data-testid=logout]')
+        .should('not.exist')
+        .login()
+        .visit("/")
+        .get('[data-testid=logout]').should('exist')
+        .logout();
+    });
+  });
 
   // describe("createSimulation in beforeEach and logout in afterEach", () => {
   //   beforeEach(() => {

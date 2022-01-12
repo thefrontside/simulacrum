@@ -6,7 +6,7 @@ import { CreateSimulation, Person, TestState, Token } from '../types';
 import { makeGetClientFromSpec } from '../utils/spec';
 import { makeGiven } from './given';
 import { makeAuthorizationFlowCommands } from './add-flow-commands';
-import { makeLogout } from './logout';
+import { makeAuthorizationCodeLogout } from './authorization_code/logout';
 import { Auth0Result } from 'auth0-js';
 import './authorization_code/get-user-info';
 import './authorization_code/get-user-tokens';
@@ -37,8 +37,8 @@ Cypress.Commands.add('createSimulation', makeCreateSimulation({ atom, getClientF
 
 Cypress.Commands.add('given', makeGiven({ atom, getClientFromSpec }));
 
-Cypress.Commands.add('logout', makeLogout({ atom, getClientFromSpec }));
+Cypress.Commands.add('logout', makeAuthorizationCodeLogout({ atom, getClientFromSpec }));
 
-makeAuthorizationFlowCommands({ atom });
+makeAuthorizationFlowCommands({ atom, getClientFromSpec });
 
 export { };
