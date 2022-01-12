@@ -11,7 +11,7 @@ const Header = (): React.ReactElement => {
         <ul>
           <li>
             <Link href="/">
-              <a>Home</a>
+              <a data-testid="home">Home</a>
             </Link>
           </li>
           {user ? (

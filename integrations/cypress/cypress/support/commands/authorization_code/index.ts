@@ -15,6 +15,7 @@ export const makeAuthorizationCodeLogin = ({ atom }: MakeLoginOptions) => () => 
 
   try {
     cy.getCookie(sessionCookieName).then((cookieValue) => {
+      log(`cookie ${sessionCookieName} is ${cookieValue}`);
       if (cookieValue) {
         log('Skip logging in again, session already exists');
         return true;

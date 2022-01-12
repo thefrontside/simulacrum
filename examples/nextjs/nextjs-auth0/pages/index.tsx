@@ -33,7 +33,7 @@ export default function Home(): JSX.Element {
           </p>
           <p>
             Once you have logged in you should be able to click in{" "}
-            <i>Protected Page</i> and <i>Logout</i>
+            <i>Protected Page</i> and <i>Log out</i>
           </p>
         </>
       )}
