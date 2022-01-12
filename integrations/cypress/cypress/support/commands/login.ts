@@ -14,7 +14,6 @@ type LoginMaker = ({ atom }: MakeLoginOptions) => () => void
 
 const log = makeCypressLogger('simulacrum-login-maker');
 
-
 const authorizationFlows: Record<AuthorizationCodeFlows, LoginMaker> = {
   authorization_code: makeAuthorizationCodeLogin,
   authorization_code_with_pkce: makeLoginWithPKCE,
@@ -23,9 +22,9 @@ const authorizationFlows: Record<AuthorizationCodeFlows, LoginMaker> = {
 export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
   let config = getConfig();
 
-  let flow: AuthorizationCodeFlows = typeof config.cookieSecret === 'undefined' ? 'authorization_code' : 'authorization_code_with_pkce' as const;
+  let flow: AuthorizationCodeFlows = typeof config.cookieSecret !== 'undefined' ? 'authorization_code' : 'authorization_code_with_pkce' as const;
 
   log(`Using ${flow} flow`);
 
-  return authorizationFlows[flow]({ atom });
+  return authorizationFlows[flow]({ atom })();
 };
