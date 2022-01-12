@@ -1,4 +1,4 @@
 ---
-"@simulacrum/auth0-cypress": minor
+"@simulacrum/auth0-cypress": patch
 ---
-Use package.json exports to export encrypt to stop cypress global variable errors
+Use package.json exports to export encrypt and stop cypress global variable errors
