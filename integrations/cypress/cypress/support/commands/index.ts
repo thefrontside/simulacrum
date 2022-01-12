@@ -5,7 +5,7 @@ import { makeCreateSimulation } from './create-simulation';
 import { CreateSimulation, Person, TestState, Token } from '../types';
 import { makeGetClientFromSpec } from '../utils/spec';
 import { makeGiven } from './given';
-import { makeLogin } from './login';
+import { makeAuthorizationFlowCommands } from './add-flow-commands';
 import { makeLogout } from './logout';
 import { Auth0Result } from 'auth0-js';
 import './authorization_code/get-user-info';
@@ -37,9 +37,8 @@ Cypress.Commands.add('createSimulation', makeCreateSimulation({ atom, getClientF
 
 Cypress.Commands.add('given', makeGiven({ atom, getClientFromSpec }));
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-Cypress.Commands.add('login', makeLogin({ atom }) as any);
-
 Cypress.Commands.add('logout', makeLogout({ atom, getClientFromSpec }));
+
+makeAuthorizationFlowCommands({ atom });
 
 export { };
