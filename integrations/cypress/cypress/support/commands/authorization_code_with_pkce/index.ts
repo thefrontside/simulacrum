@@ -11,7 +11,7 @@ const log = makeCypressLogger('simulacrum-login-pkce');
 
 export const makeLoginWithPKCE = ({ atom }: MakeLoginOptions) => () => {
   return new Cypress.Promise((resolve, reject) => {
-    import('./auth').then(m => m.auth0Client).then((auth0Client) => {
+    import('./auth').then(m => m.auth).then((auth0Client) => {
       let person = atom.slice(Cypress.spec.name, 'person').get();
 
       assert(!!person && typeof person.email !== 'undefined', `no scenario in login`);

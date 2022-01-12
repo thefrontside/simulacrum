@@ -19,4 +19,4 @@ const Auth0Config: Auth0ClientOptions = {
   ...Auth0ConfigFixed
 };
 
-export const auth0Client = new Auth0Client(Auth0Config);
+export const auth = new Auth0Client(Auth0Config);
