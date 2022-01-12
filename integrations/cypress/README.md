@@ -36,7 +36,7 @@ We need to register an encrypt [cypress task](https://docs.cypress.io/api/comman
 ```js
 // cypress/plugins/index.js
 
-import { encrypt } from '../support/utils/encrypt';
+import { encrypt } from '@simulacrum/auth0-cypress';
 
 export default (on) => {
   on('task', { encrypt });
