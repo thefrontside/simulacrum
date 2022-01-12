@@ -8,7 +8,7 @@ export interface MakeLoginOptions {
   atom: Slice<TestState>;
 }
 
-const log = makeCypressLogger('simulacrum-login');
+const log = makeCypressLogger('simulacrum-login-ac');
 
 export const makeAuthorizationCodeLogin = ({ atom }: MakeLoginOptions) => () => {
   let { sessionCookieName, cookieSecret, audience } = getConfig();

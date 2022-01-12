@@ -38,8 +38,6 @@ Cypress.Commands.add('createSimulation', makeCreateSimulation({ atom, getClientF
 
 Cypress.Commands.add('given', makeGiven({ atom, getClientFromSpec }));
 
-Cypress.Commands.add('destroySimulation', makeDestroySimulation({ atom, getClientFromSpec }));
-
 makeSDKCommands({ atom, getClientFromSpec });
 
 export { };
