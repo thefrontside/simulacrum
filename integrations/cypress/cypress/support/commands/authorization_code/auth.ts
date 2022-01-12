@@ -15,6 +15,7 @@ const Auth0Config: AuthOptions = {
   clientID,
   domain,
   scope,
+  _sendTelemetry: false,
 };
 
 export const auth = new WebAuth(Auth0Config);

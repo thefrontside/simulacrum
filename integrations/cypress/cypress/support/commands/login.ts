@@ -5,20 +5,27 @@ import { TestState } from '../types';
 import { makeAuthorizationCodeLogin } from './authorization_code';
 import { makeLoginWithPKCE } from './authorization_code_with_pkce';
 
+type AuthorizationCodeFlows = 'authorization_code' | 'authorization_code_with_pkce'
 export interface MakeLoginOptions {
   atom: Slice<TestState>;
 }
 
-const log = makeCypressLogger('simulacrum-login');
+type LoginMaker = ({ atom }: MakeLoginOptions) => () => void
+
+const log = makeCypressLogger('simulacrum-login-maker');
+
+
+const authorizationFlows: Record<AuthorizationCodeFlows, LoginMaker> = {
+  authorization_code: makeAuthorizationCodeLogin,
+  authorization_code_with_pkce: makeLoginWithPKCE,
+} as const;
 
 export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
   let config = getConfig();
 
-  let flow = typeof config.cookieSecret === 'undefined' ? 'authorization_code' : 'authorization_code_with_pkce';
+  let flow: AuthorizationCodeFlows = typeof config.cookieSecret === 'undefined' ? 'authorization_code' : 'authorization_code_with_pkce' as const;
 
-  log()
-  let login = flow === 'authorization_code' ? makeAuthorizationCodeLogin : makeLoginWithPKCE;
+  log(`Using ${flow} flow`);
 
-
-  return login({ atom });
+  return authorizationFlows[flow]({ atom });
 };

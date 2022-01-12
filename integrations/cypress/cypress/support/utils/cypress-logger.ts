@@ -4,4 +4,6 @@ export const makeCypressLogger = (label: string, displayName: string = label) =>
     displayName,
     message
   });
+
+  cy.task('log', message);
 };
