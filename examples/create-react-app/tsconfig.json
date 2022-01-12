@@ -16,10 +16,12 @@
     "jsx": "react",
     "paths": {
       "@simulacrum/auth0-cypress": ["../../integrations/cypress"]
-    }
+    },
   },
   "include": [
-    "src"
+    "src",
+    "cypress/**/*.ts",
+    "cypress/**/*.tsx"
   ],
   "references": [
     {

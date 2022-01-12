@@ -1,5 +1,6 @@
 {
   "domain": "localhost:4400",
   "clientId": "IsuLUyWaFczCbAKQrIpVPmyBTFs4g5iq",
-  "audience": "https://thefrontside.auth0.com/api/v1/"
+  "audience": "https://thefrontside.auth0.com/api/v1/",
+  "scope": "openid profile email offline_access"
 }
