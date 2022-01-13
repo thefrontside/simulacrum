@@ -28,6 +28,10 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
 
     let simulation = atom.slice("simulations", id);
 
+    if(['halted', 'destroying'].includes(simulation.get()?.status)) {
+      await scope.run(simulation.filter((sim) => typeof sim === 'undefined').expect());
+    }
+
     simulation.set({
       id,
       status: 'new',
@@ -47,6 +51,12 @@ export const destroySimulation: Resolver<{ id: string }, boolean> = {
   async resolve({ id }, { atom, scope }) {
     let simulation = atom.slice("simulations", id);
     if (simulation.get()) {
+      let status = simulation.get().status;
+
+      if(['halted', 'destroying'].includes(status)) {
+        return false;
+      }
+
       simulation.slice("status").set("destroying");
       await scope.run(simulation.filter(({ status }) => status == "halted").expect());
       simulation.remove();
