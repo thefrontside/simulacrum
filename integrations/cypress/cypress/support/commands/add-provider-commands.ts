@@ -4,7 +4,7 @@ import { getConfig } from '../utils/config';
 import { makeLogin as makeNextLogin } from './nextjs_auth0/login';
 import { makeLogin as makeReactLogin } from './auth0_react/login';
 import { makeLogout as makeNextLogout } from './nextjs_auth0/logout';
-import { makeLogout makeReactLogout } from './auth0_react/logout';
+import { makeLogout as makeReactLogout } from './auth0_react/logout';
 
 const log = makeCypressLogger('simulacrum-provider-commands');
 
