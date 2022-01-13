@@ -1,5 +1,4 @@
-import { Slice } from '@effection/atom';
-import { CommandMaker, TestState } from '../../types';
+import { CommandMaker } from '../../types';
 import { assert } from 'assert-ts';
 import { makeCypressLogger } from '../../utils/cypress-logger';
 import { getConfig } from '../../utils/config';
@@ -7,7 +6,7 @@ import { getConfig } from '../../utils/config';
 
 const log = makeCypressLogger('simulacrum-login-ac');
 
-export const makeAuthorizationCodeLogin = ({ atom }: Pick<CommandMaker, 'atom'>) => () => {
+export const makeLogin = ({ atom }: Pick<CommandMaker, 'atom'>) => () => {
   let { sessionCookieName, cookieSecret, audience } = getConfig();
 
   try {
