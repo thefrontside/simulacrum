@@ -1,15 +1,10 @@
-import { Slice } from '@effection/atom';
-import { TestState } from '../../types';
+import { CommandMaker } from '../../types';
 import { assert } from 'assert-ts';
 import { makeCypressLogger } from '../../utils/cypress-logger';
 
-export interface MakeLoginOptions {
-  atom: Slice<TestState>;
-}
-
 const log = makeCypressLogger('simulacrum-login-pkce');
 
-export const makeLoginWithPKCE = ({ atom }: MakeLoginOptions) => () => {
+export const makeLogin = ({ atom }: Pick<CommandMaker, 'atom'>) => () => {
   return new Cypress.Promise((resolve, reject) => {
     import('./auth').then(m => m.auth).then((auth0Client) => {
       let person = atom.slice(Cypress.spec.name, 'person').get();

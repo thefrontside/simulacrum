@@ -1,4 +1,4 @@
-import { AuthorizationCodeFlows } from '../types';
+import { Auth0Providers } from '../types';
 
 interface Config {
   sessionCookieName: string;
@@ -9,7 +9,7 @@ interface Config {
   clientSecret: string;
   clientID: string;
   domain: string;
-  flow: AuthorizationCodeFlows
+  provider: Auth0Providers
 }
 
 export function getConfig(): Config {
@@ -21,7 +21,7 @@ export function getConfig(): Config {
   let clientSecret = Cypress.env('auth0ClientSecret');
   let clientID = Cypress.env('clientID') ?? 'YOUR_AUTH0_CLIENT_ID';
   let domain = Cypress.env('domain') ?? 'localhost:4400';
-  let flow = (Cypress.env('AUTH0_FLOW') ?? 'authorization_code_with_pkce') as AuthorizationCodeFlows;
+  let provider = (Cypress.env('AUTH0_PROVIDER') ?? 'auth0_react') as Auth0Providers;
 
   return {
     sessionCookieName,
@@ -32,6 +32,6 @@ export function getConfig(): Config {
     clientSecret,
     clientID,
     domain,
-    flow
+    provider
   };
 }

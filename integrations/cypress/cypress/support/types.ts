@@ -2,7 +2,7 @@ import type { Slice } from '@effection/atom';
 import { AuthOptions } from 'auth0-js';
 import { Client, Simulation } from '@simulacrum/client';
 
-export type AuthorizationCodeFlows = 'authorization_code' | 'authorization_code_with_pkce'
+export type Auth0Providers = 'nextjs_auth0' | 'auth0_react'
 
 export type TestState = Record<string, {
   client: Client;

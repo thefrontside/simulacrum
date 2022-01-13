@@ -5,10 +5,10 @@ import { makeCreateSimulation } from './create-simulation';
 import { CreateSimulation, Person, TestState, Token } from '../types';
 import { makeGetClientFromSpec } from '../utils/spec';
 import { makeGiven } from './given';
-import { makeAuthorizationFlowCommands } from './add-flow-commands';
+import { makeProviderCommands } from './add-provider-commands';
 import { Auth0Result } from 'auth0-js';
-import './authorization_code/get-user-info';
-import './authorization_code/get-user-tokens';
+import './nextjs_auth0/get-user-info';
+import './nextjs_auth0/get-user-tokens';
 import { makeDestroySimulation } from './destroy-simulation';
 
 declare global {
@@ -40,6 +40,6 @@ Cypress.Commands.add('given', makeGiven({ atom, getClientFromSpec }));
 
 Cypress.Commands.add('destroySimulation', makeDestroySimulation({ atom, getClientFromSpec }));
 
-makeAuthorizationFlowCommands({ atom, getClientFromSpec });
+makeProviderCommands({ atom, getClientFromSpec });
 
 export { };
