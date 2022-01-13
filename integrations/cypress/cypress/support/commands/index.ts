@@ -6,15 +6,16 @@ import { CreateSimulation, Person, TestState, Token } from '../types';
 import { makeGetClientFromSpec } from '../utils/spec';
 import { makeGiven } from './given';
 import { makeAuthorizationFlowCommands } from './add-flow-commands';
-import { makeAuthorizationCodeLogout } from './authorization_code/logout';
 import { Auth0Result } from 'auth0-js';
 import './authorization_code/get-user-info';
 import './authorization_code/get-user-tokens';
+import { makeDestroySimulation } from './destroy-simulation';
 
 declare global {
   namespace Cypress {
     interface Chainable<Subject> {
       createSimulation(options: CreateSimulation): Chainable<Subject>;
+      destroySimulation(): Chainable<Subject>;
       login(person?: Partial<Person>): Chainable<Token>;
       logout(): Chainable<void>;
       given(attrs?: Partial<Person>): Chainable<Person>;
@@ -37,7 +38,7 @@ Cypress.Commands.add('createSimulation', makeCreateSimulation({ atom, getClientF
 
 Cypress.Commands.add('given', makeGiven({ atom, getClientFromSpec }));
 
-Cypress.Commands.add('logout', makeAuthorizationCodeLogout({ atom, getClientFromSpec }));
+Cypress.Commands.add('destroySimulation', makeDestroySimulation({ atom, getClientFromSpec }));
 
 makeAuthorizationFlowCommands({ atom, getClientFromSpec });
 

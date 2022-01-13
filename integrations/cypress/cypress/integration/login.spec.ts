@@ -3,6 +3,10 @@ import auth0Config from "../../cypress.env.json";
 
 describe("auth", () => {
   describe("log in, create person per test", () => {
+    beforeEach(() => {
+      cy.logout();
+    });
+
     it("should log in and log out", () => {
       cy
         .visit("/")
@@ -11,7 +15,7 @@ describe("auth", () => {
         .given()
         .login()
         .visit("/")
-        .contains("Logout")
+        .get('[data-testid=logout]').should('exist')
         .logout();
     });
   });

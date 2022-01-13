@@ -1,16 +1,10 @@
-import { Slice } from '@effection/atom';
-import { CreateSimulation, GetClientFromSpec, TestState } from '../types';
+import { CommandMaker, CreateSimulation } from '../types';
 import { makeCypressLogger } from '../utils/cypress-logger';
 import { SimulationId } from './constants';
 
-export interface MakeCreateSimulationOptions {
-  atom: Slice<TestState>;
-  getClientFromSpec: GetClientFromSpec;
-}
-
 const log = makeCypressLogger('simulacrum-create-simulation');
 
-export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimulationOptions) => (options: CreateSimulation) => {
+export const makeCreateSimulation = ({ atom, getClientFromSpec }: CommandMaker) => (options: CreateSimulation) => {
   return cy.logout().then(() => {
     let client = getClientFromSpec(Cypress.spec.name);
 
@@ -43,7 +37,6 @@ export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimu
           };
         });
 
-        log(`sumalation created ${JSON.stringify(simulation)}`);
 
         resolve(simulation);
       }).catch((e) => {
