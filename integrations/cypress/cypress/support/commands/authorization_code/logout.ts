@@ -7,5 +7,6 @@ const log = makeCypressLogger('simulacrum-logout-ac');
 export const makeAuthorizationCodeLogout = ({ atom, getClientFromSpec }: CommandMaker) => () => {
   log('logging out');
   return cy.request('/api/auth/logout')
+            .destroySimulation()
             .reload();
 };

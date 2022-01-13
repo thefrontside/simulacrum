@@ -1,18 +1,12 @@
-import { CommandMaker } from '../../types';
 import { makeCypressLogger } from '../../utils/cypress-logger';
 
 const log = makeCypressLogger('simulacrum-logout-pkce');
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const makeLogoutWithPKCE = ({ atom, getClientFromSpec }: CommandMaker) => () => {
+export const makeLogoutWithPKCE = () => () => {
   log('logging out');
 
-  return new Cypress.Promise((resolve) => {
-    import('./auth').then(m => m.auth)
-                    .then((auth) => {
-      let url = auth.buildLogoutUrl();
-
-      cy.request(url).then(resolve);
-    });
-  });
+  return cy.destroySimulation()
+    .clearCookies()
+    .reload();
 };
