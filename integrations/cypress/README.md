@@ -168,21 +168,8 @@ describe('log in', () => {
 cy.logout();
 ```
 
-You might want to log out after every test.
-
-```js
-afterEach(async () => {
-  cy.logout();
-});
-```
-
-You may also log out _before_ each test to allow one to inspect the state after a test run.
-
-```js
-beforeEach(async () => {
-  cy.logout();
-});
-```
+You should not need to call this, we log you out when `createSimulation` is called.
+`cy.logout` will destroy the simulation and do any clean up like removing an cookies.
 
 ## debugging
 
