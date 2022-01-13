@@ -51,9 +51,7 @@ export const destroySimulation: Resolver<{ id: string }, boolean> = {
   async resolve({ id }, { atom, scope }) {
     let simulation = atom.slice("simulations", id);
     if (simulation.get()) {
-      let status = simulation.get().status;
-
-      if(['halted', 'destroying'].includes(status)) {
+      if(['halted', 'destroying'].includes(simulation.get().status)) {
         return false;
       }
 
