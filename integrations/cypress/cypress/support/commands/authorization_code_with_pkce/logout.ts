@@ -6,7 +6,7 @@ const log = makeCypressLogger('simulacrum-logout-pkce');
 export const makeLogoutWithPKCE = () => () => {
   log('logging out');
 
-  return cy.destroySimulation()
+  return cy
     .clearCookies()
     .reload();
 };
