@@ -51,10 +51,6 @@ export const destroySimulation: Resolver<{ id: string }, boolean> = {
   async resolve({ id }, { atom, scope }) {
     let simulation = atom.slice("simulations", id);
     if (simulation.get()) {
-      if(['halted', 'destroying'].includes(simulation.get().status)) {
-        return false;
-      }
-
       simulation.slice("status").set("destroying");
       await scope.run(simulation.filter(({ status }) => status == "halted").expect());
       simulation.remove();
