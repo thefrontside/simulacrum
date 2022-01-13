@@ -1,10 +1,10 @@
 import type { Auth0Providers, CommandMaker } from '../types';
 import { makeCypressLogger } from '../utils/cypress-logger';
 import { getConfig } from '../utils/config';
-import { makeAuthorizationCodeLogin } from './nextjs_auth0/login';
-import { makeLogin } from './auth0_react/login';
-import { makeAuthorizationCodeLogout } from './nextjs_auth0/logout';
-import { makeLogout } from './auth0_react/logout';
+import { makeLogin as makeNextLogin } from './nextjs_auth0/login';
+import { makeLogin as makeReactLogin } from './auth0_react/login';
+import { makeLogout as makeNextLogout } from './nextjs_auth0/logout';
+import { makeLogout makeReactLogout } from './auth0_react/logout';
 
 const log = makeCypressLogger('simulacrum-provider-commands');
 
@@ -14,12 +14,12 @@ type Commands = Record<Auth0Providers, { login: Maker, logout: Maker }>;
 
 const providerCommands: Commands = {
   nextjs_auth0: {
-    login: makeAuthorizationCodeLogin,
-    logout: makeAuthorizationCodeLogout
+    login: makeNextLogin,
+    logout: makeNextLogout
   },
   auth0_react: {
-    login: makeLogin,
-    logout: makeLogout
+    login: makeReactLogin,
+    logout: makeReactLogout
   },
 } as const;
 
