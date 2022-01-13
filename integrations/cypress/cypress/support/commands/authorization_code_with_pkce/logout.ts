@@ -7,6 +7,7 @@ export const makeLogoutWithPKCE = () => () => {
   log('logging out');
 
   return cy
+    .destroySimulation()
     .clearCookies()
     .reload();
 };
