@@ -44,7 +44,7 @@ mutation CreateSimulation {
     options:{
       audience: "[your audience]",
       scope: "[your scope]",
-      clientId: "[your client-id]"
+      clientID: "[your client-id]"
     },
     services:{
       auth0:{
@@ -71,7 +71,7 @@ Use the values returned from the query to update your configuration in the clien
 ```json
 {
   "domain": "localhost:4400",
-  "clientId": "00000000000000000000000000000000",
+  "clientID": "00000000000000000000000000000000",
   "audience": "https://your-audience/"
 }
 ```
@@ -128,7 +128,7 @@ main(function* () {
     options: {
       audience: "[your audience]",
       scope: "[your scope]",
-      clientId: "[your client-id]",
+      clientID: "[your client-id]",
     },
     services: {
       auth0: {
@@ -183,7 +183,7 @@ async function setupClient({ url }) {
     options: {
       audience: "https://your-audience/",
       scope: "openid profile email offline_access",
-      clientId: "YOUR_AUTH0_CLIENT_ID",
+      clientID: "YOUR_AUTH0_CLIENT_ID",
     },
     services: {
       auth0: {
@@ -213,7 +213,7 @@ let simulation = yield client.createSimulation("auth0", {
   options: {
     audience: "[your audience]",
     scope: "[your scope]",
-    clientId: "[your client-id]",
+    clientID: "[your client-id]",
     rulesDirectory: "test/rules",
   },
   services: {

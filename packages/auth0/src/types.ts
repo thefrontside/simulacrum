@@ -5,7 +5,7 @@ export interface Options {
   scope: string;
   port?: number;
   audience: string;
-  clientId: string;
+  clientID: string;
   store: Store;
   services: Slice<SimulationState['services']>;
   rulesDirectory?: string;

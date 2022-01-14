@@ -22,7 +22,7 @@ main(function* () {
     options: {
       audience: "https://your-audience/",
       scope: "openid profile email offline_access",
-      clientId: "YOUR_AUTH0_CLIENT_ID",
+      clientID: "YOUR_AUTH0_CLIENT_ID",
     },
     services: {
       auth0: {

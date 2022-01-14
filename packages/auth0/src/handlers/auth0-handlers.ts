@@ -48,7 +48,7 @@ const createPersonQuery = (store: Store) => (predicate: Predicate<Person>) => {
 };
 
 export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandler> => {
-  let { audience, scope, store, clientId, rulesDirectory } = options;
+  let { audience, scope, store, clientID, rulesDirectory } = options;
   let personQuery = createPersonQuery(store);
   let rulesRunner = createRulesRunner(rulesDirectory);
 
@@ -88,13 +88,13 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let url = getServiceUrl(options);
 
-      assert(!!clientId, `no clientId assigned`);
+      assert(!!clientID, `no clientID assigned`);
 
       let html = loginView({
         domain: url.host,
         scope,
         redirectUri: redirect_uri,
-        clientId,
+        clientID,
         audience,
         loginFailed: false
       });
@@ -118,13 +118,13 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
         let url = getServiceUrlFromOptions(options);
 
-        assert(!!clientId, `no clientId assigned`);
+        assert(!!clientID, `no clientID assigned`);
 
         let html = loginView({
           domain: url.host,
           scope,
           redirectUri: redirect_uri,
-          clientId,
+          clientID,
           audience,
           loginFailed: true
         });
@@ -211,7 +211,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         exp: expiresAt(),
         iat: Date.now(),
         email: username,
-        aud: clientId,
+        aud: clientID,
         sub: user.id,
       };
 
@@ -219,14 +219,14 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         idTokenData.nonce = nonce;
       }
 
-      assert(!!clientId, 'no clientId in options');
+      assert(!!clientID, 'no clientID in options');
 
       let accessToken = {
         scope,
       };
 
       let userData = {} as RuleUser;
-      let context = { clientID: clientId, accessToken, idToken: idTokenData };
+      let context = { clientID, accessToken, idToken: idTokenData };
 
       rulesRunner(userData, context);
 

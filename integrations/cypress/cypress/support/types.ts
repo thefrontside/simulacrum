@@ -7,7 +7,7 @@ export type TestState = Record<string, {
   person?: Person
 }>;
 
-export type CreateSimulation = Omit<AuthOptions, 'clientID'> & { debug?: boolean, client_id?: string };
+export type CreateSimulation = AuthOptions & { debug?: boolean };
 
 export interface Token {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

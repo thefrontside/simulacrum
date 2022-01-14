@@ -15,7 +15,7 @@ import { createOpenIdHandlers } from './handlers/openid-handlers';
 const publicDir = path.join(__dirname, 'views', 'public');
 
 const DefaultOptions = {
-  clientId: '00000000000000000000000000000000',
+  clientID: '00000000000000000000000000000000',
   audience: 'https://thefrontside.auth0.com/api/v1/',
   scope: "openid profile email offline_access",
 };

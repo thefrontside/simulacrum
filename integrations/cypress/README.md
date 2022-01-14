@@ -64,7 +64,7 @@ An example [cypress environment file](./cypress.env.json) is in the root of this
 {
   "audience": "https://thefrontside.auth0.com/api/v1/",
   "domain": "localhost:4400",
-  "clientId": "YOUR_AUTH0_CLIENT_ID",
+  "clientID": "YOUR_AUTH0_CLIENT_ID",
   "connection": "Username-Password-Authentication",
   "scope": "openid profile email offline_access"
 }

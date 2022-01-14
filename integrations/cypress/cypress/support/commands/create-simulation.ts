@@ -14,11 +14,12 @@ export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimu
   return cy.logout().then(() => {
     let client = getClientFromSpec(Cypress.spec.name);
 
-    let { debug = false, domain, client_id, ...auth0Options } = options;
+    let { debug = false, ...auth0Options } = options;
 
-    assert(typeof domain !== 'undefined', 'domain is a required option');
+    assert(typeof auth0Options.domain !== 'undefined', 'domain is a required option');
+    assert(typeof auth0Options.clientID !== 'undefined', 'clientID is a required option');
 
-    let port = Number(domain.split(':').slice(-1)[0]);
+    let port = Number(auth0Options.domain.split(':').slice(-1)[0]);
 
     log(`creating simulation with options: ${JSON.stringify(options)}`);
 
@@ -26,7 +27,6 @@ export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimu
       client.createSimulation("auth0", {
         options: {
           ...auth0Options,
-          clientId: client_id,
         },
         services: {
           auth0: {

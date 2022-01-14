@@ -26,7 +26,7 @@ main(function*() {
       options:{
         audience: "[your audience]",
         scope: "[your scope]",
-        clientId: "[your client-id]"
+        clientID: "[your client-id]"
       },
       services:{
         auth0:{
