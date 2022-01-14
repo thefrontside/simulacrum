@@ -36,7 +36,6 @@ describe('login', () => {
     
     let { data } = await client.given(simulation, "person") as Scenario<Person>;
     
-    console.dir({simulation, data})
     person =  data;
   });
  
