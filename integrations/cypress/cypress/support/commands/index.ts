@@ -5,7 +5,7 @@ import { makeCreateSimulation } from './create-simulation';
 import { CreateSimulation, Person, TestState, Token } from '../types';
 import { makeGetClientFromSpec } from '../utils/spec';
 import { makeGiven } from './given';
-import { makeProviderCommands } from './add-provider-commands';
+import { makeSDKCommands } from './add-sdk-commands';
 import { Auth0Result } from 'auth0-js';
 import './nextjs_auth0/get-user-info';
 import './nextjs_auth0/get-user-tokens';
@@ -40,6 +40,6 @@ Cypress.Commands.add('given', makeGiven({ atom, getClientFromSpec }));
 
 Cypress.Commands.add('destroySimulation', makeDestroySimulation({ atom, getClientFromSpec }));
 
-makeProviderCommands({ atom, getClientFromSpec });
+makeSDKCommands({ atom, getClientFromSpec });
 
 export { };

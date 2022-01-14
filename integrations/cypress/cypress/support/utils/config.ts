@@ -1,4 +1,4 @@
-import { Auth0Providers } from '../types';
+import { Auth0SDKs } from '../types';
 
 interface Config {
   sessionCookieName: string;
@@ -9,7 +9,7 @@ interface Config {
   clientSecret: string;
   clientID: string;
   domain: string;
-  provider: Auth0Providers
+  sdk: Auth0SDKs
 }
 
 export function getConfig(): Config {
@@ -21,7 +21,7 @@ export function getConfig(): Config {
   let clientSecret = Cypress.env('auth0ClientSecret');
   let clientID = Cypress.env('clientID') ?? 'YOUR_AUTH0_CLIENT_ID';
   let domain = Cypress.env('domain') ?? 'localhost:4400';
-  let provider = (Cypress.env('AUTH0_PROVIDER') ?? 'auth0_react') as Auth0Providers;
+  let sdk = (Cypress.env('AUTH0_SDK') ?? 'auth0_react') as Auth0SDKs;
 
   return {
     sessionCookieName,
@@ -32,6 +32,6 @@ export function getConfig(): Config {
     clientSecret,
     clientID,
     domain,
-    provider
+    sdk
   };
 }

@@ -1,4 +1,4 @@
-import type { Auth0Providers, CommandMaker } from '../types';
+import type { Auth0SDKs, CommandMaker } from '../types';
 import { makeCypressLogger } from '../utils/cypress-logger';
 import { getConfig } from '../utils/config';
 import { makeLogin as makeNextLogin } from './nextjs_auth0/login';
@@ -10,7 +10,7 @@ const log = makeCypressLogger('simulacrum-provider-commands');
 
 type Maker = ({ atom, getClientFromSpec }: CommandMaker) => () => void;
 
-type Commands = Record<Auth0Providers, { login: Maker, logout: Maker }>;
+type Commands = Record<Auth0SDKs, { login: Maker, logout: Maker }>;
 
 const providerCommands: Commands = {
   nextjs_auth0: {
@@ -23,10 +23,10 @@ const providerCommands: Commands = {
   },
 } as const;
 
-export const makeProviderCommands = ({ atom, getClientFromSpec }: CommandMaker) => {
+export const makeSDKCommands = ({ atom, getClientFromSpec }: CommandMaker) => {
   let config = getConfig();
 
-  let provider = config.provider;
+  let provider = config.sdk;
 
   log(`Using ${provider} provider`);
 
