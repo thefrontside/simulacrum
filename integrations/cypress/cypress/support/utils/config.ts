@@ -16,7 +16,7 @@ export function getConfig(): Config {
   let connection = Cypress.env('connection') ?? 'Username-Password-Authentication';
   let scope = Cypress.env('scope') ?? 'openid profile email offline_access';
   let clientSecret = Cypress.env('auth0ClientSecret') ?? 'YOUR_AUTH0_CLIENT_SECRET';
-  let clientID = Cypress.env('client_id') ?? 'YOUR_AUTH0_CLIENT_ID';
+  let clientID = Cypress.env('clientID') ?? 'YOUR_AUTH0_CLIENT_ID';
   let domain = Cypress.env('domain') ?? 'localhost:4400';
 
   return {

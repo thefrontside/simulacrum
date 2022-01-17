@@ -47,7 +47,7 @@
     "test": "npm run test:auth0-react:headless && npm run test:nextjs-auth0:headless",
     "build": "npm run prepack",
     "prepack": "tsc --build tsconfig.dist.json",
-    "lint": "eslint \"src/**/*.ts\""
+    "lint": "eslint \"cypress/**/*.ts\""
   },
   "dependencies": {
     "@effection/atom": "2.0.1",
