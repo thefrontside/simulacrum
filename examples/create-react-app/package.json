@@ -10,7 +10,7 @@
     "build": "react-scripts build",
     "cypress:ci": "cypress run --headless",
     "cypress:open": "cypress open",
-    "test": "react-scripts test --env=jest-environment-jsdom-sixteen",
+    "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "spa": "react-scripts start",
     "server": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" node server.js",

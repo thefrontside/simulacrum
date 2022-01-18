@@ -2,6 +2,8 @@
 
 This sample demonstrates how to use auth0-simulator using [Auth0 React SDK](https://github.com/auth0/auth0-react) to authenticate into a React application created using [create-react-app](https://reactjs.org/docs/create-a-new-react-app.html). 
 
+This sample also shows how to use the [@simulacrum/auth0-cypress]()
+
 This sample demonstrates the following use cases:
 
 - [Login](https://github.com/auth0-samples/auth0-react-samples/blob/master/Sample-01/src/components/NavBar.js#L72-L79)
@@ -36,9 +38,7 @@ To do this, first copy `src/auth_config.json.example` into a new file in the sam
 {
   "domain": "{YOUR AUTH0 DOMAIN}",
   "clientId": "{YOUR AUTH0 CLIENT ID}",
-  "audience": "{YOUR AUTH0 API_IDENTIFIER}",
-  "appOrigin": "{OPTIONAL: THE BASE URL OF YOUR APPLICATION (default: http://localhost:3000)}",
-  "apiOrigin": "{OPTIONAL: THE BASE URL OF YOUR API (default: http://localhost:3001)}"
+  "audience": "{YOUR AUTH0 API_IDENTIFIER}"
 }
 ```
 
