@@ -7,8 +7,8 @@ describe('login', () => {
         .given()
         .login()
         .visit('/external-api')
-        .get('[data-cy=ping]').click()
-        .get('[data-cy=api-message]').should('contain', 'Your access token was successfully validated')
+        .get('[data-testid=ping]').click()
+        .get('[data-testid=api-message]').should('contain', 'Your access token was successfully validated')
         .url().should('include', '/external-api')
         .logout();
     });

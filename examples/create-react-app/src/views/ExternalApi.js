@@ -176,7 +176,7 @@ export const ExternalApiComponent = () => {
           className="mt-5"
           onClick={callApi}
           disabled={!audience}
-          data-cy="ping"
+          data-testid="ping"
         >
           Ping API
         </Button>
@@ -187,7 +187,7 @@ export const ExternalApiComponent = () => {
           <div className="result-block" data-testid="api-result">
             <h6 className="muted">Result</h6>
             <Highlight>
-              <span data-cy="api-message">{JSON.stringify(state.apiMessage, null, 2)}</span>
+              <span data-testid="api-message">{JSON.stringify(state.apiMessage, null, 2)}</span>
             </Highlight>
           </div>
         )}

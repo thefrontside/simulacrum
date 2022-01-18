@@ -11,7 +11,7 @@ describe('login', () => {
         .get('#password')
         .type('sdfsdfsdfsd')
         .get('#submit').click()
-        .get('[data-cy=api-link]').should('not.exist')
+        .get('[data-testid=api-link]').should('not.exist')
         .logout();
     });
     
@@ -31,7 +31,7 @@ describe('login', () => {
         .type(password)
         .should('have.value', password)
         .get('#submit').click()
-        .get('[data-cy=api-link]').should('contain', 'External API')
+        .get('[data-testid=api-link]').should('contain', 'External API')
         .logout();
     });
   });

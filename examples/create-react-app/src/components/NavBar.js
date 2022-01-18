@@ -45,6 +45,7 @@ const NavBar = () => {
               <NavItem>
                 <NavLink
                   tag={NavLink}
+                  data-testid="home"
                   to="/"
                   end
                   className={({ isActive }) => (isActive ? "router-link-exact-active" : "")}
@@ -55,7 +56,7 @@ const NavBar = () => {
               {isAuthenticated && (
                 <NavItem>
                   <NavLink
-                    data-cy="api-link"
+                    data-testid="api-link"
                     tag={NavLink}
                     to="/external-api"
                     end
@@ -73,6 +74,7 @@ const NavBar = () => {
                     id="qsLoginBtn"
                     color="primary"
                     className="btn-margin"
+                    data-testid="login"
                     onClick={() => loginWithRedirect()}
                   >
                     Log in
@@ -154,6 +156,7 @@ const NavBar = () => {
                     to="#"
                     id="qsLogoutBtn"
                     onClick={() => logoutWithRedirect()}
+                    data-testid="logout"
                   >
                     Log out
                   </NavLink>
