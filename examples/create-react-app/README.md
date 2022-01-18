@@ -45,9 +45,13 @@ password: "Passw0rd"
 ### Auth0 rules
 The `auth0-simulator` will run any [auth0 rules](https://auth0.com/docs/rules) that exist in the [./__mocks__/rules](./__mocks__/rules) directory.
 
+One sample rules file, [avatar.js](./__mocks__/rules/avatar.js) exists that adds an avatar when the user logs in:
+
+![avatar added via rules for successful login](./img/avatar.png)
+
 ## Cypress end to end (e2e) testing
 
-### run the tests
+### Run the tests
 
 1. In the browser:
 
