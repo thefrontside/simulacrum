@@ -55,6 +55,7 @@ const NavBar = () => {
               {isAuthenticated && (
                 <NavItem>
                   <NavLink
+                    data-cy="api-link"
                     tag={NavLink}
                     to="/external-api"
                     end

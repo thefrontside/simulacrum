@@ -19,7 +19,7 @@
     "dev": "npm-run-all --parallel spa api-server:dev",
     "prod": "npm-run-all --parallel server api-server",
     "test:browser": "start-server-and-test 'start:e2e' '3000|3001|4000' 'cypress:open'",
-    "test:ci": "start-server-and-test 'start:e2e' '3000|3001|4000' 'cypress:ci'",
+    "test:headless": "start-server-and-test 'start:e2e' '3000|3001|4000' 'cypress:ci'",
     "watch:tsc": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.json --watch"
   },
   "workspaces": [
