@@ -271,4 +271,17 @@ hello world`);
       expect(first).toEqual(second);
     });
   });
+
+  describe('calling createSimulation on a simulation that is being destroyed()', () => {
+    beforeEach(function*() {
+      simulation = yield client.createSimulation("echo", { key: 'sim' });
+    });
+
+    // not the greatest test, does not always fail
+    it('should wait for the simulation to be destroyed before creating a new one', function*() {
+      client.destroySimulation(simulation);
+      simulation = yield client.createSimulation("echo", { key: 'sim' });
+      expect(simulation.status).toEqual('running');
+    });
+  });
 });

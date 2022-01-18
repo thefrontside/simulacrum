@@ -28,6 +28,14 @@ export const createSimulation: Resolver<CreateSimulationParameters, SimulationSt
 
     let simulation = atom.slice("simulations", id);
 
+    if(simulation.get()?.status === 'running') {
+      await destroySimulation.resolve({ id }, ctx);
+    }
+
+    if(['halted', 'destroying'].includes(simulation.get()?.status)) {
+      await scope.run(simulation.filter((sim) => typeof sim === 'undefined').expect());
+    }
+
     simulation.set({
       id,
       status: 'new',
