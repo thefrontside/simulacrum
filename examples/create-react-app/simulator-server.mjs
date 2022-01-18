@@ -27,7 +27,8 @@ main(function* () {
 
   let simulation = yield client.createSimulation("auth0", {
     options: {
-      ...authConfig
+      ...authConfig,
+      rulesDirectory: "__mocks__/rules"
     },
     services: {
       auth0: {
@@ -41,7 +42,7 @@ main(function* () {
   let person = yield client.given(simulation, "person", {
     email: "admin@org.com",
     password: "Passw0rd"
-  });;
+  });
 
   console.log(`store populated with user`);
   console.log(`username = ${person.data.email} password = ${person.data.password}`);

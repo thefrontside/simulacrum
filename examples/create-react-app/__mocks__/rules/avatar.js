@@ -5,7 +5,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function avatar(user, context, callback) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  user.picture = require('faker').internet.avatar();
+  user.picture = 'http://localhost:3000/fake-avatar.png'
 
   console.log(`added avatar ${user.picture} to user`);
 
