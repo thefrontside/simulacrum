@@ -1,5 +1,8 @@
+import type { Slice } from '@effection/atom';
 import { AuthOptions } from 'auth0-js';
 import { Client, Simulation } from '@simulacrum/client';
+
+export type Auth0SDKs = 'nextjs_auth0' | 'auth0_react'
 
 export type TestState = Record<string, {
   client: Client;
@@ -30,4 +33,9 @@ export interface EncryptPayload {
   accessTokenScope: string,
   accessTokenExpiresAt: number
   createdAt: number,
+}
+
+export interface CommandMaker {
+  atom: Slice<TestState>;
+  getClientFromSpec: GetClientFromSpec;
 }

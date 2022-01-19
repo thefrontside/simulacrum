@@ -5,16 +5,17 @@ import { makeCreateSimulation } from './create-simulation';
 import { CreateSimulation, Person, TestState, Token } from '../types';
 import { makeGetClientFromSpec } from '../utils/spec';
 import { makeGiven } from './given';
-import { makeLogin } from './login';
-import { makeLogout } from './logout';
+import { makeSDKCommands } from './add-sdk-commands';
 import { Auth0Result } from 'auth0-js';
-import './get-user-tokens';
-import './get-user-info';
+import './nextjs_auth0/get-user-info';
+import './nextjs_auth0/get-user-tokens';
+import { makeDestroySimulation } from './destroy-simulation';
 
 declare global {
   namespace Cypress {
     interface Chainable<Subject> {
       createSimulation(options: CreateSimulation): Chainable<Subject>;
+      destroySimulation(): Chainable<Subject>;
       login(person?: Partial<Person>): Chainable<Token>;
       logout(): Chainable<void>;
       given(attrs?: Partial<Person>): Chainable<Person>;
@@ -37,8 +38,8 @@ Cypress.Commands.add('createSimulation', makeCreateSimulation({ atom, getClientF
 
 Cypress.Commands.add('given', makeGiven({ atom, getClientFromSpec }));
 
-Cypress.Commands.add('login', makeLogin({ atom }));
+Cypress.Commands.add('destroySimulation', makeDestroySimulation({ atom, getClientFromSpec }));
 
-Cypress.Commands.add('logout', makeLogout({ atom, getClientFromSpec }));
+makeSDKCommands({ atom, getClientFromSpec });
 
 export { };

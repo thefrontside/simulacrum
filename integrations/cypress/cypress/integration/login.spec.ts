@@ -3,15 +3,19 @@ import auth0Config from "../../cypress.env.json";
 
 describe("auth", () => {
   describe("log in, create person per test", () => {
+    beforeEach(() => {
+      cy.logout();
+    });
+
     it("should log in and log out", () => {
       cy
-        .createSimulation(auth0Config)
         .visit("/")
-        .contains("Logout").should('not.exist')
+        .createSimulation(auth0Config)
+        .get('[data-testid=logout]').should('not.exist')
         .given()
         .login()
         .visit("/")
-        .contains("Logout")
+        .get('[data-testid=logout]').should('exist')
         .logout();
     });
   });
@@ -25,10 +29,11 @@ describe("auth", () => {
     it("should login and logout", () => {
       cy
         .visit("/")
-        .contains("Logout").should('not.exist')
+        .get('[data-testid=home]').should('exist')
+        .get('[data-testid=logout]').should('not.exist')
         .login()
         .visit("/")
-        .contains("Logout")
+        .get('[data-testid=logout]').should('exist')
         .logout();
     });
   });
@@ -45,41 +50,44 @@ describe("auth", () => {
     it("should login once", () => {
       cy
         .visit("/")
-        .contains("Logout").should('not.exist')
+        .get('[data-testid=home]').should('exist')
+        .get('[data-testid=logout]').should('not.exist')
         .given({ email: 'first@gmail.com' })
         .login()
         .visit("/")
-        .contains("Logout");
+        .get('[data-testid=logout]').should('exist');
     });
 
     it("should login two times without error", () => {
       cy
         .visit("/")
-        .contains("Logout").should('not.exist')
+        .get('[data-testid=home]').should('exist')
+        .get('[data-testid=logout]').should('not.exist')
         .given({ email: 'second@gmail.com' })
         .login()
         .visit("/")
-        .contains("Logout");
+        .get('[data-testid=logout]').should('exist');
     });
 
     it("should login three times without error", () => {
       cy
-      .visit("/")
-      .contains("Logout").should('not.exist')
-      .given({ email: 'third@gmail.com' })
-      .login()
-      .visit("/")
-      .contains("Logout");
+        .visit("/")
+        .get('[data-testid=home]').should('exist')
+        .get('[data-testid=logout]').should('not.exist')
+        .given({ email: 'third@gmail.com' })
+        .login()
+        .visit("/")
+        .get('[data-testid=logout]').should('exist');
     });
 
     it("should login four times without error", () => {
       cy.visit("/")
-      .contains("Login")
-      .contains("Logout").should('not.exist')
+        .get('[data-testid=home]').should('exist')
+        .get('[data-testid=logout]').should('not.exist')
         .given({ email: 'fourth@gmail.com', password: 'passw0rd' })
         .login()
         .visit("/")
-        .contains("Logout");
+        .get('[data-testid=logout]').should('exist');
     });
   });
 
@@ -93,20 +101,22 @@ describe("auth", () => {
     it("should login once", () => {
         cy
           .visit("/")
-          .contains("Logout").should('not.exist')
+          .get('[data-testid=home]').should('exist')
+          .get('[data-testid=logout]').should('not.exist')
           .login()
           .visit("/")
-          .contains("Logout");
+          .get('[data-testid=logout]').should('exist');
     });
 
     it("should login twice without error", () => {
       cy
         .visit("/")
-        .contains("Logout").should('not.exist')
+        .get('[data-testid=home]').should('exist')
+        .get('[data-testid=logout]').should('not.exist')
         .given({ email: 'second@gmail.com' })
         .login()
         .visit("/")
-        .contains("Logout");
+        .get('[data-testid=logout]').should('exist');
     });
   });
 });

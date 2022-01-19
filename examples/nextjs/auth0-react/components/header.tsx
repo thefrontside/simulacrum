@@ -11,13 +11,13 @@ const Header = (): React.ReactElement => {
         <ul>
           <li>
             <Link href="/">
-              <a>Home</a>
+              <a data-testid="home">Home</a>
             </Link>
           </li>
           {user ? (
             <>
               <li>
-                <button
+                <button data-testid="logout"
                   onClick={() => logout({ returnTo: window.location.origin })}
                 >
                   Logout
@@ -27,7 +27,7 @@ const Header = (): React.ReactElement => {
           ) : (
             <>
               <li>
-                <button onClick={loginWithRedirect}>Login</button>
+                <button onClick={loginWithRedirect} data-testid="login">Login</button>
               </li>
             </>
           )}

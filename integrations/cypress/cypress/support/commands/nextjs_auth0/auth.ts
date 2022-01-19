@@ -1,6 +1,6 @@
 import type { AuthorizeOptions, AuthOptions } from 'auth0-js';
 import { WebAuth } from 'auth0-js';
-import { getConfig } from '../utils/config';
+import { getConfig } from '../../utils/config';
 
 const Auth0ConfigDefaults: Pick<AuthorizeOptions, 'connection' | 'scope'> = {
   connection: 'Username-Password-Authentication',
@@ -15,6 +15,7 @@ const Auth0Config: AuthOptions = {
   clientID,
   domain,
   scope,
+  _sendTelemetry: false,
 };
 
 export const auth = new WebAuth(Auth0Config);

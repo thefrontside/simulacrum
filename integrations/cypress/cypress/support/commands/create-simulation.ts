@@ -1,20 +1,20 @@
-import { Slice } from '@effection/atom';
-import { CreateSimulation, GetClientFromSpec, TestState } from '../types';
+import { CommandMaker, CreateSimulation } from '../types';
+import { getAuth0Config } from '../utils/config';
 import { makeCypressLogger } from '../utils/cypress-logger';
 import { SimulationId } from './constants';
 
-export interface MakeCreateSimulationOptions {
-  atom: Slice<TestState>;
-  getClientFromSpec: GetClientFromSpec;
-}
-
 const log = makeCypressLogger('simulacrum-create-simulation');
 
-export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimulationOptions) => (options: CreateSimulation) => {
+export const makeCreateSimulation = ({ atom, getClientFromSpec }: CommandMaker) => (options: CreateSimulation) => {
   return cy.logout().then(() => {
     let client = getClientFromSpec(Cypress.spec.name);
 
-    let { debug = false, ...auth0Options } = options;
+    let { debug = false, ...rest } = options;
+
+    let auth0Options = {
+      ...getAuth0Config(),
+      ...rest
+    };
 
     assert(typeof auth0Options.domain !== 'undefined', 'domain is a required option');
     assert(typeof auth0Options.clientID !== 'undefined', 'clientID is a required option');
@@ -43,7 +43,6 @@ export const makeCreateSimulation = ({ atom, getClientFromSpec }: MakeCreateSimu
           };
         });
 
-        log(`sumalation created ${JSON.stringify(simulation)}`);
 
         resolve(simulation);
       }).catch((e) => {

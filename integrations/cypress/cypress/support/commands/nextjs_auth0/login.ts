@@ -1,20 +1,17 @@
-import { Slice } from '@effection/atom';
-import { TestState } from '../types';
+import { CommandMaker } from '../../types';
 import { assert } from 'assert-ts';
-import { makeCypressLogger } from '../utils/cypress-logger';
-import { getConfig } from '../utils/config';
+import { makeCypressLogger } from '../../utils/cypress-logger';
+import { getConfig } from '../../utils/config';
 
-export interface MakeLoginOptions {
-  atom: Slice<TestState>;
-}
 
-const log = makeCypressLogger('simulacrum-login');
+const log = makeCypressLogger('simulacrum-login-ac');
 
-export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
+export const makeLogin = ({ atom }: Pick<CommandMaker, 'atom'>) => () => {
   let { sessionCookieName, cookieSecret, audience } = getConfig();
 
   try {
     cy.getCookie(sessionCookieName).then((cookieValue) => {
+      log(`cookie ${sessionCookieName} is ${cookieValue}`);
       if (cookieValue) {
         log('Skip logging in again, session already exists');
         return true;
@@ -58,6 +55,6 @@ export const makeLogin = ({ atom }: MakeLoginOptions) => () => {
     });
   } catch(error) {
     console.error(error);
-    throw new Error(error);
+    throw error;
   }
 };

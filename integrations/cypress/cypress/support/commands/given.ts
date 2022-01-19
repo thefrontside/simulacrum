@@ -1,16 +1,11 @@
-import { Slice } from '@effection/atom';
-import { GetClientFromSpec, Person, TestState } from '../types';
+import { CommandMaker, Person } from '../types';
 import { assert } from 'assert-ts';
 import { makeCypressLogger } from '../utils/cypress-logger';
 
-export interface MakeGivenOptions {
-  atom: Slice<TestState>;
-  getClientFromSpec: GetClientFromSpec;
-}
 
 const log = makeCypressLogger('simulacrum-given');
 
-export const makeGiven = ({ atom, getClientFromSpec }: MakeGivenOptions) => (attrs: Partial<Person> = {}) => {
+export const makeGiven = ({ atom, getClientFromSpec }: CommandMaker) => (attrs: Partial<Person> = {}) => {
   return new Cypress.Promise((resolve, reject) => {
     let client = getClientFromSpec(Cypress.spec.name);
 
