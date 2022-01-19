@@ -6,7 +6,6 @@ export const makeLogout = () => () => {
   log('logging out');
 
   return cy
-    .destroySimulation()
     .clearCookies()
     .reload();
 };

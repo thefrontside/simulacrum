@@ -1,5 +1,7 @@
 # @simulacrum/auth0-cypress
 
+[Cypress](https://www.cypress.io/) [Auth0](https://auth0.com) addon that simulates an auth0 server running on `localhost` so you don't have to create fake accounts while developing or running tests that require authentication.
+
 ## Contents
 
 - [Installation](#installation)
@@ -191,8 +193,7 @@ describe('log in', () => {
 cy.logout();
 ```
 
-You should not need to call this, we log you out when `createSimulation` is called.
-`cy.logout` will destroy the simulation and do any clean up like removing an cookies.
+`cy.logout` will destroy the simulation and do any clean up between tests like removing an cookies.
 
 ## debugging
 

@@ -71,19 +71,18 @@ describe("auth", () => {
 
     it("should login three times without error", () => {
       cy
-      .visit("/")
-      .get('[data-testid=home]').should('exist')
+        .visit("/")
+        .get('[data-testid=home]').should('exist')
         .get('[data-testid=logout]').should('not.exist')
-      .given({ email: 'third@gmail.com' })
-      .login()
-      .visit("/")
-      .get('[data-testid=logout]').should('exist');
+        .given({ email: 'third@gmail.com' })
+        .login()
+        .visit("/")
+        .get('[data-testid=logout]').should('exist');
     });
 
     it("should login four times without error", () => {
       cy.visit("/")
-      .contains("Login")
-      .get('[data-testid=home]').should('exist')
+        .get('[data-testid=home]').should('exist')
         .get('[data-testid=logout]').should('not.exist')
         .given({ email: 'fourth@gmail.com', password: 'passw0rd' })
         .login()
@@ -117,7 +116,7 @@ describe("auth", () => {
         .given({ email: 'second@gmail.com' })
         .login()
         .visit("/")
-        .contains("Logout");
+        .get('[data-testid=logout]').should('exist');
     });
   });
 });

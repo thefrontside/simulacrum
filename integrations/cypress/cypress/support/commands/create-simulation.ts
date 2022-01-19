@@ -1,4 +1,5 @@
 import { CommandMaker, CreateSimulation } from '../types';
+import { getAuth0Config } from '../utils/config';
 import { makeCypressLogger } from '../utils/cypress-logger';
 import { SimulationId } from './constants';
 
@@ -8,12 +9,17 @@ export const makeCreateSimulation = ({ atom, getClientFromSpec }: CommandMaker) 
   return cy.logout().then(() => {
     let client = getClientFromSpec(Cypress.spec.name);
 
-    let { debug = false, domain, ...auth0Options } = options;
+    let { debug = false, ...rest } = options;
 
-    assert(typeof domain !== 'undefined', 'domain is a required option');
+    let auth0Options = {
+      ...getAuth0Config(),
+      ...rest
+    };
+
+    assert(typeof auth0Options.domain !== 'undefined', 'domain is a required option');
     assert(typeof auth0Options.clientID !== 'undefined', 'clientID is a required option');
 
-    let port = Number(domain.split(':').slice(-1)[0]);
+    let port = Number(auth0Options.domain.split(':').slice(-1)[0]);
 
     log(`creating simulation with options: ${JSON.stringify(options)}`);
 

@@ -35,3 +35,10 @@ export function getConfig(): Config {
     sdk
   };
 }
+
+export function getAuth0Config() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let { sdk, cookieSecret, sessionCookieName, ...auth0Options } = getConfig();
+
+  return auth0Options;
+}

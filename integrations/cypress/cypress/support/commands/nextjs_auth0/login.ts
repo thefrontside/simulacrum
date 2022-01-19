@@ -55,6 +55,6 @@ export const makeLogin = ({ atom }: Pick<CommandMaker, 'atom'>) => () => {
     });
   } catch(error) {
     console.error(error);
-    throw new Error(error);
+    throw error;
   }
 };
