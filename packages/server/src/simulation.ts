@@ -1,4 +1,4 @@
-import { label, spawn } from 'effection';
+import { label, Operation, spawn, Task } from 'effection';
 import { assert } from 'assert-ts';
 import { Effect, map } from './effect';
 import express, { raw } from 'express';
@@ -69,7 +69,7 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
   };
 }
 
-function createSimulation (slice: Slice<SimulationState>, simulators: Record<string, Simulator>) {
+export function createSimulation (slice: Slice<SimulationState>, simulators: Record<string, Simulator>): Operation<Task<void>> {
   return spawn(function* () {
     try {
       yield function * errorBoundary() {

@@ -21,7 +21,7 @@ describe('person simulator', () => {
       simulation = yield client.createSimulation("person");
     });
 
-    describe('positing a person', () => {
+    describe('posting a person', () => {
       let person: Scenario<{ name: string}>;
         beforeEach(function*() {
           person = yield client.given(simulation, "person");
