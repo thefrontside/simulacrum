@@ -45,9 +45,9 @@ export function createOperationContext(atom: Slice<ServerState>, scope: Task, ne
           yield;
         } finally {
           simulationsMap.delete(simulationId);
+          slice.remove();
         }
       });
-
 
       simulationsMap.set(simulationId, simulationTask);
 
