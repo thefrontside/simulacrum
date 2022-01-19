@@ -22,46 +22,14 @@ export interface CreateSimulationParameters {
 export const createSimulation: Resolver<CreateSimulationParameters, SimulationState> = {
   async resolve(args, ctx) {
     let { simulator, options = {}, debug = false } = args;
-    let { atom, scope, newid } = ctx;
 
-    let id = options.key ?? newid();
-
-    let simulation = atom.slice("simulations", id);
-
-    if(simulation.get()?.status === 'running') {
-      await destroySimulation.resolve({ id }, ctx);
-    }
-
-    if(['halted', 'destroying'].includes(simulation.get()?.status)) {
-      await scope.run(simulation.filter((sim) => typeof sim === 'undefined').expect());
-    }
-
-    simulation.set({
-      id,
-      status: 'new',
-      simulator,
-      options,
-      services: [],
-      scenarios: {},
-      store: {},
-      debug,
-    });
-
-    return scope.run(simulation.filter(({ status }) => status !== 'new').expect());
+    return await ctx.createSimulation(simulator, options, debug);
   }
 };
 
 export const destroySimulation: Resolver<{ id: string }, boolean> = {
-  async resolve({ id }, { atom, scope }) {
-    let simulation = atom.slice("simulations", id);
-    if (simulation.get()) {
-      simulation.slice("status").set("destroying");
-      await scope.run(simulation.filter(({ status }) => status == "halted").expect());
-      simulation.remove();
-      return true;
-    } else {
-      return false;
-    }
+  async resolve({ id }, { destroySimulation }) {
+    return await destroySimulation(id);
   }
 };
 

@@ -15,7 +15,7 @@ import { OperationContext } from './schema/context';
  */
 
 
-export function createWebSocketTransport({ atom, newid }: OperationContext, server: HTTPServer): Resource<void> {
+export function createWebSocketTransport(context: OperationContext, server: HTTPServer): Resource<void> {
   return {
     *init(scope) {
       let transport = makeServer<Task>({
@@ -29,8 +29,7 @@ export function createWebSocketTransport({ atom, newid }: OperationContext, serv
             variableValues,
             document: parse(message.payload.query),
             contextValue: {
-              atom,
-              newid,
+              ...context,
               scope: extra
             }
           };

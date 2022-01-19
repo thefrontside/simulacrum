@@ -7,14 +7,14 @@ import { v4 } from 'uuid';
 import { schema } from './schema/schema';
 import { ServerOptions, ServerState } from './interfaces';
 import { Server, createServer } from './http';
-import { OperationContext } from './schema/context';
 
 export { Server, createServer } from './http';
 
-import { createEffects } from './effects';
 import { stableIds } from './faker';
 import { createWebSocketTransport } from './websocket-transport';
 import { Resource } from 'effection';
+import { createOperationContext } from './operation-context';
+import { createLogger } from './effects/logging';
 
 const defaults = {
   simulators: {},
@@ -33,7 +33,7 @@ export function createSimulationServer(options: ServerOptions = defaults): Resou
         simulations: {}
       });
 
-      let context: OperationContext = { atom, scope, newid };
+      let context = createOperationContext(atom, scope, newid, simulators);
 
       let app = express()
         .use(cors())
@@ -45,7 +45,7 @@ export function createSimulationServer(options: ServerOptions = defaults): Resou
 
       yield createWebSocketTransport(context, server.http);
 
-      yield createEffects(atom, simulators);
+      yield createLogger(atom);
 
       return server;
     }
