@@ -40,7 +40,6 @@ export function createOperationContext(atom: Slice<ServerState>, scope: Task, ne
       let simulationTask = scope.run(function* () {
         yield createSimulation(slice, simulators);
 
-
         try {
           yield;
         } finally {
