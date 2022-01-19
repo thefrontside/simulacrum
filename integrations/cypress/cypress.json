@@ -2,7 +2,6 @@
   "baseUrl": "http://localhost:3000",
   "video": false,
   "screenshotOnRunFailure": false,
-  "defaultCommandTimeout": 10000,
   "fixturesFolder": "cypress/fixtures",
   "integrationFolder": "cypress/integration",
   "pluginsFile": "cypress/plugins/index.ts",
