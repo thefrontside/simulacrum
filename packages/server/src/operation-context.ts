@@ -9,6 +9,7 @@ type NewId = (() => string) | typeof v4;
 
 export function createOperationContext(atom: Slice<ServerState>, scope: Task, newid: NewId, simulators: Record<string, Simulator>): OperationContext {
   let simulationsMap = new Map<string, Task>();
+
   return {
     atom,
     scope,
@@ -38,7 +39,7 @@ export function createOperationContext(atom: Slice<ServerState>, scope: Task, ne
       });
 
       await scope.run(function*() {
-        let simulationTask = yield scope.spawn(function* () {
+        let simulationTask: Task = yield scope.spawn(function* () {
           yield createSimulation(slice, simulators);
 
           try {
@@ -47,9 +48,11 @@ export function createOperationContext(atom: Slice<ServerState>, scope: Task, ne
             simulationsMap.delete(simulationId);
             slice.remove();
           }
-        });        
+        });
+
         simulationsMap.set(simulationId, simulationTask);
-        yield slice.filter(({ status }) => status === 'running').expect()
+
+        yield slice.filter(({ status }) => status === 'running').expect();
       });
 
       return slice.get();
