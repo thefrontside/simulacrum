@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.5.0]
+
+- have specific cypress commands for specific auth0 javascript sdks.
+  - [175a0f4](https://github.com/thefrontside/simulacrum/commit/175a0f47357f682c470c6df47ae3d3be92687f0e) Auth0 cypress provider ([#172](https://github.com/thefrontside/simulacrum/pull/172)) on 2022-01-19
+- Make all clientId variables use clientID casing
+  - [5863e14](https://github.com/thefrontside/simulacrum/commit/5863e14d35166cbfce7c87d1acc96e3a2137ea3d) Make all clientId variables use clientID casing ([#173](https://github.com/thefrontside/simulacrum/pull/173)) on 2022-01-17
+
 ## \[0.4.0]
 
 - Make encrypt typescript and exportable after transpilation

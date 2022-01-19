@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.5.0]
+
+- Simplify createSimulation and destroySimulation by removing them from the effects.
+  - [04d5aaf](https://github.com/thefrontside/simulacrum/commit/04d5aaf0077d744badd8739936aad328156d64e2) Simplify createSimulation and destroySimulation ([#174](https://github.com/thefrontside/simulacrum/pull/174)) on 2022-01-19
+- wait for simulation to be destroyed before creating a new one
+  - [b1412da](https://github.com/thefrontside/simulacrum/commit/b1412daa2d7846ec4c8eefeea2dfbf94e19b7261) wait for simulation to be destroyed before creating a new one ([#171](https://github.com/thefrontside/simulacrum/pull/171)) on 2022-01-18
+
 ## \[0.4.1]
 
 - Update eslint-config and typescript versions
