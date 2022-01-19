@@ -37,20 +37,20 @@ export function createOperationContext(atom: Slice<ServerState>, scope: Task, ne
         debug,
       });
 
-      let simulationTask = scope.run(function* () {
-        yield createSimulation(slice, simulators);
+      await scope.run(function*() {
+        let simulationTask = yield scope.spawn(function* () {
+          yield createSimulation(slice, simulators);
 
-        try {
-          yield;
-        } finally {
-          simulationsMap.delete(simulationId);
-          slice.remove();
-        }
+          try {
+            yield;
+          } finally {
+            simulationsMap.delete(simulationId);
+            slice.remove();
+          }
+        });        
+        simulationsMap.set(simulationId, simulationTask);
+        yield slice.filter(({ status }) => status === 'running').expect()
       });
-
-      simulationsMap.set(simulationId, simulationTask);
-
-      await scope.run(slice.filter(({ status }) => status === 'running').expect());
 
       return slice.get();
     },
