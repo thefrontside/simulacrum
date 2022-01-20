@@ -57,6 +57,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     web_message: createWebMessageHandler()
   };
 
+
   return {
     ['/heartbeat']: function *(_, res) {
       res.status(200).json({ ok: true });
@@ -204,6 +205,8 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let url = getServiceUrlFromOptions(options).toString();
 
+      assert(!!clientID, 'no clientID in options');
+
       let idTokenData: IdTokenData = {
         alg: "RS256",
         typ: "JWT",
@@ -218,8 +221,6 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       if(typeof nonce !== 'undefined') {
         idTokenData.nonce = nonce;
       }
-
-      assert(!!clientID, 'no clientID in options');
 
       let accessToken = {
         scope,

@@ -1,0 +1,14 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "video": false,
+  "screenshotOnRunFailure": false,
+  "fixturesFolder": "cypress/fixtures",
+  "integrationFolder": "cypress/integration",
+  "pluginsFile": "cypress/plugins/index.ts",
+  "screenshotsFolder": "cypress/screenshots",
+  "videosFolder": "cypress/videos",
+  "supportFile": "cypress/support/index.ts",
+  "configFile": "cypress/tsconfig.json",
+  "chromeWebSecurity": false,
+  "defaultCommandTimeout": 10000
+}

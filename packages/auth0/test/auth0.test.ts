@@ -334,7 +334,7 @@ describe('Auth0 simulator', () => {
 
       let idToken = jwt.decode(token.id_token, { complete: true });
 
-      expect(idToken?.payload.picture).toContain('https://cdn.fakercloud.com/avatars');
+      expect(idToken?.payload.picture).toContain('https://i.pravatar.cc');
     });
   });
 

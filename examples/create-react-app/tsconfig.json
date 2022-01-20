@@ -1,0 +1,31 @@
+{
+  "extends": "@frontside/tsconfig",
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react",
+    "paths": {
+      "@simulacrum/auth0-cypress": ["../../integrations/cypress"]
+    },
+  },
+  "include": [
+    "src",
+    "cypress/**/*.ts",
+    "cypress/**/*.tsx"
+  ],
+  "references": [
+    {
+      "path": "../../integrations/cypress"
+    }
+  ]
+}
