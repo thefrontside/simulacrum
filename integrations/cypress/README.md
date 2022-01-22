@@ -26,7 +26,7 @@ npm install @simulacrum/auth0-cypress --dev
 This plugin supports the following javascript sdks that interface with auth0:
 
 - [@auth0/auth0-react (default)](https://github.com/auth0/auth0-react)
-- [nextjs-auth0] - https://github.com/auth0/nextjs-auth0
+- [nextjs-auth0](https://github.com/auth0/nextjs-auth0)
 
 If you want to use `nextjs-auth0` then you need to set the `AUTH0_SDK` environment variables by any of the [usual cypress environmental varaibles options](https://docs.cypress.io/guides/guides/environment-variables).
 
@@ -61,7 +61,7 @@ We need to register an encrypt [cypress task](https://docs.cypress.io/api/comman
 ```js
 // cypress/plugins/index.js
 
-import { encrypt } from '@simulacrum/auth0-cypress';
+import { encrypt } from '@simulacrum/auth0-cypress/encrypt';
 
 export default (on) => {
   on('task', { encrypt });
@@ -73,7 +73,7 @@ export default (on) => {
 ```js
 // cypress/plugins/index.js
 
-const { encrypt } = require('@simulacrum/auth0-cypress');
+const { encrypt } = require('@simulacrum/auth0-cypress/encrypt');
 
 module.exports = (on, config) => {
   on('task', { encrypt });
