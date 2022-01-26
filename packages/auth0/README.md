@@ -1,5 +1,7 @@
 # Auth0 simulator
 
+Read about this simulator on our blog: [Simplified Local Development and Testing with Auth0 Simulation](https://frontside.com/blog/2022-01-13-auth0-simulator/).
+
 ## Table of Contents
 
 - [Auth0 simulator](#auth0-simulator)
@@ -100,7 +102,6 @@ npm install @simulacrum/auth0-simulator
 ```
 
 The following examples are written in Typescript, but using Typescript is not a requirement. The Auth0 simulator creates a server with a graphql interface. This means that your interactions with the server can be written in any language or framework that can communicate over http / graphql.
-
 
 ```ts
 import { main } from "effection";

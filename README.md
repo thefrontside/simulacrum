@@ -11,6 +11,11 @@ Modern applications have modern dependencies. Whether they run on the server or 
 
 Simulacrum removes these constraints from your process by allowing you to simulate external dependencies with a very high degree of reality.
 
+## Existing Simulators
+
+* [auth0](packages/auth0) - [@simulacrum/auth0-simulator](https://www.npmjs.com/package/@simulacrum/auth0-simulator)
+* [ldap](packages/ldap) - [@simulacrum/ldap-simulator](https://www.npmjs.com/package/@simulacrum/ldap-simulator)
+
 ## Usage
 
 Simulacrum is based on a client server architecture. The server can hold any number of simulations which you can create and control via the client. The following examples use JavaScript, but under the hood it is just connects over HTTP and so can be used from any language.

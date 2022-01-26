@@ -1,7 +1,7 @@
 {
   "name": "@simulacrum/auth0-simulator",
   "version": "0.4.1",
-  "description": "Simulate Auth0",
+  "description": "Run local instance of Auth0 API for local development and integration testing",
   "main": "dist/index.js",
   "bin": "bin/index.js",
   "scripts": {
@@ -25,7 +25,11 @@
     "simulation",
     "emulation",
     "authentication",
-    "auth0"
+    "auth0",
+    "mock",
+    "mocking",
+    "stubbing",
+    "integration testing"
   ],
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",

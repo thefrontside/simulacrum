@@ -1,7 +1,7 @@
 {
   "name": "@simulacrum/ldap-simulator",
   "version": "0.2.2",
-  "description": "Simulate an LDAP server",
+  "description": "Run local LDAP server with specific users for local development and integration testing",
   "main": "dist/index.js",
   "bin": "bin/index.js",
   "scripts": {
@@ -16,7 +16,11 @@
   "keywords": [
     "simulation",
     "LDAP",
-    "emulation"
+    "emulation",
+    "mock",
+    "mocking",
+    "stubbing",
+    "integration testing"
   ],
   "author": "",
   "license": "ISC",
