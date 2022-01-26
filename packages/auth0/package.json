@@ -26,6 +26,7 @@
     "emulation",
     "authentication",
     "auth0",
+    "mock",
     "mocking",
     "stubbing",
     "integration testing"
