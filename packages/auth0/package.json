@@ -6,6 +6,8 @@
   "bin": "bin/index.js",
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
+    "docker:build": "docker build -f ./Dockerfile -t auth0-simulator:latest .",
+    "docker:run": "PORT=4000 docker run --name auth0 -d -it --rm -p:4000:4000 -e PORT auth0-simulator:latest",
     "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
     "prepack": "tsc --build tsconfig.dist.json && copy-cli \"./src/views/**/*.png\" ./dist/views/",
     "build": "npm run prepack",
