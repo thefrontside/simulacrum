@@ -7,4 +7,10 @@ WORKDIR /simulacrum
 
 RUN npm i -g npm@8.4.1
 
-CMD ["npx", "@simulacrum/auth0-simulator"]
+COPY ./docker-package.json ./package.json
+
+COPY ./simulator-server.mjs .
+
+RUN npm install
+
+CMD ["npm", "start"]
