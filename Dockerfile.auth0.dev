@@ -1,0 +1,27 @@
+FROM node:14-alpine
+
+ENV NODE_ENV=development
+ENV npm_config_yes=true
+
+RUN apk --no-cache add --virtual .builds-deps build-base python3 bash
+
+WORKDIR /simulacrum
+
+COPY "package.json" .
+COPY "package-lock.json" .
+COPY "tsconfig.packages.json" .
+COPY "tsconfig.base.json" .
+
+COPY packages/server packages/server
+COPY packages/client packages/client 
+COPY packages/ui packages/ui 
+COPY packages/auth0 packages/auth0 
+
+RUN npm install -g npm@7.19.1
+RUN npm install
+
+RUN npm -v
+
+RUN npm run build
+
+CMD ["npm", "start", "-w", "@simulacrum/auth0-simulator"]

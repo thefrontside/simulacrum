@@ -4,11 +4,14 @@
   "description": "Composable simulations for testing, development, and application previews",
   "scripts": {
     "clean": "npm run clean -ws",
+    "docker:build": "docker build -f ./Dockerfile.auth0.dev -t auth0-simulator-dev:latest .",
+    "docker:run": "PORT=4000 docker run --name auth0 -d -it --rm -p:4000:4000 -p:4400:4400 -e PORT auth0-simulator-dev:latest",
     "test": "npm run test -ws",
     "build": "npm run prepack -ws",
     "prepack": "npm run prepack -ws",
     "lint": "npm run lint -ws",
     "build:tsc": "tsc -b ./tsconfig.packages.json",
+    "tsc": "tsc",
     "watch:tsc": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.packages.json --watch"
   },
   "repository": {
