@@ -1,4 +1,5 @@
 import type { Simulator, LegacyServiceCreator } from '@simulacrum/server';
+import type { Options } from './types';
 import { consoleLogger } from '@simulacrum/server';
 import { createHttpApp } from '@simulacrum/server';
 import { urlencoded, json } from 'express';
@@ -7,18 +8,12 @@ import { person } from '@simulacrum/server';
 import { createSession } from './middleware/session';
 import path from 'path';
 import express from 'express';
-import type { Options } from './types';
 import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
 import { createOpenIdHandlers } from './handlers/openid-handlers';
 
 const publicDir = path.join(__dirname, 'views', 'public');
 
-const DefaultOptions = {
-  clientID: '00000000000000000000000000000000',
-  audience: 'https://thefrontside.auth0.com/api/v1/',
-  scope: "openid profile email offline_access",
-};
 
 const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & ReturnType<typeof createOpenIdHandlers>, debug: boolean): LegacyServiceCreator => {
   let app = createHttpApp()
