@@ -1,7 +1,10 @@
-import { createClient, Client } from '@simulacrum/client';
-import { Resource, spawn } from 'effection';
-import { ServerOptions } from '../src/interfaces';
-import { createSimulationServer, Server } from '../src/server';
+import type { Client } from '@simulacrum/client';
+import { createClient } from '@simulacrum/client';
+import type { Resource } from 'effection';
+import { spawn } from 'effection';
+import type { ServerOptions } from '../src/interfaces';
+import type { Server } from '../src/server';
+import { createSimulationServer } from '../src/server';
 
 export function createTestServer(options: ServerOptions): Resource<Client> {
   return {

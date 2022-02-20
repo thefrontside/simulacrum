@@ -1,8 +1,8 @@
 import { describe, beforeEach, it } from '@effection/mocha';
-import { Client } from '@simulacrum/client';
+import type { Client } from '@simulacrum/client';
 import expect from 'expect';
 
-import { ServerState, SimulationState } from '../src/interfaces';
+import type { ServerState, SimulationState } from '../src/interfaces';
 
 import { createTestServer } from './helpers';
 

@@ -1,12 +1,15 @@
-import { label, Operation, spawn, Task } from 'effection';
+import type { Operation, Task } from 'effection';
+import { label, spawn } from 'effection';
 import { assert } from 'assert-ts';
-import { Effect, map } from './effect';
+import type { Effect } from './effect';
+import { map } from './effect';
 import express, { raw } from 'express';
-import { ResourceServiceCreator, Service, ServiceCreator, SimulationState, Simulator } from './interfaces';
-import { createServer, Server } from './http';
+import type { ResourceServiceCreator, Service, ServiceCreator, SimulationState, Simulator } from './interfaces';
+import type { Server } from './http';
+import { createServer } from './http';
 import { createFaker } from './faker';
 import { middlewareHandlerIsOperation, isRequestHandler } from './guards/guards';
-import { Slice } from '@effection/atom';
+import type { Slice } from '@effection/atom';
 
 function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreator {
   if(typeof service === 'function') {

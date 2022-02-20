@@ -5,14 +5,15 @@ import express from 'express';
 import { graphqlHTTP } from 'express-graphql';
 import { v4 } from 'uuid';
 import { schema } from './schema/schema';
-import { ServerOptions, ServerState } from './interfaces';
-import { Server, createServer } from './http';
+import type { ServerOptions, ServerState } from './interfaces';
+import type { Server } from './http';
+import { createServer } from './http';
 
 export { Server, createServer } from './http';
 
 import { stableIds } from './faker';
 import { createWebSocketTransport } from './websocket-transport';
-import { Resource } from 'effection';
+import type { Resource } from 'effection';
 import { createOperationContext } from './operation-context';
 import { createLogger } from './effects/logging';
 

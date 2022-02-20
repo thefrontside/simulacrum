@@ -17,7 +17,7 @@
     "isomorphic-ws": "^4.0.1"
   },
   "devDependencies": {
-    "@frontside/eslint-config": "^3.0.0",
+    "@frontside/eslint-config": "^3.1.0",
     "@frontside/tsconfig": "^3.0.0",
     "@frontside/typescript": "^3.0.0",
     "ts-node": "^9.1.1"

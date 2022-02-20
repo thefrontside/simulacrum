@@ -1,10 +1,13 @@
-import { on, once, spawn, Resource, Task, throwOnErrorEvent } from 'effection';
-import { Server as HTTPServer } from 'http';
+import type { Resource, Task } from 'effection';
+import { on, once, spawn, throwOnErrorEvent } from 'effection';
+import type { Server as HTTPServer } from 'http';
 import { subscribe, execute, parse } from 'graphql';
-import { makeServer, WebSocket } from 'graphql-ws';
-import WS, { CloseEvent } from 'ws';
+import type { WebSocket } from 'graphql-ws';
+import { makeServer } from 'graphql-ws';
+import type { CloseEvent } from 'ws';
+import WS from 'ws';
 import { schema } from './schema/schema';
-import { OperationContext } from './schema/context';
+import type { OperationContext } from './schema/context';
 
 /**
  * Create a graphql-ws transport resource that can execute operations in the context

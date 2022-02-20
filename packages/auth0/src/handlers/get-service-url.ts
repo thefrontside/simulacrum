@@ -1,4 +1,4 @@
-import { Options } from '../types';
+import type { Options } from '../types';
 import { assert } from 'assert-ts';
 
 export const getServiceUrl = (options: Options): URL => {

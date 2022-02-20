@@ -1,7 +1,7 @@
-import { Middleware } from '@simulacrum/server';
+import type { Middleware } from '@simulacrum/server';
 import { assert } from 'assert-ts';
 import { encode } from 'base64-url';
-import { QueryParams } from 'src/types';
+import type { QueryParams } from 'src/types';
 import { webMessage } from '../views/web-message';
 
 export const createWebMessageHandler = (): Middleware =>

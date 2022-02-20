@@ -1,5 +1,5 @@
 import jsesc from "jsesc";
-import { QueryParams } from '../types';
+import type { QueryParams } from '../types';
 
 export const webMessage = ({
   state,

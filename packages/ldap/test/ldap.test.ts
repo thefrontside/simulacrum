@@ -1,9 +1,10 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
-import { createTestServer, Client, Simulation } from './helpers';
+import type { Client, Simulation } from './helpers';
+import { createTestServer } from './helpers';
 import { ldap } from '../src';
-import { createClient, NoSuchObjectError, SearchEntryObject } from 'ldapjs';
-import type { Client as LDAPClient } from 'ldapjs';
+import { createClient, NoSuchObjectError } from 'ldapjs';
+import type { Client as LDAPClient , SearchEntryObject } from 'ldapjs';
 import { person } from '@simulacrum/server';
 
 describe('Auth0 simulator', () => {

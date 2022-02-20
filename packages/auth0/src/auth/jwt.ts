@@ -1,4 +1,5 @@
-import { sign, SignOptions } from "jsonwebtoken";
+import type { SignOptions } from "jsonwebtoken";
+import { sign } from "jsonwebtoken";
 import { JWKS, PRIVATE_KEY } from "./constants";
 
 export const parseKey = (key: string): string => key.split("~~").join("\n");

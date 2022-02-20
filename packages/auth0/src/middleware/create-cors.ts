@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { RequestHandler } from 'express';
 import cors from "cors";
 
 export const createCors = (): RequestHandler =>

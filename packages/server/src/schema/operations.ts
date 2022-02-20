@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Resolver, Subscriber } from './resolvers';
+import type { Resolver, Subscriber } from './resolvers';
 import * as resolvers from './resolvers';
 
 export const createSimulation = uncover(resolvers.createSimulation);

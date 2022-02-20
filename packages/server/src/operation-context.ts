@@ -1,8 +1,8 @@
-import { Task } from 'effection';
-import { ServerState, SimulationOptions, SimulationState, Simulator } from './interfaces';
-import { OperationContext } from './schema/context';
-import { v4 } from 'uuid';
-import { Slice } from '@effection/atom';
+import type { Task } from 'effection';
+import type { ServerState, SimulationOptions, SimulationState, Simulator } from './interfaces';
+import type { OperationContext } from './schema/context';
+import type { v4 } from 'uuid';
+import type { Slice } from '@effection/atom';
 import { createSimulation } from './simulation';
 
 type NewId = (() => string) | typeof v4;

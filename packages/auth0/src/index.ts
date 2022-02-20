@@ -7,7 +7,7 @@ import { person } from '@simulacrum/server';
 import { createSession } from './middleware/session';
 import path from 'path';
 import express from 'express';
-import { Options } from './types';
+import type { Options } from './types';
 import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
 import { createOpenIdHandlers } from './handlers/openid-handlers';

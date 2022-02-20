@@ -1,5 +1,5 @@
 import { describe, it, beforeEach } from '@effection/mocha';
-import { Client, Simulation, Scenario } from '@simulacrum/client';
+import type { Client, Simulation, Scenario } from '@simulacrum/client';
 import expect from 'expect';
 import person from '../src/simulators/person';
 

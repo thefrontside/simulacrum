@@ -1,5 +1,5 @@
 import { encode } from "html-entities";
-import { QueryParams } from '../types';
+import type { QueryParams } from '../types';
 
 export type UserNamePasswordForm = {
   auth0Domain?: string;
