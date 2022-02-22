@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import type { RequestHandler } from 'express';
 import type { Middleware } from '../http';
 
 export function isGeneratorFunction(value: unknown): value is GeneratorFunction {

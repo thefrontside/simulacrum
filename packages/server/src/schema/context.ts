@@ -1,6 +1,6 @@
-import { Slice } from '@effection/atom';
-import { Task } from 'effection';
-import { ServerState, SimulationOptions, SimulationState } from '../interfaces';
+import type { Slice } from '@effection/atom';
+import type { Task } from 'effection';
+import type { ServerState, SimulationOptions, SimulationState } from '../interfaces';
 
 export interface OperationContext {
   scope: Task;

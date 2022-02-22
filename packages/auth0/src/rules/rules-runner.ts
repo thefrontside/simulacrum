@@ -3,7 +3,7 @@ import vm from "vm";
 import fs from 'fs';
 import { assert } from "assert-ts";
 import { parseRulesFiles } from './parse-rules-files';
-import { RuleContext, RuleUser } from './types';
+import type { RuleContext, RuleUser } from './types';
 
 export type RulesRunner = <A, I>(user: RuleUser, context: RuleContext<A, I>) => void;
 

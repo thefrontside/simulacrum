@@ -1,5 +1,5 @@
-import { Simulation } from '@simulacrum/client';
-import { CommandMaker } from '../types';
+import type { Simulation } from '@simulacrum/client';
+import type { CommandMaker } from '../types';
 import { makeCypressLogger } from '../utils/cypress-logger';
 import { SimulationId } from './constants';
 

@@ -1,5 +1,6 @@
 import { main } from 'effection';
-import { createSimulationServer, Server } from '@simulacrum/server';
+import type { Server } from '@simulacrum/server';
+import { createSimulationServer } from '@simulacrum/server';
 import { ldap } from '.';
 import dedent from 'dedent';
 import { createClient } from '@simulacrum/client';

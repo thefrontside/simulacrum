@@ -1,9 +1,10 @@
 import { describe, it, beforeEach } from '@effection/mocha';
-import { Simulator } from '../src/interfaces';
-import { Client, Simulation } from '@simulacrum/client';
+import type { Simulator } from '../src/interfaces';
+import type { Client, Simulation } from '@simulacrum/client';
 import { createTestServer } from './helpers';
 import expect from 'expect';
-import { createHttpApp, consoleLogger, HttpApp } from '../src';
+import type { HttpApp } from '../src';
+import { createHttpApp, consoleLogger } from '../src';
 import fetch from 'cross-fetch';
 import { json } from 'express';
 

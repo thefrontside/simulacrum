@@ -1,8 +1,9 @@
 import type { ServerState } from 'src/interfaces';
 import { map } from '../effect';
 import { assert } from 'assert-ts';
-import { Operation, spawn, Task } from 'effection';
-import { Slice } from '@effection/atom';
+import type { Operation, Task } from 'effection';
+import { spawn } from 'effection';
+import type { Slice } from '@effection/atom';
 
 export function createLogger(slice: Slice<ServerState>): Operation<void> {
   return {

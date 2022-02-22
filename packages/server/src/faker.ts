@@ -10,7 +10,7 @@ import locales from 'faker/lib/locales';
 // import the default faker export and use that type
 // as the type of all fakers. A nice side-quest would be
 // to add types.d.ts directly to the faker project.
-import faker from 'faker';
+import type faker from 'faker';
 export type Faker = typeof faker;
 
 export function createFaker(seed: number): Faker {

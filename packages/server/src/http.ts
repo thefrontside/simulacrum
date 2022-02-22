@@ -1,10 +1,12 @@
 import type { ServerOptions as SSLOptions } from 'https';
 import type { AddressInfo } from 'net';
 import type { LegacyServiceCreator } from './interfaces';
-import { Operation, once, Resource, spawn, createFuture, label } from 'effection';
-import { Request, Response, Application, RequestHandler } from 'express';
+import type { Operation, Resource } from 'effection';
+import { once, spawn, createFuture, label } from 'effection';
+import type { Request, Response, Application, RequestHandler } from 'express';
 import { createServer as createHttpsServer } from 'https';
-import { Server as HTTPServer, createServer as createHttpServer } from 'http';
+import type { Server as HTTPServer } from 'http';
+import { createServer as createHttpServer } from 'http';
 import { paths } from './config/paths';
 import fs from 'fs';
 import { mkcertText, NoSSLError } from './errors/ssl/ssl-error';

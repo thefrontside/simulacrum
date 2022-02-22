@@ -1,7 +1,8 @@
 import 'graphiql/graphiql.css';
 import { GraphiQL } from 'graphiql';
 import { createGraphiQLFetcher } from '@graphiql/toolkit';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 export interface AppProps {
   server: () => URL;

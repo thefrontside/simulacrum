@@ -1,6 +1,8 @@
-import { Task, Resource } from 'effection';
-import { createClient, Client } from '@simulacrum/client';
-import { Server, ServerOptions, createSimulationServer } from '@simulacrum/server';
+import type { Task, Resource } from 'effection';
+import type { Client } from '@simulacrum/client';
+import { createClient } from '@simulacrum/client';
+import type { Server, ServerOptions } from '@simulacrum/server';
+import { createSimulationServer } from '@simulacrum/server';
 
 export type { Client, Simulation } from '@simulacrum/client';
 

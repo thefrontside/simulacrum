@@ -1,12 +1,13 @@
-import { createServer, InvalidCredentialsError, NoSuchObjectError, OperationsError, Server } from 'ldapjs';
-import { LDAPOptions } from './types';
-import { SimulationState, Simulator } from '@simulacrum/server';
-import { ResourceServiceCreator } from '@simulacrum/server';
+import type { Server } from 'ldapjs';
+import { createServer, InvalidCredentialsError, NoSuchObjectError, OperationsError } from 'ldapjs';
+import type { LDAPOptions } from './types';
+import type { SimulationState, Simulator } from '@simulacrum/server';
+import type { ResourceServiceCreator } from '@simulacrum/server';
 import dedent from 'dedent';
 import { person } from '@simulacrum/server';
 import { spawn } from 'effection';
 import getPort from 'get-port';
-import { Slice } from '@effection/atom';
+import type { Slice } from '@effection/atom';
 import { assert } from 'assert-ts';
 
 const DefaultOptions: Partial<LDAPOptions> = {

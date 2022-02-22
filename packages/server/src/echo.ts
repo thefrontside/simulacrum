@@ -1,4 +1,4 @@
-import { HttpHandler } from './http';
+import type { HttpHandler } from './http';
 
 export const echo: (times: number) => HttpHandler = (times: number) => function echo(request, response) {
   return function * () {

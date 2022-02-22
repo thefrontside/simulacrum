@@ -1,5 +1,5 @@
-import { HttpHandler, Middleware, Person, Store } from '@simulacrum/server';
-import { IdTokenData, Options, QueryParams, ResponseModes } from '../types';
+import type { HttpHandler, Middleware, Person, Store } from '@simulacrum/server';
+import type { IdTokenData, Options, QueryParams, ResponseModes } from '../types';
 import { createLoginRedirectHandler } from './login-redirect';
 import { createWebMessageHandler } from './web-message';
 import { loginView } from '../views/login';
@@ -11,7 +11,7 @@ import { expiresAt } from '../auth/date';
 import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
 import { getServiceUrl } from './get-service-url';
 import { createRulesRunner } from '../rules/rules-runner';
-import { RuleUser } from '../rules/types';
+import type { RuleUser } from '../rules/types';
 import { decode as decodeToken } from 'jsonwebtoken';
 
 export type Routes =

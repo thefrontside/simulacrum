@@ -1,7 +1,9 @@
-import { createFuture, Task, createChannel, run, sleep, Subscription } from 'effection';
-import { createClient as createWSClient, SubscribePayload } from 'graphql-ws';
+import type { Task, Subscription } from 'effection';
+import { createFuture, createChannel, run, sleep } from 'effection';
+import type { SubscribePayload } from 'graphql-ws';
+import { createClient as createWSClient } from 'graphql-ws';
 import webSocketImpl from 'isomorphic-ws';
-import { GraphQLError } from 'graphql';
+import type { GraphQLError } from 'graphql';
 
 export interface SimulationOptions {
   options?: Record<string, unknown>;

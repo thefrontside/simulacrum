@@ -1,6 +1,7 @@
 import type { EncryptPayload } from '../types';
 import hkdf from 'futoin-hkdf';
-import { EncryptJWT, JWTPayload } from 'jose';
+import type { JWTPayload } from 'jose';
+import { EncryptJWT } from 'jose';
 
 const BYTE_LENGTH = 32;
 const ENCRYPTION_INFO = 'JWE CEK';

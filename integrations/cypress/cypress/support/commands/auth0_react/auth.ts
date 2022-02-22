@@ -1,4 +1,5 @@
-import { Auth0Client, Auth0ClientOptions } from '@auth0/auth0-spa-js';
+import type { Auth0ClientOptions } from '@auth0/auth0-spa-js';
+import { Auth0Client } from '@auth0/auth0-spa-js';
 
 const Auth0ConfigDefaults: Pick<Auth0ClientOptions, 'connection' | 'scope'> = {
   connection: 'Username-Password-Authentication',

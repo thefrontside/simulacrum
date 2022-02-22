@@ -1,7 +1,8 @@
 import { main } from 'effection';
 
 import { echo } from './echo';
-import { createSimulationServer, Server } from './server';
+import type { Server } from './server';
+import { createSimulationServer } from './server';
 import { createHttpApp } from './http';
 import person from './simulators/person';
 import getPort from 'get-port';

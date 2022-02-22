@@ -1,4 +1,4 @@
-import { CommandMaker, Person } from '../types';
+import type { CommandMaker, Person } from '../types';
 import { assert } from 'assert-ts';
 import { makeCypressLogger } from '../utils/cypress-logger';
 

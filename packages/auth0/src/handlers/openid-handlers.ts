@@ -1,5 +1,5 @@
 import type { HttpHandler } from '@simulacrum/server';
-import { Options } from 'src/types';
+import type { Options } from 'src/types';
 import { JWKS } from '../auth/constants';
 import { getServiceUrl } from './get-service-url';
 import { removeTrailingSlash } from './url';

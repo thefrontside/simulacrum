@@ -1,8 +1,8 @@
-import { Slice } from '@effection/atom';
-import { Operation } from 'effection';
+import type { Slice } from '@effection/atom';
+import type { Operation } from 'effection';
 import { v4 } from 'uuid';
-import { Faker } from '../faker';
-import { Behaviors, Store } from "../interfaces";
+import type { Faker } from '../faker';
+import type { Behaviors, Store } from "../interfaces";
 
 export default function(): Behaviors {
   return {

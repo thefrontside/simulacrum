@@ -1,6 +1,6 @@
 import { v4 } from 'uuid';
-import { SimulationState, ScenarioState, ServerState, SimulationOptions } from "../interfaces";
-import { OperationContext } from "./context";
+import type { SimulationState, ScenarioState, ServerState, SimulationOptions } from "../interfaces";
+import type { OperationContext } from "./context";
 import { createQueue } from '../queue';
 import { assert } from 'assert-ts';
 

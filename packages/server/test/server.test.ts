@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, captureError } from '@effection/mocha';
-import { Client, Simulation } from '@simulacrum/client';
+import type { Client, Simulation } from '@simulacrum/client';
 import { assert } from 'assert-ts';
 import fetch from 'cross-fetch';
 import expect from 'expect';
@@ -7,12 +7,13 @@ import expect from 'expect';
 import getPort from 'get-port';
 import { echo } from '../src/echo';
 import { createHttpApp } from '../src/http';
-import { ServerOptions } from '../src/interfaces';
+import type { ServerOptions } from '../src/interfaces';
 import udp from 'dgram';
 import buffer from 'buffer';
 
 import { createTestServer } from './helpers';
-import { on, once, spawn, Stream, onEmit } from 'effection';
+import type { Stream } from 'effection';
+import { on, once, spawn, onEmit } from 'effection';
 
 describe('@simulacrum/server', () => {
   let simulation: Simulation;

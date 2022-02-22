@@ -1,17 +1,19 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
-import { createTestServer, Client, Simulation } from './helpers';
+import type { Client, Simulation } from './helpers';
+import { createTestServer } from './helpers';
 import { auth0 } from '../src';
 import fetch from 'cross-fetch';
 import { stringify } from 'querystring';
-import { createHttpApp, person, Person } from '@simulacrum/server';
+import type { Person } from '@simulacrum/server';
+import { createHttpApp, person } from '@simulacrum/server';
 import { decode, encode } from 'base64-url';
 import jwt from 'jsonwebtoken';
 
 import Keygrip from 'keygrip';
 import { removeTrailingSlash } from '../src/handlers/url';
-import { Scenario } from '@simulacrum/client';
-import { TokenSet } from 'src/types';
+import type { Scenario } from '@simulacrum/client';
+import type { TokenSet } from 'src/types';
 
 const createSessionCookie = <T>(data: T): string => {
   let cookie = Buffer.from(JSON.stringify(data)).toString('base64');

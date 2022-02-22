@@ -1,5 +1,7 @@
-import { Operation, Stream, Task, main, on, sleep, spawn } from 'effection';
-import { exec, daemon, StdIO } from '@effection/process';
+import type { Operation, Stream, Task } from 'effection';
+import { main, on, sleep, spawn } from 'effection';
+import type { StdIO } from '@effection/process';
+import { exec, daemon } from '@effection/process';
 import { watch } from 'chokidar';
 
 main(function*(scope) {

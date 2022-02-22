@@ -1,6 +1,7 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
-import { createTestServer, Client, Simulation } from './helpers';
+import type { Client, Simulation } from './helpers';
+import { createTestServer } from './helpers';
 import { auth0 } from '../src';
 import fetch from 'cross-fetch';
 import { JWKS } from '../src/auth/constants';

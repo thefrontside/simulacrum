@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
-import { Options, QueryParams } from '../types';
+import type { Options, QueryParams } from '../types';
 import { stringify } from "querystring";
-import { Middleware } from '@simulacrum/server';
+import type { Middleware } from '@simulacrum/server';
 
 export const createLoginRedirectHandler = (options: Options): Middleware =>
   function* loginRedirect (req: Request, res: Response) {
