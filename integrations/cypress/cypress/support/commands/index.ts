@@ -2,11 +2,11 @@
 
 import { createAtom } from '@effection/atom';
 import { makeCreateSimulation } from './create-simulation';
-import { CreateSimulation, Person, TestState, Token } from '../types';
+import type { CreateSimulation, Person, TestState, Token } from '../types';
 import { makeGetClientFromSpec } from '../utils/spec';
 import { makeGiven } from './given';
 import { makeSDKCommands } from './add-sdk-commands';
-import { Auth0Result } from 'auth0-js';
+import type { Auth0Result } from 'auth0-js';
 import './nextjs_auth0/get-user-info';
 import './nextjs_auth0/get-user-tokens';
 import { makeDestroySimulation } from './destroy-simulation';

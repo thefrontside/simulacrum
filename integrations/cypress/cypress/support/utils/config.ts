@@ -1,4 +1,4 @@
-import { Auth0SDKs } from '../types';
+import type { Auth0SDKs } from '../types';
 
 interface Config {
   sessionCookieName: string;

@@ -1,4 +1,4 @@
-import { CommandMaker, CreateSimulation } from '../types';
+import type { CommandMaker, CreateSimulation } from '../types';
 import { getAuth0Config } from '../utils/config';
 import { makeCypressLogger } from '../utils/cypress-logger';
 import { SimulationId } from './constants';

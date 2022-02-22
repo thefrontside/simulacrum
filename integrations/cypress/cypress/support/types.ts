@@ -1,6 +1,6 @@
 import type { Slice } from '@effection/atom';
-import { AuthOptions } from 'auth0-js';
-import { Client, Simulation } from '@simulacrum/client';
+import type { AuthOptions } from 'auth0-js';
+import type { Client, Simulation } from '@simulacrum/client';
 
 export type Auth0SDKs = 'nextjs_auth0' | 'auth0_react'
 

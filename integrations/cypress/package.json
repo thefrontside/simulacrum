@@ -49,7 +49,7 @@
     "test": "npm run test:auth0-react:headless && npm run test:nextjs-auth0:headless && npm run test:cra:headless",
     "build": "npm run prepack",
     "prepack": "tsc --build tsconfig.dist.json",
-    "lint": "eslint \"cypress/**/*.ts\""
+    "lint": "eslint \"cypress/**/*.ts\" --fix"
   },
   "dependencies": {
     "auth0-spa-js": "^1.6.5",
