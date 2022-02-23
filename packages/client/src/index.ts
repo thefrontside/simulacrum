@@ -40,10 +40,6 @@ export interface Scenario<T = unknown> {
   data: T;
 }
 
-export interface Service {
-  name: string;
-  url: string;
-}
 
 interface Runnable<T> {
   run(scope: Task): T;

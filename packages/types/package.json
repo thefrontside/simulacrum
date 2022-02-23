@@ -4,7 +4,7 @@
   "description": "Common simulation types",
   "main": "dist/index.d.ts",
   "scripts": {
-    "test": "test"
+    "test": "echo no tests"
   },
   "repository": {
     "type": "git",

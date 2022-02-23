@@ -35,11 +35,6 @@ export interface LegacyServiceCreator {
   port?: number;
 }
 
-export interface Service {
-  port: number;
-  protocol: string;
-}
-
 export interface ServiceOptions {
   port?: number;
 }

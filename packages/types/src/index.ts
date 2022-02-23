@@ -1,5 +1,5 @@
-export interface SimulationOptions {
-  options?: Record<string, unknown>;
+export interface SimulationOptions<O> {
+  options: O;
   services?: Record<string,{
     port?: number
   }>;
@@ -7,6 +7,12 @@ export interface SimulationOptions {
   debug?: boolean;
 }
 
+
+export interface Service {
+  name?: string;
+  port: number;
+  protocol: string;
+}
 export interface Simulation {
   id: string;
   status: 'new' | 'running' | 'failed',
