@@ -7,7 +7,8 @@
     "paths": {
       "@simulacrum/auth0-simulator": ["packages/auth0/src"],
       "@simulacrum/client": ["packages/client/src"],
-      "@simulacrum/server": ["packages/server/src"]
+      "@simulacrum/server": ["packages/server/src"],
+      "@simulacrum/types": ["packages/types/src"]
     }
   }
 }

@@ -50,7 +50,7 @@
     "@frontside/tsconfig": "^3.0.0",
     "@frontside/typescript": "^3.0.0",
     "@simulacrum/client": "0.5.3",
-    "@simaulacrum/types": "0.1.0",
+    "@simulacrum/types": "0.1.0",
     "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/mocha": "^8.2.1",

@@ -4,6 +4,7 @@ import type { SubscribePayload } from 'graphql-ws';
 import { createClient as createWSClient } from 'graphql-ws';
 import webSocketImpl from 'isomorphic-ws';
 import type { GraphQLError } from 'graphql';
+import {Service} from '@simulacrum/types'
 
 export interface SimulationOptions {
   options?: Record<string, unknown>;

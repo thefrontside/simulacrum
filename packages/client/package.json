@@ -20,7 +20,7 @@
     "@frontside/eslint-config": "^3.1.0",
     "@frontside/tsconfig": "^3.0.0",
     "@frontside/typescript": "^3.0.0",
-    "@simaulacrum/types": "0.1.0",
+    "@simulacrum/types": "0.1.0",
     "ts-node": "^9.1.1"
   },
   "repository": {
