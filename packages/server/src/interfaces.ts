@@ -2,6 +2,7 @@ import type { Operation, Resource } from 'effection';
 import type { Slice } from '@effection/atom';
 import type { HttpApp } from './http';
 import type { Faker } from './faker';
+import type { Service } from '@simulacrum/types';
 
 export interface Behaviors {
   services: Record<string, ServiceCreator>;

@@ -4,12 +4,13 @@ import { assert } from 'assert-ts';
 import type { Effect } from './effect';
 import { map } from './effect';
 import express, { raw } from 'express';
-import type { ResourceServiceCreator, Service, ServiceCreator, SimulationState, Simulator } from './interfaces';
+import type { ResourceServiceCreator, ServiceCreator, SimulationState, Simulator } from './interfaces';
 import type { Server } from './http';
 import { createServer } from './http';
 import { createFaker } from './faker';
 import { middlewareHandlerIsOperation, isRequestHandler } from './guards/guards';
 import type { Slice } from '@effection/atom';
+import type { Service } from '@simulacrum/types';
 
 function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreator {
   if(typeof service === 'function') {

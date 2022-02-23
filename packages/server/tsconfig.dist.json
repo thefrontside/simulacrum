@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig",
-  "references": [{ "path": "../client"}],
+  "references": [{ "path": "../client"}, { "path": "../types/tsconfig.dist.json"}],
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
