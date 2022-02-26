@@ -1,13 +1,14 @@
 import type { Task } from 'effection';
-import type { ServerState, SimulationOptions, SimulationState, Simulator } from './interfaces';
+import type { ServerState, SimulationState, Simulator } from './interfaces';
 import type { OperationContext } from './schema/context';
 import type { v4 } from 'uuid';
 import type { Slice } from '@effection/atom';
 import { createSimulation } from './simulation';
+import type { SimulationOptions } from '@simulacrum/types';
 
 type NewId = (() => string) | typeof v4;
 
-export function createOperationContext(atom: Slice<ServerState>, scope: Task, newid: NewId, simulators: Record<string, Simulator>): OperationContext {
+export function createOperationContext<O>(atom: Slice<ServerState<O>>, scope: Task, newid: NewId, simulators: Record<string, Simulator<O>>): OperationContext<O> {
   let simulationsMap = new Map<string, Task>();
 
   return {
@@ -15,9 +16,9 @@ export function createOperationContext(atom: Slice<ServerState>, scope: Task, ne
     scope,
     async createSimulation(
       simulator: string,
-      options: SimulationOptions,
+      options: SimulationOptions<O>,
       debug: boolean
-    ): Promise<SimulationState> {
+    ): Promise<SimulationState<O>> {
       let simulationId = options.key ?? newid();
       let existing = simulationsMap.get(simulationId);
 

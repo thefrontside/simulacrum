@@ -1,14 +1,15 @@
 import type { Slice } from '@effection/atom';
+import type { SimulationOptions } from '@simulacrum/types';
 import type { Task } from 'effection';
-import type { ServerState, SimulationOptions, SimulationState } from '../interfaces';
+import type { ServerState, SimulationState } from '../interfaces';
 
-export interface OperationContext {
+export interface OperationContext<O> {
   scope: Task;
-  atom: Slice<ServerState>;
+  atom: Slice<ServerState<O>>;
   createSimulation(
     simulator: string,
-    options: SimulationOptions,
-    debug: boolean): Promise<SimulationState>;
+    options: SimulationOptions<O>,
+    debug: boolean): Promise<SimulationState<O>>;
   destroySimulation(id: string): Promise<boolean>;
   newid(): string;
 }

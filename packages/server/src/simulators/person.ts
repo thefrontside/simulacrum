@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 import type { Faker } from '../faker';
 import type { Behaviors, Store } from "../interfaces";
 
-export default function(): Behaviors {
+export default function<O>(): Behaviors<O> {
   return {
     services: {},
     scenarios: { person }

@@ -12,7 +12,7 @@ import { middlewareHandlerIsOperation, isRequestHandler } from './guards/guards'
 import type { Slice } from '@effection/atom';
 import type { Service } from '@simulacrum/types';
 
-function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreator {
+function normalizeServiceCreator<O>(service: ServiceCreator<O>): ResourceServiceCreator<O> {
   if(typeof service === 'function') {
     return service;
   }
@@ -73,7 +73,7 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
   };
 }
 
-export function createSimulation (slice: Slice<SimulationState>, simulators: Record<string, Simulator>): Operation<Task<void>> {
+export function createSimulation<O> (slice: Slice<SimulationState<O>>, simulators: Record<string, Simulator<O>>): Operation<Task<void>> {
   return spawn(function* () {
     try {
       yield function * errorBoundary() {
@@ -86,7 +86,7 @@ export function createSimulation (slice: Slice<SimulationState>, simulators: Rec
 
         assert(simulator, `unknown simulator ${simulatorName}`);
 
-        let { options = {}, services: serviceOptions = {} } = slice.get().options;
+        let { options = {} as O, services: serviceOptions = {} } = slice.get().options;
 
         let behaviors = simulator(slice, options);
 
@@ -156,7 +156,7 @@ export function createSimulation (slice: Slice<SimulationState>, simulators: Rec
   });
 }
 
-export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
+export function simulation<O>(simulators: Record<string, Simulator<O>>): Effect<SimulationState<O>> {
   return function* (slice) {
     let simulationTask = yield createSimulation(slice, simulators);
     yield slice.filter(({ status }) => status == "destroying").expect();

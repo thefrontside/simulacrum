@@ -2,10 +2,10 @@ import type { Operation, Resource } from 'effection';
 import type { Slice } from '@effection/atom';
 import type { HttpApp } from './http';
 import type { Faker } from './faker';
-import type { Service } from '@simulacrum/types';
+import type { Service, SimulationOptions } from '@simulacrum/types';
 
-export interface Behaviors {
-  services: Record<string, ServiceCreator>;
+export interface Behaviors<O> {
+  services: Record<string, ServiceCreator<O>>;
   scenarios: Record<string, Scenario>;
   effects?: () => Operation<void>;
 }
@@ -18,8 +18,8 @@ export interface Scenario<T = any, P extends Params = Params> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Simulator<Options = any> {
-  (state: Slice<SimulationState>, options: Options): Behaviors;
+export interface Simulator<Options> {
+  (state: Slice<SimulationState<Options>>, options: Options): Behaviors<Options>;
 }
 
 export interface ServerOptions {
@@ -36,38 +36,27 @@ export interface LegacyServiceCreator {
   port?: number;
 }
 
-export interface ServiceOptions {
-  port?: number;
-}
+export type ResourceServiceCreator<O> = (slice: Slice<SimulationState<O>>, options: Service) => Resource<Service>;
 
-
-export type ResourceServiceCreator = (slice: Slice<SimulationState>, options: ServiceOptions) => Resource<Service>;
-
-export type ServiceCreator = ResourceServiceCreator | LegacyServiceCreator;
+export type ServiceCreator<O> = ResourceServiceCreator<O> | LegacyServiceCreator;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type StoreState = Record<string, Record<string, Record<string, any>>>;
 
 export type Store = Slice<StoreState>;
 
-export interface ServerState {
+export interface ServerState<O = unknown> {
   debug: boolean;
-  simulations: Record<string, SimulationState>;
+  simulations: Record<string, SimulationState<O>>;
 }
 
-export interface SimulationOptions {
-  options?: Record<string, unknown>;
-  services?: Record<string, ServiceOptions>
-  key?: string;
-}
-
-export type SimulationState =
+export type SimulationState<O = unknown> =
   {
     id: string;
     status: 'new';
     debug?: boolean;
     simulator: string;
-    options: SimulationOptions;
+    options: SimulationOptions<O>;
     scenarios: Record<string, ScenarioState>;
     services: [];
     store: StoreState;
@@ -77,7 +66,7 @@ export type SimulationState =
     status: 'running';
     simulator: string;
     debug?: boolean;
-    options: SimulationOptions;
+    options: SimulationOptions<O>;
     services: {
       name: string;
       url: string;
@@ -90,7 +79,7 @@ export type SimulationState =
     status: 'failed';
     simulator: string;
     debug?: boolean;
-    options: SimulationOptions;
+    options: SimulationOptions<O>;
     scenarios: Record<string, ScenarioState>;
     services: [];
     store: StoreState;
@@ -101,7 +90,7 @@ export type SimulationState =
     status: 'destroying';
     simulator: string;
     debug?: boolean;
-    options: SimulationOptions;
+    options: SimulationOptions<O>;
     scenarios: Record<string, ScenarioState>;
     services: [];
     store: StoreState;
@@ -112,7 +101,7 @@ export type SimulationState =
     status: 'halted';
     simulator: string;
     debug?: boolean;
-    options: SimulationOptions;
+    options: SimulationOptions<O>;
     scenarios: Record<string, ScenarioState>;
     services: [];
     store: StoreState;
@@ -140,7 +129,7 @@ export type ScenarioState =
     error: Error;
   }
 
-export type SimulationStatus = SimulationState['status'];
+export type SimulationStatus = SimulationState<unknown>['status'];
 
 export interface Server {
   port: number;

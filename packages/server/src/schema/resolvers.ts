@@ -1,27 +1,30 @@
 import { v4 } from 'uuid';
-import type { SimulationState, ScenarioState, ServerState, SimulationOptions } from "../interfaces";
+import type { SimulationState, ScenarioState, ServerState } from "../interfaces";
 import type { OperationContext } from "./context";
 import { createQueue } from '../queue';
 import { assert } from 'assert-ts';
+import type { SimulationOptions } from '@simulacrum/types';
 
 export interface Resolver<Args, Result> {
-  resolve(args: Args, context: OperationContext): Promise<Result>;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  resolve<O = {}>(args: Args, context: OperationContext<O>): Promise<Result>;
 }
 
 export interface Subscriber<Args, TEach, Result = TEach> {
-  subscribe(args: Args, context: OperationContext): AsyncIterable<TEach>;
+  subscribe<O>(args: Args, context: OperationContext<O>): AsyncIterable<TEach>;
   resolve?(each: TEach): Result;
 }
 
-export interface CreateSimulationParameters {
+export interface CreateSimulationParameters<O = unknown> {
   simulator: string;
-  options?: SimulationOptions;
+  options?: SimulationOptions<O>;
   debug?: boolean;
 }
 
 export const createSimulation: Resolver<CreateSimulationParameters, SimulationState> = {
   async resolve(args, ctx) {
-    let { simulator, options = {}, debug = false } = args;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let { simulator, options = {} as any, debug = false } = args;
 
     return await ctx.createSimulation(simulator, options, debug);
   }

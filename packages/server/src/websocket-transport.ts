@@ -18,7 +18,7 @@ import type { OperationContext } from './schema/context';
  */
 
 
-export function createWebSocketTransport(context: OperationContext, server: HTTPServer): Resource<void> {
+export function createWebSocketTransport<O>(context: OperationContext<O>, server: HTTPServer): Resource<void> {
   return {
     *init(scope) {
       let transport = makeServer<Task>({
