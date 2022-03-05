@@ -5,7 +5,7 @@ import type { Operation, Task } from 'effection';
 import { spawn } from 'effection';
 import type { Slice } from '@effection/atom';
 
-export function createLogger(slice: Slice<ServerState>): Operation<void> {
+export function createLogger<O>(slice: Slice<ServerState<O>>): Operation<void> {
   return {
     name: 'logger',
     *init(scope) {

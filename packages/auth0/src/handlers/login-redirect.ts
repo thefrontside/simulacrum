@@ -1,9 +1,9 @@
 import type { Request, Response } from 'express';
-import type { Options, QueryParams } from '../types';
+import type { Auth0Config, QueryParams } from '../types';
 import { stringify } from "querystring";
 import type { Middleware } from '@simulacrum/server';
 
-export const createLoginRedirectHandler = (options: Options): Middleware =>
+export const createLoginRedirectHandler = (options: Auth0Config): Middleware =>
   function* loginRedirect (req: Request, res: Response) {
     let {
       client_id,

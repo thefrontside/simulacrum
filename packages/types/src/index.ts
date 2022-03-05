@@ -2,6 +2,7 @@ export interface Service {
   name?: string;
   port: number;
   protocol: string;
+  url?: string;
 }
 export interface SimulationOptions<O> {
   options: O;

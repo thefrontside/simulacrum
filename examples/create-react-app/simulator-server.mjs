@@ -19,10 +19,10 @@ main(function* () {
 
   let client = createClient(url);
 
-  const authConfig = JSON.parse(
+  let authConfig: Auth0Config = JSON.parse(
     yield readFile(
       new URL('./src/auth_config.json', import.meta.url)
-    )
+    ) 
   );
 
   let simulation = yield client.createSimulation("auth0", {

@@ -5,6 +5,7 @@ import { createTestServer } from './helpers';
 import { auth0 } from '../src';
 import fetch from 'cross-fetch';
 import { JWKS } from '../src/auth/constants';
+import assert from 'assert-ts';
 
 describe('openid routes', () => {
   let client: Client;
@@ -26,7 +27,8 @@ describe('openid routes', () => {
         }
       });
 
-      auth0Url = simulation.services[0].url;
+        assert(!!simulation.services[0].url);
+        auth0Url = simulation.services[0].url;
     });
 
     it('returns the JWKS keys', function *() {

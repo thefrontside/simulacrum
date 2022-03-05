@@ -17,14 +17,12 @@ export interface Scenario<T = any, P extends Params = Params> {
   (store: Store, faker: Faker, params: P): Operation<T>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Simulator<Options> {
-  (state: Slice<SimulationState<Options>>, options: Options): Behaviors<Options>;
+export interface Simulator<O> {
+  (state: Slice<SimulationState<O>>, options: O): Behaviors<O>;
 }
 
-export interface ServerOptions {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  simulators: Record<string, Simulator<any>>;
+export interface ServerOptions<O> {
+  simulators: Record<string, Simulator<O>>;
   port?: number;
   seed?: number;
   debug?: boolean;
@@ -45,12 +43,12 @@ export type StoreState = Record<string, Record<string, Record<string, any>>>;
 
 export type Store = Slice<StoreState>;
 
-export interface ServerState<O = unknown> {
+export interface ServerState<O> {
   debug: boolean;
   simulations: Record<string, SimulationState<O>>;
 }
 
-export type SimulationState<O = unknown> =
+export type SimulationState<O> =
   {
     id: string;
     status: 'new';

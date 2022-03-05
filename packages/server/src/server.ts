@@ -22,19 +22,19 @@ const defaults = {
   debug: false
 };
 
-export function createSimulationServer(options: ServerOptions = defaults): Resource<Server> {
+export function createSimulationServer<O>(options: ServerOptions<O> = defaults): Resource<Server> {
   let { simulators, debug, port, seed } = { ...defaults, ...options };
 
   return {
     *init(scope) {
       let newid = seed ? stableIds(seed) : v4;
 
-      let atom = createAtom<ServerState>({
+      let atom = createAtom<ServerState<O>>({
         debug: !!debug,
         simulations: {}
       });
 
-      let context = createOperationContext(atom, scope, newid, simulators);
+      let context = createOperationContext<O>(atom, scope, newid, simulators);
 
       let app = express()
         .use(cors())

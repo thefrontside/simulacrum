@@ -1,13 +1,13 @@
 import type { SimulationState, Store } from '@simulacrum/server';
 import type { Slice } from '@effection/atom';
 
-export interface Options {
+export interface Auth0Config {
   scope: string;
   port?: number;
   audience: string;
   clientID: string;
   store: Store;
-  services: Slice<SimulationState['services']>;
+  services: Slice<SimulationState<Auth0Config>['services']>;
   rulesDirectory?: string;
 }
 

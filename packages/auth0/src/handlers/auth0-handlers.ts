@@ -1,5 +1,5 @@
 import type { HttpHandler, Middleware, Person, Store } from '@simulacrum/server';
-import type { IdTokenData, Options, QueryParams, ResponseModes } from '../types';
+import type { IdTokenData, Auth0Config, QueryParams, ResponseModes } from '../types';
 import { createLoginRedirectHandler } from './login-redirect';
 import { createWebMessageHandler } from './web-message';
 import { loginView } from '../views/login';
@@ -26,7 +26,7 @@ export type Routes =
 
 type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
 
-const getServiceUrlFromOptions = (options: Options) => {
+const getServiceUrlFromOptions = (options: Auth0Config) => {
   let service = options.services.get().find(({ name }) => name === 'auth0' );
   assert(!!service, `did not find auth0 service in set of running services`);
 
@@ -47,7 +47,7 @@ const createPersonQuery = (store: Store) => (predicate: Predicate<Person>) => {
   }
 };
 
-export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandler> => {
+export const createAuth0Handlers = (options: Auth0Config): Record<Routes, HttpHandler> => {
   let { audience, scope, store, clientID, rulesDirectory } = options;
   let personQuery = createPersonQuery(store);
   let rulesRunner = createRulesRunner(rulesDirectory);

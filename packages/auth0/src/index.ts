@@ -7,7 +7,7 @@ import { person } from '@simulacrum/server';
 import { createSession } from './middleware/session';
 import path from 'path';
 import express from 'express';
-import type { Options } from './types';
+import type { Auth0Config } from './types';
 import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
 import { createOpenIdHandlers } from './handlers/openid-handlers';
@@ -50,7 +50,7 @@ const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & R
   } as const;
 };
 
-export const auth0: Simulator<Options> = (slice, options) => {
+export const auth0: Simulator<Auth0Config> = (slice, options) => {
   let store = slice.slice('store');
   let services = slice.slice('services');
   let debug = !!slice.slice('debug').get();

@@ -13,7 +13,8 @@ import jwt from 'jsonwebtoken';
 import Keygrip from 'keygrip';
 import { removeTrailingSlash } from '../src/handlers/url';
 import type { Scenario } from '@simulacrum/client';
-import type { TokenSet } from 'src/types';
+import type { Auth0Config, TokenSet } from 'src/types';
+import assert from 'assert-ts';
 
 const createSessionCookie = <T>(data: T): string => {
   let cookie = Buffer.from(JSON.stringify(data)).toString('base64');
@@ -30,7 +31,7 @@ describe('Auth0 simulator', () => {
   let auth0Url: string;
 
   beforeEach(function*() {
-    client = yield createTestServer({
+    client = yield createTestServer<Auth0Config>({
       simulators: {
         auth0: (slice, options) => {
           let { services } = auth0(slice, options);
@@ -69,7 +70,10 @@ describe('Auth0 simulator', () => {
       beforeEach(function*() {
         let simulation: Simulation = yield client.createSimulation("auth0");
 
+        assert(!!simulation.services[0].url);
         auth0Url = simulation.services[0].url;
+
+        assert(!!simulation.services[1].url);
         frontendUrl = simulation.services[1].url;
       });
 
@@ -95,7 +99,10 @@ describe('Auth0 simulator', () => {
       beforeEach(function*() {
         let simulation: Simulation = yield client.createSimulation("auth0");
 
+        assert(!!simulation.services[0].url);
         auth0Url = simulation.services[0].url;
+
+        assert(!!simulation.services[1].url);
         frontendUrl = simulation.services[1].url;
       });
 
@@ -141,6 +148,9 @@ describe('Auth0 simulator', () => {
 
     beforeEach(function* () {
       simulation = yield client.createSimulation("auth0");
+
+      assert(!!simulation.services[0].url);
+
       url = simulation.services[0].url;
 
       person = yield client.given(simulation, "person");
@@ -241,6 +251,8 @@ describe('Auth0 simulator', () => {
 
       person = yield client.given(simulation, "person");
 
+      assert(!!simulation.services[0].url);
+
       authUrl = simulation.services[0].url;
 
       // prime the server with the nonce field
@@ -336,6 +348,8 @@ describe('Auth0 simulator', () => {
 
       let idToken = jwt.decode(token.id_token, { complete: true });
 
+      assert(typeof idToken?.payload !== 'string');
+
       expect(idToken?.payload.picture).toContain('https://i.pravatar.cc');
     });
   });
@@ -344,7 +358,10 @@ describe('Auth0 simulator', () => {
     beforeEach(function*() {
       let simulation: Simulation = yield client.createSimulation("auth0");
 
+      assert(!!simulation.services[0].url);
       auth0Url = simulation.services[0].url;
+
+      assert(!!simulation.services[1].url);
       frontendUrl = simulation.services[1].url;
     });
 
@@ -365,7 +382,10 @@ describe('Auth0 simulator', () => {
     beforeEach(function*() {
       let simulation: Simulation = yield client.createSimulation("auth0");
 
+      assert(!!simulation.services[0].url);
       auth0Url = simulation.services[0].url;
+
+      assert(!!simulation.services[1].url);
       frontendUrl = simulation.services[1].url;
 
       person = yield client.given(simulation, "person");

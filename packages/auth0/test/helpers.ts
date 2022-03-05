@@ -6,7 +6,7 @@ import { createSimulationServer } from '@simulacrum/server';
 
 export type { Client, Simulation } from '@simulacrum/client';
 
-export function createTestServer(options: ServerOptions): Resource<Client> {
+export function createTestServer<O>(options: ServerOptions<O>): Resource<Client> {
   return {
     *init(scope: Task) {
       let server: Server = yield createSimulationServer(options);

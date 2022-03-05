@@ -6,8 +6,8 @@ import webSocketImpl from 'isomorphic-ws';
 import type { GraphQLError } from 'graphql';
 import type { Service } from '@simulacrum/types';
 
-export interface SimulationOptions {
-  options?: Record<string, unknown>;
+export interface SimulationOptions<O> {
+  options?: Record<string, O>;
   services?: Record<string,{
     port?: number
   }>;
@@ -16,7 +16,7 @@ export interface SimulationOptions {
 }
 
 export interface Client {
-  createSimulation(simulator: string, options?: SimulationOptions): Promise<Simulation>;
+  createSimulation<O>(simulator: string, options?: SimulationOptions<O>): Promise<Simulation>;
   destroySimulation(simulation: Simulation): Promise<boolean>;
   given<T>(simulation: Simulation, scenario: string, params?: Record<string, unknown>): Promise<Scenario<T>>;
   state<T>(): AsyncIterable<T> & AsyncIterator<T>;
@@ -101,7 +101,7 @@ export function createClient(serverURL: string): Client {
   }
 
   return {
-    createSimulation: async (simulator: string, options?: SimulationOptions) => {
+    createSimulation: async <O>(simulator: string, options?: SimulationOptions<O>) => {
       return query<Simulation>("createSimulation", {
         query: `
 mutation CreateSimulation($simulator: String, $options: JSON, $debug: Boolean) {

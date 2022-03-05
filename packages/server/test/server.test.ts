@@ -111,6 +111,8 @@ describe('@simulacrum/server', () => {
       beforeEach(function*() {
         let [{ url }] = simulation.services;
 
+        assert(!!url);
+
         let response = yield fetch(url.toString(), { method: 'POST', body: "hello world" });
         expect(response.ok).toEqual(true);
         body = yield response.text();
@@ -132,6 +134,8 @@ describe('@simulacrum/server', () => {
           let service = simulation.services.find(s => s.name === 'echo.udp');
 
           assert(!!service, `no service found`);
+
+          assert(!!service.url);
 
           let { port } = new URL(service.url);
 
@@ -156,6 +160,8 @@ describe('@simulacrum/server', () => {
       beforeEach(function*() {
         let [, { url }] = simulation.services;
 
+        assert(!!url);
+
         let response = yield fetch(url.toString(), { method: 'POST', body: "hello world" });
         expect(response.ok).toEqual(true);
         body = yield response.text();
@@ -178,6 +184,9 @@ describe('@simulacrum/server', () => {
 
       it('tears down any running services', function*() {
         let [{ url }] = simulation.services;
+
+        assert(!!url);
+
         let response = fetch(url.toString(), { method: 'POST', body: "hello world" });
         expect(yield captureError(response)).toMatchObject({ name: 'FetchError' });
       });
@@ -201,7 +210,11 @@ describe('@simulacrum/server', () => {
           port
         }
       } });
+
       let [{ url }] = simulation.services;
+
+      assert(!!url);
+
       serviceUrl = url;
       response = yield fetch(url.toString(), { method: 'POST', body: "hello world" });
       expect(response.ok).toBe(true);

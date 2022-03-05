@@ -6,6 +6,7 @@ import { ldap } from '../src';
 import { createClient, NoSuchObjectError } from 'ldapjs';
 import type { Client as LDAPClient , SearchEntryObject } from 'ldapjs';
 import { person } from '@simulacrum/server';
+import assert from 'assert-ts';
 
 describe('Auth0 simulator', () => {
   let client: Client;
@@ -55,6 +56,7 @@ describe('Auth0 simulator', () => {
     let ldapClient: LDAPClient;
 
     function bind(dn: string, secret: string): Promise<LDAPClient> {
+      assert(!!simulation.services[0].url);
       ldapClient = createClient({ url: simulation.services[0].url });
 
       return new Promise((resolve, reject) => {

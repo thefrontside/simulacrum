@@ -7,6 +7,7 @@ import type { HttpApp } from '../src';
 import { createHttpApp, consoleLogger } from '../src';
 import fetch from 'cross-fetch';
 import { json } from 'express';
+import assert from 'assert-ts';
 
 describe('middleware logging', () => {
   let client: Client;
@@ -44,6 +45,8 @@ describe('middleware logging', () => {
 
   it('should log without error', function * () {
     let [{ url }] = simulation.services;
+
+    assert(!!url);
 
     let response = yield fetch(`${url.toString()}?q=a&b=c`, { method: 'POST', body: JSON.stringify({ msg: "hello world" }) });
 

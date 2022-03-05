@@ -1,6 +1,5 @@
 import { objectType, mutationType, scalarType, nonNull, arg, stringArg, intArg, subscriptionType, booleanArg } from 'nexus';
-
-import { createSimulation, destroySimulation, given, state } from './operations';
+import { createSimulation, destroySimulation, given, state } from './resolvers';
 
 export const types = [
   scalarType({
@@ -39,14 +38,14 @@ export const types = [
           }),
           debug: booleanArg(),
         },
-        ...createSimulation
+        ...createSimulation()
       });
       t.field('destroySimulation', {
         type: 'Boolean',
         args: {
           id: nonNull(stringArg())
         },
-        ...destroySimulation
+        ...destroySimulation()
       });
       t.field('given', {
         type: 'JSON',
@@ -59,7 +58,7 @@ export const types = [
             default: {}
           })
         },
-        ...given
+        ...given()
       });
     }
   }),
@@ -67,8 +66,9 @@ export const types = [
     definition(t) {
       t.field('state', {
         type: 'JSON',
-        ...state
-      });
+        ...state()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
     }
   })
 ];
