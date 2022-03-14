@@ -231,9 +231,6 @@ describe('Auth0 simulator', () => {
 
     beforeEach(function* () {
       simulation = yield client.createSimulation("auth0", {
-        options: {
-          rulesDirectory: 'test/rules'
-        },
         services: {
           auth0: { port: 4400 }, frontend: { port: 3000 }
         }
@@ -318,25 +315,6 @@ describe('Auth0 simulator', () => {
       });
 
       expect(res.status).toBe(401);
-    });
-
-    it('should have ran the rules', function* () {
-      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...Fields,
-          code
-        })
-      });
-
-      let token = yield res.json();
-
-      let idToken = jwt.decode(token.id_token, { complete: true });
-
-      expect(idToken?.payload.picture).toContain('https://i.pravatar.cc');
     });
   });
 

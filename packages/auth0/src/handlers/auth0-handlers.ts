@@ -1,5 +1,5 @@
 import type { HttpHandler, Middleware, Person, Store } from '@simulacrum/server';
-import type { IdTokenData, Options, QueryParams, ResponseModes } from '../types';
+import type { AccessTokenPayload, IdTokenData, Options, QueryParams, ResponseModes } from '../types';
 import { createLoginRedirectHandler } from './login-redirect';
 import { createWebMessageHandler } from './web-message';
 import { loginView } from '../views/login';
@@ -8,7 +8,7 @@ import { stringify } from 'querystring';
 import { decode, encode } from "base64-url";
 import { userNamePasswordForm } from '../views/username-password';
 import { expiresAt } from '../auth/date';
-import { createAuthJWT, createJsonWebToken } from '../auth/jwt';
+import { createJsonWebToken } from '../auth/jwt';
 import { getServiceUrl } from './get-service-url';
 import { createRulesRunner } from '../rules/rules-runner';
 import type { RuleUser } from '../rules/types';
@@ -222,19 +222,24 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         idTokenData.nonce = nonce;
       }
 
-      let accessToken = {
-        scope,
-      };
-
       let userData = {} as RuleUser;
-      let context = { clientID, accessToken, idToken: idTokenData };
+      let context = { clientID, accessToken: { scope }, idToken: idTokenData };
 
       rulesRunner(userData, context);
 
-      let idToken = createJsonWebToken({ ...userData, ...context.idToken, ...context.accessToken });
+      let idToken = createJsonWebToken({ ...userData, ...context.idToken });
+
+      let accessToken: AccessTokenPayload = {
+        aud: audience,
+        sub: idTokenData.sub,
+        iat: idTokenData.iat,
+        iss: idTokenData.iss,
+        exp: idTokenData.exp,
+        ...context.accessToken
+      };
 
       res.status(200).json({
-        access_token: createAuthJWT(url, audience, idTokenData.sub),
+        access_token: createJsonWebToken(accessToken),
         id_token: idToken,
         expires_in: 86400,
         token_type: "Bearer",

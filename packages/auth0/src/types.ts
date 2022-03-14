@@ -52,3 +52,14 @@ export interface IdTokenData {
   sub: string;
   nonce?: string;
 }
+
+export interface AccessTokenPayload {
+  iss: string;
+  sub: string;
+  aud: string;
+  iat: number;
+  exp: number;
+  scope: string;
+
+  [key: string]: string | number | string[];
+}
