@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.0.9]
+
+- apply @typescript/consistent-types
+  - Bumped due to a bump in @simulacrum/server.
+  - [746a2ab](https://github.com/thefrontside/simulacrum/commit/746a2ab46333ff836808dd4d1bf8e98f2a20afae) Eslint consitent types ([#181](https://github.com/thefrontside/simulacrum/pull/181)) on 2022-02-22
+
 ## \[0.0.8]
 
 - Simplify createSimulation and destroySimulation by removing them from the effects.

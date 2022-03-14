@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/auth0-cypress",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Cypress simulacrum commands",
   "main": "dist/support/index.js",
   "types": "dist/support/index.d.ts",

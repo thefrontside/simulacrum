@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.5.0]
+
+- apply @typescript/consistent-types
+  - [746a2ab](https://github.com/thefrontside/simulacrum/commit/746a2ab46333ff836808dd4d1bf8e98f2a20afae) Eslint consitent types ([#181](https://github.com/thefrontside/simulacrum/pull/181)) on 2022-02-22
+- Apply rules changes to the accessToken
+  - [ad51c3a](https://github.com/thefrontside/simulacrum/commit/ad51c3af6f74aad72b00e3ea71fc01042a6287c5) Rules tests ([#183](https://github.com/thefrontside/simulacrum/pull/183)) on 2022-03-14
+
 ## \[0.4.1]
 
 - Simplify createSimulation and destroySimulation by removing them from the effects.
