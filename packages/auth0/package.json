@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/auth0-simulator",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Run local instance of Auth0 API for local development and integration testing",
   "main": "dist/index.js",
   "bin": "bin/index.js",
@@ -39,7 +39,7 @@
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
     "@effection/process": "^2.0.1",
-    "@simulacrum/server": "0.5.0",
+    "@simulacrum/server": "0.5.1",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "base64-url": "^2.3.3",
@@ -56,7 +56,7 @@
     "@frontside/eslint-config": "^3.1.0",
     "@frontside/tsconfig": "^3.0.0",
     "@frontside/typescript": "^3.0.0",
-    "@simulacrum/client": "0.5.3",
+    "@simulacrum/client": "0.5.4",
     "@types/base64-url": "^2.2.0",
     "@types/cookie-session": "^2.0.42",
     "@types/dedent": "^0.7.0",

@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/client",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "connect to simulacrum servers and manipulate them via the control API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
