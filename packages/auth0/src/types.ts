@@ -59,9 +59,7 @@ export interface AccessTokenPayload {
   aud: string;
   iat: number;
   exp: number;
-  // azp: string;
   scope: string;
-  // gty: string;
 
   [key: string]: string | number | string[];
 }
