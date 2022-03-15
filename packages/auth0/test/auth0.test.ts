@@ -298,7 +298,7 @@ describe('Auth0 simulator', () => {
         expect(idToken.payload.email).toBe(person.data.email);
       });
 
-      it('sets the access token iat fields in the past', function * () {
+      it('sets the access token and id token iat fields in the past', function * () {
         expect([accessToken.payload.iat, idToken.payload.iat].every(d => epochTimeToLocalDate(d) < new Date())).toBe(true);
       });
     });
