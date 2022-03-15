@@ -13,7 +13,8 @@ import jwt from 'jsonwebtoken';
 import Keygrip from 'keygrip';
 import { removeTrailingSlash } from '../src/handlers/url';
 import type { Scenario } from '@simulacrum/client';
-import type { TokenSet } from 'src/types';
+import type { AccessToken, IdToken, TokenSet } from '../src/types';
+import { epochTimeToLocalDate } from '../src/auth/date';
 
 const createSessionCookie = <T>(data: T): string => {
   let cookie = Buffer.from(JSON.stringify(data)).toString('base64');
@@ -267,8 +268,8 @@ describe('Auth0 simulator', () => {
     });
 
     describe('valid token', () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let token: any;
+      let idToken: IdToken;
+      let accessToken: AccessToken;
       beforeEach(function * () {
         let res: Response = yield fetch(`${authUrl}/oauth/token`, {
           method: 'POST',
@@ -285,15 +286,20 @@ describe('Auth0 simulator', () => {
 
         let json = yield res.json();
 
-        token = jwt.decode(json.id_token, { complete: true });
+        idToken = jwt.decode(json.id_token, { complete: true }) as IdToken;
+        accessToken = jwt.decode(json.access_token, { complete: true }) as AccessToken;
       });
 
       it('should return an iss field with a forward slash', function* () {
-        expect(token.payload.iss).toBe('https://localhost:4400/');
+        expect(idToken.payload.iss).toBe('https://localhost:4400/');
       });
 
       it('token sould contain a valid email', function* () {
-        expect(token.payload.email).toBe(person.data.email);
+        expect(idToken.payload.email).toBe(person.data.email);
+      });
+
+      it('sets the access token iat fields in the past', function * () {
+        expect([accessToken.payload.iat, idToken.payload.iat].every(d => epochTimeToLocalDate(d) < new Date())).toBe(true);
       });
     });
 

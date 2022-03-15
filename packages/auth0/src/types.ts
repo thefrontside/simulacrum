@@ -63,3 +63,11 @@ export interface AccessTokenPayload {
 
   [key: string]: string | number | string[];
 }
+
+export interface IdToken {
+  payload: IdTokenData;
+}
+
+export interface AccessToken {
+  payload: AccessTokenPayload;
+}
