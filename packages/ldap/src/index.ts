@@ -39,18 +39,23 @@ export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAP
       let bindPassword = options.bindPassword;
       let groupDN = options.groupDN;
 
-      let log = {
+      let silence = {
         debug: () => undefined,
         trace: () => undefined,
         warn: () => undefined,
         error: () => undefined,
       };
 
+      let logger = options.log ? console : {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        log: (..._: unknown[]) => {}
+      };
 
-      let server = createServer({ log });
+
+      let server = createServer({ log: silence });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       server.search(baseDN, function (req: any, res: any, next: any) {
-        console.log(dedent`--- User Search ---
+        logger.log(dedent`--- User Search ---
 dn:     ${req.dn.toString()}
 scope:  ${req.scope}
 filter: ${req.filter.toString()}
@@ -72,7 +77,7 @@ filter: ${req.filter.toString()}
           };
 
           if (req.filter.matches(user.attributes)) {
-            console.log(`Sending ${user.attributes.email}`);
+            logger.log(`Sending ${user.attributes.email}`);
             res.send(user);
           }
         }
@@ -84,19 +89,19 @@ filter: ${req.filter.toString()}
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       server.compare(groupDN, (req: any, res: any) => {
-        console.log('--- Compare ---');
-        console.log(`DN: ${req.dn.toString()}`);
-        console.log(`attribute name: ${req.attribute}`);
-        console.log(`attribute value: ${req.value}`);
+        logger.log('--- Compare ---');
+        logger.log(`DN: ${req.dn.toString()}`);
+        logger.log(`attribute name: ${req.attribute}`);
+        logger.log(`attribute value: ${req.value}`);
 
         res.end(true);
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       server.bind(baseDN, function (req: any, res: any, next: any) {
-        console.log('--- Bind ---');
-        console.log(`bind DN: ${req.dn.toString()}`);
-        console.log(`bind PW: ${req.credentials}`);
+        logger.log('--- Bind ---');
+        logger.log(`bind DN: ${req.dn.toString()}`);
+        logger.log(`bind PW: ${req.credentials}`);
 
         let commonName = req.dn.rdns[0].attrs.cn.value;
         if (!commonName) {
@@ -104,24 +109,24 @@ filter: ${req.filter.toString()}
         }
 
         let password = req.credentials;
-        console.log('verify:', commonName, password);
+        logger.log('verify:', commonName, password);
 
         let users = [...options.users];
 
         let user = users.filter(u => u.id === commonName)?.[0];
 
         if (typeof user === 'undefined') {
-          console.log('could not find user');
+          logger.log('could not find user');
           return next(new NoSuchObjectError(req.dn.toString()));
         }
 
         if (user.password !== password) {
-          console.log(`bad password ${password} for ${user.email}`);
+          logger.log(`bad password ${password} for ${user.email}`);
           return next(new InvalidCredentialsError(req.dn.toString()));
         }
 
         if (commonName === bindDn && password === bindPassword) {
-          console.log(`bind succeeded for ${bindDn}`);
+          logger.log(`bind succeeded for ${bindDn}`);
           res.end();
         } else {
           return next(new OperationsError('could not find user'));
@@ -129,7 +134,7 @@ filter: ${req.filter.toString()}
       });
 
       server.listen(port, function () {
-        console.log(dedent`LDAP test server running on port ${port});
+        logger.log(dedent`LDAP test server running on port ${port});
 
 BindDN: bindDn = ${bindDn} cn=${bindDn},${baseDN}
 Bind Password: ${bindPassword}
@@ -144,16 +149,16 @@ UserBaseDN:    ${bindDn}
         } finally {
           yield new Promise<void>(resolve => {
             server?.close(() => {
-              console.log('ldap server closed');
+              logger.log('ldap server closed');
               resolve();
             });
           });
         }
       });
 
-      return { ...server, port }
+      return { ...server, port };
     }
-  }
+  };
 }
 
 export function createLdapService<T extends UserData>(options: LDAPOptions, state: Slice<SimulationState>): ResourceServiceCreator {
@@ -177,7 +182,7 @@ export function createLdapService<T extends UserData>(options: LDAPOptions, stat
         return {
           port: server.port,
           protocol: 'ldap',
-        }
+        };
       }
     };
   };

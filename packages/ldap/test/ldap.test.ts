@@ -69,7 +69,7 @@ describe('Auth0 simulator', () => {
     }
 
     afterEach(() => {
-      ldapClient?.unbind(() => console.log('unbound`'));
+      ldapClient?.unbind();
     });
 
     describe('bind', () => {
