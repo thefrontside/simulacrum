@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.5.1]
+
+- Make the iat field epoch time.
+  - [6e08689](https://github.com/thefrontside/simulacrum/commit/6e086899eaf085d1e12e2c8edfea56139d8b705b) make iat field epoch time ([#187](https://github.com/thefrontside/simulacrum/pull/187)) on 2022-03-15
+
 ## \[0.5.0]
 
 - apply @typescript/consistent-types

@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.3.0]
+
+- add low-level `createLDAPServer()` resource that lets you embed an LDAP server
+  into any Effection program as an resource.
+  - [a470277](https://github.com/thefrontside/simulacrum/commit/a47027705cb8976dc97f5b274a3582b8c665dadb) Allow LDAP server to be standalone a resource on 2022-03-15
+
 ## \[0.2.3]
 
 - apply @typescript/consistent-types

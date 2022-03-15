@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/ldap-simulator",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Run local LDAP server with specific users for local development and integration testing",
   "main": "dist/index.js",
   "bin": "bin/index.js",
