@@ -7,7 +7,7 @@ import { assert } from 'assert-ts';
 import { stringify } from 'querystring';
 import { decode, encode } from "base64-url";
 import { userNamePasswordForm } from '../views/username-password';
-import { expiresAt } from '../auth/date';
+import { epochTime, expiresAt } from '../auth/date';
 import { createJsonWebToken } from '../auth/jwt';
 import { getServiceUrl } from './get-service-url';
 import { createRulesRunner } from '../rules/rules-runner';
@@ -212,7 +212,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         typ: "JWT",
         iss: url,
         exp: expiresAt(),
-        iat: Date.now(),
+        iat: epochTime(),
         email: username,
         aud: clientID,
         sub: user.id,
@@ -232,7 +232,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       let accessToken: AccessTokenPayload = {
         aud: audience,
         sub: idTokenData.sub,
-        iat: idTokenData.iat,
+        iat: epochTime(),
         iss: idTokenData.iss,
         exp: idTokenData.exp,
         ...context.accessToken
