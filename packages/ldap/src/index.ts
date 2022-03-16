@@ -46,7 +46,7 @@ export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAP
         error: () => undefined,
       };
 
-      let logger = options.log ? console : {
+      let logger = options.log || options.log == null ? console : {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         log: (..._: unknown[]) => {}
       };
