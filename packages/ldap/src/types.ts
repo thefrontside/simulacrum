@@ -1,4 +1,5 @@
 export interface LDAPOptions {
+  log?: boolean;
   port?: number;
   baseDN: string;
   bindDn: string;

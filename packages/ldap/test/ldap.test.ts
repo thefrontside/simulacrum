@@ -34,6 +34,7 @@ describe('Auth0 simulator', () => {
     beforeEach(function*() {
       simulation = yield client.createSimulation("ldap", {
         options: {
+          log: false,
           baseDN: "ou=users,dc=org.com",
           bindDn: "admin@org.com",
           bindPassword: "password",
@@ -69,7 +70,7 @@ describe('Auth0 simulator', () => {
     }
 
     afterEach(() => {
-      ldapClient?.unbind(() => console.log('unbound`'));
+      ldapClient?.unbind();
     });
 
     describe('bind', () => {
