@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.3.1]
+
+- add `log` option to LDAP simulator options to enabled/disable logging
+  - [83a59fe](https://github.com/thefrontside/simulacrum/commit/83a59fe3361f333187e5275bfaf1da440fbd6c65) Add changeset on 2022-03-15
+
 ## \[0.3.0]
 
 - add low-level `createLDAPServer()` resource that lets you embed an LDAP server
