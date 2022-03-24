@@ -13,11 +13,13 @@ import { noCache } from './middleware/no-cache';
 import { createOpenIdHandlers } from './handlers/openid-handlers';
 import { getConfig } from './config/get-config';
 
+export { getConfig } from './config/get-config';
+
 const publicDir = path.join(__dirname, 'views', 'public');
 
 type Auth0Handlers = ReturnType<typeof createAuth0Handlers> & ReturnType<typeof createOpenIdHandlers>;
 
-const createAuth0Service = (handlers: Auth0Handlers, debug: boolean): LegacyServiceCreator => {
+const createAuth0Service = (handlers: Auth0Handlers, { port, debug }: { port: number, debug: boolean }): LegacyServiceCreator => {
   let app = createHttpApp()
     .use(express.static(publicDir))
     .use(createSession())
@@ -43,7 +45,8 @@ const createAuth0Service = (handlers: Auth0Handlers, debug: boolean): LegacyServ
 
   return {
     protocol: 'https',
-    app
+    app,
+    port
   } as const;
 };
 
@@ -59,8 +62,10 @@ export const auth0: Simulator<Options> = (slice, options) => {
   let auth0Handlers = createAuth0Handlers(handlersOptions);
   let openIdHandlers = createOpenIdHandlers(handlersOptions);
 
+  let serviceOptions = { debug, port: config.port };
+
   return {
-    services: { auth0: createAuth0Service({ ...auth0Handlers, ...openIdHandlers }, debug) },
+    services: { auth0: createAuth0Service({ ...auth0Handlers, ...openIdHandlers }, serviceOptions) },
     scenarios: {
       /**
        * Here we just export the internal `person` scenario so that it can be

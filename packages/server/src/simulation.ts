@@ -61,7 +61,9 @@ function normalizeServiceCreator(service: ServiceCreator): ResourceServiceCreato
           });
         }
 
-        let server: Server = yield createServer(app, { protocol: service.protocol, port: options.port });
+        let port = options.port ?? service.port;
+
+        let server: Server = yield createServer(app, { protocol: service.protocol, port });
 
         return {
           port: server.address.port,

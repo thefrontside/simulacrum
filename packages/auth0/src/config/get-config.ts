@@ -1,5 +1,5 @@
 import { cosmiconfigSync } from 'cosmiconfig';
-import type { Options, Schema } from '../types';
+import type { Auth0Configuration, Options, Schema } from '../types';
 import { configurationSchema } from '../types';
 
 function omit<T, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> {
@@ -15,19 +15,34 @@ function omit<T, K extends keyof T>(obj: T, ...keys: K[]): Omit<T, K> {
   return copy;
 }
 
+const DefaultAuth0Port = 4400;
+
 export const DefaultArgs: Schema = {
   clientID: '00000000000000000000000000000000',
   audience: 'https://thefrontside.auth0.com/api/v1/',
   scope: "openid profile email offline_access",
-  port: 3300
 };
 
 type Explorer = ReturnType<typeof cosmiconfigSync>;
 
+function getPort({ domain, port }: Auth0Configuration): number {
+  if(typeof port === 'number') {
+    return port;
+  }
+
+  if(domain) {
+    if(domain.split(':').length === 2) {
+      return parseInt(domain.split(':')[1]);
+    }
+  }
+
+  return DefaultAuth0Port;
+}
+
 // This higher order function would only be used for testing and
 // allows different cosmiconfig instances to be used for testing
 export function getConfigCreator(explorer: Explorer) {
-  return function getConfig(options: Options) {
+  return function getConfig(options: Options): Auth0Configuration {
     let searchResult = explorer.search();
 
     let config: Schema =
@@ -37,12 +52,9 @@ export function getConfigCreator(explorer: Explorer) {
 
     let configuration = { ...DefaultArgs, ...config, ...strippedOptions };
 
-    try {
-      configurationSchema.parse(configuration);
-    } catch (e) {
-      console.error(e);
-      process.exit(1);
-    }
+    configuration.port = getPort(configuration);
+
+    configurationSchema.parse(configuration);
 
     return configuration;
   };

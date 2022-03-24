@@ -1,9 +1,7 @@
-import appConfig from "../../src/auth_config.json";
-
 describe('login', () => {
   describe('login and call an external api', () => {
     it('should get token without signing in and access restricted route',  () => {
-      cy.createSimulation(appConfig)
+      cy.createSimulation()
         .given()
         .login()
         .visit('/external-api')

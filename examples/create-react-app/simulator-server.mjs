@@ -19,16 +19,8 @@ main(function* () {
 
   let client = createClient(url);
 
-  const authConfig = JSON.parse(
-    yield readFile(
-      new URL('./src/auth_config.json', import.meta.url)
-    )
-  );
-
   let simulation = yield client.createSimulation("auth0", {
     options: {
-      ...authConfig,
-      rulesDirectory: "__mocks__/rules"
     },
     services: {
       auth0: {

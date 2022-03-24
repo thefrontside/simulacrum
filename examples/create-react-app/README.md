@@ -14,7 +14,7 @@ npm install
 
 ## Development Configuration
 
-The auth0 configuration to connect to the `auth0-simulator` is in the [src/auth_config.json](./src/auth_config.json) file.
+The auth0 configuration to connect to the `auth0-simulator` is defined in the `auth0Simulator` property of the pacakge.json file.
 
 ```json
 { 
@@ -74,8 +74,6 @@ There are two spec files in that directory that show how to:
 1. [login silently](./cypress/integration/login.spec.ts) and run e2e tests
 
 ```ts
-import appConfig from "../../src/auth_config.json";
-
 describe('login', () => {
   describe('login and call an external api', () => {
     it('should get token without signing in and access restricted route',  () => {
@@ -95,8 +93,6 @@ describe('login', () => {
 2. login via the [universal login pages](./cypress/integration/universal-login.spec.ts),
 
 ```ts
-import appConfig from "../../src/auth_config.json";
-
 describe('login', () => {
   describe('Universal Login', () => {
     it('should login', () => {

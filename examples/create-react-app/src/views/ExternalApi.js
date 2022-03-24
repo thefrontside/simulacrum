@@ -159,8 +159,8 @@ export const ExternalApiComponent = () => {
                 in the <code>src/index.js</code> file
               </li>
               <li>
-                by specifying it in the <code>auth_config.json</code> file (see
-                the <code>auth_config.json</code> file for an example of
+                by specifying it in the <code>auth0Simulator</code> property of the <code>package.json</code> file (see
+                the <code>package.json</code> file for an example of
                 where it should go)
               </li>
             </ul>

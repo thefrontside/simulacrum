@@ -73,11 +73,6 @@
     "ts-node": "^9.1.1",
     "ws": "^7.4.4"
   },
-  "auth0Simulator": {
-    "clientID": "00000000000000000000000000000000",
-    "audience": "https://thefrontside.auth0.com/api/v1/",
-    "scope": "openid profile email offline_access"
-  },
   "volta": {
     "extends": "../../package.json"
   }

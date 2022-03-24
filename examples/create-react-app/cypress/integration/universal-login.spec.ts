@@ -1,12 +1,10 @@
-import appConfig from "../../src/auth_config.json";
-
 describe('login', () => {
   describe('Universal Login', () => {
     it('should login', () => {
       let email = 'bob@gmail.com';
       let password = 'Passw0rd!';
       
-      cy.createSimulation(appConfig)
+      cy.createSimulation()
         .given({ email, password })
         .visit('/')
         .contains('Log in').first().click()
@@ -23,7 +21,7 @@ describe('login', () => {
     });
 
     it('should fail login with invalid credentials', () => {
-      cy.createSimulation(appConfig)
+      cy.createSimulation()
         .visit('/')
         .get('#qsLoginBtn').first().click()
         .get('#username')

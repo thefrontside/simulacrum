@@ -2,9 +2,11 @@ import type { SimulationState, Store } from '@simulacrum/server';
 import type { Slice } from '@effection/atom';
 import { z } from 'zod';
 
+// TODO: better validation
 export const configurationSchema = z.object({
-  port: z.number().gt(2999, "port must be greater than 2999").lt(10000, "must be less than 10000"),
-  audience:  z.optional(z.string().url("audience must be a valid url")),
+  port: z.optional(z.number().gt(2999, "port must be greater than 2999").lt(10000, "must be less than 10000")),
+  domain: z.optional(z.string().min(1, 'domain is required')),
+  audience:  z.optional(z.string().min(1, "audience is required")),
   clientID: z.optional(z.string().max(32, "must be 32 characters long")),
   scope: z.string().min(1, "scope is required"),
   clientSecret: z.optional(z.string()),
@@ -13,8 +15,8 @@ export const configurationSchema = z.object({
 
 export type Schema = z.infer<typeof configurationSchema>;
 
-type Auth0Configuration = Required<Pick<Schema, 'audience' | 'clientID' | 'scope'>>
-                                 & Pick<Schema, 'clientSecret' | 'rulesDirectory'>;
+export type Auth0Configuration = Required<Pick<Schema, 'audience' | 'clientID' | 'scope' | 'port'>>
+                                 & Pick<Schema, 'clientSecret' | 'rulesDirectory' | 'domain'>;
 
 export type Options = Auth0Configuration & {
   store: Store;
