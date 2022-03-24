@@ -4,14 +4,17 @@ import { z } from 'zod';
 
 export const configurationSchema = z.object({
   port: z.number().gt(2999, "port must be greater than 2999").lt(10000, "must be less than 10000"),
-  audience:  z.string().url("audience must be a valid url"),
-  clientID: z.string().max(32, "must be 32 characters long"),
-  scope: z.string(),
+  audience:  z.optional(z.string().url("audience must be a valid url")),
+  clientID: z.optional(z.string().max(32, "must be 32 characters long")),
+  scope: z.string().min(1, "scope is required"),
   clientSecret: z.optional(z.string()),
   rulesDirectory: z.optional(z.string()),
 });
 
-export type Auth0Configuration = z.infer<typeof configurationSchema>;
+export type Schema = z.infer<typeof configurationSchema>;
+
+type Auth0Configuration = Required<Pick<Schema, 'audience' | 'clientID' | 'scope'>>
+                                 & Pick<Schema, 'clientSecret' | 'rulesDirectory'>;
 
 export type Options = Auth0Configuration & {
   store: Store;
