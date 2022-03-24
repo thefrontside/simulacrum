@@ -11,11 +11,13 @@ import express from 'express';
 import { createCors } from './middleware/create-cors';
 import { noCache } from './middleware/no-cache';
 import { createOpenIdHandlers } from './handlers/openid-handlers';
+import { getConfig } from './config/get-config';
 
 const publicDir = path.join(__dirname, 'views', 'public');
 
+type Auth0Handlers = ReturnType<typeof createAuth0Handlers> & ReturnType<typeof createOpenIdHandlers>;
 
-const createAuth0Service = (handlers: ReturnType<typeof createAuth0Handlers> & ReturnType<typeof createOpenIdHandlers>, debug: boolean): LegacyServiceCreator => {
+const createAuth0Service = (handlers: Auth0Handlers, debug: boolean): LegacyServiceCreator => {
   let app = createHttpApp()
     .use(express.static(publicDir))
     .use(createSession())
@@ -50,7 +52,9 @@ export const auth0: Simulator<Options> = (slice, options) => {
   let services = slice.slice('services');
   let debug = !!slice.slice('debug').get();
 
-  let handlersOptions = { ...DefaultOptions, ...options, store, services };
+  let config = getConfig(options);
+
+  let handlersOptions = { ...config, store, services };
 
   let auth0Handlers = createAuth0Handlers(handlersOptions);
   let openIdHandlers = createOpenIdHandlers(handlersOptions);
