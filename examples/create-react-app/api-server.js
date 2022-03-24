@@ -4,13 +4,15 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const jwt = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
-const authConfig = require("./src/auth_config.json");
+const { getConfig } = require("@simulacrum/auth0-simulator");
 
 const app = express();
 
+const authConfig = getConfig();
+
 const port = process.env.API_PORT || 3001;
 const appPort = process.env.SERVER_PORT || 3000;
-const appOrigin = authConfig.appOrigin || `http://localhost:${appPort}`;
+const appOrigin = `http://localhost:${appPort}`;
 
 if (
   !authConfig.domain ||
@@ -18,7 +20,7 @@ if (
   authConfig.audience === "YOUR_API_IDENTIFIER"
 ) {
   console.log(
-    "Exiting: Please make sure that auth_config.json is in place and populated with valid domain and audience values"
+    "Exiting: Please make sure that the auth0Simulator config in the package.json file is in place and populated with valid domain and audience values"
   );
 
   process.exit();
