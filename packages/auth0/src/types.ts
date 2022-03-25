@@ -11,12 +11,18 @@ export const configurationSchema = z.object({
   scope: z.string().min(1, "scope is required"),
   clientSecret: z.optional(z.string()),
   rulesDirectory: z.optional(z.string()),
+  auth0SessionCookieName: z.optional(z.string()),
+  auth0CookieSecret: z.optional(z.string()),
+  connection: z.optional(z.string()),
+  cookieSecret: z.optional(z.string()),
 });
 
 export type Schema = z.infer<typeof configurationSchema>;
 
-export type Auth0Configuration = Required<Pick<Schema, 'audience' | 'clientID' | 'scope' | 'port'>>
-                                 & Pick<Schema, 'clientSecret' | 'rulesDirectory' | 'domain'>;
+type ReadonlyFields = 'audience' | 'clientID' | 'scope' | 'port';
+
+export type Auth0Configuration = Required<Pick<Schema, ReadonlyFields>>
+                                 & Omit<Schema, ReadonlyFields>;
 
 export type Options = Auth0Configuration & {
   store: Store;

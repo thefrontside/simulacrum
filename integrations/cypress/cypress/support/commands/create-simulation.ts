@@ -5,11 +5,11 @@ import { SimulationId } from './constants';
 
 const log = makeCypressLogger('simulacrum-create-simulation');
 
-export const makeCreateSimulation = ({ atom, getClientFromSpec }: CommandMaker) => (options: CreateSimulation) => {
+export const makeCreateSimulation = ({ atom, getClientFromSpec }: CommandMaker) => (options?: CreateSimulation) => {
   return cy.logout().then(() => {
     let client = getClientFromSpec(Cypress.spec.name);
 
-    let { debug = false, ...rest } = options;
+    let { debug = false, ...rest } = options ?? { debug: false };
 
     let auth0Options = {
       ...getAuth0Config(),

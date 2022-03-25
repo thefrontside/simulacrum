@@ -1,7 +1,9 @@
+import { getConfig } from '../../src/config';
+
 describe('login', () => {
   describe('login and call an external api', () => {
     it('should get token without signing in and access restricted route',  () => {
-      cy.createSimulation()
+      cy.createSimulation(getConfig())
         .given()
         .login()
         .visit('/external-api')

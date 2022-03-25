@@ -1,10 +1,12 @@
+import { getConfig } from '../../src/config';
+
 describe('login', () => {
   describe('Universal Login', () => {
     it('should login', () => {
       let email = 'bob@gmail.com';
       let password = 'Passw0rd!';
       
-      cy.createSimulation()
+      cy.createSimulation(getConfig())
         .given({ email, password })
         .visit('/')
         .contains('Log in').first().click()
