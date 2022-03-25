@@ -6,7 +6,7 @@
     "start": "npm-run-all --parallel spa api-server",
     "start:dev": "concurrently --kill-others \"npm run spa\" \"npm run api-server\" \"npm run start:auth0\"",
     "start:e2e": "concurrently --kill-others \"npm run spa\" \"npm run api-server\" \"PORT=4000 npx auth0-simulator\"",
-    "start:auth0": "npx auth0-simulator --standalone --username=admin@org.com --password=Passw0rd",
+    "start:auth0": "PORT=4000 npx auth0-simulator --standalone --username=admin@org.com --password=Passw0rd",
     "build": "react-scripts build",
     "cypress:ci": "cypress run --headless",
     "cypress:open": "cypress open",
@@ -42,7 +42,7 @@
     "npm-run-all": "^4.1.5",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-router-dom": "^6.2.1", 
+    "react-router-dom": "^6.2.1",
     "react-scripts": "^5.0.0",
     "reactstrap": "^9.0.1"
   },

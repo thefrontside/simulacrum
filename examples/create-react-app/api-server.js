@@ -4,11 +4,14 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const jwt = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
-const { getConfig } = require("@simulacrum/auth0-simulator");
 
 const app = express();
 
-const authConfig = getConfig();
+const authConfig = {
+  domain: process.env.REACT_APP_DOMAIN ?? 'localhost:4400',
+  clientId: process.env.REACT_APP_CLIENT_ID ?? '00000000000000000000000000000000',
+  audience: process.env.REACT_APP_AUDIENCE ?? 'https://thefrontside.auth0.com/api/v1/',
+};
 
 const port = process.env.API_PORT || 3001;
 const appPort = process.env.SERVER_PORT || 3000;
