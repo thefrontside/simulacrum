@@ -17,15 +17,19 @@ const password = args.find(arg => arg.startsWith('--password='))?.split('=')[1];
 function * startInStandAloneMode(url: string) {
   let client = createClient(url);
 
-  let simulation: Simulation = yield client.createSimulation("auth0");
+  try {
+    let simulation: Simulation = yield client.createSimulation("auth0");
 
-  let person: Scenario<Person> = yield client.given(simulation, "person", {
-    email: userName,
-    password
-  });
+    let person: Scenario<Person> = yield client.given(simulation, "person", {
+      email: userName,
+      password
+    });
 
-  console.log(`store populated with user`);
-  console.log(`username = ${person.data.email} password = ${person.data.password}`);
+    console.log(`store populated with user`);
+    console.log(`username = ${person.data.email} password = ${person.data.password}`);
+  } finally {
+    client.dispose();
+  }
 }
 
 main(function*() {
