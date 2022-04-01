@@ -16,7 +16,8 @@
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/acmecorp"
   ],
   "keywords": [
     "simulation",
@@ -33,10 +34,10 @@
   },
   "volta": {
     "node": "14.17.0",
-    "npm": "7.19.1"
+    "npm": "8.6.0"
   },
   "devDependencies": {
-    "@effection/fetch": "^2.0.1",
+    "@effection/fetch": "^2.0.4",
     "cosmiconfig": "^7.0.1",
     "deepmerge": "^4.2.2"
   }

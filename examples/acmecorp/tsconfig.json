@@ -1,0 +1,9 @@
+{
+  "extends": "@frontside/tsconfig",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDirs": ["src", "bin"],
+    "baseUrl": "."
+  },
+  "include": ["src"]
+}
