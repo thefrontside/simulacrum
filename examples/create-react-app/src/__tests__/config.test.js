@@ -3,11 +3,14 @@ const mockConfig = (config) => {
   // on a per-test basis. Jest does not return mock objects
   // for these types of static file modules.
   jest.doMock(
-    "../auth_config.json",
+    "../config",
     () => ({
-      domain: "test-domain.com",
-      clientId: "123",
-      ...config,
+      getConfig: () => ({
+        domain: "test-domain.com",
+        clientId: "123",
+        ...config,
+      }),
+      __esModule: true
     }),
     { virtual: true }
   );

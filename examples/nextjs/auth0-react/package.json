@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "standup": "npm run sim & npm run dev",
-    "sim": "node ./simulator-server.mjs",
+    "sim": "PORT=4000 npx auth0-simulator --standalone",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -28,5 +28,11 @@
     "eslint": "7.30.0",
     "eslint-config-next": "11.0.1",
     "typescript": "4.4.3"
+  },
+  "auth0Simulator": {
+    "domain": "localhost:4400",
+    "clientID": "YOUR_AUTH0_CLIENT_ID",
+    "audience": "https://your-audience/",
+    "scope": "openid profile email offline_access"
   }
 }

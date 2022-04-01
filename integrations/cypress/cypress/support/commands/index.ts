@@ -14,7 +14,7 @@ import { makeDestroySimulation } from './destroy-simulation';
 declare global {
   namespace Cypress {
     interface Chainable<Subject> {
-      createSimulation(options: CreateSimulation): Chainable<Subject>;
+      createSimulation(options?: CreateSimulation): Chainable<Subject>;
       destroySimulation(): Chainable<Subject>;
       login(person?: Partial<Person>): Chainable<Token>;
       logout(): Chainable<void>;
