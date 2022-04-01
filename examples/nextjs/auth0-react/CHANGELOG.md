@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.10]
+
+- Add cosmiconfig and zod to @simulacrum/auth0-simulator
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [3dfacdc](https://github.com/thefrontside/simulacrum/commit/3dfacdcf84ca55a7f965dd297675245efb794f69) Add Cosmiconfig and zod to @simulacrum/auth0-config ([#190](https://github.com/thefrontside/simulacrum/pull/190)) on 2022-04-01
+
 ## \[0.1.9]
 
 - Make the iat field epoch time.
