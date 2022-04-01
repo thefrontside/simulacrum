@@ -4,6 +4,7 @@
   "description": "Simulate Acme Corp Backend Services",
   "main": "dist/server.js",
   "scripts": {
+    "build": "npm run prepack",
     "start": "ts-node bin/start.ts",
     "watch": "PORT=5000 nodemon",
     "test": "echo noop",
@@ -12,15 +13,18 @@
   },
   "author": "Charles Lowell <cowboyd@frontside.io>",
   "license": "ISC",
+  "dependencies": {
+    "@simulacrum/ldap-simulator": "^0.3.2"
+  },
   "devDependencies": {
-    "@frontside/tsconfig": "^1.2.0",
-    "@frontside/graphgen": "^1.1.0",
-    "@simulacrum/auth0-simulator": "^0.2.3",
-    "@simulacrum/server": "^0.3.2",
+    "@frontside/tsconfig": "^3.0.0",
+    "@frontside/graphgen": "^1.3.1",
+    "@simulacrum/auth0-simulator": "0.6.0",
+    "@simulacrum/server": "0.6.0",
     "@types/faker": "5.5.8",
     "@types/seedrandom": "3.0.1",
     "faker": "5.5.3",
-    "effection": "^2.0.1",
+    "effection": "^2.0.4",
     "nodemon": "latest",
     "seedrandom": "3.0.5",
     "typescript": "^4.4.3",

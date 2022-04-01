@@ -37,7 +37,7 @@
     "npm": "8.6.0"
   },
   "devDependencies": {
-    "@effection/fetch": "^2.0.1",
+    "@effection/fetch": "^2.0.4",
     "cosmiconfig": "^7.0.1",
     "deepmerge": "^4.2.2"
   }

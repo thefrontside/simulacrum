@@ -1,10 +1,11 @@
-import { createSimulationServer, Server } from '@simulacrum/server';
+import type { Server } from '@simulacrum/server';
+import { createSimulationServer } from '@simulacrum/server';
 import { auth0 as auth0Simulator } from '@simulacrum/auth0-simulator';
 import { createLdapService } from '@simulacrum/ldap-simulator';
-import { Resource } from 'effection';
+import type { Resource } from 'effection';
 export { Server } from '@simulacrum/server';
 import { createData } from './data';
-import { Vertex } from '@frontside/graphgen';
+import type { Vertex } from '@frontside/graphgen';
 
 export function toRecord<
   T extends Vertex,

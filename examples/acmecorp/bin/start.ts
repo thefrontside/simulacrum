@@ -1,5 +1,6 @@
 import { main } from 'effection';
-import { createAcmecorpSimulationServer, Server } from '../src/server';
+import type { Server } from '../src/server';
+import { createAcmecorpSimulationServer } from '../src/server';
 import { createClient } from '@simulacrum/client';
 
 main(function*() {

@@ -1,4 +1,5 @@
-import { createGraph, createVertex, Distribution, Vertex } from '@frontside/graphgen';
+import type { Distribution, Vertex } from '@frontside/graphgen';
+import { createGraph, createVertex } from '@frontside/graphgen';
 import { createFaker } from './faker';
 
 export interface UserData {

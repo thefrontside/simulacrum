@@ -1,4 +1,4 @@
-import { Graph, Edge, Seed, CreateData, Vertex } from '@frontside/graphgen';
+import type { Graph, Edge, Seed, CreateData, Vertex } from '@frontside/graphgen';
 
 import seedrandom from 'seedrandom';
 
@@ -14,7 +14,7 @@ import locales from 'faker/lib/locales';
 // import the default faker export and use that type
 // as the type of all fakers. A nice side-quest would be
 // to add types.d.ts directly to the faker project.
-import { default as _faker } from 'faker';
+import type { default as _faker } from 'faker';
 export type Faker = typeof _faker;
 
 export function createFaker(seed: () => number = seedrandom()): Faker {

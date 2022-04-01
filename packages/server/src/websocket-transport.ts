@@ -20,7 +20,6 @@ import type { OperationContext } from './schema/context';
 
 export function createWebSocketTransport(context: OperationContext, server: HTTPServer): Resource<void> {
   return {
-    name: 'websocket transport',
     *init(scope) {
       let transport = makeServer<Task>({
         schema,
@@ -47,8 +46,6 @@ export function createWebSocketTransport(context: OperationContext, server: HTTP
         try {
           yield on<WS>(sockets, 'connection').forEach(function* (socket) {
             yield spawn(function*(child) {
-              let { url, readyState } = socket;
-              yield label({ name: 'connection', url, readyState: getReadyStateName(readyState) });
               try {
                 let websocket = yield createWebSocket(socket);
                 let closed = transport.opened(websocket, child);
@@ -70,7 +67,6 @@ export function createWebSocketTransport(context: OperationContext, server: HTTP
 
 export function createWebSocket(ws: WS): Resource<WebSocket> {
   return {
-    name: 'websocket',
     *init(scope: Task) {
 
       yield spawn(throwOnErrorEvent(ws));
@@ -92,17 +88,4 @@ export function createWebSocket(ws: WS): Resource<WebSocket> {
       };
     }
   };
-}
-
-function getReadyStateName(readyState: number) {
-  switch (readyState) {
-    case WS.CONNECTING:
-      return "CONNECTING";
-    case WS.CLOSING:
-      return "CLOSING";
-    case WS.OPEN:
-      return "OPEN";
-    default:
-      return `UNKNOWN: ${readyState}`;
-  }
 }
