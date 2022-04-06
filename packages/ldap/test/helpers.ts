@@ -41,17 +41,15 @@ export function createLDAPClient(url: string): LDAP {
         *init() {
           let client = createLDAPJSClient({ url });
 
-          yield ensure(function*() {
-            yield new Promise<void>((resolve, reject) => {
-              client.unbind(err => {
-                if (err) {
-                  reject(err)
-                } else {
-                  resolve();
-                }
-              })
+          yield ensure(() => new Promise<void>((resolve, reject) => {
+            client.unbind(err => {
+              if (err) {
+                reject(err)
+              } else {
+                resolve();
+              }
             });
-          });
+          }));
 
           yield new Promise((resolve, reject) => {
             client.bind(dn, secret, (err, value) => {
