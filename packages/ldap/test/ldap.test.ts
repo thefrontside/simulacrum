@@ -128,6 +128,15 @@ describe('LDAP simulator', () => {
 
         expect(result).toBeUndefined();
       });
+
+      it('has a root DSE', function*() {
+        let result = yield commands.search("").first();
+        expect(result).toMatchObject({
+          attributes: [{
+            type: "vendorName",
+          }]
+        });
+      });
     });
   });
 });
