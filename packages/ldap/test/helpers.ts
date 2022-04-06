@@ -79,8 +79,7 @@ export function createLDAPClient(url: string): LDAP {
                 });
 
                 yield spawn(function*() {
-                  let error = yield once(response, 'error');
-                  throw error;
+                  throw yield once(response, 'error');
                 });
 
                 yield spawn(on<SearchEntryObject>(response, 'searchEntry').forEach(publish))
