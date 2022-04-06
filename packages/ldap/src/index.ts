@@ -54,7 +54,7 @@ export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAP
 
       let server = createServer({ log: silence });
 
-
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       server.search("", function (req: any, res: any, next: any) {
         logger.log(dedent`--- Root DSE ---
 scope:  ${req.scope}

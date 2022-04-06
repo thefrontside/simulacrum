@@ -1,6 +1,7 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
-import { Client, createLDAPClient, LDAP, LDAPCommands, Simulation } from './helpers';
+import type { Client, LDAP, LDAPCommands, Simulation } from './helpers';
+import { createLDAPClient } from './helpers';
 import { createTestServer } from './helpers';
 import { ldap } from '../src';
 import { NoSuchObjectError } from 'ldapjs';
