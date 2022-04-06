@@ -41,6 +41,9 @@ export function createLDAPClient(url: string): LDAP {
         *init() {
           let client = createLDAPJSClient({ url });
 
+          // The mere attempt to `bind()` requires an `unbind()`,
+          // so we have to put our ensure block first because
+          // it must be called even in the event that `bind()` fails.
           yield ensure(() => new Promise<void>((resolve, reject) => {
             client.unbind(err => {
               if (err) {
