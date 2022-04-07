@@ -1,13 +1,12 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
-import type { Client, Simulation } from './helpers';
+import { Client, createLDAPClient, LDAP, LDAPCommands, Simulation } from './helpers';
 import { createTestServer } from './helpers';
 import { ldap } from '../src';
-import { createClient, NoSuchObjectError } from 'ldapjs';
-import type { Client as LDAPClient , SearchEntryObject } from 'ldapjs';
+import { NoSuchObjectError } from 'ldapjs';
 import { person } from '@simulacrum/server';
 
-describe('Auth0 simulator', () => {
+describe('LDAP simulator', () => {
   let client: Client;
   let simulation: Simulation;
 
@@ -28,9 +27,11 @@ describe('Auth0 simulator', () => {
 
   afterEach(function* () {
     yield client.destroySimulation(simulation);
+    yield client.dispose();
   });
 
   describe("Creating a simulation with an ldap simulator", () => {
+    let ldap: LDAP;
     beforeEach(function*() {
       simulation = yield client.createSimulation("ldap", {
         options: {
@@ -47,30 +48,11 @@ describe('Auth0 simulator', () => {
         },
         debug: true
       });
+      ldap = createLDAPClient(simulation.services[0].url);
     });
 
     it('starts the ldap simulation', function*() {
       expect(simulation.status).toEqual('running');
-    });
-
-    let ldapClient: LDAPClient;
-
-    function bind(dn: string, secret: string): Promise<LDAPClient> {
-      ldapClient = createClient({ url: simulation.services[0].url });
-
-      return new Promise((resolve, reject) => {
-        ldapClient.bind(dn, secret, err => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(ldapClient);
-          }
-        });
-      });
-    }
-
-    afterEach(() => {
-      ldapClient?.unbind();
     });
 
     describe('bind', () => {
@@ -80,7 +62,7 @@ describe('Auth0 simulator', () => {
           password: "password"
         });
 
-        let result = yield bind("cn=admin@org.com,ou=users,dc=org.com", "password");
+        let result = yield ldap.bind("cn=admin@org.com,ou=users,dc=org.com", "password");
 
         expect(result).toBeTruthy();
       });
@@ -92,7 +74,7 @@ describe('Auth0 simulator', () => {
         });
 
         try {
-          yield bind("cn=bad@evilcorp.com,ou=users,dc=org.com", "password");
+          yield ldap.bind("cn=bad@evilcorp.com,ou=users,dc=org.com", "password");
         } catch(err) {
           expect(err).toBeInstanceOf(NoSuchObjectError);
         }
@@ -102,7 +84,7 @@ describe('Auth0 simulator', () => {
         yield client.given(simulation, "person");
 
         try {
-          yield bind("cn=admin@org.com,ou=users,dc=org.com", "password");
+          yield ldap.bind("cn=admin@org.com,ou=users,dc=org.com", "password");
         } catch(err) {
           expect(err).toBeInstanceOf(NoSuchObjectError);
           return;
@@ -113,33 +95,19 @@ describe('Auth0 simulator', () => {
     });
 
     describe('search', () => {
+      let commands: LDAPCommands;
+
       beforeEach(function * () {
         yield client.given(simulation, "person", {
           email: "admin@org.com",
           password: "password"
         });
 
-        ldapClient = yield bind("cn=admin@org.com,ou=users,dc=org.com", "password");
+        commands = yield ldap.bind("cn=admin@org.com,ou=users,dc=org.com", "password");
       });
 
       function search(email: string) {
-        return new Promise((resolve, reject) => {
-          let results: SearchEntryObject[] = [];
-          ldapClient.search(`cn=${email},ou=users,dc=org.com`, { }, (err, res) => {
-            res.on('searchEntry', entry => {
-              if(entry.object.email === email ) {
-                results.push(entry.object);
-              }
-            });
-
-            res.on('error', err => {
-              reject(err);
-            });
-            res.on('end', () => {
-              resolve(results);
-            });
-          });
-        });
+        return commands.search(`cn=${email},ou=users,dc=org.com`).filter((entry) => entry.object.email === email);
       }
 
       it('should find created user', function* () {
@@ -148,17 +116,17 @@ describe('Auth0 simulator', () => {
           password: "password"
         });
 
-        let result = yield search("a.user@org.com");
+        let result = yield search("a.user@org.com").first();
 
-        expect(result).toHaveLength(1);
+        expect(result).toBeDefined();
       });
 
       it('should not find user with no scenario', function * () {
         yield client.given(simulation, "person");
 
-        let result = yield search("joe.bloggs@org.com");
+        let result = yield search("joe.bloggs@org.com").first();
 
-        expect(result).toHaveLength(0);
+        expect(result).toBeUndefined();
       });
     });
   });
