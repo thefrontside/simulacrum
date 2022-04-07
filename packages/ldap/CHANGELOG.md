@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.4.0]
+
+- ✨Simulated LDAP server now implements the root DSE response https://github.com/thefrontside/simulacrum/pull/193
+  - [b83367c](https://github.com/thefrontside/simulacrum/commit/b83367c1c45be25e5dd63b99e86bd82b248b51ce) Add changeset on 2022-04-06
+  - [8303448](https://github.com/thefrontside/simulacrum/commit/8303448882db063a11d28c58c9d605aa27a8eae1) Fix changelog entry on 2022-04-07
+
 ## \[0.3.2]
 
 - Add cosmiconfig and zod to @simulacrum/auth0-simulator
