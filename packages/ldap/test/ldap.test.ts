@@ -1,6 +1,7 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
-import { Client, createLDAPClient, LDAP, LDAPCommands, Simulation } from './helpers';
+import type { Client, LDAP, LDAPCommands, Simulation } from './helpers';
+import { createLDAPClient } from './helpers';
 import { createTestServer } from './helpers';
 import { ldap } from '../src';
 import { NoSuchObjectError } from 'ldapjs';
@@ -127,6 +128,15 @@ describe('LDAP simulator', () => {
         let result = yield search("joe.bloggs@org.com").first();
 
         expect(result).toBeUndefined();
+      });
+
+      it('has a root DSE', function*() {
+        let result = yield commands.search("").first();
+        expect(result).toMatchObject({
+          attributes: [{
+            type: "vendorName",
+          }]
+        });
       });
     });
   });
