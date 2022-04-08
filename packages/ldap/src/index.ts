@@ -15,8 +15,8 @@ const DefaultOptions: Partial<LDAPOptions> = {
 };
 
 interface UserData {
-  id: string | number;
-  email: string;
+  uuid: string;
+  cn: string;
   password: string;
 }
 
@@ -79,21 +79,24 @@ filter: ${req.filter.toString()}
 
         let users = [...options.users];
 
-        for (let [id, entry] of Object.entries(users)) {
+        for (let entry of users) {
           let groups = [`cn=users,${groupDN}`];
 
+          let dn = `cn=${entry.cn},${baseDN}`;
+
           let user = {
-            dn: `cn=${id},${baseDN}`,
+            dn,
             attributes: {
+              entryUUID: entry.uuid,
+              entryDN: dn,
               objectclass: ['user'],
-              uid: entry.id,
               ...entry,
               memberof: groups,
             },
           };
 
           if (req.filter.matches(user.attributes)) {
-            logger.log(`Sending ${user.attributes.email}`);
+            logger.log(`Sending ${user.dn}`);
             res.send(user);
           }
         }
@@ -129,7 +132,7 @@ filter: ${req.filter.toString()}
 
         let users = [...options.users];
 
-        let user = users.filter(u => u.id === commonName)?.[0];
+        let user = users.filter(u => u.cn === commonName)?.[0];
 
         if (typeof user === 'undefined') {
           logger.log('could not find user');
@@ -137,7 +140,7 @@ filter: ${req.filter.toString()}
         }
 
         if (user.password !== password) {
-          logger.log(`bad password ${password} for ${user.email}`);
+          logger.log(`bad password ${password} for ${user.cn}`);
           return next(new InvalidCredentialsError(req.dn.toString()));
         }
 
@@ -183,7 +186,7 @@ export function createLdapService<T extends UserData>(options: LDAPOptions, stat
       *[Symbol.iterator]() {
         let entries = state.slice('store', 'people').get() ?? [];
         for (let user of Object.values(entries)) {
-          yield { ...user, id: user.email };
+          yield { ...user, uuid: user.id, cn: user.email };
         }
       }
     } as Iterable<T>;

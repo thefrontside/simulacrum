@@ -70,7 +70,7 @@ describe('LDAP simulator', () => {
 
       it('should not bind with invalid credentials', function* () {
         yield client.given(simulation, "person", {
-          email: "admin@org.com",
+          cn: "admin@org.com",
           password: "password"
         });
 
