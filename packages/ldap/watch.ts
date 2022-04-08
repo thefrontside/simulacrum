@@ -1,5 +1,5 @@
-import { Operation, Stream, Task, main, on, sleep, spawn } from 'effection';
-import { exec, daemon, StdIO } from '@effection/process';
+import { Operation, Task, main, on, sleep, spawn } from 'effection';
+import { exec, daemon, Process, StdIO } from '@effection/process';
 import { watch } from 'chokidar';
 
 main(function* (scope: Task) {
@@ -7,11 +7,11 @@ main(function* (scope: Task) {
 
   let watcher = watch(['../server/src/**/*.ts', './src/**/*.ts'], { ignoreInitial: true, ignored: 'dist' });
   try {
-    let process: Task = scope.run(buildAndRun);
+    let process: Task = yield scope.spawn(buildAndRun);
 
-    yield on(watcher, 'all').forEach(() => {
-      process.halt();
-      process = scope.run(function*() {
+    yield on(watcher, 'all').forEach(function*() {
+      yield process.halt();
+      process = yield scope.spawn(function*() {
         yield sleep(10);
         console.log('rebuilding.....');
         yield buildAndRun;
@@ -22,24 +22,10 @@ main(function* (scope: Task) {
   }
 });
 
-function writeOut(channel: Stream<string>, out: NodeJS.WriteStream) {
-  return channel.forEach(function (data) {
-    return new Promise((resolve, reject) => {
-      out.write(data, (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
-    });
-  });
-}
-
 function* executeAndOut(command: string): Operation<void> {
-  let { stdout, stderr, expect } = yield exec(`npm run ${command}`);
-  yield spawn(writeOut(stdout, process.stdout));
-  yield spawn(writeOut(stderr, process.stderr));
+  let { stdout, stderr, expect }: Process = yield exec(`npm run ${command}`);
+  yield spawn(stdout.forEach(line => { process.stdout.write(line); }))
+  yield spawn(stderr.forEach(line => { process.stderr.write(line); }))
   yield expect();
 }
 
@@ -49,8 +35,8 @@ function* buildAndRun() {
     yield executeAndOut('prepack');
 
     let server: StdIO = yield daemon('node dist/start.js');
-    yield spawn(writeOut(server.stdout, process.stdout));
-    yield spawn(writeOut(server.stderr, process.stderr));
+    yield spawn(server.stdout.forEach(line => { process.stdout.write(line); }))
+    yield spawn(server.stderr.forEach(line => { process.stderr.write(line); }))
   } catch (err) {
     console.error(err);
   }
