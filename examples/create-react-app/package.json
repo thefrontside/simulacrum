@@ -27,7 +27,7 @@
     "../../integrations/*"
   ],
   "dependencies": {
-    "@auth0/auth0-react": "^1.8.0",
+    "@auth0/auth0-react": "^1.9.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
@@ -77,10 +77,10 @@
     ]
   },
   "auth0Simulator": {
-    "domain": "cutting.eu.auth0.com",
-    "clientID": "IsuLUyWaFczCbAKQrIpVPmyBTFs4g5iq",
-    "audience": "https://cutting.eu.auth0.com/api/v2/",
-    "scope": "offline_access",
+    "domain": "localhost:4400",
+    "clientID": "00000000000000000000000000000000",
+    "audience": "https://thefrontside.auth0.com/api/v1/",
+    "scope": "openid profile email offline_access",
     "rulesDirectory": "__mocks__/rules"
   }
 }
