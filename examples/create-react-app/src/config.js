@@ -1,9 +1,7 @@
 export function getConfig() {
-  // The environment variables REACT_APP_DOMAIN,REACT_APP_CLIENT_ID and REACT_APP_AUDIENCE
-
   return {
-    domain: process.env.REACT_APP_DOMAIN ?? 'localhost:4400',
-    clientId: process.env.REACT_APP_CLIENT_ID ?? '00000000000000000000000000000000',
-    audience: process.env.REACT_APP_AUDIENCE ?? 'https://thefrontside.auth0.com/api/v1/',
+    domain: process.env.REACT_APP_DOMAIN ?? 'cutting.eu.auth0.com',
+    clientId: process.env.REACT_APP_CLIENT_ID ?? 'IsuLUyWaFczCbAKQrIpVPmyBTFs4g5iq',
+    audience: process.env.REACT_APP_AUDIENCE ?? 'https://cutting.eu.auth0.com/api/v2/',
   };
 }

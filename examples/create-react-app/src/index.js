@@ -24,7 +24,7 @@ const providerConfig = {
   redirectUri: window.location.origin,
   onRedirectCallback,
   useRefreshTokens:true,
-  cacheLocation: "localstorage"
+  scope: 'offline_access',
 };
 
 ReactDOM.render(

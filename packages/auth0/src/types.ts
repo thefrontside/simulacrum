@@ -33,7 +33,7 @@ type ReadonlyFields = 'audience' | 'clientID' | 'scope' | 'port';
 
 // grant_type list as defined by auth0
 // https://auth0.com/docs/get-started/applications/application-grant-types#spec-conforming-grants
-export type GrantType = 'password' | 'client_credentials' | 'authorization_code';
+export type GrantType = 'password' | 'client_credentials' | 'authorization_code' | 'refresh_token';
 
 export type ScopeConfig =
   | string

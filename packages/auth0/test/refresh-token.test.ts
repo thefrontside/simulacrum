@@ -1,5 +1,6 @@
 import { describe, it, beforeEach } from '@effection/mocha';
 import expect from 'expect';
+import { issueRefreshToken } from '../src/auth/refresh-token';
 import type { Client, Simulation } from './helpers';
 import { createTestServer } from './helpers';
 import { auth0 } from '../src';
@@ -11,27 +12,8 @@ import jwt from 'jsonwebtoken';
 import { assert } from 'assert-ts';
 import type { Scenario } from '@simulacrum/client';
 
-let Fields = {
-  audience: "https://example.nl",
-  client_id: "00000000000000000000000000000000",
-  connection: "Username-Password-Authentication",
-  nonce: "aGV6ODdFZjExbF9iMkdYZHVfQ3lYcDNVSldGRDR6dWdvREQwUms1Z0Ewaw==",
-  redirect_uri: "http://localhost:3000",
-  response_type: "token id_token",
-  scope: "openid profile email offline_access",
-  state: "sxmRf2Fq.IMN5SER~wQqbsXl5Hx0JHov",
-  tenant: "localhost:4400",
-};
-
-type FixtureDirectories = 'user' | 'access-token';
-
-type Fixtures = `test/fixtures/rules-${FixtureDirectories}`;
-
-function * createSimulation(client: Client, rulesDirectory: Fixtures) {
+function * createSimulation(client: Client) {
   let simulation: Simulation = yield client.createSimulation("auth0", {
-    options: {
-      rulesDirectory
-    },
     services: {
       auth0: { port: 4400 }, frontend: { port: 3000 }
     }
@@ -41,40 +23,43 @@ function * createSimulation(client: Client, rulesDirectory: Fixtures) {
 
   let person: Scenario<Person> = yield client.given(simulation, "person");
 
-  // prime the server with the nonce field
-  yield fetch(`${authUrl}/usernamepassword/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      ...Fields,
-      username: person.data.email,
-      password: person.data.password,
-    })
-  });
-
-  let res: Response = yield fetch(`https://localhost:4400/login/callback`, {
+  let loginResponse: Response = yield fetch(`${authUrl}/usernamepassword/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
     body: `wctx=${encodeURIComponent(JSON.stringify({
-      ...Fields
+      audience: "https://example.nl",
+      client_id: "00000000000000000000000000000000",
+      connection: "Username-Password-Authentication",
+      nonce: "aGV6ODdFZjExbF9iMkdYZHVfQ3lYcDNVSldGRDR6dWdvREQwUms1Z0Ewaw==",
+      redirect_uri: "http://localhost:3000",
+      response_type: "token id_token",
+      scope: "openid profile email offline_access",
+      state: "sxmRf2Fq.IMN5SER~wQqbsXl5Hx0JHov",
+      tenant: "localhost:4400",
+      username: person.data.email,
+      password: person.data.password,
     }))}`
   });
 
-  let code = new URL(res.url).searchParams.get('code') as string;
+  let code = new URL(loginResponse.url).searchParams.get('code') as string;
 
   return { code, authUrl };
 }
 
-describe('rules', () => {
-  let client: Client;
+describe('refresh token', () => {
+  describe('issueRefreshToken', () => {
+    it('should issue with grant_type refresh_token', function*() {
+      expect(issueRefreshToken('refresh_token')).toBe(true);
+    });
 
-  it('should', function * () {
-    expect(true).toBe(true);
+    it('should not issue with no refresh_token grant_type', function*() {
+      expect(issueRefreshToken('authorization_code')).toBe(false);
+    });
   });
+
+  let client: Client;
 
   beforeEach(function* () {
     client = yield createTestServer({
@@ -99,25 +84,36 @@ describe('rules', () => {
     });
   });
 
-  describe('accessToken claims', () => {
+  describe('get refresh token', () => {
     let authUrl: string;
     let code: string;
 
     beforeEach(function* () {
-      ({ authUrl, code } = yield createSimulation(client, 'test/fixtures/rules-access-token'));
+      ({ authUrl, code } = yield createSimulation(client));
     });
 
-    it('should have added the claims', function* () {
+    it('should return a refresh token', function* () {
       let res: Response = yield fetch(`${authUrl}/oauth/token`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          ...Fields,
+          audience: "https://example.nl",
+          client_id: "00000000000000000000000000000000",
+          connection: "Username-Password-Authentication",
+          nonce: "aGV6ODdFZjExbF9iMkdYZHVfQ3lYcDNVSldGRDR6dWdvREQwUms1Z0Ewaw==",
+          redirect_uri: "http://localhost:3000",
+          response_type: "token id_token",
+          scope: "openid profile email offline_access",
+          grant_type: 'refresh_token',
+          state: "sxmRf2Fq.IMN5SER~wQqbsXl5Hx0JHov",
+          tenant: "localhost:4400",
           code
         })
       });
+
+      console.log({ s: res.status });
 
       let token = yield res.json();
 
@@ -125,37 +121,7 @@ describe('rules', () => {
 
       assert(!!accessToken);
 
-      expect(accessToken.payload['https://example.nl/roles']).toEqual(["example"]);
-
-      expect(accessToken.payload['https://example.nl/email']).toEqual('paulwaters.white@yahoo.com');
-    });
-  });
-
-  describe('augment user', () => {
-    let authUrl: string;
-    let code: string;
-
-    beforeEach(function* () {
-      ({ authUrl, code } = yield createSimulation(client, 'test/fixtures/rules-user'));
-    });
-
-    it('should have added a picture to the payload', function* () {
-      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...Fields,
-          code
-        })
-      });
-
-      let token = yield res.json();
-
-      let idToken = jwt.decode(token.id_token, { complete: true });
-
-      expect(idToken?.payload.picture).toContain('https://i.pravatar.cc');
+      console.dir({ token });
     });
   });
 });
