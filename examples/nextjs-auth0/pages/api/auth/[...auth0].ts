@@ -12,7 +12,6 @@ const afterCallback = async (_req: NextApiRequest, _res: NextApiResponse, sessio
 
 const getLoginState = (req: NextApiRequest) => {
   let paramRole = req.query?.role ?? "candidate";
-  console.dir({ paramRole });
   return { role: paramRole, returnTo: `/${paramRole}` };
 };
 

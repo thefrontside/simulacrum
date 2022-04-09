@@ -94,10 +94,20 @@ export interface AccessTokenPayload {
   [key: string]: string | number | string[];
 }
 
-export interface IdToken {
-  payload: IdTokenData;
+export interface RefreshTokenPayload {
+  iat: number;
+  exp: number;
+  rotations?: number;
+  scope: string;
+  sessionUid?: string;
 }
 
-export interface AccessToken {
-  payload: AccessTokenPayload;
+type Token<P> = {
+  payload: P;
 }
+
+export type IdToken = Token<IdTokenData>;
+
+export type AccessToken = Token<AccessTokenPayload>;
+
+export type RefreshToken = Token<RefreshTokenPayload>;

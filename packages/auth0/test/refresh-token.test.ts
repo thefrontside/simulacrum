@@ -12,8 +12,22 @@ import jwt from 'jsonwebtoken';
 import { assert } from 'assert-ts';
 import type { Scenario } from '@simulacrum/client';
 
+let Fields = {
+  audience: "https://example.nl",
+  client_id: "00000000000000000000000000000000",
+  connection: "Username-Password-Authentication",
+  nonce: "aGV6ODdFZjExbF9iMkdYZHVfQ3lYcDNVSldGRDR6dWdvREQwUms1Z0Ewaw==",
+  redirect_uri: "http://localhost:3000",
+  response_type: "token id_token",
+  scope: "openid profile email offline_access",
+  state: "sxmRf2Fq.IMN5SER~wQqbsXl5Hx0JHov",
+  tenant: "localhost:4400",
+};
+
 function * createSimulation(client: Client) {
   let simulation: Simulation = yield client.createSimulation("auth0", {
+    options: {
+    },
     services: {
       auth0: { port: 4400 }, frontend: { port: 3000 }
     }
@@ -23,27 +37,30 @@ function * createSimulation(client: Client) {
 
   let person: Scenario<Person> = yield client.given(simulation, "person");
 
-  let loginResponse: Response = yield fetch(`${authUrl}/usernamepassword/login`, {
+  // prime the server with the nonce field
+  yield fetch(`${authUrl}/usernamepassword/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+      body: JSON.stringify({
+        ...Fields,
+        username: person.data.email,
+        password: person.data.password,
+      })
+  });
+
+  let res: Response = yield fetch(`https://localhost:4400/login/callback`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
     body: `wctx=${encodeURIComponent(JSON.stringify({
-      audience: "https://example.nl",
-      client_id: "00000000000000000000000000000000",
-      connection: "Username-Password-Authentication",
-      nonce: "aGV6ODdFZjExbF9iMkdYZHVfQ3lYcDNVSldGRDR6dWdvREQwUms1Z0Ewaw==",
-      redirect_uri: "http://localhost:3000",
-      response_type: "token id_token",
-      scope: "openid profile email offline_access",
-      state: "sxmRf2Fq.IMN5SER~wQqbsXl5Hx0JHov",
-      tenant: "localhost:4400",
-      username: person.data.email,
-      password: person.data.password,
+      ...Fields
     }))}`
   });
 
-  let code = new URL(loginResponse.url).searchParams.get('code') as string;
+  let code = new URL(res.url).searchParams.get('code') as string;
 
   return { code, authUrl };
 }
@@ -99,29 +116,18 @@ describe('refresh token', () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          audience: "https://example.nl",
-          client_id: "00000000000000000000000000000000",
-          connection: "Username-Password-Authentication",
-          nonce: "aGV6ODdFZjExbF9iMkdYZHVfQ3lYcDNVSldGRDR6dWdvREQwUms1Z0Ewaw==",
-          redirect_uri: "http://localhost:3000",
-          response_type: "token id_token",
-          scope: "openid profile email offline_access",
-          grant_type: 'refresh_token',
-          state: "sxmRf2Fq.IMN5SER~wQqbsXl5Hx0JHov",
-          tenant: "localhost:4400",
+          ...Fields,
           code
         })
       });
 
-      console.log({ s: res.status });
-
       let token = yield res.json();
 
-      let accessToken = jwt.decode(token.access_token, { complete: true });
+      let refreshToken = jwt.decode(token.refresh_token, { complete: true });
 
-      assert(!!accessToken);
+      assert(!!refreshToken, `no refresh token`);
 
-      console.dir({ token });
+      expect(typeof refreshToken.payload.rotations).toBe('number');
     });
   });
 });

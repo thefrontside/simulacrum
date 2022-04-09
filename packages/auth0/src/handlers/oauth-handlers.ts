@@ -14,7 +14,7 @@ import type {
   GrantType,
   IdTokenData,
 } from '../types';
-import { issueRefreshToken } from 'src/auth/refresh-token';
+import { createRefreshToken, issueRefreshToken } from 'src/auth/refresh-token';
 
 export const createTokens = async ({
   body,
@@ -72,9 +72,8 @@ export const createTokens = async ({
         ...userData,
         ...context.idToken,
       }),
-      refresh_token: issueRefreshToken(grant_type) ? createJsonWebToken({
+      refresh_token: issueRefreshToken(grant_type) ? createRefreshToken({
         exp: idTokenData.exp,
-        iat: epochTime(),
         rotations:0,
         scope,
       }) : undefined

@@ -10,7 +10,6 @@ import { stringify } from 'querystring';
 import { encode } from "base64-url";
 import { userNamePasswordForm } from '../views/username-password';
 import { decode as decodeToken } from 'jsonwebtoken';
-import { createPersonQuery } from './utils';
 
 export type Routes =
   | '/heartbeat'
