@@ -1,7 +1,7 @@
-import type { Server } from 'ldapjs';
+import type { SearchRequest, Server, SearchResponse, CompareRequest, CompareResponse, BindResponse, BindRequest } from 'ldapjs';
 import type { Operation } from 'effection';
 import { createServer, InvalidCredentialsError, NoSuchObjectError, OperationsError } from 'ldapjs';
-import type { LDAPOptions } from './types';
+import type { LDAPOptions, LDAPStoreOptions, Port, UserData } from './types';
 import type { SimulationState, Simulator } from '@simulacrum/server';
 import type { ResourceServiceCreator } from '@simulacrum/server';
 import dedent from 'dedent';
@@ -14,18 +14,8 @@ const DefaultOptions: Partial<LDAPOptions> = {
   port: 389
 };
 
-interface UserData {
-  uuid: string;
-  cn: string;
-  password: string;
-}
-
-export interface LDAPStoreOptions<T extends UserData> {
-  users: Iterable<T>;
-}
-
-export interface Port {
-  port: number;
+export interface NextFunction {
+  <E>(err?: E): void;
 }
 
 export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAPStoreOptions<T>): Operation<Server & Port> {
@@ -54,14 +44,13 @@ export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAP
 
       let server = createServer({ log: silence });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      server.search("", function (req: any, res: any, next: any) {
+      server.search("", function (req: SearchRequest, res: SearchResponse, next: NextFunction) {
         logger.log(dedent`--- Root DSE ---
-scope:  ${req.scope}
-`);
+        scope:  ${req.scope}
+        `);
         res.send({
-          "dn":"",
-          "attributes":{
+          dn: "",
+          attributes: {
             "vendorName": "Frontside, Inc."
           },
         });
@@ -69,8 +58,7 @@ scope:  ${req.scope}
         return next();
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      server.search(baseDN, function (req: any, res: any, next: any) {
+      server.search(baseDN, function (req: SearchRequest, res: SearchResponse, next: NextFunction) {
         logger.log(dedent`--- User Search ---
 dn:     ${req.dn.toString()}
 scope:  ${req.scope}
@@ -106,18 +94,16 @@ filter: ${req.filter.toString()}
         return next();
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      server.compare(groupDN, (req: any, res: any) => {
+      server.compare(groupDN, (req: CompareRequest, res: CompareResponse) => {
         logger.log('--- Compare ---');
         logger.log(`DN: ${req.dn.toString()}`);
         logger.log(`attribute name: ${req.attribute}`);
         logger.log(`attribute value: ${req.value}`);
 
-        res.end(true);
+        res.end(0);
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      server.bind(baseDN, function (req: any, res: any, next: any) {
+      server.bind(baseDN, function (req: BindRequest, res: BindResponse, next: NextFunction) {
         logger.log('--- Bind ---');
         logger.log(`bind DN: ${req.dn.toString()}`);
         logger.log(`bind PW: ${req.credentials}`);
