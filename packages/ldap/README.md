@@ -12,6 +12,7 @@ environment, you can use promise-based API.
 
 ## Plain JavaScript
 
+```js
 import { runLDAPServer } from "@simulacrum/ldap-simulator";
 
 async function run() {
@@ -39,6 +40,7 @@ async function run() {
     await server.close();
   }
 }
+```
 
 ## Effection
 
@@ -46,6 +48,7 @@ However, if you are already using [Effection][effection], the LDAP
 server is available as a [Resource][resource], and so you can use it
 freely in any context:
 
+```js
 import { createLDAPServer } from "@simulacrum/ldap-simulator";
 
 function* run() {
@@ -68,6 +71,7 @@ function* run() {
 
   //... do some stuff
 }
+```
 
 [effection]: https://frontside.com/effection
 [resource]: https://frontside.com/effection/docs/guides/resources
