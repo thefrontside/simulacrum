@@ -1,5 +1,6 @@
 import type { SearchRequest, Server, SearchResponse, CompareRequest, CompareResponse, BindResponse, BindRequest } from 'ldapjs';
 import type { Operation } from 'effection';
+import { run } from 'effection';
 import { createServer, InvalidCredentialsError, NoSuchObjectError, OperationsError } from 'ldapjs';
 import type { LDAPOptions, LDAPStoreOptions, Port, UserData } from './types';
 import type { SimulationState, Simulator } from '@simulacrum/server';
@@ -164,6 +165,22 @@ UserBaseDN:    ${bindDn}
       return { ...server, port };
     }
   };
+}
+
+export interface Close {
+  close(): Promise<void>;
+}
+
+/**
+ * Wraps an LDAP server resource into an Promise based API
+ */
+export async function runLDAPServer<T extends UserData>(options: LDAPOptions & LDAPStoreOptions<T>): Promise<Server & Port & Close> {
+  let task = run(createLDAPServer(options));
+  let server = await task;
+  return Object.create(server, {
+    close: { value: () => task.halt() }
+  });
+
 }
 
 export function createLdapService<T extends UserData>(options: LDAPOptions, state: Slice<SimulationState>): ResourceServiceCreator {
