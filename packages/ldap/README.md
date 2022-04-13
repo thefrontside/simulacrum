@@ -52,7 +52,7 @@ freely in any context:
 import { createLDAPServer } from "@simulacrum/ldap-simulator";
 
 function* run() {
-  let server = yield runLDAPServer({
+  let server = yield createLDAPServer({
     port: 3890,
     baseDN: "ou=users,dc=org.com",
     bindDn: "admin@org.com",
