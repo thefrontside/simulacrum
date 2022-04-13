@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.5.1]
+
+- fix typo in readme for Effection example
+  - [622f61e](https://github.com/thefrontside/simulacrum/commit/622f61e528bb56e087c188d4c04e6670c4d50f71) fix typo in readme on 2022-04-13
+
 ## \[0.5.0]
 
 - feed ldap server uuid, cn directly to the low-level server api
