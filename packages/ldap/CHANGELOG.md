@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.5.0]
+
+- feed ldap server uuid, cn directly to the low-level server api
+  - [e797e34](https://github.com/thefrontside/simulacrum/commit/e797e34cebede30aa9b700bf8d2cd367d6bbc5f0) Simplify the LDAP schema on 2022-04-08
+- Add a README to the NPM package as well as an async api around an LDAP server
+  resource
+  - [399f3d0](https://github.com/thefrontside/simulacrum/commit/399f3d0fb6d166a0d122dec8445cb66c37da43ed) Prep API and README for testing article ([#200](https://github.com/thefrontside/simulacrum/pull/200)) on 2022-04-12
+- improve ldap types
+  - [3939705](https://github.com/thefrontside/simulacrum/commit/39397056a7ba7731a9c253a312c0e277e37c8d91) improve ldap types ([#199](https://github.com/thefrontside/simulacrum/pull/199)) on 2022-04-12
+
 ## \[0.4.0]
 
 - ✨Simulated LDAP server now implements the root DSE response https://github.com/thefrontside/simulacrum/pull/193
