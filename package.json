@@ -37,7 +37,6 @@
   },
   "devDependencies": {
     "@effection/fetch": "^2.0.1",
-    "cosmiconfig": "^7.0.1",
     "deepmerge": "^4.2.2"
   }
 }
