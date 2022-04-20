@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.11]
+
+- Add cosmiconfig as a dependency to the auth0-simulator
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [7bd03b4](https://github.com/thefrontside/simulacrum/commit/7bd03b4313bd34a498c06bf8823f9e1559df4d38) add cosmiconfig as a dependency to @simularcurm/auth0-simulator ([#203](https://github.com/thefrontside/simulacrum/pull/203)) on 2022-04-20
+
 ## \[0.1.10]
 
 - Add cosmiconfig and zod to @simulacrum/auth0-simulator
