@@ -39,6 +39,7 @@
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
     "@effection/process": "^2.0.1",
+    "@simulacrum/client": "0.5.4",
     "@simulacrum/server": "0.6.0",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
