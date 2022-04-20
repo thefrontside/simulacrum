@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.12]
+
+- add missing @simulacrum/client to auth0 package
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [6b0c7d1](https://github.com/thefrontside/simulacrum/commit/6b0c7d1cdca0f19455b5e9017216520bcae06ff2) add missing @simulacrum/client to auth0 package ([#205](https://github.com/thefrontside/simulacrum/pull/205)) on 2022-04-20
+
 ## \[0.1.11]
 
 - Add cosmiconfig as a dependency to the auth0-simulator
