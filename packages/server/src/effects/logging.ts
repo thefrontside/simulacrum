@@ -15,7 +15,7 @@ export function createLogger(slice: Slice<ServerState>): Operation<void> {
         yield task.halt();
         if (shouldLogErrors) {
           task = yield spawn(map(slice.slice("simulations"), function*(simulation) {
-            yield simulation.filter(({ status }) => status === 'failed').forEach(state => {
+            yield simulation.filter(sim => sim?.status === 'failed').forEach(state => {
               assert(state.status === 'failed');
               console.error(state.error);
             });
