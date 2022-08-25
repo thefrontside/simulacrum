@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.1.13]
+
+- The simulation server can return null events on shutdown, and the logger did not consider this. Check for undefined within the filter.
+  - Bumped due to a bump in @simulacrum/server.
+  - [43bb4cf](https://github.com/thefrontside/simulacrum/commit/43bb4cfde8884595496ecdd27f6c94ceff95765d) simulation filter may include null, include check ([#210](https://github.com/thefrontside/simulacrum/pull/210)) on 2022-08-23
+
 ## \[0.1.12]
 
 - add missing @simulacrum/client to auth0 package
