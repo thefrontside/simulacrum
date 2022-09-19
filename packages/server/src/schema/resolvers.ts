@@ -49,7 +49,7 @@ export const given: Resolver<GivenParameters, ScenarioState> = {
     let scenario = simulation.slice('scenarios').slice(id);
     scenario.set({ id, status: 'new', name: scenarioName, params });
 
-    return scope.run(scenario.filter(({ status }) => status !== 'new').expect());
+    return scope.run(scenario.filter((sim) => sim?.status !== 'new').expect());
   }
 };
 
