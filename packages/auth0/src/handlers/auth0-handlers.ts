@@ -1,5 +1,5 @@
-import type { HttpHandler, Middleware, Person, Store } from '@simulacrum/server';
-import type { AccessTokenPayload, IdTokenData, Options, QueryParams, ResponseModes } from '../types';
+import type { HttpHandler, Middleware, Person } from '@simulacrum/server';
+import type { AccessTokenPayload, Auth0Configuration, IdTokenData, QueryParams, ResponseModes } from '../types';
 import { createLoginRedirectHandler } from './login-redirect';
 import { createWebMessageHandler } from './web-message';
 import { loginView } from '../views/login';
@@ -9,7 +9,6 @@ import { decode, encode } from "base64-url";
 import { userNamePasswordForm } from '../views/username-password';
 import { epochTime, expiresAt } from '../auth/date';
 import { createJsonWebToken } from '../auth/jwt';
-import { getServiceUrl } from './get-service-url';
 import { createRulesRunner } from '../rules/rules-runner';
 import type { RuleUser } from '../rules/types';
 import { decode as decodeToken } from 'jsonwebtoken';
@@ -24,32 +23,22 @@ export type Routes =
   | '/v2/logout'
   | '/userinfo'
 
-type Predicate<T> = (this: void, value: [string, T], index: number, obj: [string, T][]) => boolean;
+type Predicate<T> = (this: void, value: T, index: number, obj: T[]) => boolean;
 
-const getServiceUrlFromOptions = (options: Options) => {
-  let service = options.services.get().find(({ name }) => name === 'auth0' );
-  assert(!!service, `did not find auth0 service in set of running services`);
+export type AuthSession = { username: string, nonce: string };
 
-  return new URL(service.url);
+export interface Auth0Store {
+  get(nonce: string): AuthSession;
+  set(nonce: string, session: AuthSession): void;
+}
+
+const createPersonQuery = (people: Iterable<Person>) => (predicate: Predicate<Person>) => {
+  return [...people].find(predicate);
 };
 
-const createPersonQuery = (store: Store) => (predicate: Predicate<Person>) => {
-  let people = store.slice('people').get() ?? [];
-
-  let entry = Object.entries(people as unknown as Person[]).find(predicate);
-
-  if(!entry) {
-    return undefined;
-  }else {
-    let [,person] = entry;
-
-    return person;
-  }
-};
-
-export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandler> => {
-  let { audience, scope, store, clientID, rulesDirectory } = options;
-  let personQuery = createPersonQuery(store);
+export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>, serviceURL: () => URL, options: Auth0Configuration): Record<Routes, HttpHandler> => {
+  let { audience, scope, clientID, rulesDirectory } = options;
+  let personQuery = createPersonQuery(people);
   let rulesRunner = createRulesRunner(rulesDirectory);
 
   let authorizeHandlers: Record<ResponseModes, Middleware> = {
@@ -87,12 +76,10 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
     ['/login']: function* (req, res) {
       let { redirect_uri } = req.query as QueryParams;
 
-      let url = getServiceUrl(options);
-
       assert(!!clientID, `no clientID assigned`);
 
       let html = loginView({
-        domain: url.host,
+        domain: serviceURL().host,
         scope,
         redirectUri: redirect_uri,
         clientID,
@@ -112,17 +99,15 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
       assert(!!nonce, 'no nonce in /usernamepassword/login');
       assert(!!req.session, "no session");
 
-      let user = personQuery(([, person]) => person.email?.toLowerCase() === username.toLowerCase() && person.password === password);
+      let user = personQuery((person) => person.email?.toLowerCase() === username.toLowerCase() && person.password === password);
 
       if(!user) {
         let { redirect_uri } = req.query as QueryParams;
 
-        let url = getServiceUrlFromOptions(options);
-
         assert(!!clientID, `no clientID assigned`);
 
         let html = loginView({
-          domain: url.host,
+          domain: serviceURL().host,
           scope,
           redirectUri: redirect_uri,
           clientID,
@@ -138,12 +123,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       req.session.username = username;
 
-      store.slice('auth0').set({
-        [nonce]: {
-          username,
-          nonce
-        }
-      });
+      store.set(nonce, { username, nonce });
 
       res.status(200).send(userNamePasswordForm(req.body));
     },
@@ -153,7 +133,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let { redirect_uri, state, nonce } = wctx;
 
-      let { username } = store.slice('auth0', nonce).get();
+      let { username } = store.get(nonce);
 
       let encodedNonce = encode(`${nonce}:${username}`);
 
@@ -186,7 +166,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         return;
       }
 
-      user = personQuery(([, person]) => {
+      user = personQuery((person) => {
         assert(!!person.email, `no email defined on person scenario`);
 
         let valid = person.email.toLowerCase() === username.toLowerCase();
@@ -203,14 +183,12 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
         return;
       }
 
-      let url = getServiceUrlFromOptions(options).toString();
-
       assert(!!clientID, 'no clientID in options');
 
       let idTokenData: IdTokenData = {
         alg: "RS256",
         typ: "JWT",
-        iss: url,
+        iss: serviceURL().toString(),
         exp: expiresAt(),
         iat: epochTime(),
         email: username,
@@ -265,7 +243,7 @@ export const createAuth0Handlers = (options: Options): Record<Routes, HttpHandle
 
       let { sub } = decodeToken(token, { json: true }) as { sub: string };
 
-      let user = personQuery(([, person]) => {
+      let user = personQuery((person) => {
         assert(!!person.id, `no email defined on person scenario`);
 
         return person.id === sub;

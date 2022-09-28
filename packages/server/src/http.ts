@@ -20,7 +20,7 @@ export interface ServerOptions {
   protocol: LegacyServiceCreator['protocol'];
 }
 
-const createAppServer = (app: Application, options: ServerOptions) => {
+export const createAppServer = (app: Application, options: ServerOptions) => {
   switch(options.protocol) {
     case 'http':
       return createHttpServer(app);

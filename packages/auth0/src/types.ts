@@ -1,5 +1,3 @@
-import type { SimulationState, Store } from '@simulacrum/server';
-import type { Slice } from '@effection/atom';
 import { z } from 'zod';
 
 // TODO: better validation
@@ -23,12 +21,6 @@ type ReadonlyFields = 'audience' | 'clientID' | 'scope' | 'port';
 
 export type Auth0Configuration = Required<Pick<Schema, ReadonlyFields>>
                                  & Omit<Schema, ReadonlyFields>;
-
-export type Options = Auth0Configuration & {
-  store: Store;
-  services: Slice<SimulationState['services']>;
-}
-
 export type ResponseModes = 'query' | 'web_message';
 
 export type QueryParams = {
