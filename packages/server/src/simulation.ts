@@ -160,7 +160,7 @@ export function createSimulation (slice: Slice<SimulationState>, simulators: Rec
 export function simulation(simulators: Record<string, Simulator>): Effect<SimulationState> {
   return function* (slice) {
     let simulationTask = yield createSimulation(slice, simulators);
-    yield slice.filter(({ status }) => status == "destroying").expect();
+    yield slice.filter((sim) => sim?.status == "destroying").expect();
     yield simulationTask.halt();
     slice.slice("status").set("halted");
   };

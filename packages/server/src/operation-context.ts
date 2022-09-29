@@ -52,7 +52,7 @@ export function createOperationContext(atom: Slice<ServerState>, scope: Task, ne
 
         simulationsMap.set(simulationId, simulationTask);
 
-        yield slice.filter(({ status }) => status === 'running').expect();
+        yield slice.filter((sim) => sim?.status === 'running').expect();
       });
 
       return slice.get();
