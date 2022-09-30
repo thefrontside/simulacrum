@@ -1,8 +1,6 @@
-import type { AddressInfo } from 'net';
-import type { Person } from '@simulacrum/server';
-import { createAppServer, consoleLogger, person, ResourceServiceCreator, Simulator } from '@simulacrum/server';
+import type { Person , ResourceServiceCreator, Simulator } from '@simulacrum/server';
+import { createServer, consoleLogger, person } from '@simulacrum/server';
 import type { Operation } from 'effection';
-import { ensure, once, spawn, createFuture } from 'effection';
 import express, { json, urlencoded } from 'express';
 import path from 'path';
 import { getConfig } from './config/get-config';
@@ -105,26 +103,10 @@ function createAuth0Server(options: Auth0ServerOptions): Operation<Server> {
         app.use(consoleLogger);
       }
 
-      let server = createAppServer(app, { protocol: 'https', port });
-
-      server.listen(options.port);
-
-      yield spawn(function*() {
-        throw yield once(server, 'error');
-      });
-
-      yield ensure(function*() {
-        let { future, resolve, reject } = createFuture<void>();
-        server.close((err) => err ? reject(err) : resolve());
-        yield future;
-      });
-
-      yield once(server, 'listening');
-
-      let address = server.address() as AddressInfo;
+      let server = yield createServer(app, { protocol: 'https', port });
 
       return {
-        port: address.port
+        port: server.address.port
       };
     }
   };

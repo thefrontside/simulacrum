@@ -1,4 +1,4 @@
-import type { Middleware, Person } from '@simulacrum/server';
+import type { Person } from '@simulacrum/server';
 import type { AccessTokenPayload, Auth0Configuration, IdTokenData, QueryParams, ResponseModes } from '../types';
 import type { RequestHandler } from 'express';
 import { createLoginRedirectHandler } from './login-redirect';
