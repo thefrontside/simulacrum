@@ -141,13 +141,20 @@ describe('Auth0 simulator', () => {
     let url: string;
 
     beforeEach(function* () {
-      simulation = yield client.createSimulation("auth0");
+      simulation = yield client.createSimulation("auth0", {
+        services: {
+          auth0: {
+            port: 4400,
+          }
+        }
+      });
       url = simulation.services[0].url;
+      console.dir({ url });
 
       person = yield client.given(simulation, "person");
     });
 
-    it('should login with valid credentials', function*(){
+    it('should login with valid credentials', function*() {
       let res: Response = yield fetch(`${url}/usernamepassword/login`, {
         method: 'POST',
         headers: {
@@ -175,6 +182,7 @@ describe('Auth0 simulator', () => {
           password: 'no-way',
         })
       });
+      console.dir({ res });
 
       expect(res.status).toBe(400);
     });

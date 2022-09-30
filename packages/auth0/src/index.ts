@@ -2,7 +2,7 @@ import type { AddressInfo } from 'net';
 import type { Person } from '@simulacrum/server';
 import { createAppServer, consoleLogger, person, ResourceServiceCreator, Simulator } from '@simulacrum/server';
 import type { Operation } from 'effection';
-import { once, spawn } from 'effection';
+import { ensure, once, spawn, createFuture } from 'effection';
 import express, { json, urlencoded } from 'express';
 import path from 'path';
 import { getConfig } from './config/get-config';
@@ -57,6 +57,8 @@ const createAuth0Service: ResourceServiceCreator = (slice, options) => ({
       }
     };
 
+    console.dir({ options })
+
     let server: Server = yield createAuth0Server({
       debug,
       config,
@@ -65,6 +67,8 @@ const createAuth0Service: ResourceServiceCreator = (slice, options) => ({
       people,
       port
     });
+
+    console.dir({ server })
 
     return {
       port: server.port,
@@ -106,10 +110,16 @@ function createAuth0Server(options: Auth0ServerOptions): Operation<Server> {
 
       let server = createAppServer(app, { protocol: 'https', port });
 
-      server.listen();
+      server.listen(options.port);
 
       yield spawn(function*() {
         throw yield once(server, 'error');
+      });
+
+      yield ensure(function*() {
+        let { future, resolve, reject } = createFuture<void>();
+        server.close((err) => err ? reject(err) : resolve());
+        yield future;
       });
 
       yield once(server, 'listening');
