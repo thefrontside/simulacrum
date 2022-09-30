@@ -1,5 +1,6 @@
-import type { HttpHandler, Middleware, Person } from '@simulacrum/server';
+import type { Middleware, Person } from '@simulacrum/server';
 import type { AccessTokenPayload, Auth0Configuration, IdTokenData, QueryParams, ResponseModes } from '../types';
+import type { RequestHandler } from 'express';
 import { createLoginRedirectHandler } from './login-redirect';
 import { createWebMessageHandler } from './web-message';
 import { loginView } from '../views/login';
@@ -36,23 +37,23 @@ const createPersonQuery = (people: Iterable<Person>) => (predicate: Predicate<Pe
   return [...people].find(predicate);
 };
 
-export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>, serviceURL: () => URL, options: Auth0Configuration): Record<Routes, HttpHandler> => {
+export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>, serviceURL: () => URL, options: Auth0Configuration): Record<Routes, RequestHandler> => {
   let { audience, scope, clientID, rulesDirectory } = options;
   let personQuery = createPersonQuery(people);
   let rulesRunner = createRulesRunner(rulesDirectory);
 
-  let authorizeHandlers: Record<ResponseModes, Middleware> = {
+  let authorizeHandlers: Record<ResponseModes, RequestHandler> = {
     query: createLoginRedirectHandler(options),
     web_message: createWebMessageHandler()
   };
 
 
   return {
-    ['/heartbeat']: function *(_, res) {
+    ['/heartbeat']: function (_, res) {
       res.status(200).json({ ok: true });
     },
 
-    ['/authorize']: function *(req, res) {
+    ['/authorize']: function(req, res, next) {
       let currentUser = req.query.currentUser as string | undefined;
 
       assert(!!req.session, "no session");
@@ -70,10 +71,10 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
 
       let handler = authorizeHandlers[responseMode];
 
-      yield handler(req, res);
+      handler(req, res, next);
     },
 
-    ['/login']: function* (req, res) {
+    ['/login']: function(req, res) {
       let { redirect_uri } = req.query as QueryParams;
 
       assert(!!clientID, `no clientID assigned`);
@@ -92,7 +93,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       res.status(200).send(Buffer.from(html));
     },
 
-    ['/usernamepassword/login']: function* (req, res) {
+    ['/usernamepassword/login']: function(req, res) {
       let { username, nonce, password } = req.body;
 
       assert(!!username, 'no username in /usernamepassword/login');
@@ -128,7 +129,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       res.status(200).send(userNamePasswordForm(req.body));
     },
 
-    ['/login/callback']: function* (req, res) {
+    ['/login/callback']: function(req, res) {
       let wctx = JSON.parse(req.body.wctx);
 
       let { redirect_uri, state, nonce } = wctx;
@@ -144,7 +145,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       res.status(302).redirect(routerUrl);
     },
 
-    ['/oauth/token']: function* (req, res) {
+    ['/oauth/token']: function(req, res) {
       let { code, grant_type } = req.body;
 
       let user: Person | undefined;
@@ -224,7 +225,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       });
     },
 
-    ['/v2/logout']: function *(req, res) {
+    ['/v2/logout']: function(req, res) {
       req.session = null;
 
       let returnToUrl = req.query.returnTo ?? req.headers.referer;
@@ -234,7 +235,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       res.redirect(returnToUrl);
     },
 
-    ['/userinfo']: function* (req, res) {
+    ['/userinfo']: function(req, res) {
       let authorizationHeader = req.headers.authorization;
 
       assert(!!authorizationHeader, 'no authorization header');

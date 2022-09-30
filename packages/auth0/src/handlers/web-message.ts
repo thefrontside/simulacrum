@@ -1,11 +1,11 @@
-import type { Middleware } from '@simulacrum/server';
+import type { RequestHandler } from 'express';
 import { assert } from 'assert-ts';
 import { encode } from 'base64-url';
 import type { QueryParams } from 'src/types';
 import { webMessage } from '../views/web-message';
 
-export const createWebMessageHandler = (): Middleware =>
-  function* (req, res) {
+export const createWebMessageHandler = (): RequestHandler =>
+  function(req, res) {
     assert(!!req.session, "no session");
 
     let username = req.session.username;

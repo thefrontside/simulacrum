@@ -42,6 +42,7 @@ const createAuth0Service: ResourceServiceCreator = (slice, options) => ({
     let serviceURL = () => getServiceUrl(slice.get());
 
     let auth0Store = slice.slice('store').slice('auth0');
+    auth0Store.set({});
 
     let store: Auth0Store = {
       get: (nonce) => auth0Store.slice(nonce).get() as AuthSession,
@@ -57,8 +58,6 @@ const createAuth0Service: ResourceServiceCreator = (slice, options) => ({
       }
     };
 
-    console.dir({ options })
-
     let server: Server = yield createAuth0Server({
       debug,
       config,
@@ -67,8 +66,6 @@ const createAuth0Service: ResourceServiceCreator = (slice, options) => ({
       people,
       port
     });
-
-    console.dir({ server })
 
     return {
       port: server.port,

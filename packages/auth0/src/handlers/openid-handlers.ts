@@ -1,4 +1,4 @@
-import type { HttpHandler } from '@simulacrum/server';
+import type { RequestHandler } from 'express';
 import { JWKS } from '../auth/constants';
 import { removeTrailingSlash } from './url';
 
@@ -16,13 +16,13 @@ export interface OpenIdConfiguration {
   jwks_uri: string;
 }
 
-export const createOpenIdHandlers = (serviceURL: () => URL): Record<OpenIdRoutes, HttpHandler> => {
+export const createOpenIdHandlers = (serviceURL: () => URL): Record<OpenIdRoutes, RequestHandler> => {
   return {
-    ['/.well-known/jwks.json']: function* (_, res) {
+    ['/.well-known/jwks.json']: function(_, res) {
       res.json(JWKS);
     },
 
-    ['/.well-known/openid-configuration']: function* (_, res) {
+    ['/.well-known/openid-configuration']: function(_, res) {
       let url = removeTrailingSlash(serviceURL().toString());
 
       res.json({

@@ -74,6 +74,11 @@ describe('Auth0 simulator', () => {
         frontendUrl = simulation.services[1].url;
       });
 
+      it('has a heartbeat', function*() {
+        let res: Response = yield fetch(`${auth0Url}/heartbeat`);
+        expect(res.ok).toBe(true);
+      });
+
       it('should authorize', function *() {
         let res: Response = yield fetch(`${auth0Url}/authorize?${stringify({
           client_id: "1234",
@@ -141,15 +146,8 @@ describe('Auth0 simulator', () => {
     let url: string;
 
     beforeEach(function* () {
-      simulation = yield client.createSimulation("auth0", {
-        services: {
-          auth0: {
-            port: 4400,
-          }
-        }
-      });
+      simulation = yield client.createSimulation("auth0");
       url = simulation.services[0].url;
-      console.dir({ url });
 
       person = yield client.given(simulation, "person");
     });
@@ -182,7 +180,6 @@ describe('Auth0 simulator', () => {
           password: 'no-way',
         })
       });
-      console.dir({ res });
 
       expect(res.status).toBe(400);
     });
