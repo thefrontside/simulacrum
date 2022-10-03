@@ -74,6 +74,11 @@ describe('Auth0 simulator', () => {
         frontendUrl = simulation.services[1].url;
       });
 
+      it('has a heartbeat', function*() {
+        let res: Response = yield fetch(`${auth0Url}/heartbeat`);
+        expect(res.ok).toBe(true);
+      });
+
       it('should authorize', function *() {
         let res: Response = yield fetch(`${auth0Url}/authorize?${stringify({
           client_id: "1234",
@@ -147,7 +152,7 @@ describe('Auth0 simulator', () => {
       person = yield client.given(simulation, "person");
     });
 
-    it('should login with valid credentials', function*(){
+    it('should login with valid credentials', function*() {
       let res: Response = yield fetch(`${url}/usernamepassword/login`, {
         method: 'POST',
         headers: {
