@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.1.14]
+
+- now exports a `createAuth0Server` operation which can be used directly without
+  starting a Simulacrum server
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [875def0](https://github.com/thefrontside/simulacrum/commit/875def0277a9c6d6d1f5ea05d8dbffcfcc65d1a2) Add change entry on 2022-10-01
+
 ## \[0.1.13]
 
 - The simulation server can return null events on shutdown, and the logger did not consider this. Check for undefined within the filter.
