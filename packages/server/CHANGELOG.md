@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.6.2]
+
+- The simulation server can return null events on shutdown, and the logger did not consider this. The previous patch fixed a single instance. This addresses the remaining three instances by checking for undefined within the filter.
+  - [7a3b87a](https://github.com/thefrontside/simulacrum/commit/7a3b87aeea69128f9dff04d6a99a52b5d58d08fa) simulation filter may include null, include check on 2022-09-19
+
 ## \[0.6.1]
 
 - The simulation server can return null events on shutdown, and the logger did not consider this. Check for undefined within the filter.
