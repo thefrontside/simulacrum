@@ -236,12 +236,15 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
     },
 
     ['/userinfo']: function(req, res) {
-      let authorizationHeader = req.headers.authorization;
+      let token = null;
+      if (req.headers.authorization) {
+        let authorizationHeader = req.headers.authorization;
+        token = authorizationHeader?.split(' ')?.[1];
+      } else {
+        token = req?.query?.access_token as string;
+      }
 
-      assert(!!authorizationHeader, 'no authorization header');
-
-      let [, token] = authorizationHeader.split(' ');
-
+      assert(!!token, 'no authorization header or access_token');
       let { sub } = decodeToken(token, { json: true }) as { sub: string };
 
       let user = personQuery((person) => {
