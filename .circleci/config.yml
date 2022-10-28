@@ -23,6 +23,8 @@ jobs:
       # build root first
       - node/install-packages
       - run: npm run build
+      # run unit tests
+      - run: npm run test
       # integration test requires the example installed
       - node/install-packages:
           app-dir: examples/nextjs/auth0-react
