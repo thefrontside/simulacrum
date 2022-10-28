@@ -351,41 +351,104 @@ describe('Auth0 simulator', () => {
     let person: Scenario<Person>;
     let token: TokenSet;
 
-    beforeEach(function*() {
-      let simulation: Simulation = yield client.createSimulation("auth0");
+    describe('should retrieve userinfo', () => {
+      beforeEach(function* () {
+        let simulation: Simulation = yield client.createSimulation('auth0');
 
-      auth0Url = simulation.services[0].url;
-      frontendUrl = simulation.services[1].url;
+        auth0Url = simulation.services[0].url;
+        frontendUrl = simulation.services[1].url;
 
-      person = yield client.given(simulation, "person");
+        person = yield client.given(simulation, 'person');
 
-      let res: Response = yield fetch(`${auth0Url}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ...Fields,
-          username: person.data.email,
-          password: person.data.password,
-          grant_type: 'password'
-        })
+        let res: Response = yield fetch(`${auth0Url}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            username: person.data.email,
+            password: person.data.password,
+            grant_type: 'password',
+          }),
+        });
+
+        token = yield res.json();
       });
 
-      token = yield res.json();
+      it('should retrieve userinfo from token', function* () {
+        let res: Response = yield fetch(`${auth0Url}/userinfo`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token.access_token}`,
+          },
+        });
+
+        let user = yield res.json();
+
+        expect(user.name).toBe(person.data.name);
+      });
+
+      it('should retrieve userinfo from access_token', function* () {
+        let res: Response = yield fetch(
+          `${auth0Url}/userinfo?access_token=${token.access_token}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        let user = yield res.json();
+
+        expect(user.name).toBe(person.data.name);
+      });
     });
 
-    it('should retrieve userinfo from token', function * () {
-      let res: Response = yield fetch(`${auth0Url}/userinfo`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token.access_token}`
-        }
+    describe('should throw if', () => {
+      let globalError = console.error;
+      afterEach(() => {
+        console.error = globalError;
       });
 
-      let user = yield res.json();
+      it('neither token specified', function* () {
+        let errorLogs = '';
+        console.error = (message) => (errorLogs += message);
+        let simulation: Simulation = yield client.createSimulation('auth0');
 
-      expect(user.name).toBe(person.data.name);
+        auth0Url = simulation.services[0].url;
+        frontendUrl = simulation.services[1].url;
+
+        person = yield client.given(simulation, 'person');
+
+        let resToFail: Response = yield fetch(`${auth0Url}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            username: person.data.email,
+            password: person.data.password,
+            grant_type: 'password',
+          }),
+        });
+
+        token = yield resToFail.json();
+
+        let res: Response = yield fetch(`${auth0Url}/userinfo`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        expect(
+          errorLogs.startsWith(
+            'Error: Assert condition failed: no authorization header or access_token'
+          )
+        ).toBe(true);
+        expect(res.status).toBe(500);
+      });
     });
   });
 });
