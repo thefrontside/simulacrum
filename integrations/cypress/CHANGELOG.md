@@ -1,5 +1,14 @@
 # Changelog
 
+## \[0.6.5]
+
+- The auth0 simulator `/userinfo` endpoint will fall back to check for the `access_token` query parameter if the authorization header is not set.
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [e3c55cd](https://github.com/thefrontside/simulacrum/commit/e3c55cdb3b0087a7e1be95d4c68674074956dfa2) change file on 2022-10-27
+- The auth0 simulator `/oauth/token` endpoint passes the user data through which is important as input for rules.
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [f039985](https://github.com/thefrontside/simulacrum/commit/f039985b8768aa0c447b9304f2a624170f5e5782) pass user data at /oauth/token on 2022-10-31
+
 ## \[0.6.4]
 
 - now exports a `createAuth0Server` operation which can be used directly without
