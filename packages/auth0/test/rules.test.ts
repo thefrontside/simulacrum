@@ -23,11 +23,11 @@ let Fields = {
   tenant: "localhost:4400",
 };
 
-type FixtureDirectories = 'user' | 'access-token';
+type FixtureDirectories = 'user' | 'access-token' | 'user-dependent';
 
 type Fixtures = `test/fixtures/rules-${FixtureDirectories}`;
 
-function * createSimulation(client: Client, rulesDirectory: Fixtures) {
+function * createSimulation(client: Client, rulesDirectory: Fixtures, userData?: Record<string, string>) {
   let simulation: Simulation = yield client.createSimulation("auth0", {
     options: {
       rulesDirectory
@@ -39,7 +39,11 @@ function * createSimulation(client: Client, rulesDirectory: Fixtures) {
 
   let authUrl = simulation.services[0].url;
 
-  let person: Scenario<Person> = yield client.given(simulation, "person");
+  let person: Scenario<Person> = yield client.given(
+    simulation,
+    'person',
+    userData
+  );
 
   // prime the server with the nonce field
   yield fetch(`${authUrl}/usernamepassword/login`, {
@@ -66,7 +70,7 @@ function * createSimulation(client: Client, rulesDirectory: Fixtures) {
 
   let code = new URL(res.url).searchParams.get('code') as string;
 
-  return { code, authUrl };
+  return { code, authUrl, person };
 }
 
 describe('rules', () => {
@@ -156,6 +160,64 @@ describe('rules', () => {
       let idToken = jwt.decode(token.id_token, { complete: true });
 
       expect(idToken?.payload.picture).toContain('https://i.pravatar.cc');
+    });
+  });
+
+  describe('rely on user data', () => {
+    it('should trust Fred', function* () {
+      let { authUrl, code, person } = yield createSimulation(
+        client,
+        'test/fixtures/rules-user-dependent',
+        {
+          name: 'Fred Waters',
+          email: 'fred@yahoo.com',
+        }
+      );
+
+      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code,
+          ...person.data,
+        }),
+      });
+
+      let token = yield res.json();
+
+      let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.trustProfile).toContain('friend');
+    });
+
+    it('should distrust Mark', function* () {
+      let { authUrl, code, person } = yield createSimulation(
+        client,
+        'test/fixtures/rules-user-dependent',
+        {
+          name: 'Mark Wahl',
+          email: 'mark@yahoo.com',
+        }
+      );
+
+      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code,
+          ...person.data,
+        }),
+      });
+
+      let token = yield res.json();
+
+      let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.trustProfile).toContain('foe');
     });
   });
 });

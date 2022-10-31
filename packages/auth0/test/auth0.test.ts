@@ -299,7 +299,7 @@ describe('Auth0 simulator', () => {
         expect(idToken.payload.iss).toBe('https://localhost:4400/');
       });
 
-      it('token sould contain a valid email', function* () {
+      it('token should contain a valid email', function* () {
         expect(idToken.payload.email).toBe(person.data.email);
       });
 
