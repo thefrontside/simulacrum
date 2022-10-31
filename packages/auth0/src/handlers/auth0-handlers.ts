@@ -201,7 +201,14 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
         idTokenData.nonce = nonce;
       }
 
-      let userData = {} as RuleUser;
+      let userData = {
+        name: req?.body?.name,
+        email: req?.body?.email,
+        user_id: req?.body?.id,
+        nickname: req?.body?.nickname,
+        picture: req?.body?.picture,
+        identities: req?.body?.identities,
+      } as RuleUser;
       let context = { clientID, accessToken: { scope }, idToken: idTokenData };
 
       rulesRunner(userData, context);
@@ -264,7 +271,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
         email_verified: true,
         locale: 'en',
         hd: 'okta.com'
-       };
+      };
 
       res.status(200).json(userinfo);
     }
