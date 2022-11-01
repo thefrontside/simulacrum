@@ -1,6 +1,6 @@
 import type { Person , ResourceServiceCreator, Simulator } from '@simulacrum/server';
 import { createServer, consoleLogger, person } from '@simulacrum/server';
-import type { Operation } from 'effection';
+import { Operation } from 'effection';
 import express, { json, urlencoded } from 'express';
 import path from 'path';
 import { getConfig } from './config/get-config';
@@ -17,7 +17,7 @@ export { getConfig } from './config/get-config';
 
 const publicDir = path.join(__dirname, 'views', 'public');
 
-interface Server {
+export interface Server {
   port: number;
 }
 
@@ -72,7 +72,7 @@ const createAuth0Service: ResourceServiceCreator = (slice, options) => ({
   }
 });
 
-function createAuth0Server(options: Auth0ServerOptions): Operation<Server> {
+export function createAuth0Server(options: Auth0ServerOptions): Operation<Server> {
   let { config, serviceURL, store, people, port, debug = true } = options;
   let auth0 = createAuth0Handlers(store, people, serviceURL, config);
   let openid = createOpenIdHandlers(serviceURL);
