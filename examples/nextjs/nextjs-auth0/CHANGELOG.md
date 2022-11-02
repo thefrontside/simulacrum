@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.0.17]
+
+- export `createAuth0Server` operation for running Auth0 server standalone.
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [cd2f869](https://github.com/thefrontside/simulacrum/commit/cd2f8695ef8f4d4088a7fd37a8383fb7cc0d8c49) Export standalone Auth0 creation function on 2022-11-01
+
 ## \[0.0.16]
 
 - The auth0 simulator `/userinfo` endpoint will fall back to check for the `access_token` query parameter if the authorization header is not set.
