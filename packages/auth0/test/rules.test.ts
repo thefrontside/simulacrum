@@ -23,7 +23,7 @@ let Fields = {
   tenant: "localhost:4400",
 };
 
-type FixtureDirectories = 'user' | 'access-token' | 'user-dependent';
+type FixtureDirectories = 'user' | 'access-token' | 'user-dependent' | 'async';
 
 type Fixtures = `test/fixtures/rules-${FixtureDirectories}`;
 
@@ -218,6 +218,32 @@ describe('rules', () => {
 
       let idToken = jwt.decode(token.id_token, { complete: true });
       expect(idToken?.payload.trustProfile).toContain('foe');
+    });
+  });
+
+  describe('async rule resolution', () => {
+    let authUrl: string;
+    let code: string;
+    beforeEach(function* () {
+      ({ authUrl, code } = yield createSimulation(client, 'test/fixtures/rules-async'));
+    });
+
+    it('should resolve', function* () {
+      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code,
+        }),
+      });
+      let token = yield res.json();
+
+      let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.checkURL).toBe('https://www.frontside.com');
+      expect(idToken?.payload.checkURLStatus).toBe('200');
     });
   });
 });
