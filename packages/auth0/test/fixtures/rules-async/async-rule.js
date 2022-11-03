@@ -11,9 +11,9 @@ async function asyncRule(user, context, callback) {
   user.checkURL = checkURL;
   let response = await fetch(checkURL);
   user.checkURLStatus = response.status;
-  // console.dir({ response });
-  // let result = await response.json();
-  // console.dir({ result });
+  console.dir({ response });
+  let result = await response.text();
+  console.dir({ result });
 
   console.log(`added checkURL, ${user.checkURL}, to user, ${user.name}`);
 

@@ -239,6 +239,7 @@ describe('rules', () => {
           code,
         }),
       });
+
       let token = yield res.json();
 
       let idToken = jwt.decode(token.id_token, { complete: true });

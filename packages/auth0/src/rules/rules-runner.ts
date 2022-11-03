@@ -7,11 +7,11 @@ import type { RuleContext, RuleUser } from './types';
 
 export type RulesRunner = <A, I>(user: RuleUser, context: RuleContext<A, I>) => void;
 
-export function createRulesRunner (rulesPath?: string): RulesRunner {
+export function createRulesRunner(rulesPath?: string): RulesRunner {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let callback = (_user: RuleUser, _context: RuleContext<unknown, unknown>) => {};
+  let callback = (_user: RuleUser, _context: RuleContext<unknown, unknown>) => { };
 
-  if(typeof rulesPath === 'undefined') {
+  if (typeof rulesPath === 'undefined') {
     return callback;
   }
 
@@ -21,52 +21,69 @@ export function createRulesRunner (rulesPath?: string): RulesRunner {
 
   let rules = parseRulesFiles(rulesPath);
 
-  if(rules.length === 0) {
+  if (rules.length === 0) {
     return callback;
   }
 
-  return <A, I>(user: RuleUser, context: RuleContext<A, I>) => {
+  return async <A, I>(user: RuleUser, context: RuleContext<A, I>) => {
     console.debug(`applying ${rules.length} rules`);
 
-    let vmContext = vm.createContext({
-      process,
-      Buffer,
-      clearImmediate,
-      clearInterval,
-      clearTimeout,
-      setImmediate,
-      setInterval,
-      setTimeout,
-      console,
-      require,
-      module,
-      __simulator: {
-        ...{
-          user,
-          context: { ...context, },
-          callback,
-        },
-      },
-    });
+    return new Promise((resolve) => {
 
-    for (let rule of rules) {
-      assert(typeof rule !== "undefined", "undefined rule");
-
-      let { code, filename } = rule;
-
-      console.debug(`executing rule ${path.basename(filename)}`);
-
-      let script = new vm.Script(
-        `(function(exports) {
-            (${code})(__simulator.user, __simulator.context, __simulator.callback)
-          }
-          (module.exports));
-        `
-      );
-
-      script.runInContext(vmContext, {
-        filename,
+      let vmContext = vm.createContext({
+        process,
+        Buffer,
+        clearImmediate,
+        clearInterval,
+        clearTimeout,
+        setImmediate,
+        setInterval,
+        setTimeout,
+        console,
+        require,
+        module,
+        resolve,
+        __simulator: {
+          ...{
+            user,
+            context: { ...context, },
+            callback,
+          },
+        }
       });
-    }
+
+      for (let rule of rules) {
+        assert(typeof rule !== "undefined", "undefined rule");
+
+        let { code, filename } = rule;
+
+        console.debug(`executing rule ${path.basename(filename)}`);
+
+        let script = new vm.Script(
+          `
+          (async function() {
+            async function run(exports) {
+              console.log(typeof code);
+              try {
+                await ${code}(__simulator.user, __simulator.context, __simulator.callback);
+              } catch (err) {
+                console.error(err);
+              }
+            }
+          
+            await run();
+            resolve();
+          })()
+        `
+        );
+
+        script.runInContext(vmContext, {
+          filename,
+          microtaskMode: 'afterEvaluate',
+          displayErrors: true
+        });
+      }
+    });
   };
+
 }
