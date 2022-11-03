@@ -28,8 +28,7 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
   return async <A, I>(user: RuleUser, context: RuleContext<A, I>) => {
     console.debug(`applying ${rules.length} rules`);
 
-    return new Promise((resolve) => {
-      let vmContext = vm.createContext({
+    let sandbox = {
         process,
         Buffer,
         clearImmediate,
@@ -41,7 +40,6 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
         console,
         require,
         module,
-        resolve,
         __simulator: {
           ...{
             user,
@@ -49,9 +47,11 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
             callback,
           },
         },
-      });
+    };
 
       for (let rule of rules) {
+      await new Promise((resolve) => {
+        let vmContext = vm.createContext({ ...sandbox, resolve });
         assert(typeof rule !== 'undefined', 'undefined rule');
 
         let { code, filename } = rule;
@@ -60,26 +60,22 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
 
         let script = new vm.Script(`
           (async function(exports) {
-            async function run() {
-              try {
-                await (${code})(__simulator.user, __simulator.context, __simulator.callback);
-              } catch (err) {
-                console.error(err);
-              }
+            try {
+              await (${code})(__simulator.user, __simulator.context, __simulator.callback);
+            } catch (err) {
+              console.error(err);
             }
           
-            await run();
             resolve();
           })(module.exports)
         `);
 
-        script.runInContext(vmContext, {
+        script.runInNewContext(vmContext, {
           filename,
           microtaskMode: 'afterEvaluate',
           displayErrors: true,
-          timeout: 5000,
+        });
         });
       }
-    });
   };
 }
