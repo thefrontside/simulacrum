@@ -244,7 +244,8 @@ describe('rules', () => {
 
       let idToken = jwt.decode(token.id_token, { complete: true });
       expect(idToken?.payload.checkURL).toBe('https://www.frontside.com');
-      expect(idToken?.payload.checkURLStatus).toBe('200');
+      expect(idToken?.payload.checkURLStatus).toBe(200);
+      expect(idToken?.payload.checkURLText).toBe('<!DOCTYPE html>');
     });
   });
 });

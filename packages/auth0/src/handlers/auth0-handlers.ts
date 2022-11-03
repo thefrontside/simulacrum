@@ -213,8 +213,6 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
 
       await rulesRunner(userData, context);
 
-      console.dir({ context, userData });
-
       let idToken = createJsonWebToken({ ...userData, ...context.idToken });
 
       let accessToken: AccessTokenPayload = {

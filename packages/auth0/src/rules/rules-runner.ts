@@ -63,7 +63,6 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
           `
           (async function() {
             async function run(exports) {
-              console.log(typeof code);
               try {
                 await ${code}(__simulator.user, __simulator.context, __simulator.callback);
               } catch (err) {
