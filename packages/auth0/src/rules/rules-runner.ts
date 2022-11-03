@@ -1,7 +1,7 @@
-import path from "path";
-import vm from "vm";
+import path from 'path';
+import vm from 'vm';
 import fs from 'fs';
-import { assert } from "assert-ts";
+import { assert } from 'assert-ts';
 import { parseRulesFiles } from './parse-rules-files';
 import type { RuleContext, RuleUser } from './types';
 
@@ -29,7 +29,6 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
     console.debug(`applying ${rules.length} rules`);
 
     return new Promise((resolve) => {
-
       let vmContext = vm.createContext({
         process,
         Buffer,
@@ -46,25 +45,24 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
         __simulator: {
           ...{
             user,
-            context: { ...context, },
+            context: { ...context },
             callback,
           },
-        }
+        },
       });
 
       for (let rule of rules) {
-        assert(typeof rule !== "undefined", "undefined rule");
+        assert(typeof rule !== 'undefined', 'undefined rule');
 
         let { code, filename } = rule;
 
         console.debug(`executing rule ${path.basename(filename)}`);
 
-        let script = new vm.Script(
-          `
-          (async function() {
-            async function run(exports) {
+        let script = new vm.Script(`
+          (async function(exports) {
+            async function run() {
               try {
-                await ${code}(__simulator.user, __simulator.context, __simulator.callback);
+                await (${code})(__simulator.user, __simulator.context, __simulator.callback);
               } catch (err) {
                 console.error(err);
               }
@@ -72,17 +70,16 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
           
             await run();
             resolve();
-          })()
-        `
-        );
+          })(module.exports)
+        `);
 
         script.runInContext(vmContext, {
           filename,
           microtaskMode: 'afterEvaluate',
-          displayErrors: true
+          displayErrors: true,
+          timeout: 5000,
         });
       }
     });
   };
-
 }

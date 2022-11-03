@@ -243,9 +243,13 @@ describe('rules', () => {
       let token = yield res.json();
 
       let idToken = jwt.decode(token.id_token, { complete: true });
-      expect(idToken?.payload.checkURL).toBe('https://www.frontside.com');
-      expect(idToken?.payload.checkURLStatus).toBe(200);
-      expect(idToken?.payload.checkURLText).toBe('<!DOCTYPE html>');
+      expect(idToken?.payload.checkURLOne).toBe('https://www.frontside.com');
+      expect(idToken?.payload.checkURLStatusOne).toBe(200);
+      expect(idToken?.payload.checkURLTextOne).toBe('<!DOCTYPE html>');
+
+      expect(idToken?.payload.checkURLTwo).toBe('https://www.frontside.com/effection');
+      expect(idToken?.payload.checkURLStatusTwo).toBe(200);
+      expect(idToken?.payload.checkURLTextTwo).toBe('<!DOCTYPE html>');
     });
   });
 });
