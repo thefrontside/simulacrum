@@ -23,7 +23,12 @@ let Fields = {
   tenant: "localhost:4400",
 };
 
-type FixtureDirectories = 'user' | 'access-token' | 'user-dependent' | 'async';
+type FixtureDirectories =
+  | 'user'
+  | 'access-token'
+  | 'user-dependent'
+  | 'async-only'
+  | 'async-sync-wrapper-with-async';
 
 type Fixtures = `test/fixtures/rules-${FixtureDirectories}`;
 
@@ -189,6 +194,7 @@ describe('rules', () => {
       let token = yield res.json();
 
       let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.name).toBe(person.data.name);
       expect(idToken?.payload.trustProfile).toContain('friend');
     });
 
@@ -217,18 +223,19 @@ describe('rules', () => {
       let token = yield res.json();
 
       let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.name).toBe(person.data.name);
       expect(idToken?.payload.trustProfile).toContain('foe');
     });
   });
 
   describe('async rule resolution', () => {
-    let authUrl: string;
-    let code: string;
-    beforeEach(function* () {
-      ({ authUrl, code } = yield createSimulation(client, 'test/fixtures/rules-async'));
-    });
-
-    it('should resolve', function* () {
+    it('should resolve async top level', function* () {
+      let {
+        authUrl,
+        code,
+        person,
+      }: { authUrl: string; code: string; person: Scenario<Person> } =
+        yield createSimulation(client, 'test/fixtures/rules-async-only');
       let res: Response = yield fetch(`${authUrl}/oauth/token`, {
         method: 'POST',
         headers: {
@@ -243,11 +250,52 @@ describe('rules', () => {
       let token = yield res.json();
 
       let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.name).toBe(person.data.name);
+
       expect(idToken?.payload.checkURLOne).toBe('https://www.frontside.com');
       expect(idToken?.payload.checkURLOneStatus).toBe(200);
       expect(idToken?.payload.checkURLOneText).toBe('<!doctype html>');
 
-      expect(idToken?.payload.checkURLTwo).toBe('https://www.frontside.com/effection');
+      expect(idToken?.payload.checkURLTwo).toBe(
+        'https://www.frontside.com/effection'
+      );
+      expect(idToken?.payload.checkURLTwoStatus).toBe(200);
+      expect(idToken?.payload.checkURLTwoText).toBe('<!doctype html>');
+    });
+
+    it('should resolve async nested in sync wrapper', function* () {
+      let {
+        authUrl,
+        code,
+        person,
+      }: { authUrl: string; code: string; person: Scenario<Person> } =
+        yield createSimulation(
+          client,
+          'test/fixtures/rules-async-sync-wrapper-with-async'
+        );
+      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code,
+        }),
+      });
+
+      let token = yield res.json();
+
+      let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.name).toBe(person.data.name);
+
+      expect(idToken?.payload.checkURLOne).toBe('https://www.frontside.com');
+      expect(idToken?.payload.checkURLOneStatus).toBe(200);
+      expect(idToken?.payload.checkURLOneText).toBe('<!doctype html>');
+
+      expect(idToken?.payload.checkURLTwo).toBe(
+        'https://www.frontside.com/effection'
+      );
       expect(idToken?.payload.checkURLTwoStatus).toBe(200);
       expect(idToken?.payload.checkURLTwoText).toBe('<!doctype html>');
     });
