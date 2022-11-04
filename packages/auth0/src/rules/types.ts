@@ -23,3 +23,8 @@ export interface RuleContext<A, I> {
 
   idToken: I
 }
+
+export interface Rule {
+  code: string;
+  filename: string;
+}

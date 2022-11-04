@@ -23,7 +23,12 @@ let Fields = {
   tenant: "localhost:4400",
 };
 
-type FixtureDirectories = 'user' | 'access-token' | 'user-dependent';
+type FixtureDirectories =
+  | 'user'
+  | 'access-token'
+  | 'user-dependent'
+  | 'async-only'
+  | 'sync-wrapper-with-async';
 
 type Fixtures = `test/fixtures/rules-${FixtureDirectories}`;
 
@@ -138,9 +143,10 @@ describe('rules', () => {
   describe('augment user', () => {
     let authUrl: string;
     let code: string;
+    let person: Scenario<Person>;
 
     beforeEach(function* () {
-      ({ authUrl, code } = yield createSimulation(client, 'test/fixtures/rules-user'));
+      ({ authUrl, code, person } = yield createSimulation(client, 'test/fixtures/rules-user'));
     });
 
     it('should have added a picture to the payload', function* () {
@@ -151,7 +157,8 @@ describe('rules', () => {
         },
         body: JSON.stringify({
           ...Fields,
-          code
+          code,
+          ...person.data
         })
       });
 
@@ -160,6 +167,7 @@ describe('rules', () => {
       let idToken = jwt.decode(token.id_token, { complete: true });
 
       expect(idToken?.payload.picture).toContain('https://i.pravatar.cc');
+      expect(idToken?.payload.name).toBe(person.data.name);
     });
   });
 
@@ -189,6 +197,7 @@ describe('rules', () => {
       let token = yield res.json();
 
       let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.name).toBe(person.data.name);
       expect(idToken?.payload.trustProfile).toContain('friend');
     });
 
@@ -217,7 +226,83 @@ describe('rules', () => {
       let token = yield res.json();
 
       let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.name).toBe(person.data.name);
       expect(idToken?.payload.trustProfile).toContain('foe');
+    });
+  });
+
+  describe('async rule resolution', () => {
+    it('should resolve async top level', function* () {
+      let {
+        authUrl,
+        code,
+        person,
+      }: { authUrl: string; code: string; person: Scenario<Person> } =
+        yield createSimulation(client, 'test/fixtures/rules-async-only');
+      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code,
+          ...person.data
+        }),
+      });
+
+      let token = yield res.json();
+
+      let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.name).toBe(person.data.name);
+
+      expect(idToken?.payload.checkURLOne).toBe('https://www.frontside.com');
+      expect(idToken?.payload.checkURLOneStatus).toBe(200);
+      expect(idToken?.payload.checkURLOneText).toBe('<!doctype html>');
+
+      expect(idToken?.payload.checkURLTwo).toBe(
+        'https://www.frontside.com/effection'
+      );
+      expect(idToken?.payload.checkURLTwoStatus).toBe(200);
+      expect(idToken?.payload.checkURLTwoText).toBe('<!doctype html>');
+    });
+
+    it('should resolve async nested in sync wrapper', function* () {
+      let {
+        authUrl,
+        code,
+        person,
+      }: { authUrl: string; code: string; person: Scenario<Person> } =
+        yield createSimulation(
+          client,
+          'test/fixtures/rules-sync-wrapper-with-async'
+        );
+      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code,
+          ...person.data
+        }),
+      });
+
+      let token = yield res.json();
+
+      let idToken = jwt.decode(token.id_token, { complete: true });
+      expect(idToken?.payload.name).toBe(person.data.name);
+
+      expect(idToken?.payload.checkURLOne).toBe('https://www.frontside.com');
+      expect(idToken?.payload.checkURLOneStatus).toBe(200);
+      expect(idToken?.payload.checkURLOneText).toBe('<!doctype html>');
+
+      expect(idToken?.payload.checkURLTwo).toBe(
+        'https://www.frontside.com/effection'
+      );
+      expect(idToken?.payload.checkURLTwoStatus).toBe(200);
+      expect(idToken?.payload.checkURLTwoText).toBe('<!doctype html>');
     });
   });
 });

@@ -145,7 +145,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       res.status(302).redirect(routerUrl);
     },
 
-    ['/oauth/token']: function(req, res) {
+    ['/oauth/token']: async function (req, res) {
       let { code, grant_type } = req.body;
 
       let user: Person | undefined;
@@ -211,7 +211,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       } as RuleUser;
       let context = { clientID, accessToken: { scope }, idToken: idTokenData };
 
-      rulesRunner(userData, context);
+      await rulesRunner(userData, context);
 
       let idToken = createJsonWebToken({ ...userData, ...context.idToken });
 
