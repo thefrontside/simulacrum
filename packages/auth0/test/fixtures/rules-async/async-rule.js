@@ -3,7 +3,7 @@ fake async rule
 */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function syncWrapper(user, context, callback) {
+async function syncWrapper(user, context, callback) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   let fetch = require('node-fetch');
 
@@ -39,5 +39,5 @@ function syncWrapper(user, context, callback) {
     callback(null, user, context);
   };
 
-  fetchAndReturn();
+  await fetchAndReturn();
 }

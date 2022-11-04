@@ -3,9 +3,59 @@ import vm from 'vm';
 import fs from 'fs';
 import { assert } from 'assert-ts';
 import { parseRulesFiles } from './parse-rules-files';
-import type { RuleContext, RuleUser } from './types';
+import type { Rule, RuleContext, RuleUser } from './types';
 
 export type RulesRunner = <A, I>(user: RuleUser, context: RuleContext<A, I>) => void;
+
+async function runRule <A, I>(user: RuleUser, context: RuleContext<A, I>, rule: Rule) {
+  await new Promise((resolve, reject) => {
+    let sandbox = {
+      process,
+      Buffer,
+      clearImmediate,
+      clearInterval,
+      clearTimeout,
+      setImmediate,
+      setInterval,
+      setTimeout,
+      console,
+      require,
+      module,
+      resolve,
+      reject,
+      __simulator: {
+        ...{
+          user,
+          context: { ...context },
+        },
+      },
+    };
+
+    let vmContext = vm.createContext({ ...sandbox });
+    assert(typeof rule !== 'undefined', 'undefined rule');
+
+    let { code, filename } = rule;
+
+    console.debug(`executing rule ${path.basename(filename)}`);
+
+    let script = new vm.Script(`
+      (async function(exports) {
+        try {
+          await (${code})(__simulator.user, __simulator.context, resolve);
+          resolve();
+        } catch (err) {
+          console.error(err);
+          reject();
+        }
+      })(module.exports)
+    `);
+
+    script.runInContext(vmContext, {
+      filename,
+      displayErrors: true,
+    });
+  }).catch((error) => console.error(error));
+}
 
 export function createRulesRunner(rulesPath?: string): RulesRunner {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -28,51 +78,12 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
   return async <A, I>(user: RuleUser, context: RuleContext<A, I>) => {
     console.debug(`applying ${rules.length} rules`);
 
-    let sandbox = {
-        process,
-        Buffer,
-        clearImmediate,
-        clearInterval,
-        clearTimeout,
-        setImmediate,
-        setInterval,
-        setTimeout,
-        console,
-        require,
-        module,
-        __simulator: {
-          ...{
-            user,
-            context: { ...context },
-          },
-        },
-    };
-
       for (let rule of rules) {
-      await new Promise((resolve) => {
-        let vmContext = vm.createContext({ ...sandbox, resolve });
-        assert(typeof rule !== 'undefined', 'undefined rule');
-
-        let { code, filename } = rule;
-
-        console.debug(`executing rule ${path.basename(filename)}`);
-
-        let script = new vm.Script(`
-          (async function(exports) {
-            try {
-              await (${code})(__simulator.user, __simulator.context, resolve);
-            } catch (err) {
-              console.error(err);
-            resolve();
-            }
-          })(module.exports)
-        `);
-
-        script.runInContext(vmContext, {
-          filename,
-          displayErrors: true,
-        });
-      }).catch((error) => console.error(error));
+        try {
+          await runRule(user, context, rule);
+        } catch (_e) {
+          // not sure what we do here
+        }
       }
   };
 }
