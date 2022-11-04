@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.6.7]
+
+- Async rules were not properly processing and would run as a race condition mutating the `user` and `context` objects. This would mean part of the rule might be applied. This adds some additional wrappers in the rule running to properly handle and `await` on async code.
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [013b5db](https://github.com/thefrontside/simulacrum/commit/013b5dbf12d1995efe1fb6fba90b55d3fe05f523) change file on 2022-11-03
+
 ## \[0.6.6]
 
 - export `createAuth0Server` operation for running Auth0 server standalone.
