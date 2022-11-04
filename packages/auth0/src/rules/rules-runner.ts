@@ -31,7 +31,7 @@ async function runRule <A, I>(user: RuleUser, context: RuleContext<A, I>, rule: 
       },
     };
 
-    let vmContext = vm.createContext({ ...sandbox });
+    let vmContext = vm.createContext(sandbox);
     assert(typeof rule !== 'undefined', 'undefined rule');
 
     let { code, filename } = rule;
@@ -52,7 +52,7 @@ async function runRule <A, I>(user: RuleUser, context: RuleContext<A, I>, rule: 
     script.runInContext(vmContext, {
       filename,
       displayErrors: true,
-      timeout: 20000
+      timeout: 20000,
     });
   }).catch((error) => console.error(error));
 }
