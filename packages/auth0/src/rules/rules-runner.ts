@@ -53,6 +53,7 @@ async function runRule <A, I>(user: RuleUser, context: RuleContext<A, I>, rule: 
     script.runInContext(vmContext, {
       filename,
       displayErrors: true,
+      timeout: 20000
     });
   }).catch((error) => console.error(error));
 }
