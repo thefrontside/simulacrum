@@ -79,11 +79,7 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
     console.debug(`applying ${rules.length} rules`);
 
       for (let rule of rules) {
-        try {
-          await runRule(user, context, rule);
-        } catch (_e) {
-          // not sure what we do here
-        }
+        await runRule(user, context, rule);
       }
   };
 }
