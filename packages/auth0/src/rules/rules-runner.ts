@@ -42,7 +42,6 @@ async function runRule <A, I>(user: RuleUser, context: RuleContext<A, I>, rule: 
       (async function(exports) {
         try {
           await (${code})(__simulator.user, __simulator.context, resolve);
-          resolve();
         } catch (err) {
           console.error(err);
           reject();
