@@ -28,7 +28,7 @@ type FixtureDirectories =
   | 'access-token'
   | 'user-dependent'
   | 'async-only'
-  | 'async-sync-wrapper-with-async';
+  | 'sync-wrapper-with-async';
 
 type Fixtures = `test/fixtures/rules-${FixtureDirectories}`;
 
@@ -143,9 +143,10 @@ describe('rules', () => {
   describe('augment user', () => {
     let authUrl: string;
     let code: string;
+    let person: Scenario<Person>;
 
     beforeEach(function* () {
-      ({ authUrl, code } = yield createSimulation(client, 'test/fixtures/rules-user'));
+      ({ authUrl, code, person } = yield createSimulation(client, 'test/fixtures/rules-user'));
     });
 
     it('should have added a picture to the payload', function* () {
@@ -156,7 +157,8 @@ describe('rules', () => {
         },
         body: JSON.stringify({
           ...Fields,
-          code
+          code,
+          ...person.data
         })
       });
 
@@ -165,6 +167,7 @@ describe('rules', () => {
       let idToken = jwt.decode(token.id_token, { complete: true });
 
       expect(idToken?.payload.picture).toContain('https://i.pravatar.cc');
+      expect(idToken?.payload.name).toBe(person.data.name);
     });
   });
 
@@ -244,6 +247,7 @@ describe('rules', () => {
         body: JSON.stringify({
           ...Fields,
           code,
+          ...person.data
         }),
       });
 
@@ -271,7 +275,7 @@ describe('rules', () => {
       }: { authUrl: string; code: string; person: Scenario<Person> } =
         yield createSimulation(
           client,
-          'test/fixtures/rules-async-sync-wrapper-with-async'
+          'test/fixtures/rules-sync-wrapper-with-async'
         );
       let res: Response = yield fetch(`${authUrl}/oauth/token`, {
         method: 'POST',
@@ -281,6 +285,7 @@ describe('rules', () => {
         body: JSON.stringify({
           ...Fields,
           code,
+          ...person.data
         }),
       });
 
