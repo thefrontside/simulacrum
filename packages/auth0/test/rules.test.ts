@@ -244,12 +244,12 @@ describe('rules', () => {
 
       let idToken = jwt.decode(token.id_token, { complete: true });
       expect(idToken?.payload.checkURLOne).toBe('https://www.frontside.com');
-      expect(idToken?.payload.checkURLStatusOne).toBe(200);
-      expect(idToken?.payload.checkURLTextOne).toBe('<!DOCTYPE html>');
+      expect(idToken?.payload.checkURLOneStatus).toBe(200);
+      expect(idToken?.payload.checkURLOneText).toBe('<!doctype html>');
 
       expect(idToken?.payload.checkURLTwo).toBe('https://www.frontside.com/effection');
-      expect(idToken?.payload.checkURLStatusTwo).toBe(200);
-      expect(idToken?.payload.checkURLTextTwo).toBe('<!DOCTYPE html>');
+      expect(idToken?.payload.checkURLTwoStatus).toBe(200);
+      expect(idToken?.payload.checkURLTwoText).toBe('<!doctype html>');
     });
   });
 });

@@ -44,7 +44,6 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
           ...{
             user,
             context: { ...context },
-            callback,
           },
         },
     };
@@ -61,21 +60,19 @@ export function createRulesRunner(rulesPath?: string): RulesRunner {
         let script = new vm.Script(`
           (async function(exports) {
             try {
-              await (${code})(__simulator.user, __simulator.context, __simulator.callback);
+              await (${code})(__simulator.user, __simulator.context, resolve);
             } catch (err) {
               console.error(err);
-            }
-          
             resolve();
+            }
           })(module.exports)
         `);
 
-        script.runInNewContext(vmContext, {
+        script.runInContext(vmContext, {
           filename,
-          microtaskMode: 'afterEvaluate',
           displayErrors: true,
         });
-        });
+      }).catch((error) => console.error(error));
       }
   };
 }
