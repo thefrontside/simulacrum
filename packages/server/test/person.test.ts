@@ -44,5 +44,18 @@ describe('person simulator', () => {
         expect(person.data.name).toEqual("Bob Dobalina");
       });
     });
+
+    describe('given a person with a specified id', () => {
+      let person: Scenario<{ id: string }>;
+      beforeEach(function* () {
+        person = yield client.given(simulation, 'person', {
+          id: 'auth0|aoh1-09jdal-j13lkasd',
+        });
+      });
+
+      it('creates the person with that name', function* () {
+        expect(person.data.id.slice(0, 5)).toBe('auth0');
+      });
+    });
   });
 });
