@@ -153,19 +153,35 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       let nonce: string | undefined;
       let username: string;
       let password: string | undefined;
-      let response_client_id: string;
-      let response_audience: string;
+      let responseClientId: string = req?.body?.client_id as string ?? clientID;
+      let responseAudience: string = req?.body?.audience as string ?? audience;
 
+      // grant_type list as defined by auth0
+      // https://auth0.com/docs/get-started/applications/application-grant-types#spec-conforming-grants
       if (grant_type === 'password') {
         username = req.body.username;
         password = req.body.password;
-        response_client_id = req?.body?.client_id as string || clientID;
-        response_audience = req?.body?.audience as string|| audience;
+      } else if (grant_type === 'client_credentials') {
+        let token = {
+            iss: serviceURL().toString(),
+            exp: expiresAt(),
+            iat: epochTime(),
+            aud: req.body.audience ?? audience,
+            gty: grant_type,
+            scope
+        };
+        res.status(200).json({
+            access_token: createJsonWebToken(token),
+            expires_in: 86400,
+            token_type: "Bearer",
+        });
+        return;
+      } else if (grant_type === 'authorization_code') {
+        // the same as the `else` below, but being explicit in considering the functionality
+        assert(typeof code !== 'undefined', 'no code in /oauth/token');
+        [nonce, username] = decode(code).split(":");
       } else {
         assert(typeof code !== 'undefined', 'no code in /oauth/token');
-        response_client_id = clientID;
-        response_audience = audience;
-
         [nonce, username] = decode(code).split(":");
       }
 
@@ -185,13 +201,13 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
           return valid && password === person.password;
         }
       });
-
+      
       if(!user) {
         res.status(401).send('Unauthorized');
         return;
       }
 
-      assert(!!response_client_id, 'no clientID in options');
+      assert(!!responseClientId, 'no clientID in options');
 
       let idTokenData: IdTokenData = {
         alg: "RS256",
@@ -200,7 +216,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
         exp: expiresAt(),
         iat: epochTime(),
         email: username,
-        aud: response_client_id,
+        aud: responseClientId,
         sub: user.id,
       };
 
@@ -216,14 +232,14 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
         picture: req?.body?.picture,
         identities: req?.body?.identities,
       } as RuleUser;
-      let context = { clientID: response_client_id, accessToken: { scope }, idToken: idTokenData };
+      let context = { clientID: responseClientId, accessToken: { scope }, idToken: idTokenData };
 
       await rulesRunner(userData, context);
 
       let idToken = createJsonWebToken({ ...userData, ...context.idToken });
 
       let accessToken: AccessTokenPayload = {
-        aud: response_audience,
+        aud: responseAudience,
         sub: idTokenData.sub,
         iat: epochTime(),
         iss: idTokenData.iss,

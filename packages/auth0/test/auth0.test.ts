@@ -364,6 +364,73 @@ describe('Auth0 simulator', () => {
         expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
       });
     });
+
+    describe('grant_type=client_credentials', () => {
+      let accessToken: AccessToken;
+      beforeEach(function * () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            // these are different than the simulator defined values
+            // to confirming we can auth and create tokens with the passed values
+            client_id: 'test-id-to-confirm-it-uses-this',
+            audience: 'https://thefrontside.auth0.com/api/v0/',
+          })
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        accessToken = jwt.decode(json.access_token, { complete: true }) as AccessToken;
+      });
+
+      it('access_token should contain audience as aud', function* () {
+        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
+      });
+    });
+
+    describe('grant_type=authorization_code', () => {
+      let idToken: IdToken;
+      let accessToken: AccessToken;
+      beforeEach(function * () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...Fields,
+            code,
+            grant_type: 'authorization_code',
+            // these are different than the simulator defined values
+            // to confirming we can auth and create tokens with the passed values
+            client_id: 'test-id-to-confirm-it-uses-this',
+            audience: 'https://thefrontside.auth0.com/api/v0/',
+          })
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        idToken = jwt.decode(json.id_token, { complete: true }) as IdToken;
+        accessToken = jwt.decode(json.access_token, { complete: true }) as AccessToken;
+      });
+
+      it('id_token should contain client_id as aud', function* () {
+        expect(idToken.payload.aud).toBe('test-id-to-confirm-it-uses-this');
+      });
+
+      it('access_token should contain audience as aud', function* () {
+        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
+      });
+    });
   });
 
   describe('/v2/logout', () => {
