@@ -6,6 +6,7 @@ export const createLoginRedirectHandler = (options: Auth0Configuration): Request
   function loginRedirect (req: Request, res: Response) {
     let {
       client_id,
+      audience,
       redirect_uri,
       scope,
       state,
@@ -21,7 +22,7 @@ export const createLoginRedirectHandler = (options: Auth0Configuration): Request
       `/login?${stringify({
         state,
         redirect_uri,
-        client: client_id,
+        client: client_id || options.clientID,
         protocol: "oauth2",
         scope,
         response_type,
@@ -30,7 +31,7 @@ export const createLoginRedirectHandler = (options: Auth0Configuration): Request
         code_challenge,
         code_challenge_method,
         auth0Client,
-        audience: options.audience,
+        audience: audience || options.audience,
       })}`
     );
   };

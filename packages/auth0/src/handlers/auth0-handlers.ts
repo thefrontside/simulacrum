@@ -75,16 +75,21 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
     },
 
     ['/login']: function(req, res) {
-      let { redirect_uri } = req.query as QueryParams;
-
-      assert(!!clientID, `no clientID assigned`);
+      let {
+        client_id: query_client_id,
+        audience: query_audience,
+        redirect_uri,
+      } = req.query as QueryParams;
+      let response_client_id = query_client_id || clientID;
+      let response_audience = query_audience || audience;
+      assert(!!response_client_id, `no clientID assigned`);
 
       let html = loginView({
         domain: serviceURL().host,
         scope,
         redirectUri: redirect_uri,
-        clientID,
-        audience,
+        clientID: response_client_id,
+        audience: response_audience,
         loginFailed: false
       });
 
@@ -152,12 +157,18 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       let nonce: string | undefined;
       let username: string;
       let password: string | undefined;
+      let response_client_id: string;
+      let response_audience: string;
 
       if (grant_type === 'password') {
         username = req.body.username;
         password = req.body.password;
+        response_client_id = req?.body?.client_id as string || clientID;
+        response_audience = req?.body?.audience as string|| audience;
       } else {
         assert(typeof code !== 'undefined', 'no code in /oauth/token');
+        response_client_id = clientID;
+        response_audience = audience;
 
         [nonce, username] = decode(code).split(":");
       }
@@ -184,7 +195,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
         return;
       }
 
-      assert(!!clientID, 'no clientID in options');
+      assert(!!response_client_id, 'no clientID in options');
 
       let idTokenData: IdTokenData = {
         alg: "RS256",
@@ -193,7 +204,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
         exp: expiresAt(),
         iat: epochTime(),
         email: username,
-        aud: clientID,
+        aud: response_client_id,
         sub: user.id,
       };
 
@@ -209,14 +220,14 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
         picture: req?.body?.picture,
         identities: req?.body?.identities,
       } as RuleUser;
-      let context = { clientID, accessToken: { scope }, idToken: idTokenData };
+      let context = { clientID: response_client_id, accessToken: { scope }, idToken: idTokenData };
 
       await rulesRunner(userData, context);
 
       let idToken = createJsonWebToken({ ...userData, ...context.idToken });
 
       let accessToken: AccessTokenPayload = {
-        aud: audience,
+        aud: response_audience,
         sub: idTokenData.sub,
         iat: epochTime(),
         iss: idTokenData.iss,
