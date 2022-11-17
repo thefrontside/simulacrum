@@ -75,21 +75,17 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
     },
 
     ['/login']: function(req, res) {
-      let {
-        client_id: query_client_id,
-        audience: query_audience,
-        redirect_uri,
-      } = req.query as QueryParams;
-      let response_client_id = query_client_id || clientID;
-      let response_audience = query_audience || audience;
-      assert(!!response_client_id, `no clientID assigned`);
+      let query = req.query as QueryParams;
+      let responseClientId = query.client_id ?? clientID;
+      let responseAudience = query.audience ?? audience;
+      assert(!!responseClientId, `no clientID assigned`);
 
       let html = loginView({
         domain: serviceURL().host,
         scope,
-        redirectUri: redirect_uri,
-        clientID: response_client_id,
-        audience: response_audience,
+        redirectUri: query.redirect_uri,
+        clientID: responseClientId,
+        audience: responseAudience,
         loginFailed: false
       });
 
