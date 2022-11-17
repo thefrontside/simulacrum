@@ -19,11 +19,11 @@ export interface Person {
   picture?: string;
 }
 
-export type OptionalParams<T extends { id: string }> = Partial<Omit<T, 'id'>>;
+export type OptionalParams<T extends { id: string }> = Partial<T>;
 
 export function person(store: Store, faker: Faker, params: OptionalParams<Person> = {}): Operation<Person> {
   return function*() {
-    let id = v4();
+    let id = params.id ?? v4();
     let slice = records(store).slice(id);
 
     let name = params.name ?? faker.name.findName();
