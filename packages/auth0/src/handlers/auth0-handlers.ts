@@ -136,7 +136,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       res.status(302).redirect(routerUrl);
     },
 
-    ['/oauth/token']: async function (req, res) {
+    ['/oauth/token']: async function (req, res, next) {
       try {
         let iss = serviceURL().toString();
 
@@ -162,28 +162,8 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
           expires_in: 86400,
           token_type: "Bearer",
         });
-      } catch (error: any) {
-        let assertCondition = 'Assert condition failed: ';
-        if (error?.message?.startsWith(assertCondition)) {
-          let errorMessage = error.message.slice(assertCondition.length);
-          let errorCode =
-            errorMessage.slice(3, 5) === '::'
-              ? parseInt(errorMessage.slice(0, 3))
-              : 500;
-          let errorResponse = errorMessage.slice(5);
-          res.status(errorCode).send(errorResponse);
-        } else {
-          console.error(error)
-          res
-            .status(500)
-            .json({
-              error: {
-                name: error.name,
-                message: error.message,
-                stack: error.stack,
-              },
-            });
-        }
+      } catch (error) {
+        next(error);
       }
     },
 
