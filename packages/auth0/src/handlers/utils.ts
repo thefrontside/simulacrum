@@ -19,6 +19,9 @@ export const deriveScope = ({
   audience: string;
 }) => {
   if (typeof scopeConfig === 'string') return scopeConfig;
+  let defaultScope = scopeConfig.find(
+    (application) => application.clientID === 'default'
+  );
 
   assert(!!clientID, `500::Did not have a clientID to derive the scope`);
 
@@ -36,6 +39,10 @@ export const deriveScope = ({
       ignoreAudience === undefined,
       `500::Found application matching clientID, ${ignoreAudience?.clientID}, but incorrect audience, configured: ${ignoreAudience?.audience} :: passed: ${audience}`
     );
+  }
+
+  if (!application && defaultScope) {
+    application = defaultScope;
   }
 
   assert(

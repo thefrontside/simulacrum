@@ -13,7 +13,7 @@ import jwt from 'jsonwebtoken';
 import Keygrip from 'keygrip';
 import { removeTrailingSlash } from '../src/handlers/url';
 import type { Scenario } from '@simulacrum/client';
-import type { AccessToken, IdToken, TokenSet } from '../src/types';
+import type { AccessToken, IdToken, ScopeConfig, TokenSet } from '../src/types';
 import { epochTimeToLocalDate } from '../src/auth/date';
 
 const createSessionCookie = <T>(data: T): string => {
@@ -437,11 +437,144 @@ describe('Auth0 simulator', () => {
 
   describe('m2m token at /oauth/token', () => {
     let authUrl: string;
-
-    beforeEach(function* () {
+    let createAuth0Simulation = function* ({ scope }: {scope: ScopeConfig}) {
       let simulation: Simulation = yield client.createSimulation('auth0', {
         debug: true,
         options: {
+          scope,
+        },
+        services: {
+          auth0: { port: 4400 },
+        },
+      });
+
+      return simulation.services[0].url;
+    };
+
+    describe('should return scope', () => {
+      beforeEach(function* () {
+        authUrl = yield createAuth0Simulation({
+          scope: [
+            { clientID: 'client-one', scope: 'custom:access' },
+            { clientID: 'client-two', scope: 'more-custom:access' },
+            {
+              clientID: 'client-three',
+              audience: 'https://vip',
+              scope: 'custom:special-access',
+            },
+            {
+              clientID: 'default',
+              scope: 'openid profile email offline_access',
+            },
+          ],
+        });
+      });
+
+      it('based on clientID in req.body', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'client-one',
+            audience: 'https://thefrontside.auth0.com/api/v0/',
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        let accessToken = jwt.decode(json.access_token, {
+          complete: true,
+        }) as AccessToken;
+
+        expect(accessToken.payload.scope).toBe('custom:access');
+      });
+
+      it('based on different clientID in req.body', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'client-two',
+            audience: 'https://thefrontside.auth0.com/api/v0/',
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        let accessToken = jwt.decode(json.access_token, {
+          complete: true,
+        }) as AccessToken;
+
+        expect(accessToken.payload.scope).toBe('more-custom:access');
+      });
+
+      it('based on clientID and specific audience in req.body', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'client-three',
+            audience: 'https://vip',
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        let accessToken = jwt.decode(json.access_token, {
+          complete: true,
+        }) as AccessToken;
+
+        expect(accessToken.payload.scope).toBe('custom:special-access');
+      });
+
+      it('due to fallback scope', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'client-which-expects-the-default',
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        let accessToken = jwt.decode(json.access_token, {
+          complete: true,
+        }) as AccessToken;
+
+        expect(accessToken.payload.scope).toBe(
+          'openid profile email offline_access'
+        );
+      });
+    });
+
+    describe('should fail', () => {
+      beforeEach(function* () {
+        authUrl = yield createAuth0Simulation({
           scope: [
             { clientID: 'client-one', scope: 'custom:access' },
             { clientID: 'client-two', scope: 'more-custom:access' },
@@ -451,133 +584,53 @@ describe('Auth0 simulator', () => {
               scope: 'custom:special-access',
             },
           ],
-        },
-        services: {
-          auth0: { port: 4400 },
-        },
+        });
       });
 
-      authUrl = simulation.services[0].url;
-    });
+      it('on missing scope based on clientID', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'non-existent-client',
+          }),
+        });
 
-    it('should return custom:access scope', function* () {
-      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...Fields,
-          grant_type: 'client_credentials',
-          client_id: 'client-one',
-          audience: 'https://thefrontside.auth0.com/api/v0/',
-        }),
+        expect(res.ok).toBe(false);
+
+        let text = yield res.text();
+
+        expect(text).toBe(
+          'Could not find application with clientID: non-existent-client'
+        );
       });
 
-      expect(res.ok).toBe(true);
+      it('on missing scope based on audience', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'client-three',
+            audience: 'https://bad-audience',
+          }),
+        });
 
-      let json = yield res.json();
+        expect(res.ok).toBe(false);
 
-      let accessToken = jwt.decode(json.access_token, {
-        complete: true,
-      }) as AccessToken;
+        let text = yield res.text();
 
-      expect(accessToken.payload.scope).toBe('custom:access');
-    });
-
-    it('should return more-custom:access scope', function* () {
-      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...Fields,
-          grant_type: 'client_credentials',
-          client_id: 'client-two',
-          audience: 'https://thefrontside.auth0.com/api/v0/',
-        }),
+        expect(text).toBe(
+          'Found application matching clientID, client-three, but incorrect audience, configured: https://vip :: passed: https://bad-audience'
+        );
       });
-
-      expect(res.ok).toBe(true);
-
-      let json = yield res.json();
-
-      let accessToken = jwt.decode(json.access_token, {
-        complete: true,
-      }) as AccessToken;
-
-      expect(accessToken.payload.scope).toBe('more-custom:access');
-    });
-
-    it('should return custom:special-access scope', function* () {
-      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...Fields,
-          grant_type: 'client_credentials',
-          client_id: 'client-three',
-          audience: 'https://vip',
-        }),
-      });
-
-      expect(res.ok).toBe(true);
-
-      let json = yield res.json();
-
-      let accessToken = jwt.decode(json.access_token, {
-        complete: true,
-      }) as AccessToken;
-
-      expect(accessToken.payload.scope).toBe('custom:special-access');
-    });
-
-    it('should fail on missing scope based on clientID', function* () {
-      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...Fields,
-          grant_type: 'client_credentials',
-          client_id: 'non-existent-client',
-        }),
-      });
-
-      expect(res.ok).toBe(false);
-
-      let text = yield res.text();
-
-      expect(text).toBe(
-        'Could not find application with clientID: non-existent-client'
-      );
-    });
-
-    it('should fail on missing scope based on audience', function* () {
-      let res: Response = yield fetch(`${authUrl}/oauth/token`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...Fields,
-          grant_type: 'client_credentials',
-          client_id: 'client-three',
-          audience: 'https://bad-audience',
-        }),
-      });
-
-      expect(res.ok).toBe(false);
-
-      let text = yield res.text();
-
-      expect(text).toBe(
-        'Found application matching clientID, client-three, but incorrect audience, configured: https://vip :: passed: https://bad-audience'
-      );
     });
   });
 
