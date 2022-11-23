@@ -13,15 +13,23 @@ export interface RuleUser {
   given_name?: string | undefined;
   family_name?: string | undefined;
   name?: string | undefined;
+  identities: IdentityProvider[] | undefined;
 }
 
-export interface RuleContext<A, I> {
-  clientID: string
-  accessToken: {
-    scope: string | string[]
-  } & A
+type IdentityProvider = {
+  provider: string;
+  user_id: string;
+  connection: string;
+  isSocial: boolean;
+};
 
-  idToken: I
+export interface RuleContext<A, I> {
+  clientID: string;
+  accessToken: {
+    scope: string | string[];
+  } & A;
+
+  idToken: I;
 }
 
 export interface Rule {

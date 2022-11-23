@@ -1,18 +1,16 @@
 import type { Person } from '@simulacrum/server';
-import type { AccessTokenPayload, Auth0Configuration, IdTokenData, QueryParams, ResponseModes } from '../types';
+import type { Auth0Configuration, QueryParams, ResponseModes } from '../types';
 import type { RequestHandler } from 'express';
 import { createLoginRedirectHandler } from './login-redirect';
 import { createWebMessageHandler } from './web-message';
 import { loginView } from '../views/login';
+import { createTokens } from './oauth-handlers';
 import { assert } from 'assert-ts';
 import { stringify } from 'querystring';
-import { decode, encode } from "base64-url";
+import { encode } from "base64-url";
 import { userNamePasswordForm } from '../views/username-password';
-import { epochTime, expiresAt } from '../auth/date';
-import { createJsonWebToken } from '../auth/jwt';
-import { createRulesRunner } from '../rules/rules-runner';
-import type { RuleUser } from '../rules/types';
 import { decode as decodeToken } from 'jsonwebtoken';
+import { createPersonQuery } from './utils';
 
 export type Routes =
   | '/heartbeat'
@@ -24,8 +22,6 @@ export type Routes =
   | '/v2/logout'
   | '/userinfo'
 
-type Predicate<T> = (this: void, value: T, index: number, obj: T[]) => boolean;
-
 export type AuthSession = { username: string, nonce: string };
 
 export interface Auth0Store {
@@ -33,20 +29,14 @@ export interface Auth0Store {
   set(nonce: string, session: AuthSession): void;
 }
 
-const createPersonQuery = (people: Iterable<Person>) => (predicate: Predicate<Person>) => {
-  return [...people].find(predicate);
-};
-
 export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>, serviceURL: () => URL, options: Auth0Configuration): Record<Routes, RequestHandler> => {
   let { audience, scope, clientID, rulesDirectory } = options;
   let personQuery = createPersonQuery(people);
-  let rulesRunner = createRulesRunner(rulesDirectory);
 
   let authorizeHandlers: Record<ResponseModes, RequestHandler> = {
     query: createLoginRedirectHandler(options),
     web_message: createWebMessageHandler()
   };
-
 
   return {
     ['/heartbeat']: function (_, res) {
@@ -147,112 +137,54 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
     },
 
     ['/oauth/token']: async function (req, res) {
-      let { code, grant_type } = req.body;
+      try {
+        let iss = serviceURL().toString();
 
-      let user: Person | undefined;
-      let nonce: string | undefined;
-      let username: string;
-      let password: string | undefined;
-      let responseClientId: string = req?.body?.client_id as string ?? clientID;
-      let responseAudience: string = req?.body?.audience as string ?? audience;
+        let responseClientId: string =
+          (req?.body?.client_id as string) ?? clientID;
+        let responseAudience: string =
+          (req?.body?.audience as string) ?? audience;
 
-      // grant_type list as defined by auth0
-      // https://auth0.com/docs/get-started/applications/application-grant-types#spec-conforming-grants
-      if (grant_type === 'password') {
-        username = req.body.username;
-        password = req.body.password;
-      } else if (grant_type === 'client_credentials') {
-        let token = {
-            iss: serviceURL().toString(),
-            exp: expiresAt(),
-            iat: epochTime(),
-            aud: req.body.audience ?? audience,
-            gty: grant_type,
-            scope
-        };
-        res.status(200).json({
-            access_token: createJsonWebToken(token),
-            expires_in: 86400,
-            token_type: "Bearer",
+        assert(!!responseClientId, '500::no clientID in options or request body');
+
+        let tokens = await createTokens({
+          body: req.body,
+          iss,
+          clientID: responseClientId,
+          audience: responseAudience,
+          rulesDirectory,
+          people,
+          scope
         });
-        return;
-      } else if (grant_type === 'authorization_code') {
-        // the same as the `else` below, but being explicit in considering the functionality
-        assert(typeof code !== 'undefined', 'no code in /oauth/token');
-        [nonce, username] = decode(code).split(":");
-      } else {
-        assert(typeof code !== 'undefined', 'no code in /oauth/token');
-        [nonce, username] = decode(code).split(":");
-      }
 
-      if (!username) {
-        res.status(400).send(`no nonce in store for ${code}`);
-        return;
-      }
-
-      user = personQuery((person) => {
-        assert(!!person.email, `no email defined on person scenario`);
-
-        let valid = person.email.toLowerCase() === username.toLowerCase();
-
-        if(typeof password === 'undefined') {
-          return valid;
+        res.status(200).json({
+          ...tokens,
+          expires_in: 86400,
+          token_type: "Bearer",
+        });
+      } catch (error: any) {
+        let assertCondition = 'Assert condition failed: ';
+        if (error?.message?.startsWith(assertCondition)) {
+          let errorMessage = error.message.slice(assertCondition.length);
+          let errorCode =
+            errorMessage.slice(3, 5) === '::'
+              ? parseInt(errorMessage.slice(0, 3))
+              : 500;
+          let errorResponse = errorMessage.slice(5);
+          res.status(errorCode).send(errorResponse);
         } else {
-          return valid && password === person.password;
+          console.error(error)
+          res
+            .status(500)
+            .json({
+              error: {
+                name: error.name,
+                message: error.message,
+                stack: error.stack,
+              },
+            });
         }
-      });
-      
-      if(!user) {
-        res.status(401).send('Unauthorized');
-        return;
       }
-
-      assert(!!responseClientId, 'no clientID in options');
-
-      let idTokenData: IdTokenData = {
-        alg: "RS256",
-        typ: "JWT",
-        iss: serviceURL().toString(),
-        exp: expiresAt(),
-        iat: epochTime(),
-        email: username,
-        aud: responseClientId,
-        sub: user.id,
-      };
-
-      if(typeof nonce !== 'undefined') {
-        idTokenData.nonce = nonce;
-      }
-
-      let userData = {
-        name: req?.body?.name,
-        email: req?.body?.email,
-        user_id: req?.body?.id,
-        nickname: req?.body?.nickname,
-        picture: req?.body?.picture,
-        identities: req?.body?.identities,
-      } as RuleUser;
-      let context = { clientID: responseClientId, accessToken: { scope }, idToken: idTokenData };
-
-      await rulesRunner(userData, context);
-
-      let idToken = createJsonWebToken({ ...userData, ...context.idToken });
-
-      let accessToken: AccessTokenPayload = {
-        aud: responseAudience,
-        sub: idTokenData.sub,
-        iat: epochTime(),
-        iss: idTokenData.iss,
-        exp: idTokenData.exp,
-        ...context.accessToken
-      };
-
-      res.status(200).json({
-        access_token: createJsonWebToken(accessToken),
-        id_token: idToken,
-        expires_in: 86400,
-        token_type: "Bearer",
-      });
     },
 
     ['/v2/logout']: function(req, res) {
