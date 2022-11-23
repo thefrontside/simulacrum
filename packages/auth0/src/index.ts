@@ -1,9 +1,10 @@
 import type { Person , ResourceServiceCreator, Simulator } from '@simulacrum/server';
 import { createServer, consoleLogger, person } from '@simulacrum/server';
-import { Operation } from 'effection';
+import type { Operation } from 'effection';
 import express, { json, urlencoded } from 'express';
 import path from 'path';
 import { getConfig } from './config/get-config';
+import { defaultErrorHandler } from './error-handling-middleware';
 import type { Auth0Store, AuthSession } from './handlers/auth0-handlers';
 import { createAuth0Handlers } from './handlers/auth0-handlers';
 import { getServiceUrl } from './handlers/get-service-url';
@@ -102,6 +103,9 @@ export function createAuth0Server(options: Auth0ServerOptions): Operation<Server
       if (debug) {
         app.use(consoleLogger);
       }
+
+      // needs to be the last middleware added
+      app.use(defaultErrorHandler);
 
       let server = yield createServer(app, { protocol: 'https', port });
 

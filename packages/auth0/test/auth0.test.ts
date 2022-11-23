@@ -664,8 +664,6 @@ describe('Auth0 simulator', () => {
       });
 
       it('neither token specified', function* () {
-        let errorLogs = '';
-        console.error = (message) => (errorLogs += message);
         let simulation: Simulation = yield client.createSimulation('auth0');
 
         auth0Url = simulation.services[0].url;
@@ -694,9 +692,11 @@ describe('Auth0 simulator', () => {
           },
         });
 
+        let responseText = yield res.text();
+
         expect(
-          errorLogs.startsWith(
-            'Error: Assert condition failed: no authorization header or access_token'
+          responseText.startsWith(
+            'Assert condition failed: no authorization header or access_token'
           )
         ).toBe(true);
         expect(res.status).toBe(500);
