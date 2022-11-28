@@ -1,5 +1,18 @@
 # Changelog
 
+## \[0.0.19]
+
+- Added specific support for the `grant_type` `client_credentials` which is required for machine-to-machine tokens. This grant_type specifically does not run the rules. The `scope` option now accepts an array of objects to specify specific scopes for specific clients.
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [4ffde63](https://github.com/thefrontside/simulacrum/commit/4ffde63842c0984f7bf5d6b3bd0f3d98ad938799) support client_credentials grant_type on 2022-11-17
+  - [9bb1b43](https://github.com/thefrontside/simulacrum/commit/9bb1b43bb80332e5357123550d72eef8681ae416) update change file with note about scope adjustments on 2022-11-23
+- Tweaks the login form so the button is a true form submission button. This allows the form to input validate, and enables all form submission options (enter primarily the addition).
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [fa4a9e2](https://github.com/thefrontside/simulacrum/commit/fa4a9e27f72b6609419ee93d3c55b620a5feb6bc) auth0 submit as form button on 2022-11-21
+- The simulator should consider the audience and client_id passed in the request. The values may be important for logic in user defined rules, and is used in validating the token, e.g. in `auth0-react`.
+  - Bumped due to a bump in @simulacrum/auth0-simulator.
+  - [86cd7d0](https://github.com/thefrontside/simulacrum/commit/86cd7d06d5747c81d31a241726999955425a8e65) consider client_id and audience in auth0 sim request on 2022-11-16
+
 ## \[0.0.18]
 
 - Async rules were not properly processing and would run as a race condition mutating the `user` and `context` objects. This would mean part of the rule might be applied. This adds some additional wrappers in the rule running to properly handle and `await` on async code.

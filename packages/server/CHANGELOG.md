@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.6.3]
+
+- When creating a person with the person simulator, we now allow passing in a specific `id` to use.
+  - [6793a27](https://github.com/thefrontside/simulacrum/commit/6793a2743ed57c79670ca95842e0202bfa5db359) change file on 2022-11-16
+
 ## \[0.6.2]
 
 - The simulation server can return null events on shutdown, and the logger did not consider this. The previous patch fixed a single instance. This addresses the remaining three instances by checking for undefined within the filter.
