@@ -13,7 +13,7 @@ import jwt from 'jsonwebtoken';
 import Keygrip from 'keygrip';
 import { removeTrailingSlash } from '../src/handlers/url';
 import type { Scenario } from '@simulacrum/client';
-import type { AccessToken, IdToken, TokenSet } from '../src/types';
+import type { AccessToken, IdToken, ScopeConfig, TokenSet } from '../src/types';
 import { epochTimeToLocalDate } from '../src/auth/date';
 
 const createSessionCookie = <T>(data: T): string => {
@@ -32,6 +32,7 @@ describe('Auth0 simulator', () => {
 
   beforeEach(function*() {
     client = yield createTestServer({
+      debug: true,
       simulators: {
         auth0: (slice, options) => {
           let { services } = auth0(slice, options);
@@ -324,6 +325,7 @@ describe('Auth0 simulator', () => {
         })
       });
 
+      expect(yield res.text()).toBe('Unauthorized');
       expect(res.status).toBe(401);
     });
 
@@ -362,6 +364,272 @@ describe('Auth0 simulator', () => {
 
       it('access_token should contain audience as aud', function* () {
         expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
+      });
+    });
+
+    describe('grant_type=client_credentials', () => {
+      let accessToken: AccessToken;
+      beforeEach(function * () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            // these are different than the simulator defined values
+            // to confirming we can auth and create tokens with the passed values
+            client_id: 'test-id-to-confirm-it-uses-this',
+            audience: 'https://thefrontside.auth0.com/api/v0/',
+          })
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        accessToken = jwt.decode(json.access_token, { complete: true }) as AccessToken;
+      });
+
+      it('access_token should contain audience as aud', function* () {
+        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
+      });
+    });
+
+    describe('grant_type=authorization_code', () => {
+      let idToken: IdToken;
+      let accessToken: AccessToken;
+      beforeEach(function * () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            ...Fields,
+            code,
+            grant_type: 'authorization_code',
+            // these are different than the simulator defined values
+            // to confirming we can auth and create tokens with the passed values
+            client_id: 'test-id-to-confirm-it-uses-this',
+            audience: 'https://thefrontside.auth0.com/api/v0/',
+          })
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        idToken = jwt.decode(json.id_token, { complete: true }) as IdToken;
+        accessToken = jwt.decode(json.access_token, { complete: true }) as AccessToken;
+      });
+
+      it('id_token should contain client_id as aud', function* () {
+        expect(idToken.payload.aud).toBe('test-id-to-confirm-it-uses-this');
+      });
+
+      it('access_token should contain audience as aud', function* () {
+        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
+      });
+    });
+  });
+
+  describe('m2m token at /oauth/token', () => {
+    let authUrl: string;
+    let createAuth0Simulation = function* ({ scope }: {scope: ScopeConfig}) {
+      let simulation: Simulation = yield client.createSimulation('auth0', {
+        debug: true,
+        options: {
+          scope,
+        },
+        services: {
+          auth0: { port: 4400 },
+        },
+      });
+
+      return simulation.services[0].url;
+    };
+
+    describe('should return scope', () => {
+      beforeEach(function* () {
+        authUrl = yield createAuth0Simulation({
+          scope: [
+            { clientID: 'client-one', scope: 'custom:access' },
+            { clientID: 'client-two', scope: 'more-custom:access' },
+            {
+              clientID: 'client-three',
+              audience: 'https://vip',
+              scope: 'custom:special-access',
+            },
+            {
+              clientID: 'default',
+              scope: 'openid profile email offline_access',
+            },
+          ],
+        });
+      });
+
+      it('based on clientID in req.body', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'client-one',
+            audience: 'https://thefrontside.auth0.com/api/v0/',
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        let accessToken = jwt.decode(json.access_token, {
+          complete: true,
+        }) as AccessToken;
+
+        expect(accessToken.payload.scope).toBe('custom:access');
+      });
+
+      it('based on different clientID in req.body', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'client-two',
+            audience: 'https://thefrontside.auth0.com/api/v0/',
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        let accessToken = jwt.decode(json.access_token, {
+          complete: true,
+        }) as AccessToken;
+
+        expect(accessToken.payload.scope).toBe('more-custom:access');
+      });
+
+      it('based on clientID and specific audience in req.body', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'client-three',
+            audience: 'https://vip',
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        let accessToken = jwt.decode(json.access_token, {
+          complete: true,
+        }) as AccessToken;
+
+        expect(accessToken.payload.scope).toBe('custom:special-access');
+      });
+
+      it('due to fallback scope', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'client-which-expects-the-default',
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+
+        let json = yield res.json();
+
+        let accessToken = jwt.decode(json.access_token, {
+          complete: true,
+        }) as AccessToken;
+
+        expect(accessToken.payload.scope).toBe(
+          'openid profile email offline_access'
+        );
+      });
+    });
+
+    describe('should fail', () => {
+      beforeEach(function* () {
+        authUrl = yield createAuth0Simulation({
+          scope: [
+            { clientID: 'client-one', scope: 'custom:access' },
+            { clientID: 'client-two', scope: 'more-custom:access' },
+            {
+              clientID: 'client-three',
+              audience: 'https://vip',
+              scope: 'custom:special-access',
+            },
+          ],
+        });
+      });
+
+      it('on missing scope based on clientID', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'non-existent-client',
+          }),
+        });
+
+        expect(res.ok).toBe(false);
+
+        let text = yield res.text();
+
+        expect(text).toBe(
+          'Could not find application with clientID: non-existent-client'
+        );
+      });
+
+      it('on missing scope based on audience', function* () {
+        let res: Response = yield fetch(`${authUrl}/oauth/token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: 'client_credentials',
+            client_id: 'client-three',
+            audience: 'https://bad-audience',
+          }),
+        });
+
+        expect(res.ok).toBe(false);
+
+        let text = yield res.text();
+
+        expect(text).toBe(
+          'Found application matching clientID, client-three, but incorrect audience, configured: https://vip :: passed: https://bad-audience'
+        );
       });
     });
   });
@@ -449,8 +717,6 @@ describe('Auth0 simulator', () => {
       });
 
       it('neither token specified', function* () {
-        let errorLogs = '';
-        console.error = (message) => (errorLogs += message);
         let simulation: Simulation = yield client.createSimulation('auth0');
 
         auth0Url = simulation.services[0].url;
@@ -479,9 +745,11 @@ describe('Auth0 simulator', () => {
           },
         });
 
+        let responseText = yield res.text();
+
         expect(
-          errorLogs.startsWith(
-            'Error: Assert condition failed: no authorization header or access_token'
+          responseText.startsWith(
+            'Assert condition failed: no authorization header or access_token'
           )
         ).toBe(true);
         expect(res.status).toBe(500);

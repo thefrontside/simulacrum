@@ -1,8 +1,10 @@
+import type { ScopeConfig } from '../types';
+import { deriveScope } from '../handlers/utils';
 const html = String.raw;
 
 interface LoginViewProps {
   domain: string;
-  scope: string;
+  scope: ScopeConfig;
   redirectUri: string;
   clientID: string;
   audience: string;
@@ -11,7 +13,7 @@ interface LoginViewProps {
 
 export const loginView = ({
   domain,
-  scope,
+  scope: scopeConfig,
   redirectUri,
   clientID,
   audience,
@@ -86,7 +88,7 @@ export const loginView = ({
                   username: username.value,
                   password: password.value,
                   realm: 'Username-Password-Authentication',
-                  scope: '${scope}',
+                  scope: '${deriveScope({ scopeConfig, clientID, audience })}',
                   nonce: params.get('nonce'),
                   state: params.get('state')
                 },

@@ -229,6 +229,8 @@ let simulation = yield client.createSimulation("auth0", {
 
 The `options` field supports the [auth0 configuration fields](https://auth0.com/docs/quickstart/spa/vanillajs#configure-auth0). The option fields should match the fields in the client application that is calling the auth0 server.
 
+The `scope` also accepts an array of objects containing `clientID`, `scope` and optionally `audience` to enable dynamic scopes from a single simulator. This should allow multiple clients to all use the same simulator. Additionally, setting the `clientID: "default"` will enable a default fallback scope so every client does not need to be included.
+
 An optional [`rulesDirectory` field](#rules) can specify a directory of [auth0 rules](https://auth0.com/docs/rules) code files, more on this [below](#rules).
 
 ### Services
