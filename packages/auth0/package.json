@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/auth0-simulator",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Run local instance of Auth0 API for local development and integration testing",
   "main": "dist/index.js",
   "bin": "bin/index.js",
@@ -40,7 +40,7 @@
   "dependencies": {
     "@effection/process": "^2.0.1",
     "@simulacrum/client": "0.5.4",
-    "@simulacrum/server": "0.6.2",
+    "@simulacrum/server": "0.6.3",
     "@types/faker": "^5.1.7",
     "assert-ts": "^0.3.2",
     "base64-url": "^2.3.3",
