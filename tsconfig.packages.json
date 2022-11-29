@@ -9,6 +9,9 @@
     },
     {
       "path": "./packages/auth0/tsconfig.dist.json"
+    },
+    {
+      "path": "../packages/github-api/tsconfig.dist.json"
     }
   ]
 }

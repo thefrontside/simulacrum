@@ -20,7 +20,7 @@
     "@frontside/eslint-config": "^3.1.0",
     "@frontside/tsconfig": "^3.0.0",
     "@frontside/typescript": "^3.0.0",
-    "ts-node": "^9.1.1"
+    "ts-node": "^10.9.1"
   },
   "repository": {
     "type": "git",

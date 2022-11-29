@@ -1,0 +1,86 @@
+union RepositoryOwner = GithubAccount | GithubOrganization
+
+type GithubCommit {
+  sha: String!
+  message: String!
+  numberOfAncestors: Int!
+}
+
+type GithubRef {
+  name: String!
+  target: GithubCommit!
+}
+
+type GithubRepository {
+  name: String!
+  description: String!
+  nameWithOwner: String!
+  login: String!
+  url: String!
+  createdAt: String!
+  collaborators: [GithubAccount!]!
+  owner: RepositoryOwner!
+  defaultBranchRef: GithubRef!
+  languages: [String!]!
+  repositoryTopics: [String!]!
+  visibility: String!
+  isArchived: Boolean!
+  entityName: String!
+}
+
+type GithubTeam {
+  entityName: String!
+  name: String!
+  slug: String!
+  url: String!
+  members: [GithubTeamMembership!]!
+  organization: GithubOrganization!
+}
+
+type GithubTeamMembership {
+  name: String!
+  githubAccount: GithubAccount!
+  team: GithubTeam! 
+}
+
+type GithubOrganization {
+  entityName: String!
+  name: String!
+  url: String!
+  login: String!
+  avatarUrl: String!
+  description: String!
+  email: String!
+  createdAt: String!
+  teams: [GithubTeam!]! 
+  repositories: [GithubRepository!]! 
+}
+
+type GithubAccount {
+  firstName: String!
+  lastName: String!
+  name: String!
+  url: String!
+  login: String!
+  user: User! 
+  entityName: String!
+  bio: String!
+  avatarUrl: String!
+  lastActive: String!
+  createdAt: String!
+  organizations: [GithubOrganization!]!
+  teamMemberships: [GithubTeamMembership!]!
+  collaboratorOn: [GithubRepository!]! 
+  repositories: [GithubRepository!]! 
+}
+
+type User {
+  firstName: String!
+  lastName: String!
+  displayName: String!
+  email: String!
+  name: String!
+  picture: String!
+  githubAccount: GithubAccount!
+  entityName: String!
+}
