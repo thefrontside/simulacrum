@@ -29,7 +29,7 @@ export interface Auth0Store {
   set(nonce: string, session: AuthSession): void;
 }
 
-export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>, serviceURL: () => URL, options: Auth0Configuration): Record<Routes, RequestHandler> => {
+export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>, serviceURL: () => URL, options: Auth0Configuration, debug: boolean): Record<Routes, RequestHandler> => {
   let { audience, scope, clientID, rulesDirectory } = options;
   let personQuery = createPersonQuery(people);
 
@@ -44,6 +44,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
     },
 
     ['/authorize']: function(req, res, next) {
+      if (debug) console.dir({ '/authorize': { body: req.body, query: req.query, session: req.session } });
       let currentUser = req.query.currentUser as string | undefined;
 
       assert(!!req.session, "no session");
@@ -65,6 +66,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
     },
 
     ['/login']: function(req, res) {
+      if (debug) console.dir({ '/login': { body: req.body, query: req.query } });
       let query = req.query as QueryParams;
       let responseClientId = query.client_id ?? clientID;
       let responseAudience = query.audience ?? audience;
@@ -85,6 +87,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
     },
 
     ['/usernamepassword/login']: function(req, res) {
+      if (debug) console.dir({ '/usernamepassword/login': { body: req.body, query: req.query } });
       let { username, nonce, password } = req.body;
 
       assert(!!username, 'no username in /usernamepassword/login');
@@ -122,6 +125,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
 
     ['/login/callback']: function(req, res) {
       let wctx = JSON.parse(req.body.wctx);
+      if (debug) console.dir({ '/login/callback': { body: req.body, query: req.query, wctx } });
 
       let { redirect_uri, state, nonce } = wctx;
 
@@ -137,6 +141,7 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
     },
 
     ['/oauth/token']: async function (req, res, next) {
+      if (debug) console.dir({ '/oauth/token': { body: req.body, query: req.query } });
       try {
         let iss = serviceURL().toString();
 
