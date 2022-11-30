@@ -20,11 +20,11 @@
     "prepack": "npm run build",
     "build:cjs": "tsc -b tsconfig.dist.json",
     "build:esm": "tsc -b tsconfig.esm.json", 
-    "build": "yarn generate && yarn build:cjs && yarn build:esm && copyfiles -f src/schema/schema.docs*.graphql dist/schema",
+    "build": "npm run generate && npm run build:cjs && npm run build:esm && copyfiles -f src/schema/schema.docs*.graphql dist/schema",
     "start": "PORT=3300 nodemon",
-    "watch": "NODE_ENV=development yarn concurrently \"tsc -b --watch\" \"yarn generate:watch\"",
+    "watch": "NODE_ENV=development npm run concurrently \"tsc -b --watch\" \"npm run generate:watch\"",
     "generate": "tsc -p ./codegen.tsconfig.json && graphql-codegen",
-    "generate:watch": "yarn generate --watch",
+    "generate:watch": "npm run generate --watch",
     "test": "echo not.....yet"
   },
   "dependencies": {
@@ -73,9 +73,6 @@
         "dist/esm/index.d.ts"
       ]
     }
-  },
-  "engines": {
-    "node": "14 || 16"
   },
   "volta": {
     "extends": "../../package.json"
