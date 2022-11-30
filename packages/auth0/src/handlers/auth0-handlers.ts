@@ -94,16 +94,18 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
       let user = personQuery((person) => person.email?.toLowerCase() === username.toLowerCase() && person.password === password);
 
       if(!user) {
-        let { redirect_uri } = req.query as QueryParams;
+        let query = req.query as QueryParams;
+        let responseClientId = query.client_id ?? clientID;
+        let responseAudience = query.audience ?? audience;
 
         assert(!!clientID, `no clientID assigned`);
 
         let html = loginView({
           domain: serviceURL().host,
           scope,
-          redirectUri: redirect_uri,
-          clientID,
-          audience,
+          redirectUri: query.redirect_uri,
+          clientID: responseClientId,
+          audience: responseAudience,
           loginFailed: true
         });
 
@@ -123,13 +125,13 @@ export const createAuth0Handlers = (store: Auth0Store, people: Iterable<Person>,
     ['/login/callback']: function(req, res) {
       let wctx = JSON.parse(req.body.wctx);
 
-      let { redirect_uri, state, nonce } = wctx;
+      let { redirect_uri, nonce } = wctx;
 
       let { username } = store.get(nonce);
 
       let encodedNonce = encode(`${nonce}:${username}`);
 
-      let qs = stringify({ code: encodedNonce, state, nonce });
+      let qs = stringify({ code: encodedNonce, ...wctx });
 
       let routerUrl = `${redirect_uri}?${qs}`;
 

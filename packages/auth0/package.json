@@ -6,7 +6,7 @@
   "bin": "bin/index.js",
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
-    "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" mocha -r ts-node/register --timeout 21000 test/**/*.test.ts",
+    "test": "mocha -r ts-node/register --timeout 21000 test/**/*.test.ts",
     "prepack": "tsc --build tsconfig.dist.json && copy-cli \"./src/views/**/*.png\" ./dist/views/",
     "build": "npm run prepack",
     "lint": "eslint src bin test",
