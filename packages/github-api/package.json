@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/github-api-simulator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "description": "Provides common functionality to frontend app and plugins.",
   "main": "dist/cjs/index.js",
@@ -19,7 +19,7 @@
     "lint": "eslint src",
     "prepack": "npm run build",
     "build:cjs": "tsc -b tsconfig.dist.json",
-    "build:esm": "tsc -b tsconfig.esm.json", 
+    "build:esm": "tsc -b tsconfig.esm.json",
     "build": "npm run generate && npm run build:cjs && npm run build:esm && copyfiles -f src/schema/schema.docs*.graphql dist/schema",
     "start": "PORT=3300 nodemon",
     "watch": "NODE_ENV=development npm run concurrently \"tsc -b --watch\" \"npm run generate:watch\"",
