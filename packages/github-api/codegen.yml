@@ -1,0 +1,12 @@
+schema: ./world.graphql
+generates:
+  ./src/types/graphql.ts:
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - typescript
+      - ./dist/cjs/codegen/plugins/add-id-to-types.js
+
+    config:
+      avoidOptionals: true
+      declarationKind: 'interface' 

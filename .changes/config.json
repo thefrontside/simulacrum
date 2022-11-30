@@ -40,6 +40,11 @@
       ],
       "prepublish": ["npm install", "npm run build"]
     },
+    "@simulacrum/github-api-simulator": {
+      "path": "./packages/github-api",
+      "manager": "javascript",
+      "dependencies": []
+    },
     "@simulacrum-examples/nextjs-with-auth0-react": {
       "path": "./examples/nextjs/auth0-react",
       "manager": "javascript",
