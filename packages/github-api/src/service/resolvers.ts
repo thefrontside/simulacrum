@@ -73,7 +73,7 @@ export function createResolvers({
         assert(!!repo, `no repository found for ${name}`);
 
         return {
-          id: repo.id,
+          // id: repo.id,
           name: repo.name,
           nameWithOwner: repo.nameWithOwner,
           url: repo.url,
@@ -94,9 +94,9 @@ export function createResolvers({
             name: repo.owner.name,
             login: repo.owner.login,
           },
-          collaborators(pageArgs: PageArgs) {
-            return applyRelayPagination(repo.collaborators, pageArgs);
-          },
+          // collaborators(pageArgs: PageArgs) {
+          //   return applyRelayPagination(repo.collaborators, pageArgs);
+          // },
         };
       },
     },

@@ -1,11 +1,10 @@
 import { createServer } from '@graphql-yoga/node';
-import fs from 'fs';
 import { createResolvers } from './resolvers';
 import type { ServerInstance, SimulatedData } from './types';
 import path from 'path';
 
 function getSchema(): string {
-  return path(
+  return path.join(
         process.cwd(),
         'schema',
         'schema.docs-enterprise.graphql',
@@ -31,8 +30,12 @@ export function createHandler({
     },
     maskedErrors: false,
     logging: {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       debug(..._args) {},
-      warn(..._args) {},
+      warn(...args) {
+        console.dir(...args);
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       info(..._args) {},
       error(...args) {
         console.error(...args);

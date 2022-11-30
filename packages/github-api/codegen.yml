@@ -5,6 +5,7 @@ generates:
       - add:
           content: '/* eslint-disable */'
       - typescript
+      - ./dist/cjs/codegen/plugins/add-id-to-types.js
 
     config:
       avoidOptionals: true

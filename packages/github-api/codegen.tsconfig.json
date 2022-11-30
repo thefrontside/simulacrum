@@ -1,4 +1,5 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.dist.json",
+  "outDir": "dist/cjs",
   "include": ["./src/codegen/plugins/add-id-to-types.ts"]
 }

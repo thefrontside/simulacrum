@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": false,
   "description": "Provides common functionality to frontend app and plugins.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
   "backstage": {
     "role": "backend"
   },
@@ -17,12 +18,14 @@
   "scripts": {
     "lint": "eslint src bin test",
     "prepack": "npm run build",
-    "build": "tsc && copyfiles -f src/schema/schema.docs*.graphql dist/schema",
+    "build:cjs": "tsc -b tsconfig.dist.json",
+    "build:esm": "tsc -b tsconfig.esm.json", 
+    "build": "yarn generate && yarn build:cjs && yarn build:esm && copyfiles -f src/schema/schema.docs*.graphql dist/schema",
     "start": "PORT=3300 nodemon",
     "watch": "NODE_ENV=development yarn concurrently \"tsc -b --watch\" \"yarn generate:watch\"",
-    "generate": "graphql-codegen",
+    "generate": "tsc -p ./codegen.tsconfig.json && graphql-codegen",
     "generate:watch": "yarn generate --watch",
-    "test": "echo N/A.....yet"
+    "test": "echo not.....yet"
   },
   "dependencies": {
     "@frontside/graphgen": "^1.7.0",
@@ -50,6 +53,26 @@
   },
   "peerDependencies": {
     "@graphql-codegen/cli": "2.x.x"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./main": {
+      "import": "./dist/esm/main.js",
+      "require": "./dist/cjs/main.js"
+    },
+    "./add-id-to-types": {
+      "require": "./dist/cjs/codegen/plugins/add-id-to-types.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/esm/index.d.ts"
+      ]
+    }
   },
   "engines": {
     "node": "14 || 16"
