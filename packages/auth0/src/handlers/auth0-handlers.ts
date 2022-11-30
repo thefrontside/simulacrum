@@ -33,7 +33,7 @@ type LoggerArgs = Parameters<typeof console.dir>;
 
 const createLogger = (debug: boolean) => ({
   log: (...args: LoggerArgs): void => {
-    if(debug) {
+    if (!debug) {
       return;
     }
 
