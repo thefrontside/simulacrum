@@ -1,5 +1,16 @@
 # Changelog
 
+## \[0.8.3]
+
+- The auth0-simulator `/login/callback` is difficult to inspect. We need the `client_id` passed, but it seems safe to pass the whole `wctx` object as query strings.
+  - [6b18117](https://github.com/thefrontside/simulacrum/commit/6b18117093e650713fe00d5b0614ba085186db9f) /login/callback should pass all wctx ([#241](https://github.com/thefrontside/simulacrum/pull/241)) on 2022-11-30
+- The auth0-simulator userData does not consider the Auth0 email verification functionality. Set it to `true` as a default to enable minimal functionality.
+  - [547ef7f](https://github.com/thefrontside/simulacrum/commit/547ef7f3a9f7d99023078ff18307bed2b30223af) default auth0 simulator userData email_verified to true on 2022-11-29
+- The login form needs `event.preventDefault()` to allow the Auth0 library functions to run instead of default form functionality.
+  - [046f49f](https://github.com/thefrontside/simulacrum/commit/046f49f3603a7865f3e62c84d81851637971f97f) add event.preventDefault() to login form for submit event on 2022-11-29
+- The auth0-simulator uses a logger that was refactored and broke the middleware logging. As a stopgap to the required, involved refactor, log out based on the debug flag.
+  - [67e2f7f](https://github.com/thefrontside/simulacrum/commit/67e2f7f18d90a2fa53f2f216291ee770aab60440) add stopgap debug in auth0-simulator ([#237](https://github.com/thefrontside/simulacrum/pull/237)) on 2022-11-30
+
 ## \[0.8.2]
 
 - Added specific support for the `grant_type` `client_credentials` which is required for machine-to-machine tokens. This grant_type specifically does not run the rules. The `scope` option now accepts an array of objects to specify specific scopes for specific clients.
