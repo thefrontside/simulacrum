@@ -91,6 +91,7 @@ export const getIdToken = ({
   let userData: RuleUser = {
     name: body?.name,
     email: body?.email,
+    email_verified: true,
     user_id: body?.id,
     nickname: body?.nickname,
     picture: body?.picture,
