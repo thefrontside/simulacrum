@@ -38,15 +38,15 @@ export function applyRelayPagination<T, R>(
   args: PageArgs,
   mapper: (a: T) => R = identity as (a: T) => R,
 ): Page<R> {
-  const range = applyCursorsToEdges(nodes, args.before, args.after);
+  let range = applyCursorsToEdges(nodes, args.before, args.after);
 
-  const edges = edgesToReturn(range, args.first, args.last).map(edge => ({
+  let edges = edgesToReturn(range, args.first, args.last).map(edge => ({
     ...edge,
     node: mapper(edge.node),
   }));
 
-  const [first] = edges;
-  const last = edges.slice().pop();
+  let [first] = edges;
+  let last = edges.slice().pop();
 
   return {
     totalCount: nodes.length,
@@ -54,7 +54,7 @@ export function applyRelayPagination<T, R>(
     nodes: edges.map(e => e.node),
     pageInfo: {
       get hasNextPage() {
-        const { first, before } = args;
+        let { first, before } = args;
         if (first != null) {
           return range.length > first;
         } else if (before != null) {
@@ -63,7 +63,7 @@ export function applyRelayPagination<T, R>(
         return false;
       },
       get hasPreviousPage() {
-        const { last, after } = args;
+        let { last, after } = args;
         if (last != null) {
           return range.length > last;
         } else if (after != null) {
@@ -78,10 +78,10 @@ export function applyRelayPagination<T, R>(
 }
 
 function applyCursorsToEdges<T>(nodes: T[], before?: string, after?: string) {
-  const afterIdx = !!after ? Number(after) : -1;
-  const beforeIdx = !!before ? Number(before) : nodes.length;
+  let afterIdx = !!after ? Number(after) : -1;
+  let beforeIdx = !!before ? Number(before) : nodes.length;
 
-  const edges = nodes.slice(afterIdx + 1, beforeIdx).map((node, i) => ({
+  let edges = nodes.slice(afterIdx + 1, beforeIdx).map((node, i) => ({
     node,
     cursor: (afterIdx + 1 + i).toString(),
   }));

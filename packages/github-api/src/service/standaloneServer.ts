@@ -15,7 +15,7 @@ export async function startStandaloneServer({
   githubRepositories,
   githubOrganizations,
 }: ServerOptions): Promise<Server> {
-  const router = Router();
+  let router = Router();
 
   router.use(express.json());
 
@@ -28,9 +28,9 @@ export async function startStandaloneServer({
     createHandler({ users, githubRepositories, githubOrganizations }),
   );
 
-  const app = express().use(cors()).use(router);
+  let app = express().use(cors()).use(router);
 
-  const server = app.listen(port);
+  let server = app.listen(port);
 
   if (!server.listening) {
     await new Promise<void>(resolve => {

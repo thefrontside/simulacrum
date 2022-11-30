@@ -16,7 +16,7 @@
     "schema"
   ],
   "scripts": {
-    "lint": "eslint src bin test",
+    "lint": "eslint src",
     "prepack": "npm run build",
     "build:cjs": "tsc -b tsconfig.dist.json",
     "build:esm": "tsc -b tsconfig.esm.json", 
