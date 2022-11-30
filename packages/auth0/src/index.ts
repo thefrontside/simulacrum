@@ -75,7 +75,7 @@ const createAuth0Service: ResourceServiceCreator = (slice, options) => ({
 
 export function createAuth0Server(options: Auth0ServerOptions): Operation<Server> {
   let { config, serviceURL, store, people, port, debug = true } = options;
-  let auth0 = createAuth0Handlers(store, people, serviceURL, config);
+  let auth0 = createAuth0Handlers(store, people, serviceURL, config, debug);
   let openid = createOpenIdHandlers(serviceURL);
 
   return {
