@@ -212,7 +212,7 @@ describe('Auth0 simulator', () => {
       });
     });
 
-    it('should post to /login/callback', function* () {
+    it('should post', function* () {
       let fields = encodeURIComponent(JSON.stringify({
         ...Fields
       }));
@@ -227,6 +227,28 @@ describe('Auth0 simulator', () => {
 
       expect(res.status).toBe(200);
       expect(res.statusText).toBe('OK');
+    });
+
+    it(`should redirect to redirect_uri`, function* () {
+      let fields = encodeURIComponent(JSON.stringify({
+        ...Fields
+      }));
+
+      let res: Response = yield fetch(`https://localhost:4400/login/callback`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `wctx=${fields}`
+      });
+
+
+
+      expect(res.url.slice(0, Fields.redirect_uri.length)).toBe(
+        Fields.redirect_uri
+      );
+      expect(res.url).toContain(`client_id=${Fields.client_id}`);
+      expect(res.url).toContain(`audience=${encodeURIComponent(Fields.audience)}`);
     });
   });
 
