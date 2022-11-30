@@ -2,13 +2,16 @@ import { createServer } from '@graphql-yoga/node';
 import { createResolvers } from './resolvers';
 import type { ServerInstance, SimulatedData } from './types';
 import path from 'path';
+import fs from 'fs';
 
 function getSchema(): string {
-  return path.join(
-        process.cwd(),
+  let root = path.dirname(path.join('..', '..', '..')) === 'dist' ? path.join(__dirname, '..', '..', '..', '..') : path.join(__dirname, '..', '..', '..');
+
+  return fs.readFileSync(path.join(
+        root,
         'schema',
         'schema.docs-enterprise.graphql',
-      );
+      ), 'utf-8');
 }
 
 export function createHandler({
