@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.2.2]
+
+- export World and Factory types
+  - [1c70396](https://github.com/thefrontside/simulacrum/commit/1c703967c972f9a363727607becd29c1c7b9992e) export World and Factory types ([#245](https://github.com/thefrontside/simulacrum/pull/245)) on 2022-12-01
+
 ## \[0.2.1]
 
 - Fix path resolution to github api schema
