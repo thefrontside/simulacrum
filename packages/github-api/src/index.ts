@@ -9,5 +9,8 @@ export type {
   User,
   RepositoryOwner
  } from './types/graphql';
+
+export type { World, Factory } from './types/world';
+
 export * from './service/standaloneServer';
 export * from './main';
