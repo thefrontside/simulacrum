@@ -13,7 +13,8 @@
   "files": [
     "dist",
     "README.md",
-    "schema"
+    "schema",
+    "repository-mock-data"
   ],
   "scripts": {
     "lint": "eslint src",
@@ -65,6 +66,14 @@
     },
     "./add-id-to-types": {
       "require": "./dist/cjs/codegen/plugins/add-id-to-types.js"
+    },
+    "./github-topics.json": {
+      "import": "./repository-mock-data/github-topics.json",
+      "require": "./repository-mock-data/github-topics.json"
+    },
+    "./repository-names.json": {
+      "import": "./repository-mock-data/github-topics.json",
+      "require": "./repository-mock-data/repository-names.json"
     }
   },
   "typesVersions": {
