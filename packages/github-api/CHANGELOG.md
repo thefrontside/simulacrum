@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.2.3]
+
+- add repository mock data to github-api-simulator
+  - [62e3948](https://github.com/thefrontside/simulacrum/commit/62e394877d4e726dca692b4dcfc8af2bcf6d03e1) add repository mock data to github-api-simulator ([#247](https://github.com/thefrontside/simulacrum/pull/247)) on 2022-12-05
+
 ## \[0.2.2]
 
 - export World and Factory types

@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/github-api-simulator",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": false,
   "description": "Provides common functionality to frontend app and plugins.",
   "main": "dist/cjs/index.js",
