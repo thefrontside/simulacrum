@@ -68,11 +68,12 @@ function * createSimulation(client: Client) {
 describe('refresh token', () => {
   describe('issueRefreshToken', () => {
     it('should issue with grant_type refresh_token', function*() {
-      expect(issueRefreshToken('refresh_token')).toBe(true);
+      expect(issueRefreshToken('offline_access', 'authorization_code')).toBe(true);
+
     });
 
     it('should not issue with no refresh_token grant_type', function*() {
-      expect(issueRefreshToken('authorization_code')).toBe(false);
+      expect(issueRefreshToken('', 'authorization_code')).toBe(false);
     });
   });
 
