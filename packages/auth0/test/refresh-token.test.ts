@@ -11,6 +11,7 @@ import { person as personScenario } from '@simulacrum/server';
 import { assert } from 'assert-ts';
 import type { Scenario } from '@simulacrum/client';
 import { decode } from 'base64-url';
+import querystring from 'querystring';
 
 let Fields = {
   audience: "https://example.nl",
@@ -129,6 +130,24 @@ describe('refresh token', () => {
       assert(!!refreshToken, `no refresh token`);
 
       expect(typeof refreshToken.user.id).toBe('string');
+
+      res = yield fetch(`${authUrl}/oauth/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: querystring.stringify({
+          grant_type: 'refresh_token',
+          client_id: "00000000000000000000000000000000",
+          refresh_token: token.refresh_token
+        })
+      });
+
+      let result = yield res.json();
+
+      expect(typeof result.access_token).toBe('string');
+      expect(typeof result.id_token).toBe('string');
+      expect(typeof result.refresh_token).toBe('string');
     });
   });
 });
