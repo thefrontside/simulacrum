@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.9.0]
+
+- Add the `refresh_token` flow
+  - [7e4e918](https://github.com/thefrontside/simulacrum/commit/7e4e918b83484116021b06eeb0f5407ea3458628) Refresh token ([#252](https://github.com/thefrontside/simulacrum/pull/252)) on 2023-02-11
+
 ## \[0.8.3]
 
 - The auth0-simulator `/login/callback` is difficult to inspect. We need the `client_id` passed, but it seems safe to pass the whole `wctx` object as query strings.
