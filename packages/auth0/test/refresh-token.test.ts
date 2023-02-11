@@ -8,9 +8,9 @@ import fetch from 'cross-fetch';
 import type { Person } from '@simulacrum/server';
 import { createHttpApp } from '@simulacrum/server';
 import { person as personScenario } from '@simulacrum/server';
-import jwt from 'jsonwebtoken';
 import { assert } from 'assert-ts';
 import type { Scenario } from '@simulacrum/client';
+import { decode } from 'base64-url';
 
 let Fields = {
   audience: "https://example.nl",
@@ -124,7 +124,7 @@ describe('refresh token', () => {
 
       let token = yield res.json();
 
-      let refreshToken = jwt.decode(token.refresh_token, { complete: true });
+      let refreshToken = JSON.parse(decode(token.refresh_token));
 
       assert(!!refreshToken, `no refresh token`);
 
