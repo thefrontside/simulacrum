@@ -28,7 +28,7 @@ export const loginView = ({
           href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
           rel="stylesheet"
         />
-        <script src="https://cdn.auth0.com/js/auth0/9.16.0/auth0.min.js"></script>
+        <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.js"></script>
       </head>
       <title>login</title>
       <body>

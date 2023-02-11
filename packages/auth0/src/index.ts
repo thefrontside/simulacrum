@@ -36,11 +36,11 @@ const createAuth0Service: ResourceServiceCreator = (slice, options) => ({
   *init() {
     let debug = !!slice.slice('debug').get();
     let { port } = options;
-    let config = getConfig(slice.slice('options').slice('options').get());
+    let config = getConfig(slice.slice('options', 'options').get());
 
     let serviceURL = () => getServiceUrl(slice.get());
 
-    let auth0Store = slice.slice('store').slice('auth0');
+    let auth0Store = slice.slice('store', 'auth0');
     auth0Store.set({});
 
     let store: Auth0Store = {
@@ -50,7 +50,7 @@ const createAuth0Service: ResourceServiceCreator = (slice, options) => ({
 
     let people: Iterable<Person> = {
       *[Symbol.iterator]() {
-        let values = Object.values(slice.slice('store').slice('people').get() ?? {});
+        let values = Object.values(slice.slice('store', 'people').get() ?? {});
         for (let person of values) {
           yield person as Person;
         }

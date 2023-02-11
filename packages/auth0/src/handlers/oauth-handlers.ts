@@ -1,5 +1,5 @@
 import { assert } from 'assert-ts';
-import { decode as decodeBase64 } from 'base64-url';
+import { decode, decode as decodeBase64 } from 'base64-url';
 import { epochTime, expiresAt } from '../auth/date';
 import { createJsonWebToken } from '../auth/jwt';
 import { createRulesRunner } from '../rules/rules-runner';
@@ -13,7 +13,9 @@ import type {
   AccessTokenPayload,
   GrantType,
   IdTokenData,
+  RefreshToken,
 } from '../types';
+import { createRefreshToken, issueRefreshToken } from '../auth/refresh-token';
 
 export const createTokens = async ({
   body,
@@ -36,43 +38,72 @@ export const createTokens = async ({
   let scope = deriveScope({ scopeConfig, clientID, audience });
 
   let accessToken = getBaseAccessToken({ iss, grant_type, scope, audience });
+  let user: Person | undefined;
+  let nonce: string | undefined;
+
   if (grant_type === 'client_credentials') {
     return { access_token: createJsonWebToken(accessToken) };
+  }
+  // TODO: check refresh_token expiry date
+  else if (grant_type === 'refresh_token') {
+    let { refresh_token: refreshTokenValue } = body;
+    let refreshToken: RefreshToken = JSON.parse(decode(refreshTokenValue));
+
+    let findUser = createPersonQuery(people);
+
+    user = findUser((person) => person.id === refreshToken.user.id);
+
+    nonce = refreshToken.nonce;
+    assert(!!nonce, `400::No nonce in request`);
+
   } else {
-    let { user, nonce } = verifyUserExistsInStore({
+    let result = verifyUserExistsInStore({
       people,
       body,
       grant_type,
     });
-    let { idTokenData, userData } = getIdToken({
-      body,
-      iss,
-      user,
-      clientID,
-      nonce,
-    });
 
-    let context: RuleContext<Partial<AccessTokenPayload>, IdTokenData> = {
-      clientID,
-      accessToken: { scope, sub: idTokenData.sub },
-      idToken: idTokenData,
-    };
-
-    let rulesRunner = createRulesRunner(rulesDirectory);
-    // the rules mutate the values
-    await rulesRunner(userData, context);
-
-    return {
-      access_token: createJsonWebToken({
-        ...accessToken,
-        ...context.accessToken,
-      }),
-      id_token: createJsonWebToken({
-        ...userData,
-        ...context.idToken,
-      }),
-    };
+    user = result.user;
+    nonce = result.nonce;
   }
+
+  assert(!!user, '500::No user found');
+
+  let { idTokenData, userData } = getIdToken({
+    body,
+    iss,
+    user,
+    clientID,
+    nonce,
+  });
+
+  let context: RuleContext<Partial<AccessTokenPayload>, IdTokenData> = {
+    clientID,
+    accessToken: { scope, sub: idTokenData.sub },
+    idToken: idTokenData,
+  };
+
+  let rulesRunner = createRulesRunner(rulesDirectory);
+  // the rules mutate the values
+  await rulesRunner(userData, context);
+
+  return {
+    access_token: createJsonWebToken({
+      ...accessToken,
+      ...context.accessToken,
+    }),
+    id_token: createJsonWebToken({
+      ...userData,
+      ...context.idToken,
+    }),
+    refresh_token: issueRefreshToken(scope, grant_type) ? createRefreshToken({
+      exp: idTokenData.exp,
+      rotations: 0,
+      scope,
+      user,
+      nonce
+    }) : undefined
+  };
 };
 
 export const getIdToken = ({
@@ -99,6 +130,7 @@ export const getIdToken = ({
   };
 
   assert(!!user.email, '500::User in store requires an email');
+
   let idTokenData: IdTokenData = {
     alg: 'RS256',
     typ: 'JWT',

@@ -33,7 +33,7 @@ type ReadonlyFields = 'audience' | 'clientID' | 'scope' | 'port';
 
 // grant_type list as defined by auth0
 // https://auth0.com/docs/get-started/applications/application-grant-types#spec-conforming-grants
-export type GrantType = 'password' | 'client_credentials' | 'authorization_code';
+export type GrantType = 'password' | 'client_credentials' | 'authorization_code' | 'refresh_token';
 
 export type ScopeConfig =
   | string
@@ -94,10 +94,21 @@ export interface AccessTokenPayload {
   [key: string]: string | number | string[];
 }
 
-export interface IdToken {
-  payload: IdTokenData;
+export interface RefreshToken {
+  iat: number;
+  exp: number;
+  rotations?: number;
+  scope: string;
+  sessionUid?: string;
+  user: { id: string };
+  nonce?: string;
 }
 
-export interface AccessToken {
-  payload: AccessTokenPayload;
+type Token<P> = {
+  payload: P;
 }
+
+export type IdToken = Token<IdTokenData>;
+
+export type AccessToken = Token<AccessTokenPayload>;
+

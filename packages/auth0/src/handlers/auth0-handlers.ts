@@ -1,6 +1,6 @@
 import type { Person } from '@simulacrum/server';
-import type { Auth0Configuration, QueryParams, ResponseModes } from '../types';
 import type { RequestHandler } from 'express';
+import type { Auth0Configuration, QueryParams, ResponseModes } from '../types';
 import { createLoginRedirectHandler } from './login-redirect';
 import { createWebMessageHandler } from './web-message';
 import { loginView } from '../views/login';
