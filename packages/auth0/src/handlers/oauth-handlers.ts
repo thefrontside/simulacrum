@@ -47,13 +47,15 @@ export const createTokens = async ({
   // TODO: check refresh_token expiry date
   else if (grant_type === 'refresh_token') {
     let { refresh_token: refreshTokenValue } = body;
-    let refreshToken: RefreshToken['payload'] = JSON.parse(decode(refreshTokenValue));
+    let refreshToken: RefreshToken = JSON.parse(decode(refreshTokenValue));
 
     let findUser = createPersonQuery(people);
 
     user = findUser((person) => person.id === refreshToken.user.id);
 
     nonce = refreshToken.nonce;
+    assert(!!nonce, `400::No nonce in request`);
+
   } else {
     let result = verifyUserExistsInStore({
       people,
@@ -65,7 +67,6 @@ export const createTokens = async ({
     nonce = result.nonce;
   }
 
-  assert(!!nonce, `400::No nonce in request`);
   assert(!!user, '500::No user found');
 
   let { idTokenData, userData } = getIdToken({

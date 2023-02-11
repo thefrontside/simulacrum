@@ -110,7 +110,7 @@ describe('refresh token', () => {
       ({ authUrl, code } = yield createSimulation(client));
     });
 
-    it('should return a refresh token', function* () {
+    it('should get access token from refresh token', function* () {
       let res: Response = yield fetch(`${authUrl}/oauth/token`, {
         method: 'POST',
         headers: {
@@ -128,7 +128,7 @@ describe('refresh token', () => {
 
       assert(!!refreshToken, `no refresh token`);
 
-      expect(typeof refreshToken.payload.rotations).toBe('number');
+      expect(typeof refreshToken.user.id).toBe('string');
     });
   });
 });
