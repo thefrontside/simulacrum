@@ -1,4 +1,3 @@
-import type { Person } from '@simulacrum/server';
 import { z } from 'zod';
 
 // TODO: better validation
@@ -101,7 +100,7 @@ export interface RefreshTokenPayload {
   rotations?: number;
   scope: string;
   sessionUid?: string;
-  user: Person;
+  user: { id: string };
   nonce: string;
 }
 

@@ -38,19 +38,21 @@ export const createTokens = async ({
   let scope = deriveScope({ scopeConfig, clientID, audience });
 
   let accessToken = getBaseAccessToken({ iss, grant_type, scope, audience });
-  let user: Person;
+  let user: Person | undefined;
   let nonce: string | undefined;
 
   if (grant_type === 'client_credentials') {
     return { access_token: createJsonWebToken(accessToken) };
   }
+  // TODO: check refresh_token expiry date
   else if (grant_type === 'refresh_token') {
     let { refresh_token: refreshTokenValue } = body;
     let refreshToken: RefreshToken['payload'] = JSON.parse(decode(refreshTokenValue));
 
-    console.dir({ refreshToken });
+    let findUser = createPersonQuery(people);
 
-    user = refreshToken.user; 
+    user = findUser((person) => person.id === refreshToken.user.id);
+
     nonce = refreshToken.nonce;
   } else {
     let result = verifyUserExistsInStore({
@@ -63,7 +65,8 @@ export const createTokens = async ({
     nonce = result.nonce;
   }
 
-  assert(!!nonce, `no nonce in request`);
+  assert(!!nonce, `400::No nonce in request`);
+  assert(!!user, '500::No user found');
 
   let { idTokenData, userData } = getIdToken({
     body,
@@ -126,6 +129,7 @@ export const getIdToken = ({
   };
 
   assert(!!user.email, '500::User in store requires an email');
+
   let idTokenData: IdTokenData = {
     alg: 'RS256',
     typ: 'JWT',
