@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.2.4]
+
+- Added the description mapping to repositories.
+  - [ba0046e](https://github.com/thefrontside/simulacrum/commit/ba0046ec563023ce023e0264346a15d34d304de7) add the description mapping to Github API simulator ([#256](https://github.com/thefrontside/simulacrum/pull/256)) on 2023-03-02
+
 ## \[0.2.3]
 
 - add repository mock data to github-api-simulator
