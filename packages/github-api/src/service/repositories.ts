@@ -13,6 +13,7 @@ export function requestRepositories(
 export function requestRepository(repository: GithubRepository) {
   return {
     name: repository.name,
+    description: repository.description,
     isArchived: repository.isArchived,
     nameWithOwner: repository.nameWithOwner,
     repositoryTopics: {
