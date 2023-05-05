@@ -7,6 +7,15 @@ import type { SimulatedData } from './types';
 
 export interface ServerOptions extends SimulatedData {
   port?: number;
+
+  /**
+   * Extend the capabilities of the Express Router simulating the GithHub API
+   * with custom middlewares, and custom endpoints.
+   *
+   * @param ext an extenstion function that accepts the Express Router to make
+   * changes to it
+   */
+  extend?(router: express.Router): void;
 }
 
 export async function startStandaloneServer({
@@ -14,6 +23,7 @@ export async function startStandaloneServer({
   users,
   githubRepositories,
   githubOrganizations,
+  extend,
 }: ServerOptions): Promise<Server> {
   let router = Router();
 
@@ -27,6 +37,10 @@ export async function startStandaloneServer({
     '/graphql',
     createHandler({ users, githubRepositories, githubOrganizations }),
   );
+
+  if (extend) {
+    extend(router);
+  }
 
   let app = express().use(cors()).use(router);
 
