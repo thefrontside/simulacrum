@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.3.0]
+
+- Allow extenstion of github api simulator with new endpoints and middleware
+  - [b065a10](https://github.com/thefrontside/simulacrum/commit/b065a10ad6f5cb53a70453f1e8d3f0065b5e2210) Add changeset on 2023-05-05
+
 ## \[0.2.4]
 
 - Added the description mapping to repositories.
