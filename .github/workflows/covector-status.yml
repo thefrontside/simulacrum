@@ -10,7 +10,7 @@ jobs:
         with:
           fetch-depth: 0 # required for use of git history
       - name: covector status
-        uses: jbolda/covector/packages/action@covector-v0.5
+        uses: jbolda/covector/packages/action@covector-v0.9
         id: covector
         with:
           token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}

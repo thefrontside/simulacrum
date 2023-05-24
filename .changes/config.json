@@ -7,6 +7,12 @@
       "publish": "npm publish --access public"
     }
   },
+  "changeTags": {
+    "feat": "New Features",
+    "enhance": "Enhancements",
+    "bug": "Bug Fixes",
+    "deps": "Dependencies"
+  },
   "packages": {
     "@simulacrum/client": {
       "path": "./packages/client",
@@ -35,9 +41,7 @@
     "@simulacrum/auth0-cypress": {
       "path": "./integrations/cypress",
       "manager": "javascript",
-      "dependencies": [
-        "@simulacrum/auth0-simulator"
-      ],
+      "dependencies": ["@simulacrum/auth0-simulator"],
       "prepublish": ["npm install", "npm run build"]
     },
     "@simulacrum/github-api-simulator": {
