@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.3.1]
+
+### Dependencies
+
+- [`70eedc3`](https://github.com/thefrontside/simulacrum/commit/70eedc311329078b65fd57afd9112dceeed0319e)([#260](https://github.com/thefrontside/simulacrum/pull/260)) Bump the version of graphgen to 1.8.1 to support the latest type signature expected from the factory that is passed to the server.
+
 ## \[0.3.0]
 
 - Allow extenstion of github api simulator with new endpoints and middleware
