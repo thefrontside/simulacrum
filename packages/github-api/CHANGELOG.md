@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.3.2]
+
+### Bug Fixes
+
+- [`1040a8f`](https://github.com/thefrontside/simulacrum/commit/1040a8f11d9534eebaa1620c0bd9b8b884291d53)([#263](https://github.com/thefrontside/simulacrum/pull/263)) A `repository` query would fail due to a destructured `name`. This fixes the reference and adds an additional check for matching `nameWithOwner`.
+
 ## \[0.3.1]
 
 ### Dependencies
