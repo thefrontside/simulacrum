@@ -65,9 +65,11 @@ export function createResolvers({
           };
         });
       },
-      repository({ name }: { owner: string; name: string }) {
+      repository(_, { owner, name }: { owner: string; name: string }) {
         let repo = [...githubRepositories].find(
-          r => r.name.toLowerCase() === name,
+          (r) =>
+            r.name.toLowerCase() === name &&
+            r.nameWithOwner.toLowerCase() === `${owner}/${name}`.toLowerCase()
         );
 
         assert(!!repo, `no repository found for ${name}`);
