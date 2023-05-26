@@ -81,6 +81,10 @@ export function createResolvers({
           url: repo.url,
           description: repo.description,
           visibility: repo.visibility,
+          isArchived: repo.isArchived,
+          defaultBranchRef: {
+              name: repo.defaultBranchRef.name
+          },
           languages: {
             nodes: repo.languages.map(l => ({
               name: l,
