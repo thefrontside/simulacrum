@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.3.3]
+
+- [`d38705a`](https://github.com/thefrontside/simulacrum/commit/d38705aaa34ce10a9a57ed418a277c7aa777fb97)([#265](https://github.com/thefrontside/simulacrum/pull/265)) Adding the isArchived and defaultBranchRef as options to return in the query.
+
 ## \[0.3.2]
 
 ### Bug Fixes
