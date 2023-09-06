@@ -3,15 +3,15 @@ import type {
   GithubOrganization,
   User,
   GithubAccount,
-} from "../types/graphql";
-import type { PageArgs } from "../relay";
-import { applyRelayPagination } from "../relay";
+} from '../types/graphql';
+import type { PageArgs } from '../relay';
+import { applyRelayPagination } from '../relay';
 
 export function toGraphql(
   factory: GithubRepository | GithubOrganization | GithubAccount | User
 ) {
   switch (factory.__typename) {
-    case "GithubRepository":
+    case 'GithubRepository':
       return {
         name: factory.name,
         description: factory.description,
@@ -29,21 +29,23 @@ export function toGraphql(
           name: factory.defaultBranchRef.name,
           target: factory.defaultBranchRef.target,
         },
-        languages: {
-          nodes: factory.languages.map((l) => ({
+        languages(pageArgs: PageArgs) {
+          return applyRelayPagination(factory.languages, pageArgs, (l) => ({
             name: l,
-          })),
+          }));
         },
-        repositoryTopics: {
-          nodes: factory.repositoryTopics.map((t) => ({
-            topic: { name: t },
-          })),
+        repositoryTopics(pageArgs: PageArgs) {
+          return applyRelayPagination(
+            factory.repositoryTopics,
+            pageArgs,
+            (t) => ({ topic: { name: t } })
+          );
         },
         visibility: factory.visibility,
         isArchived: factory.isArchived,
         entityName: factory.entityName,
       };
-    case "GithubOrganization":
+    case 'GithubOrganization':
       return {
         ...toGithubRepositoryOwner(factory),
         entityName: factory.entityName,
@@ -57,7 +59,7 @@ export function toGraphql(
           }));
         },
       };
-    case "GithubAccount":
+    case 'GithubAccount':
       return {
         ...toGithubRepositoryOwner(factory),
         firstName: factory.firstName,
