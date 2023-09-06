@@ -44,7 +44,7 @@ export function createResolvers({
       },
       repositoryOwner(_, { login }: { login: string }) {
         let [org] = [...githubOrganizations].filter((o) => o.login === login);
-        if (org) return toGraphql(org, "GithubRepositoryOwner");
+        if (org) return toGraphql(org);
 
         let [userAccount] = [...users].filter(
           (u) => u.githubAccount.login === login
@@ -53,8 +53,7 @@ export function createResolvers({
           !!userAccount,
           `no github organization or account found for ${login}`
         );
-        if (userAccount)
-          return toGraphql(userAccount.githubAccount, "GithubRepositoryOwner");
+        if (userAccount) return toGraphql(userAccount.githubAccount);
       },
     },
   };
