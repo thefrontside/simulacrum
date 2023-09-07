@@ -91,6 +91,9 @@ function applyCursorsToEdges<T>(nodes: T[], before?: string, after?: string) {
 
 function edgesToReturn<T>(edges: T[], first?: number, last?: number) {
   let newEdges: T[] = [];
+  if (first == null && last == null) {
+    first = 100;
+  }
   if (first != null) {
     if (first < 0) {
       throw new Error(`value of first must be greater than 0, was ${first}`);

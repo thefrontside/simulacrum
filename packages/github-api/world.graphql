@@ -1,4 +1,11 @@
-union RepositoryOwner = GithubAccount | GithubOrganization
+union GithubRepositoryOwner = GithubOrganization | GithubAccount
+interface RepositoryOwner {
+  avatarUrl: String!
+  login: String!
+  repositories: [GithubRepository!]!
+  url: String!
+  resourcePath: String!
+}
 
 type GithubCommit {
   sha: String!
@@ -19,7 +26,7 @@ type GithubRepository {
   url: String!
   createdAt: String!
   collaborators: [GithubAccount!]!
-  owner: RepositoryOwner!
+  owner: GithubRepositoryOwner!
   defaultBranchRef: GithubRef!
   languages: [String!]!
   repositoryTopics: [String!]!
@@ -40,38 +47,30 @@ type GithubTeam {
 type GithubTeamMembership {
   name: String!
   githubAccount: GithubAccount!
-  team: GithubTeam! 
+  team: GithubTeam!
 }
 
-type GithubOrganization {
+type GithubOrganization implements RepositoryOwner {
   entityName: String!
   name: String!
-  url: String!
-  login: String!
-  avatarUrl: String!
   description: String!
   email: String!
   createdAt: String!
-  teams: [GithubTeam!]! 
-  repositories: [GithubRepository!]! 
+  teams: [GithubTeam!]!
 }
 
-type GithubAccount {
+type GithubAccount implements RepositoryOwner {
   firstName: String!
   lastName: String!
   name: String!
-  url: String!
-  login: String!
-  user: User! 
+  user: User!
   entityName: String!
   bio: String!
-  avatarUrl: String!
   lastActive: String!
   createdAt: String!
   organizations: [GithubOrganization!]!
   teamMemberships: [GithubTeamMembership!]!
-  collaboratorOn: [GithubRepository!]! 
-  repositories: [GithubRepository!]! 
+  collaboratorOn: [GithubRepository!]!
 }
 
 type User {

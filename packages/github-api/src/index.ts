@@ -7,8 +7,8 @@ export type {
   GithubTeam,
   GithubTeamMembership,
   User,
-  RepositoryOwner
- } from './types/graphql';
+  GithubRepositoryOwner,
+} from './types/graphql';
 
 export type { World, Factory } from './types/world';
 

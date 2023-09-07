@@ -13,9 +13,8 @@ export interface Scalars {
   Float: number;
 }
 
-export interface GithubAccount {
+export interface GithubAccount extends RepositoryOwner {
   __typename?: 'GithubAccount';
-  avatarUrl: Scalars['String'];
   bio: Scalars['String'];
   collaboratorOn: Array<GithubRepository>;
   createdAt: Scalars['String'];
@@ -23,12 +22,9 @@ export interface GithubAccount {
   firstName: Scalars['String'];
   lastActive: Scalars['String'];
   lastName: Scalars['String'];
-  login: Scalars['String'];
   name: Scalars['String'];
   organizations: Array<GithubOrganization>;
-  repositories: Array<GithubRepository>;
   teamMemberships: Array<GithubTeamMembership>;
-  url: Scalars['String'];
   user: User;
 }
 
@@ -39,18 +35,14 @@ export interface GithubCommit {
   sha: Scalars['String'];
 }
 
-export interface GithubOrganization {
+export interface GithubOrganization extends RepositoryOwner {
   __typename?: 'GithubOrganization';
-  avatarUrl: Scalars['String'];
   createdAt: Scalars['String'];
   description: Scalars['String'];
   email: Scalars['String'];
   entityName: Scalars['String'];
-  login: Scalars['String'];
   name: Scalars['String'];
-  repositories: Array<GithubRepository>;
   teams: Array<GithubTeam>;
-  url: Scalars['String'];
 }
 
 export interface GithubRef {
@@ -71,11 +63,13 @@ export interface GithubRepository {
   login: Scalars['String'];
   name: Scalars['String'];
   nameWithOwner: Scalars['String'];
-  owner: RepositoryOwner;
+  owner: GithubRepositoryOwner;
   repositoryTopics: Array<Scalars['String']>;
   url: Scalars['String'];
   visibility: Scalars['String'];
 }
+
+export type GithubRepositoryOwner = GithubAccount | GithubOrganization;
 
 export interface GithubTeam {
   __typename?: 'GithubTeam';
@@ -94,7 +88,13 @@ export interface GithubTeamMembership {
   team: GithubTeam;
 }
 
-export type RepositoryOwner = GithubAccount | GithubOrganization;
+export interface RepositoryOwner {
+  avatarUrl: Scalars['String'];
+  login: Scalars['String'];
+  repositories: Array<GithubRepository>;
+  resourcePath: Scalars['String'];
+  url: Scalars['String'];
+}
 
 export interface User {
   __typename?: 'User';

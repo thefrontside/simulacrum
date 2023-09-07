@@ -1,7 +1,7 @@
 import type { PageArgs } from '../relay';
 import { applyRelayPagination } from '../relay';
 import type { Resolvers, SimulatedData } from './types';
-import { requestRepositories } from './repositories';
+import { toGraphql } from './graphgen-to-graphql';
 import { assert } from 'assert-ts';
 
 export function createResolvers({
@@ -13,57 +13,25 @@ export function createResolvers({
     Query: {
       viewer(_: unknown, { size, cursor }: { size: number; cursor?: string }) {
         let orgs = [...users]
-          .flatMap(e => e.githubAccount?.organizations)
-          .flatMap(org => (!!org ? [org] : []));
+          .flatMap((e) => e.githubAccount?.organizations)
+          .flatMap((org) => (!!org ? [org] : []));
 
         return {
           organizations: applyRelayPagination(
             orgs,
             { first: size, after: cursor },
-            node => {
-              return {
-                ...node,
-                teams: applyRelayPagination(node.teams, { first: 10 }, team => {
-                  return {
-                    ...team,
-                  };
-                }),
-              };
-            },
+            (org) => toGraphql(org)
           ),
         };
       },
       organization(_: unknown, { login }: { login: string }) {
-        let [org] = [...githubOrganizations].filter(o => o.login === login);
-
-        assert(!!org, `no orginization found for ${login}`);
-
-        // TODO: why do we have commits with the repos?
-        let organizationRepositories = org.repositories.filter(
-          repo => !!repo.owner,
-        );
-
-        return {
-          ...org,
-          repositories(pageArgs: PageArgs) {
-            return requestRepositories(organizationRepositories, pageArgs);
-          },
-        };
+        let [org] = [...githubOrganizations].filter((o) => o.login === login);
+        assert(!!org, `no organization found for ${login}`);
+        return toGraphql(org);
       },
       organizations(pageArgs: PageArgs) {
         let orgs = [...githubOrganizations];
-
-        return applyRelayPagination(orgs, pageArgs, org => {
-          return {
-            ...org,
-            repositories(repositoryiesPageArgs: PageArgs) {
-              return requestRepositories(
-                org.repositories,
-                repositoryiesPageArgs,
-              );
-            },
-          };
-        });
+        return applyRelayPagination(orgs, pageArgs, (org) => toGraphql(org));
       },
       repository(_, { owner, name }: { owner: string; name: string }) {
         let repo = [...githubRepositories].find(
@@ -71,39 +39,21 @@ export function createResolvers({
             r.name.toLowerCase() === name &&
             r.nameWithOwner.toLowerCase() === `${owner}/${name}`.toLowerCase()
         );
-
         assert(!!repo, `no repository found for ${name}`);
+        return toGraphql(repo);
+      },
+      repositoryOwner(_, { login }: { login: string }) {
+        let [org] = [...githubOrganizations].filter((o) => o.login === login);
+        if (org) return toGraphql(org);
 
-        return {
-          // id: repo.id,
-          name: repo.name,
-          nameWithOwner: repo.nameWithOwner,
-          url: repo.url,
-          description: repo.description,
-          visibility: repo.visibility,
-          isArchived: repo.isArchived,
-          defaultBranchRef: {
-              name: repo.defaultBranchRef.name
-          },
-          languages: {
-            nodes: repo.languages.map(l => ({
-              name: l,
-            })),
-          },
-          repositoryTopics: {
-            nodes: repo.repositoryTopics.map(t => ({
-              topic: { name: t },
-            })),
-          },
-          owner: {
-            __typename: 'teams' in repo.owner ? 'Organization' : 'User',
-            name: repo.owner.name,
-            login: repo.owner.login,
-          },
-          // collaborators(pageArgs: PageArgs) {
-          //   return applyRelayPagination(repo.collaborators, pageArgs);
-          // },
-        };
+        let [userAccount] = [...users].filter(
+          (u) => u.githubAccount.login === login
+        );
+        assert(
+          !!userAccount,
+          `no github organization or account found for ${login}`
+        );
+        if (userAccount) return toGraphql(userAccount.githubAccount);
       },
     },
   };
