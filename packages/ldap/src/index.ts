@@ -139,15 +139,23 @@ filter: ${req.filter.toString()}
         }
       });
 
-      server.listen(port, function () {
-        logger.log(dedent`LDAP test server running on port ${port});
+      yield new Promise<void>((resolve, reject) => {
+        server.listen(port, function (err: Error) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      logger.log(dedent`LDAP test server running on port ${port}
 
 BindDN: bindDn = ${bindDn} cn=${bindDn},${baseDN}
 Bind Password: ${bindPassword}
 
 UserBaseDN:    ${bindDn}
 `);
-      });
 
       yield spawn(function* shutdown() {
         try {
