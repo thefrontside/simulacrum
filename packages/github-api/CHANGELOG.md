@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.4.0]
+
+- [`955dd7f`](https://github.com/thefrontside/simulacrum/commit/955dd7f248f6f1352b6be10327dda48a0ffcea58)([#267](https://github.com/thefrontside/simulacrum/pull/267)) Adds the `repositoryOwner` resolver.
+
 ## \[0.3.3]
 
 - [`d38705a`](https://github.com/thefrontside/simulacrum/commit/d38705aaa34ce10a9a57ed418a277c7aa777fb97)([#265](https://github.com/thefrontside/simulacrum/pull/265)) Adding the isArchived and defaultBranchRef as options to return in the query.

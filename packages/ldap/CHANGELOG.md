@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.5.5]
+
+- [`7c69bbd`](https://github.com/thefrontside/simulacrum/commit/7c69bbd650c7ab2463192fd117c7ee20cc751eff) Don't resolve `createLDAPServer()` until server is known to be accepting
+  connections.
+
 ## \[0.5.4]
 
 - When creating a person with the person simulator, we now allow passing in a specific `id` to use.
