@@ -1,5 +1,5 @@
 import { describe } from 'mocha';
-import auth0Config from "../../cypress.env.json";
+import {getConfig} from "../support/utils/config";
 
 describe("auth", () => {
   describe("log in, create person per test", () => {
@@ -10,7 +10,7 @@ describe("auth", () => {
     it("should log in and log out", () => {
       cy
         .visit("/")
-        .createSimulation(auth0Config)
+        .createSimulation(getConfig())
         .get('[data-testid=logout]').should('not.exist')
         .given()
         .login()
@@ -22,7 +22,7 @@ describe("auth", () => {
 
   describe("log in, create simulation and person in beforeEach", () => {
     beforeEach(() => {
-      cy.createSimulation(auth0Config)
+      cy.createSimulation(getConfig())
         .given();
     });
 
@@ -40,7 +40,7 @@ describe("auth", () => {
 
   describe("createSimulation in beforeEach and logout in afterEach", () => {
     beforeEach(() => {
-      cy.createSimulation(auth0Config);
+      cy.createSimulation(getConfig());
     });
 
     afterEach(() => {
@@ -94,7 +94,7 @@ describe("auth", () => {
   describe("logout in beforeEach", () => {
     beforeEach(() => {
       cy.logout()
-        .createSimulation(auth0Config)
+        .createSimulation(getConfig())
         .given();
     });
 
