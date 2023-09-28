@@ -30,9 +30,7 @@ declare global {
 
 const atom = createAtom<TestState>({});
 
-const ClientPort = Number(process.env.PORT || 4000);
-
-const getClientFromSpec = makeGetClientFromSpec({ atom, port: ClientPort });
+const getClientFromSpec = makeGetClientFromSpec({ atom, port: Cypress.env('PORT') || 4000 });
 
 Cypress.Commands.add('createSimulation', makeCreateSimulation({ atom, getClientFromSpec }));
 

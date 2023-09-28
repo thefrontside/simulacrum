@@ -18,6 +18,7 @@ export default defineConfig({
     baseUrl: 'http://localhost:3000',
   },
   env: {
+    PORT: 4000,
     "audience": "https://thefrontside.auth0.com/api/v1/",
     "domain": "localhost:4400",
     "clientID": "00000000000000000000000000000000",
