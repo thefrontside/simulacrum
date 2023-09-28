@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { encrypt } from "./cypress/support/utils/encrypt";
 
 export default defineConfig({
   video: false,
@@ -7,13 +8,12 @@ export default defineConfig({
   fixturesFolder: 'cypress/fixtures',
   screenshotsFolder: 'cypress/screenshots',
   videosFolder: 'cypress/videos',
-  configFile: 'cypress/tsconfig.json',
   chromeWebSecurity: false,
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
-    setupNodeEvents(on, config) {
-      return require('./cypress/plugins/index.ts').default(on, config)
+    setupNodeEvents(on) {
+      on('task', { encrypt });
     },
     baseUrl: 'http://localhost:3000',
   },
