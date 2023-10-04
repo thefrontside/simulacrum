@@ -1,38 +1,109 @@
-import type { Auth0SDKs, CommandMaker } from '../types';
-import { makeCypressLogger } from '../utils/cypress-logger';
-import { getConfig } from '../utils/config';
-import { makeLogin as makeNextLogin } from './nextjs_auth0/login';
-import { makeLogin as makeReactLogin } from './auth0_react/login';
-import { makeLogout as makeNextLogout } from './nextjs_auth0/logout';
-import { makeLogout as makeReactLogout } from './auth0_react/logout';
+import type {Auth0SDKs, CommandMaker, Token} from '../types';
+import {makeCypressLogger} from '../utils/cypress-logger';
+import {getConfig} from '../utils/config';
+import {assert} from "assert-ts";
+import Bluebird from "cypress/types/bluebird";
 
-const log = makeCypressLogger('simulacrum-provider-commands');
+export const makeSDKCommands = ({atom}: CommandMaker) => {
+    let config = getConfig();
 
-type Maker = ({ atom, getClientFromSpec }: CommandMaker) => () => void;
+    let provider = config.sdk;
 
-type Commands = Record<Auth0SDKs, { login: Maker, logout: Maker }>;
+    // cy.log(`Using ${provider} provider`);
 
-const providerCommands: Commands = {
-  nextjs_auth0: {
-    login: makeNextLogin,
-    logout: makeNextLogout
-  },
-  auth0_react: {
-    login: makeReactLogin,
-    logout: makeReactLogout
-  },
-} as const;
 
-export const makeSDKCommands = ({ atom, getClientFromSpec }: CommandMaker) => {
-  let config = getConfig();
+    if (provider === 'nextjs_auth0') {
+        Cypress.Commands.add('login', () => {
+            cy.then(() => {
+                let {sessionCookieName, cookieSecret, audience} = getConfig();
 
-  let provider = config.sdk;
+                try {
+                    cy.getCookie(sessionCookieName).then((cookieValue) => {
+                        cy.log(`cookie ${sessionCookieName} is ${cookieValue}`);
+                        if (cookieValue) {
+                            cy.log('Skip logging in again, session already exists');
+                            return true;
+                        } else {
+                            cy.clearCookies();
 
-  log(`Using ${provider} provider`);
+                            let person = atom.slice(Cypress.spec.name, 'person').get();
 
-  let commands = providerCommands[provider];
+                            assert(!!person, `no scenario in login`);
+                            assert(!!person.email, 'no email defined in scenario');
 
-  for (let [name, command] of Object.entries(commands)) {
-    Cypress.Commands.add(name, command({ atom, getClientFromSpec }));
-  }
+                            cy.getUserTokens(person).then((response) => {
+                                let {accessToken, expiresIn, idToken, scope} = response;
+
+                                cy.log(`successfully called getUserTokens with ${person?.email}`);
+
+                                assert(!!accessToken, 'no access token in login');
+
+                                cy.getUserInfo(accessToken).then((user) => {
+                                    assert(typeof expiresIn !== 'undefined', 'no expiresIn in login');
+
+                                    let payload = {
+                                        secret: cookieSecret,
+                                        audience,
+                                        user,
+                                        idToken,
+                                        accessToken,
+                                        accessTokenScope: scope,
+                                        accessTokenExpiresAt: Date.now() + expiresIn,
+                                        createdAt: Date.now(),
+                                    };
+
+                                    cy.task<string>('encrypt', payload).then((encryptedSession) => {
+                                        cy.log('successfully encrypted session');
+
+                                        cy.setCookie(sessionCookieName, encryptedSession);
+                                    });
+                                });
+                            });
+                        }
+                    });
+                } catch (error) {
+                    console.error(error);
+                    throw error;
+                }
+            });
+        });
+        Cypress.Commands.add('logout', () => {
+            cy.log('logging out');
+            return cy.request('/api/auth/logout').reload();
+        });
+    }
+
+    if (provider === 'auth0_react') {
+        Cypress.Commands.add('login', () => {
+            return cy.then((): Bluebird<string> => {
+                return new Cypress.Promise((resolve, reject) => {
+                    import('./auth0_react/auth').then(m => m.auth).then((auth0Client) => {
+                        let person = atom.slice(Cypress.spec.name, 'person').get();
+
+                        assert(!!person && typeof person.email !== 'undefined', `no scenario in login`);
+
+                        auth0Client.getTokenSilently({
+                            ignoreCache: true,
+                            currentUser: person.email,
+                            test: Cypress.currentTest.title
+                        })
+                            .then((token) => {
+                                cy.log(`successfully logged in with token ${JSON.stringify(token)}`);
+
+                                resolve(token);
+                            }).catch((e) => {
+                            console.error(e);
+
+                            reject(e);
+                        });
+                    });
+                });
+
+            })
+        });
+        Cypress.Commands.add('logout', () => {
+            cy.log('logging out');
+            return cy.clearCookies().reload();
+        });
+    }
 };
