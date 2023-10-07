@@ -1,9 +1,10 @@
 import type { Person } from "../../types";
 import { cyLog, getAtom, getClientFromSpec, getSimulationAtomSlice } from "../../utils";
 import { assert } from "assert-ts";
+import type Bluebird from "cypress/types/bluebird";
 
 export function given(attrs: Partial<Person> = {}) {
-    return cy.then(() => {
+    return cy.then((): Bluebird<Person> => {
 
         return new Cypress.Promise((resolve, reject) => {
             let client = getClientFromSpec(Cypress.spec.name);

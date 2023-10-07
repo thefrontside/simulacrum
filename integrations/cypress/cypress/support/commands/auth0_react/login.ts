@@ -1,8 +1,9 @@
 import { assert } from "assert-ts";
 import { cyLog, getPersonAtomSlice } from "../../utils";
+import type Bluebird from "cypress/types/bluebird";
 
 export function login() {
-    return cy.then(() => {
+    return cy.then((): Bluebird<string> => {
         return new Cypress.Promise((resolve, reject) => {
             import('./auth').then(m => m.authClient).then((auth0Client) => {
                 let person = getPersonAtomSlice();
