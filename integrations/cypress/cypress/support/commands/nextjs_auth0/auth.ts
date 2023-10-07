@@ -30,3 +30,5 @@ export function Auth0NextJsConfig() {
     _sendTelemetry: false,
   });
 }
+
+export const authClient = Auth0NextJsConfig();

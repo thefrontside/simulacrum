@@ -1,4 +1,4 @@
-import { Person } from "../../types";
+import type { Person } from "../../types";
 import { cyLog, getAtom, getClientFromSpec, getSimulationAtomSlice } from "../../utils";
 import { assert } from "assert-ts";
 
@@ -11,8 +11,6 @@ export function given(attrs: Partial<Person> = {}) {
             let simulation = getSimulationAtomSlice();
 
             assert(!!simulation, 'no sumulation in given');
-
-            cyLog('creating person with attrs:', attrs);
 
             client.given<Person>(simulation, "person", attrs)
                 .then((scenario) => {
@@ -27,7 +25,7 @@ export function given(attrs: Partial<Person> = {}) {
                     resolve(scenario.data);
                 })
                 .catch((e) => {
-                    cyLog('given failed:', e);
+                    cyLog('Failed to create person:', e);
                     reject(e);
                 });
         });

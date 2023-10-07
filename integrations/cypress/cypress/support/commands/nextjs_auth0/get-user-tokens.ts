@@ -16,7 +16,7 @@ export function getUserTokens(person: Person) {
         cyLog(`about to attempt login with email: ${email}`);
 
         return new Cypress.Promise((resolve, reject) => {
-            import('./auth').then(m => m.Auth0NextJsConfig()).then((auth) => {
+            import('./auth').then(m => m.authClient).then((auth) => {
                 auth.client.loginWithDefaultDirectory({
                     username: email, password, audience, scope, client_secret: clientSecret,
                 } as DefaultDirectoryLoginOptions, (err, response) => {

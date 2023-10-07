@@ -24,3 +24,5 @@ export function Auth0ReactConfig() {
     ...Auth0ConfigFixed
   });
 }
+
+export const authClient = Auth0ReactConfig();

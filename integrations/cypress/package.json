@@ -28,8 +28,6 @@
   "files": [
     "dist/**/*",
     "cypress/**/*",
-    "cypress.env.json",
-    "cypress.json",
     "CHANGELOG.md",
     "README.md"
   ],

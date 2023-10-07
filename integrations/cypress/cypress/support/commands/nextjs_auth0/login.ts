@@ -2,7 +2,7 @@ import { assert } from "assert-ts";
 import { getConfig,getPersonAtomSlice } from "../../utils";
 
 export function login(){
-    cy.then(() => {
+    return cy.then(() => {
         let { sessionCookieName, cookieSecret, audience } = getConfig();
 
         try {
