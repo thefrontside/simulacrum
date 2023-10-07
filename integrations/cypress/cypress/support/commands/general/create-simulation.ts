@@ -8,7 +8,10 @@ export function makeCreateSimulation(options?: CreateSimulation) {
 
     let { debug = false } = options ?? { debug: false };
 
-    let config = getConfig();
+    let config = {
+      ...getConfig(),
+      ...options,
+    };
 
 
     cyLog(`creating simulation with options:`, config);
@@ -40,7 +43,6 @@ export function makeCreateSimulation(options?: CreateSimulation) {
           };
         });
 
-
         resolve(simulation);
       }).catch((e) => {
         cyLog(`create-simulation failed ${e.message}`);
@@ -49,4 +51,4 @@ export function makeCreateSimulation(options?: CreateSimulation) {
       });
     });
   });
-};
+}

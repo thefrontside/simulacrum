@@ -19,7 +19,7 @@ export function getConfig(): Config {
   return {
     auth0RunningPort,
     auth0SimulatorPort: Cypress.env('AUTH0_SIMULATOR_PORT') ?? 4000,
-    sdk : Cypress.env('AUTH0_SDK') ?? 'auth0_react',
+    sdk : Cypress.env('AUTH0_SDK'),
     // Auth0 sdk configuration
     audience : Cypress.env('AUTH0_AUDIENCE'),
     scope : Cypress.env('AUTH0_SCOPE') ?? 'openid profile email offline_access',

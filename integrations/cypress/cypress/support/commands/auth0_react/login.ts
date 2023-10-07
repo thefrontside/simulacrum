@@ -16,6 +16,9 @@ export function login() {
                 })
                     .then((token) => {
                         cy.log(`successfully logged in with token ${JSON.stringify(token)}`);
+                        auth0Client.isAuthenticated().then((isAuthenticated) => {
+                            cyLog(`Is user authenticated:`, isAuthenticated);
+                        });
                         auth0Client.getUser().then((userObject) => {
                             cyLog(`logged in user object:`, userObject);
                         });
