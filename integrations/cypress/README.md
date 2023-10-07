@@ -95,9 +95,11 @@ An example [cypress environment file](./cypress.env.json) is in the root of this
 }
 ```
 
-## Usage
+## How it works
 
-Start the simulator
+Under the hood, @simulacrum/auth0-cypress uses another package called [@simulacrum/auth0-simulator](https://github.com/thefrontside/simulacrum/tree/v0/packages/auth0) which will first start a GraphQL interface/web server (by default on localhost:4000). This will then require a mutation command to start the actual Auth0 simulation server which you will then use in the Cypress tests. This is what @simulacrum/auth0-cypress will do for you.
+
+## Usage
 
 ```shell
 PORT=4000 npx @simulacrum/auth0-simulator
@@ -107,10 +109,15 @@ PORT=4000 npx @simulacrum/auth0-simulator
 
 Cypress recommends using [start-server-and-test](https://github.com/bahmutov/start-server-and-test) to ensure the test process exits and any servers are shut down.
 
+Make sure to follow the following convention for creating your own start command with Auth0-Cypress
+```bash
+npx start-server-and-test <first command> <first resource> <second command> <second resource> <test command>
+```
+As example: 
 ```shell
 npx start-server-and-test 'npm run start:server' http://localhost:3000 \
                       'npm run start:auth0' http://localhost:4000 \
-                      cypress:run
+                      cypress:browser
 ```
 
 The following commands are now available in your test suite:
