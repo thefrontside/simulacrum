@@ -5,3 +5,7 @@ export const makeCypressLogger = (label: string, displayName: string = label) =>
     message
   });
 };
+
+export function cyLog(message: string, object: any | undefined = undefined) {
+  cy.log(message, JSON.stringify(object, null, 4));
+}

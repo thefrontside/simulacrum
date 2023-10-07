@@ -1,27 +1,22 @@
-import type {Person} from '../../types';
-import type {DefaultDirectoryLoginOptions} from 'auth0-js';
-import {makeCypressLogger} from '../../utils/cypress-logger';
-import {getConfig} from '../../utils/config';
-import Bluebird from "cypress/types/bluebird";
-import {Auth0Result} from "auth0-js";
+import type { Person } from '../../types';
+import type { DefaultDirectoryLoginOptions } from 'auth0-js';
+import { cyLog, getConfig } from '../../utils';
+import type Bluebird from "cypress/types/bluebird";
+import type { Auth0Result } from "auth0-js";
 
-const log = makeCypressLogger('simulacrum-get-user-tokens');
-
-Cypress.Commands.add('getUserTokens', (person: Person) => {
+export function getUserTokens(person: Person) {
 
     return cy.then((): Bluebird<Auth0Result & { scope: string }> => {
 
-        let {email, password} = person;
-        let {audience, scope} = getConfig();
-
-        let {clientSecret} = getConfig();
+        let { email, password } = person;
+        let { audience, scope, clientSecret } = getConfig();
 
         assert([email, password, clientSecret].every(Boolean), 'email, auth0ClientSecret and password are required');
 
-        log(`about to attempt login with email: ${email}`);
+        cyLog(`about to attempt login with email: ${email}`);
 
         return new Cypress.Promise((resolve, reject) => {
-            import('./auth').then(m => m.auth).then((auth) => {
+            import('./auth').then(m => m.Auth0NextJsConfig()).then((auth) => {
                 auth.client.loginWithDefaultDirectory({
                     username: email, password, audience, scope, client_secret: clientSecret,
                 } as DefaultDirectoryLoginOptions, (err, response) => {
@@ -29,12 +24,11 @@ Cypress.Commands.add('getUserTokens', (person: Person) => {
                         console.error(err);
                         reject(err);
                     } else {
-                        log(`login successful for ${email}`);
+                        cyLog(`Login was successful for ${email}`);
                         resolve(response);
                     }
                 });
             });
         });
     });
-
-});
+}

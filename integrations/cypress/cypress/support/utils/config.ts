@@ -10,35 +10,36 @@ interface Config {
   clientID: string;
   domain: string;
   sdk: Auth0SDKs
+  auth0RunningPort: number;
+  auth0SimulatorPort: number;
 }
 
 export function getConfig(): Config {
-  let sessionCookieName = Cypress.env('auth0SessionCookieName') ?? 'appSession';
-  let cookieSecret = Cypress.env('auth0CookieSecret');
-  let audience = Cypress.env('audience');
-  let connection = Cypress.env('connection') ?? 'Username-Password-Authentication';
-  let scope = Cypress.env('scope') ?? 'openid profile email offline_access';
-  let clientSecret = Cypress.env('auth0ClientSecret');
-  let clientID = Cypress.env('clientID') ?? 'YOUR_AUTH0_CLIENT_ID';
-  let domain = Cypress.env('domain') ?? 'localhost:4400';
-  let sdk = (Cypress.env('AUTH0_SDK') ?? 'auth0_react') as Auth0SDKs;
-
+  let auth0RunningPort = Cypress.env('AUTH0_RUNNING_PORT') ?? 4400;
   return {
-    sessionCookieName,
-    cookieSecret,
-    audience,
-    connection,
-    scope,
-    clientSecret,
-    clientID,
-    domain,
-    sdk
+    auth0RunningPort,
+    auth0SimulatorPort: Cypress.env('AUTH0_SIMULATOR_PORT') ?? 4000,
+    sdk : Cypress.env('AUTH0_SDK') ?? 'auth0_react',
+    // Auth0 sdk configuration
+    sessionCookieName : Cypress.env('AUTH0_SESSION_COOKIE_NAME') ?? 'appSession',
+    cookieSecret : Cypress.env('AUTH0_COOKIE_SECRET'),
+    audience : Cypress.env('AUTH0_AUDIENCE'),
+    connection : Cypress.env('AUTH0_CONNECTION') ?? 'Username-Password-Authentication',
+    scope : Cypress.env('AUTH0_SCOPE') ?? 'openid profile email offline_access',
+    clientSecret : Cypress.env('AUTH0_CLIENT_SECRET') ?? '6d0598f28f62a9aee14929ef46c7c8befdc015',
+    clientID : Cypress.env('AUTH0_CLIENTID') ?? 'CMrwdII8ZMmhsqbDLmti8otKX1EzoBUT',
+    // TODO: this breaks non-localhost custom domains as the Auth0 domain, but that seems to not be possible anyway in @simulacrum/auth0-simulator
+    domain : `localhost:${auth0RunningPort}`,
   };
 }
 
-export function getAuth0Config() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let { sdk, cookieSecret, sessionCookieName, ...auth0Options } = getConfig();
+export function configValidation(config: Config): void {
 
-  return auth0Options;
+  function isConfigKeyValid(key: keyof Config): boolean {
+    return config.hasOwnProperty(key) && config[key] !== '';
+  }
+
+  assert.isOk(isConfigKeyValid('sdk'), 'sdk is a required option in the config');
+  assert.isOk(isConfigKeyValid('clientID'), 'clientID is a required option in the config');
+  assert.isOk(isConfigKeyValid('scope'), 'scope is a required option in the config');
 }

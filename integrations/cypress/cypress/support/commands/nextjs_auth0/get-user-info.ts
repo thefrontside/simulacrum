@@ -1,7 +1,7 @@
-Cypress.Commands.add('getUserInfo', (accessToken) => {
+export function getUserInfo(accessToken) {
     cy.then(() => {
         return new Cypress.Promise((resolve, reject) => {
-            import('./auth').then(m => m.auth).then((auth) => {
+            import('./auth').then(m => m.Auth0NextJsConfig()).then((auth) => {
                 auth.client.userInfo(accessToken, (err, user) => {
                     if (err) {
                         reject(err);
@@ -12,4 +12,4 @@ Cypress.Commands.add('getUserInfo', (accessToken) => {
             });
         });
     });
-});
+}

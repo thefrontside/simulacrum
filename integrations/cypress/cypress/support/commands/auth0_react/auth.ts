@@ -1,5 +1,6 @@
 import type { Auth0ClientOptions } from '@auth0/auth0-spa-js';
 import { Auth0Client } from '@auth0/auth0-spa-js';
+import { getConfig } from "../../utils";
 
 const Auth0ConfigDefaults: Pick<Auth0ClientOptions, 'connection' | 'scope'> = {
   connection: 'Username-Password-Authentication',
@@ -11,13 +12,15 @@ const Auth0ConfigFixed: Pick<Auth0ClientOptions, 'cacheLocation' | 'useRefreshTo
   useRefreshTokens: true
 };
 
-const Auth0Config: Auth0ClientOptions = {
-  ...Auth0ConfigDefaults,
-  audience: Cypress.env('audience'),
-  client_id: Cypress.env('clientID'),
-  domain: Cypress.env('domain'),
-  scope: Cypress.env('scope'),
-  ...Auth0ConfigFixed
-};
 
-export const auth = new Auth0Client(Auth0Config);
+export function Auth0ReactConfig() {
+  let config = getConfig();
+  return new Auth0Client({
+    ...Auth0ConfigDefaults,
+    audience: config.audience,
+    client_id: config.clientID,
+    domain: config.domain,
+    scope: config.scope,
+    ...Auth0ConfigFixed
+  });
+}
