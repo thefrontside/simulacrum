@@ -17,14 +17,15 @@ export default defineConfig({
     baseUrl: 'http://localhost:3000',
   },
   env: {
-    // This is the port of the @simulacrum/auth0-simulator
+    // This is the port of the @simulacrum/auth0-simulator GraphQL server
     AUTH0_SIMULATOR_PORT: 4000,
     // This is the port of the simulated Auth0 server
     AUTH0_RUNNING_PORT: 4400,
+    // This is the SDK used to communicate with Auth0, can be either 'auth0_react' or 'nextjs_auth0'
     AUTH0_SDK: 'auth0_react',
     AUTH0_CLIENT_SECRET: '6d0598f28f62a9aee14929ef46c7c8befdc015',
     AUTH0_AUDIENCE: 'https://your-audience/',
-    AUTH0_CLIENTID:  "YOUR_AUTH0_CLIENT_ID",
+    AUTH0_CLIENT_ID:  "YOUR_AUTH0_CLIENT_ID",
     AUTH0_CONNECTION: "Username-Password-Authentication",
     AUTH0_SCOPE: "openid profile email offline_access",
     AUTH0_SESSION_COOKIE_NAME: "appSession",

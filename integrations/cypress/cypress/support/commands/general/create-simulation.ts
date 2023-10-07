@@ -21,6 +21,9 @@ export function makeCreateSimulation(options?: CreateSimulation) {
           audience: config.audience,
           scope: config.scope,
           clientID: config.clientID,
+          connection: config.connection,
+          clientSecret: config.clientSecret,
+          domain: config.domain,
         },
         services: {
           auth0: {

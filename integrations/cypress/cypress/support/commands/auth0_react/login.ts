@@ -9,7 +9,10 @@ export function login() {
                 assert(!!person && typeof person.email !== 'undefined', `no scenario in login`);
 
                 auth0Client.getTokenSilently({
-                    ignoreCache: true, currentUser: person.email, test: Cypress.currentTest.title
+                    currentUser: person.email,
+                    test: Cypress.currentTest.title,
+                    // Ensures a fresh token is always retrieved
+                    ignoreCache: true,
                 })
                     .then((token) => {
                         cy.log(`successfully logged in with token ${JSON.stringify(token)}`);

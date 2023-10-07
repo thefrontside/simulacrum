@@ -11,7 +11,6 @@ describe("auth", () => {
             cy
                 .visit("/")
                 .createSimulation(getConfig())
-                .get('[data-testid=login]').click()
                 .get('[data-testid=logout]').should('not.exist')
                 .given()
                 .login()
@@ -21,7 +20,7 @@ describe("auth", () => {
         });
     });
 
-    xdescribe("log in, create simulation and person in beforeEach", () => {
+    describe("log in, create simulation and person in beforeEach", () => {
         beforeEach(() => {
             cy.createSimulation(getConfig())
                 .given();
@@ -39,7 +38,7 @@ describe("auth", () => {
         });
     });
 
-    xdescribe("createSimulation in beforeEach and logout in afterEach", () => {
+    describe("createSimulation in beforeEach and logout in afterEach", () => {
         beforeEach(() => {
             cy.createSimulation(getConfig());
         });
@@ -92,7 +91,7 @@ describe("auth", () => {
         });
     });
 
-    xdescribe("logout in beforeEach", () => {
+    describe("logout in beforeEach", () => {
         beforeEach(() => {
             cy.logout()
                 .createSimulation(getConfig())
