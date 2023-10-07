@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress';
-import { encrypt } from "./cypress/support/utils/encrypt";
-
+import { encrypt } from "./cypress/support/utils";
+import { config } from 'dotenv';
 export default defineConfig({
   video: false,
   screenshotOnRunFailure: false,
@@ -10,25 +10,56 @@ export default defineConfig({
   videosFolder: 'cypress/videos',
   chromeWebSecurity: false,
   e2e: {
-    setupNodeEvents(on) {
+    setupNodeEvents(on, config) {
+      // Based on the example app that is run, we need to load the correct environment variables.
+      switch (process.env.CYPRESS_TEST_MODE) {
+        case 'nextjs-auth0':
+          config.env = mergeEnvConfig(config.env, 'nextjs-auth0');
+          break;
+        case 'auth0-react':
+          config.env = mergeEnvConfig(config.env, 'auth0-react');
+            break;
+        case 'create-react-app':
+          config.env = mergeEnvConfig(config.env, 'create-react-app');
+            break;
+      }
+
+      console.log('The environment variables used:', config.env);
       on('task', { encrypt });
+
+      // Make sure the config is returned, otherwise it will not be used.
+      return config;
     },
     // This is the url on which the application in test is running
     baseUrl: 'http://localhost:3000',
   },
   env: {
-    // This is the port of the @simulacrum/auth0-simulator GraphQL server
-    AUTH0_SIMULATOR_PORT: 4000,
-    // This is the port of the simulated Auth0 server
-    AUTH0_RUNNING_PORT: 4400,
     // This is the SDK used to communicate with Auth0, can be either 'auth0_react' or 'nextjs_auth0'
     AUTH0_SDK: 'auth0_react',
-    AUTH0_CLIENT_SECRET: '6d0598f28f62a9aee14929ef46c7c8befdc015',
-    AUTH0_AUDIENCE: 'https://your-audience/',
-    AUTH0_CLIENT_ID:  "YOUR_AUTH0_CLIENT_ID",
+    // This is the port of the @simulacrum/auth0-simulator GraphQL server
+    AUTH0_SIMULATOR_PORT: 4000,
+    // This is the port of the simulated Auth0 server to which the Auth0 SDK will connect
+    AUTH0_RUNNING_PORT: 4400,
+    // The intended consumer of the token
+    AUTH0_AUDIENCE: 'https://thefrontside.auth0.com/api/v1/',
+    // The Client ID of the Auth0 application
+    AUTH0_CLIENT_ID:  "00000000000000000000000000000000",
+    // The type of authentication flow used by the Auth0 SDK
     AUTH0_CONNECTION: "Username-Password-Authentication",
+    // The default scope for the Auth0 user
     AUTH0_SCOPE: "openid profile email offline_access",
+    // This is the secret used to sign the JWT tokens
+    AUTH0_CLIENT_SECRET: '6d0598f28f62a9aee14929ef46c7c8befdc015',
+    // This is the secret used to encrypt the session cookie
+    AUTH0_COOKIE_SECRET: "",
+    // This is the name of the session cookie used by the Cypress tests
     AUTH0_SESSION_COOKIE_NAME: "appSession",
-    AUTH0_COOKIE_SECRET: "6d0598f28f62a9aee14929ef46c7c8befdc0150d870ec462fa45629511fd2a46",
   }
 });
+
+function mergeEnvConfig(configEnv: Record<string, any>, testMode: string): Record<string, string> {
+  return {
+    ...configEnv,
+    ...config({ path: `.env.${testMode}` }).parsed
+  };
+}
