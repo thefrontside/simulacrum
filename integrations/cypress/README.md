@@ -51,7 +51,7 @@ This plugin supports the following javascript sdks that interface with auth0:
 To set the correct SDK, you need to set the `AUTH0_SDK` environment variable inside your cypress.config.ts or through
 any of the [usual cypress environmental varaibles options](https://docs.cypress.io/guides/guides/environment-variables).
 
-in the [`cypress.config.ts`](./cypress.config.ts)  file
+in the [cypress.config.ts](./cypress.config.ts)  file
 
 ```typescript
 // integrations/cypress/cypress.config.ts
