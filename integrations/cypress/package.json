@@ -51,6 +51,7 @@
     "test": "npm run test:auth0-react:headless && npm run test:nextjs-auth0:headless && npm run test:cra:headless && npm run test:auth0-vue:headless",
     "build": "npm run prepack",
     "prepack": "tsc --build tsconfig.dist.json",
+    "type-check": "tsc --noEmit",
     "lint": "eslint \"cypress/**/*.ts\" --fix"
   },
   "dependencies": {
