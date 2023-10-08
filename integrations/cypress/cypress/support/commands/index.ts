@@ -2,7 +2,7 @@ import type { CreateSimulation, Person } from '../types';
 import type { Auth0Result } from 'auth0-js';
 import { getConfig } from "../utils";
 import { registerGeneralCommands } from "./general";
-import { registerNextjsAuth0Commands } from "./nextjs_auth0";
+import { registerNextjsAuth0Commands } from "./auth0-js";
 import { registerAuth0ReactCommands } from "./auth0_react";
 
 declare global {
@@ -26,7 +26,7 @@ declare global {
             getUserTokens(person: Person): Chainable<Auth0Result & { scope: string }>;
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            task<T>(event: string, args?: any, options?: Partial<Loggable & Timeoutable>): Chainable<T>
+            task<T>(event: string, args?: any, options?: Partial<Loggable & Timeoutable>): Chainable<T>;
         }
     }
 }
