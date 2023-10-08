@@ -4,7 +4,7 @@ import type { Auth0Result } from 'auth0-js';
 import { getConfig } from "../utils";
 import { registerGeneralCommands } from "./general";
 import { registerAuth0JsCommands } from "./auth0-js";
-import { registerAuth0ReactCommands } from "./auth0_react";
+import { registerAuth0ReactCommands } from "./auth0-react";
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
