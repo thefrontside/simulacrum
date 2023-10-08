@@ -44,6 +44,7 @@ function setupAuth0CypressCommands() {
             registerAuth0JsCommands();
             break;
         case Auth0SDK.Auth0Vue:
+            // Auth0 Vue uses the same commands as Auth0 React, using the native Auth0Vue SDK is not supported due to only 1 instance being allowed of the Auth0Vue SDK
             registerAuth0ReactCommands();
             break;
         case Auth0SDK.Auth0React:
