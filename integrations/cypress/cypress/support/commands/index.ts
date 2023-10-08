@@ -1,8 +1,9 @@
 import type { CreateSimulation, Person } from '../types';
+import { Auth0SDK } from "../types";
 import type { Auth0Result } from 'auth0-js';
 import { getConfig } from "../utils";
 import { registerGeneralCommands } from "./general";
-import { registerNextjsAuth0Commands } from "./auth0-js";
+import { registerAuth0JsCommands } from "./auth0-js";
 import { registerAuth0ReactCommands } from "./auth0_react";
 
 declare global {
@@ -38,12 +39,21 @@ function setupAuth0CypressCommands() {
 
     registerGeneralCommands();
 
-    if (provider === 'nextjs_auth0') {
-        registerNextjsAuth0Commands();
-    }
-
-    if (provider === 'auth0_react') {
-        registerAuth0ReactCommands();
+    switch (provider) {
+        case Auth0SDK.Auth0JS:
+            registerAuth0JsCommands();
+            break;
+        case Auth0SDK.Auth0Vue:
+            registerAuth0JsCommands();
+            break;
+        case Auth0SDK.Auth0React:
+            registerAuth0ReactCommands();
+            break;
+        case Auth0SDK.Auth0NextJS:
+            registerAuth0JsCommands();
+            break;
+        default:
+            throw new Error(`Unknown Auth0 SDK: ${provider}`);
     }
 }
 
