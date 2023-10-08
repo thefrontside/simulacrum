@@ -3,10 +3,10 @@ import type { AuthOptions } from 'auth0-js';
 import type { Client, Simulation } from '@simulacrum/client';
 
 export const enum Auth0SDK {
-    Auth0JS = 'auth0_js',
-    Auth0Vue = 'auth0_vue',
-    Auth0React = 'auth0_react',
-    Auth0NextJS = 'nextjs_auth0',
+    Auth0JS = 'auth0-js',
+    Auth0Vue = 'auth0-vue',
+    Auth0React = 'auth0-react',
+    Auth0NextJS = 'nextjs-auth0',
 }
 
 export type TestState = Record<string, {

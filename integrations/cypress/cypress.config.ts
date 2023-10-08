@@ -38,8 +38,8 @@ export default defineConfig({
         baseUrl: 'http://localhost:3000',
     },
     env: {
-        // This is the SDK used to communicate with Auth0, can be either 'auth0_react' or 'nextjs_auth0'
-        AUTH0_SDK: 'auth0_react',
+        // This is the SDK used to communicate with Auth0, can be either 'auth0-js', 'auth0-vue', 'auth0-react' or 'nextjs-auth0'
+        AUTH0_SDK: 'auth0-js',
         // This is the port of the @simulacrum/auth0-simulator GraphQL server
         AUTH0_SIMULATOR_PORT: 4000,
         // This is the port of the simulated Auth0 server to which the Auth0 SDK will connect
@@ -53,7 +53,7 @@ export default defineConfig({
         // The default scope for the Auth0 user
         AUTH0_SCOPE: "openid profile email offline_access",
         // This is the secret used to sign the JWT tokens
-        AUTH0_CLIENT_SECRET: '',
+        AUTH0_CLIENT_SECRET: 'fdmGkzmcHOwgUfMcP33y43yrKvSNjZzm',
         // This is the secret used to encrypt the session cookie
         AUTH0_COOKIE_SECRET: "",
         // This is the name of the session cookie used by the Cypress tests

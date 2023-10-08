@@ -44,7 +44,7 @@ function setupAuth0CypressCommands() {
             registerAuth0JsCommands();
             break;
         case Auth0SDK.Auth0Vue:
-            registerAuth0JsCommands();
+            registerAuth0ReactCommands();
             break;
         case Auth0SDK.Auth0React:
             registerAuth0ReactCommands();
