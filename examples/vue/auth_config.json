@@ -1,0 +1,6 @@
+{
+  "domain": "localhost:4400",
+  "clientId": "00000000000000000000000000000000",
+  "scope": "openid profile email offline_access",
+  "audience": "https://your-audience/"
+}
