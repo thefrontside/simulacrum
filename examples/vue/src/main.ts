@@ -18,16 +18,17 @@ const app = createApp(App);
 library.add(faLink, faUser, faPowerOff);
 
 app
-  .use(hljsVuePlugin)
-  .use(createRouter(app))
-  .use(
-    createAuth0({
-      domain: authConfig.domain,
-      clientId: authConfig.clientId,
-      authorizationParams: {
-        redirect_uri: window.location.origin,
-      }
-    })
-  )
-  .component("font-awesome-icon", FontAwesomeIcon)
-  .mount("#app");
+    .use(hljsVuePlugin)
+    .use(createRouter(app))
+    .use(
+        createAuth0({
+            domain: authConfig.domain,
+            clientId: authConfig.clientId,
+            authorizationParams: {
+                redirect_uri: window.location.origin,
+                scope: authConfig.scope,
+            }
+        })
+    )
+    .component("font-awesome-icon", FontAwesomeIcon)
+    .mount("#app");
