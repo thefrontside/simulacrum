@@ -6,7 +6,7 @@ export const configurationSchema = z.object({
     z
       .number()
       .gt(2999, 'port must be greater than 2999')
-      .lt(10000, 'must be less than 10000')
+      .lt(100000, 'must be less than 100000')
   ),
   domain: z.optional(z.string().min(1, 'domain is required')),
   audience: z.optional(z.string().min(1, 'audience is required')),
