@@ -10,15 +10,13 @@ interface Config {
   clientID: string;
   domain: string;
   sdk: Auth0SDKs
-  auth0RunningPort: number;
   auth0SimulatorPort: number;
 }
 
 export function getConfig(): Config {
-  let auth0RunningPort = Cypress.env('AUTH0_RUNNING_PORT') ?? 4400;
+  let auth0SimulatorPort = Cypress.env('AUTH0_SIMULATOR_PORT') ?? 4400;
   return {
-    auth0RunningPort,
-    auth0SimulatorPort: Cypress.env('AUTH0_SIMULATOR_PORT') ?? 4000,
+    auth0SimulatorPort,
     sdk : Cypress.env('AUTH0_SDK'),
     // Auth0 sdk configuration
     audience : Cypress.env('AUTH0_AUDIENCE'),
@@ -29,7 +27,7 @@ export function getConfig(): Config {
     sessionCookieName : Cypress.env('AUTH0_SESSION_COOKIE_NAME') ?? 'appSession',
     cookieSecret : Cypress.env('AUTH0_COOKIE_SECRET'),
     // TODO: this breaks non-localhost custom domains as the Auth0 domain, but that seems to not be possible anyway in @simulacrum/auth0-simulator
-    domain : `localhost:${auth0RunningPort}`,
+    domain : `localhost:${auth0SimulatorPort}`,
   };
 }
 

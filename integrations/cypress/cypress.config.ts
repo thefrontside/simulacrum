@@ -36,10 +36,8 @@ export default defineConfig({
   env: {
     // This is the SDK used to communicate with Auth0, can be either 'auth0_react' or 'nextjs_auth0'
     AUTH0_SDK: 'auth0_react',
-    // This is the port of the @simulacrum/auth0-simulator GraphQL server
-    AUTH0_SIMULATOR_PORT: 4000,
     // This is the port of the simulated Auth0 server to which the Auth0 SDK will connect
-    AUTH0_RUNNING_PORT: 4400,
+    AUTH0_SIMULATOR_PORT: 4400,
     // The intended consumer of the token
     AUTH0_AUDIENCE: 'https://thefrontside.auth0.com/api/v1/',
     // The Client ID of the Auth0 application
