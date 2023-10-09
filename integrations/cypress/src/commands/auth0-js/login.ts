@@ -1,7 +1,7 @@
 import { assert } from "assert-ts";
-import { getConfig,getPersonAtomSlice } from "../../utils";
+import { getConfig, getPersonAtomSlice } from "../../utils";
 
-export function login(){
+export function login() {
     let { sessionCookieName, cookieSecret, audience } = getConfig();
 
     try {

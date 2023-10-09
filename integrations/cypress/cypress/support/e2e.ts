@@ -1,3 +1,1 @@
-import './commands';
-
-export { encrypt } from './utils/encrypt';
+import '../../src/commands';

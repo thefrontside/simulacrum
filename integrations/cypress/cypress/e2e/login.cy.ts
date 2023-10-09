@@ -1,5 +1,5 @@
 import { describe } from 'mocha';
-import { getConfig } from "../support/utils";
+import { getConfig } from "../../src/utils";
 
 describe("auth", () => {
     describe("log in, create person per test", () => {

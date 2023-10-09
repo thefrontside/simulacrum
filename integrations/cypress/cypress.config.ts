@@ -1,5 +1,5 @@
 import { defineConfig } from 'cypress';
-import { encrypt } from "./cypress/support/utils";
+import { encrypt } from "./src/utils";
 import { config } from 'dotenv';
 
 export default defineConfig({
