@@ -40,10 +40,10 @@ function setupAuth0CypressCommands() {
 
     if (provider === 'nextjs_auth0') {
         registerNextjsAuth0Commands();
-    }
-
-    if (provider === 'auth0_react') {
+    } else if (provider === 'auth0_react') {
         registerAuth0ReactCommands();
+    } else {
+        throw new Error(`Unknown auth provider: ${provider}`);
     }
 }
 
