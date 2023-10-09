@@ -1,18 +1,24 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["cypress", "node"],
-    "baseUrl": ".",
+    "types": [
+      "cypress",
+      "node"
+    ],
     "outDir": "dist",
-    "rootDir": "cypress",
+    "baseUrl": "./src",
     "resolveJsonModule": true,
-    "typeRoots": ["node_modules/@types", "node_modules/cypress/types"]
+    "typeRoots": [
+      "node_modules/@types",
+      "node_modules/cypress/types"
+    ]
   },
   "include": [
-    "cypress/**/*.ts",
-    "cypress.env.json"
+    "**/*.ts"
   ],
   "references": [
-    { "path" : "../../packages/auth0/tsconfig.dist.json" }
+    {
+      "path": "../../packages/auth0/tsconfig.dist.json"
+    }
   ]
 }
