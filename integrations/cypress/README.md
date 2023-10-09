@@ -151,6 +151,11 @@ AUTH0_CLIENT_SECRET='YOUR_AUTH0_CLIENT_SECRET'
 AUTH0_COOKIE_SECRET='6d0598f28f62a9aee14929ef46c7c8befdc0150d870ec462fa45629511fd2a46'
 ```
 
+## Step 6: Configure your localhost to use a https connection
+
+The Auth0 SDK's require a https connection to work. This can easily be setup by using [mkcert](https://github.com/FiloSottile/mkcert) to create a self-signed certificate for your localhost. 
+
+A running example with setting up mkcert instruction can be found here at [@simulacrum/ui](../../packages/ui/README.md#running-https-services-from-localhost)
 
 ## How it works
 
