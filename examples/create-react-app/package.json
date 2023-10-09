@@ -20,7 +20,7 @@
     "dev": "npm-run-all --parallel spa api-server:dev",
     "prod": "npm-run-all --parallel server api-server",
     "test:browser": "start-server-and-test 'start:e2e' '3000|3001|4000' 'cypress open'",
-    "test:headless": "start-server-and-test 'start:e2e' '3000|3001|4000' 'cypress run --headless --spec cypress/integration/login.spec.ts --browser chrome'",
+    "test:headless": "start-server-and-test 'start:e2e' '3000|3001|4000' 'cypress run --headless --browser chrome'",
     "watch:tsc": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.json --watch"
   },
   "workspaces": [

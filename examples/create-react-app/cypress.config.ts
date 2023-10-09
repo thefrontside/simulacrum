@@ -14,7 +14,7 @@ export default defineConfig({
     NOTE_COMMENT: "NOTE: Also update 'integrations/cypress/.env.create-react-app' when changing these values",
     audience: "https://thefrontside.auth0.com/api/v1/",
     domain: "localhost:57630",
-    clientID: "00000000000000000000000000000000",
+    AUTH0_CLIENT_ID: "00000000000000000000000000000000",
     connection: "Username-Password-Authentication",
     scope: "openid profile email offline_access",
     AUTH0_SDK: "auth0_react"

@@ -15,7 +15,7 @@ export function given(attrs: Partial<Person> = {}) {
 
             client.given<Person>(simulation, "person", attrs)
                 .then((scenario) => {
-                    cyLog('person created:', scenario);
+                    // cyLog('person created:', scenario);
 
                     getAtom().slice(Cypress.spec.name).update(current => {
                         return {
@@ -26,7 +26,7 @@ export function given(attrs: Partial<Person> = {}) {
                     resolve(scenario.data);
                 })
                 .catch((e) => {
-                    cyLog('Failed to create person:', e);
+                    // cyLog('Failed to create person:', e);
                     reject(e);
                 });
         });

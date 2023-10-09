@@ -14,7 +14,7 @@ export function makeCreateSimulation(options?: CreateSimulation) {
     };
 
 
-    cyLog(`creating simulation with options:`, config);
+    // cyLog(`creating simulation with options:`, config);
 
     configValidation(config);
 
@@ -45,7 +45,7 @@ export function makeCreateSimulation(options?: CreateSimulation) {
 
         resolve(simulation);
       }).catch((e) => {
-        cyLog(`create-simulation failed ${e.message}`);
+        // cyLog(`create-simulation failed ${e.message}`);
 
         reject(e);
       });

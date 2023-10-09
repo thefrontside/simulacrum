@@ -13,7 +13,7 @@ export function getUserTokens(person: Person) {
 
         assert([email, password, clientSecret].every(Boolean), 'email, auth0ClientSecret and password are required');
 
-        cyLog(`about to attempt login with email: ${email}`);
+        // cyLog(`about to attempt login with email: ${email}`);
 
         return new Cypress.Promise((resolve, reject) => {
             import('./auth').then(m => m.authClient).then((auth) => {
@@ -24,7 +24,7 @@ export function getUserTokens(person: Person) {
                         console.error(err);
                         reject(err);
                     } else {
-                        cyLog(`Login was successful for ${email}`);
+                        // cyLog(`Login was successful for ${email}`);
                         resolve(response);
                     }
                 });
