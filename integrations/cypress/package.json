@@ -2,33 +2,32 @@
   "name": "@simulacrum/auth0-cypress",
   "version": "0.6.10",
   "description": "Cypress simulacrum commands",
-  "main": "dist/support/index.js",
-  "module": "dist/support/index.js",
-  "types": "dist/support/index.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "repository": "https://github.com/thefrontside/simulacrum.git",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/support/index.js",
-      "require": "./dist/support/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
     },
     "./encrypt": {
-      "import": "./dist/support/utils/encrypt.js",
-      "require": "./dist/support/utils/encrypt.js"
+      "import": "./dist/utils/encrypt.js",
+      "require": "./dist/utils/encrypt.js"
     }
   },
   "typesVersions": {
     "*": {
       "*": [
-        "dist/support/commands/index.d.ts"
+        "dist/index.d.ts"
       ]
     }
   },
   "files": [
-    "dist/**/*",
-    "cypress/**/*",
+    "src",
     "CHANGELOG.md",
     "README.md"
   ],
@@ -50,8 +49,8 @@
     "test:cra:browser": "CYPRESS_TEST_MODE=create-react-app npx start-server-and-test 'npm run start:server:cra' http://localhost:3000 'npm run start:auth0' http://localhost:4000 cypress:browser",
     "test:cra:headless": "CYPRESS_TEST_MODE=create-react-app npx start-server-and-test 'npm run start:server:cra' http://localhost:3000 'npm run start:auth0' http://localhost:4000 cypress:run",
     "test": "npm run test:auth0-react:headless && npm run test:nextjs-auth0:headless && npm run test:cra:headless && npm run test:auth0-vue:headless",
-    "build": "npm run prepack",
-    "prepack": "tsc --build tsconfig.dist.json",
+    "build": "npm run prepack ",
+    "prepack": "tsc --build tsconfig.dist.json ",
     "type-check": "tsc --noEmit",
     "lint": "eslint \"cypress/**/*.ts\" --fix"
   },
