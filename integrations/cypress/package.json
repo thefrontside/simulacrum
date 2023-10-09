@@ -2,16 +2,17 @@
   "name": "@simulacrum/auth0-cypress",
   "version": "0.6.10",
   "description": "Cypress simulacrum commands",
-  "main": "dist/support/commands/index.js",
-  "module": "dist/support/commands/index.js",
-  "types": "dist/support/commands/index.d.ts",
+  "main": "dist/support/index.js",
+  "module": "dist/support/index.js",
+  "types": "dist/support/index.d.ts",
   "repository": "https://github.com/thefrontside/simulacrum.git",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
+  "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/support/commands/index.js",
-      "require": "./dist/support/commands/index.js"
+      "import": "./dist/support/index.js",
+      "require": "./dist/support/index.js"
     },
     "./encrypt": {
       "import": "./dist/support/utils/encrypt.js",
