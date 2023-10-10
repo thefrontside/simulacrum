@@ -30,7 +30,7 @@ export function makeCreateSimulation(options?: CreateSimulation) {
         },
         services: {
           auth0: {
-            port: config.auth0RunningPort,
+            port: config.auth0SimulatorPort,
           },
         },
         debug,
