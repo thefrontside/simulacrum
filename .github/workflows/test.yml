@@ -1,10 +1,10 @@
-name: Lint
+name: Test
 
 on: push
 
 jobs:
-  run-linters:
-    name: Lint
+  run-tests:
+    name: Test
     runs-on: ubuntu-latest
 
     steps:
@@ -13,5 +13,4 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
-      - name: Run linters
-        run: npm run lint
+      - run: npm test
