@@ -5,7 +5,7 @@ fake async rule
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function asyncRule(user, context, callback) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let fetch = require('node-fetch');
+  let fetch = require("node-fetch");
 
   let fetcher = async (url) => {
     let response = await fetch(url);
@@ -18,7 +18,7 @@ async function asyncRule(user, context, callback) {
   // these is a contrived rule, but entirely possible
   //  that someone would run a fetch and attach output
   //  to the user as part of the token
-  let checkURLOne = 'https://www.frontside.com';
+  let checkURLOne = "https://frontside.com";
   user.checkURLOne = checkURLOne;
   let checkOne = await fetcher(checkURLOne);
   user.checkURLOneStatus = checkOne.checkURLStatus;
@@ -26,7 +26,7 @@ async function asyncRule(user, context, callback) {
 
   // this is a sub-site with various redirects to it should
   //   take some time to revolve
-  let checkURLTwo = 'https://www.frontside.com/effection';
+  let checkURLTwo = "https://frontside.com/effection";
   user.checkURLTwo = checkURLTwo;
   let checkTwo = await fetcher(checkURLTwo);
   user.checkURLTwoStatus = checkTwo.checkURLStatus;
