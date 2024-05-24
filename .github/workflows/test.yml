@@ -11,16 +11,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: volta-cli/action@v4
 
-      - name: Debug Environment
-        run: |
-          echo "PATH: $PATH"
-          echo "SHELL: $SHELL"
-        shell: bash
-
       - run: wget https://dl.filippo.io/mkcert/latest?for=linux/amd64 -O mkcert
       - run: export CWD=$(pwd)
       - run: chmod +x mkcert
-      - run: cp mkcert /usr/local/bin/
+      - run: cp mkcert /home/runner/.local/bin/
       - run: mkdir -p ~/.simulacrum/certs
       - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
       - run: mkcert -install && mkcert localhost
