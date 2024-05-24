@@ -4,9 +4,15 @@ runs:
   using: "composite"
   steps:
     - run: wget https://dl.filippo.io/mkcert/latest?for=linux/amd64 -O mkcert
+      shell: bash
     - run: chmod +x mkcert
+      shell: bash
     - run: cp mkcert /usr/local/bin
+      shell: bash
     - run: mkdir -p $HOME/.simulacrum/certs
+      shell: bash
     - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
+      shell: bash
     - run: mkcert -install && mkcert localhost
       working-directory: /home/runner/.simulacrum/certs
+      shell: bash
