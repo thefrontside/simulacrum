@@ -280,7 +280,7 @@ describe("rules", () => {
         "https://frontside.com/effection"
       );
       expect(idToken?.payload.checkURLTwoStatus).toBe(200);
-      expect(idToken?.payload.checkURLTwoText).toBe("<!doctype html>");
+      expect(idToken?.payload.checkURLTwoText).toBe('<html lang="en-');
     });
 
     it("should resolve async nested in sync wrapper", function* () {
@@ -318,7 +318,7 @@ describe("rules", () => {
         "https://frontside.com/effection"
       );
       expect(idToken?.payload.checkURLTwoStatus).toBe(200);
-      expect(idToken?.payload.checkURLTwoText).toBe("<!doctype html>");
+      expect(idToken?.payload.checkURLTwoText).toBe('<html lang="en-');
     });
   });
 });
