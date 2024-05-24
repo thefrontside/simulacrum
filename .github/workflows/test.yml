@@ -10,15 +10,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: volta-cli/action@v4
-      - run: echo $HOME
 
       - run: wget https://dl.filippo.io/mkcert/latest?for=linux/amd64 -O mkcert
       - run: chmod +x mkcert
       - run: cp mkcert /usr/local/bin
-      - run: mkdir -p ${{ env.HOME }}/.simulacrum/certs
+      - run: mkdir -p $HOME/.simulacrum/certs
       - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
       - run: mkcert -install && mkcert localhost
-        working-directory: ${{ env.HOME }}/.simulacrum/certs
+        working-directory: /home/runner/.simulacrum/certs
 
       - name: Install Node.js dependencies
         run: npm ci
