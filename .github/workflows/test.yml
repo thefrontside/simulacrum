@@ -11,8 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: volta-cli/action@v4
 
-      - run: wget https://dl.filippo.io/mkcert/v1.4.4?for=linux/amd64
-      - run: mv mkcert-v1.4.4-linux-amd64 mkcert
+      - run: wget https://dl.filippo.io/mkcert/latest?for=linux/amd64 -O mkcert
       - run: export CWD=$(pwd)
       - run: chmod +x mkcert
       - run: cp mkcert /usr/local/bin/
