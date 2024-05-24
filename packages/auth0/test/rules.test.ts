@@ -275,14 +275,12 @@ describe("rules", () => {
 
       expect(idToken?.payload.checkURLOne).toBe("https://frontside.com");
       expect(idToken?.payload.checkURLOneStatus).toBe(200);
-      expect(idToken?.payload.checkURLOneText).toBe('<html lang="en-');
-      // used to be <!doctype html> which may switch back
+      expect(idToken?.payload.checkURLOneText).toBe("<!doctype html>");
       expect(idToken?.payload.checkURLTwo).toBe(
         "https://frontside.com/effection"
       );
       expect(idToken?.payload.checkURLTwoStatus).toBe(200);
-      expect(idToken?.payload.checkURLTwoText).toBe('<html lang="en-');
-      // used to be <!doctype html> which may switch back
+      expect(idToken?.payload.checkURLTwoText).toBe("<!doctype html>");
     });
 
     it("should resolve async nested in sync wrapper", function* () {
@@ -314,15 +312,13 @@ describe("rules", () => {
 
       expect(idToken?.payload.checkURLOne).toBe("https://frontside.com");
       expect(idToken?.payload.checkURLOneStatus).toBe(200);
-      expect(idToken?.payload.checkURLOneText).toBe('<html lang="en-');
-      // used to be <!doctype html> which may switch back
+      expect(idToken?.payload.checkURLOneText).toBe("<!doctype html>");
 
       expect(idToken?.payload.checkURLTwo).toBe(
         "https://frontside.com/effection"
       );
       expect(idToken?.payload.checkURLTwoStatus).toBe(200);
-      expect(idToken?.payload.checkURLTwoText).toBe('<html lang="en-');
-      // used to be <!doctype html> which may switch back
+      expect(idToken?.payload.checkURLTwoText).toBe("<!doctype html>");
     });
   });
 });
