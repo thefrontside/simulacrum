@@ -10,14 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: volta-cli/action@v4
-
-      - run: wget https://dl.filippo.io/mkcert/latest?for=linux/amd64 -O mkcert
-      - run: chmod +x mkcert
-      - run: cp mkcert /usr/local/bin
-      - run: mkdir -p $HOME/.simulacrum/certs
-      - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
-      - run: mkcert -install && mkcert localhost
-        working-directory: /home/runner/.simulacrum/certs
+      - name: Install TLS Certificate
+        uses: ./.github/actions/install-cert
 
       - name: Install Node.js dependencies
         run: npm ci
