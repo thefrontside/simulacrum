@@ -15,10 +15,10 @@ jobs:
       - run: export CWD=$(pwd)
       - run: chmod +x mkcert
       - run: cp mkcert /home/runner/.local/bin
-      - run: mkdir -p ~/.simulacrum/certs
+      - run: mkdir -p $HOME/.simulacrum/certs
       - run: export NODE_EXTRA_CA_CERTS="$(mkcert -CAROOT)/rootCA.pem"
       - run: mkcert -install && mkcert localhost
-        working-directory: ~/.simulacrum/certs
+        working-directory: $HOME/.simulacrum/certs
 
       - name: Install Node.js dependencies
         run: npm ci
