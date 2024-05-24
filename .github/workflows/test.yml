@@ -1,17 +1,20 @@
-name: Lint
+name: Test
 
 on: push
 
 jobs:
-  run-linters:
-    name: Lint
+  run-tests:
+    name: Test
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
       - uses: volta-cli/action@v4
+      - name: Install TLS Certificate
+        uses: ./.github/actions/install-cert
+
       - name: Install Node.js dependencies
         run: npm ci
 
-      - name: Run linters
-        run: npm run lint
+      - run: npm run build
+      - run: npm test

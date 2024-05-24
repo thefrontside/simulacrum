@@ -5,17 +5,17 @@ fake async rule
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function syncWrapper(user, context, callback) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let fetch = require('node-fetch');
+  let fetch = require("node-fetch");
 
   // these is a contrived rule, but entirely possible
   //  that someone would run a fetch and attach output
   //  to the user as part of the token
-  let checkURLOne = 'https://www.frontside.com';
+  let checkURLOne = "https://frontside.com";
   user.checkURLOne = checkURLOne;
 
   // this is a sub-site with various redirects to it should
   //   take some time to revolve
-  let checkURLTwo = 'https://www.frontside.com/effection';
+  let checkURLTwo = "https://frontside.com/effection";
   user.checkURLTwo = checkURLTwo;
 
   let fetcher = async (url) => {

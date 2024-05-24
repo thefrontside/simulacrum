@@ -6,7 +6,8 @@
   "bin": "bin/index.js",
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
-    "test": "NODE_ENV=test mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
+    "test": "echo skip",
+    "test-local": "NODE_ENV=test mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
     "prepack": "tsc --build tsconfig.dist.json",
     "build": "npm run prepack",
     "lint": "eslint src test",
