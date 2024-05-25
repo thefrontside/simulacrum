@@ -38,12 +38,6 @@
       "manager": "javascript",
       "dependencies": ["@simulacrum/server", "@simulacrum/client"]
     },
-    "@simulacrum/auth0-cypress": {
-      "path": "./integrations/cypress",
-      "manager": "javascript",
-      "dependencies": ["@simulacrum/auth0-simulator"],
-      "prepublish": ["npm install", "npm run build"]
-    },
     "@simulacrum/github-api-simulator": {
       "path": "./packages/github-api",
       "manager": "javascript",
