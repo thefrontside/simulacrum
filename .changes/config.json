@@ -3,7 +3,12 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
-      "getPublishedVersion": "node ../../.scripts/checkIfPublished.mjs ${ pkgFile.pkg.name } ${ pkg.tag ? pkg.tag : 'latest' }",
+      "getPublishedVersion": {
+        "use": "fetch:check",
+        "options": {
+          "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
+        }
+      },
       "publish": "npm publish --access public"
     }
   },
