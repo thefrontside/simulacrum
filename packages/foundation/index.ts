@@ -14,7 +14,7 @@ type RecursivePartial<T> = {
 export async function startServerStandalone({
   openapi,
   port = 9000,
-  extendStore = { actions: {}, schema: {} },
+  extendStore,
   extend,
 }: {
   openapi?: {
@@ -65,14 +65,10 @@ export async function startServerStandalone({
         res.status(400).json({ err: c.validation.errors }),
       notFound: (c, req, res) => res.status(404).json({ error: "not found" }),
       notImplemented: (c, req, res) => {
-        if (!c?.operation?.operationId) {
-          return res.status(404).json({
-            status: 501,
-            error: "No handler registered for operation",
-          });
-        }
         let { status, mock } = c.api.mockResponseForOperation(
-          c.operation.operationId
+          // the route validates this exists and throws if it does not
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          c.operation.operationId!
         );
         return res.status(status).json(mock);
       },

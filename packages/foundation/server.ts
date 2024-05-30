@@ -1,7 +1,7 @@
 import { startServerStandalone } from "./index";
 import type { SimulationSlice } from "./store/schema";
 
-const oas1 = {
+const openapiSchemaFromRealEndpoint = {
   openapi: "3.0.0",
   info: {
     title: "API",
@@ -22,16 +22,51 @@ const oas1 = {
   },
 };
 
-const oas2 = {
+const openapiSchemaWithModificationsForSimulation = {
   openapi: "3.0.0",
   info: {
     title: "API",
     version: "1.0.0",
   },
   paths: {
+    "/pets": {
+      get: {
+        operationId: "getPets",
+        responses: {
+          200: {
+            $ref: "#/components/responses/PetList",
+          },
+        },
+      },
+    },
     "/dogs": {
       get: {
         operationId: "getDogs",
+      },
+    },
+    "/more-dogs": {
+      get: {
+        operationId: "putDogs",
+        responses: {
+          200: {
+            description: "All of the dogs",
+          },
+        },
+      },
+    },
+  },
+  components: {
+    responses: {
+      PetList: {
+        description: "you would love them",
+        content: {
+          "application/json": {
+            example: [
+              { id: 1, name: "Garfield" },
+              { id: 2, name: "Odie" },
+            ],
+          },
+        },
       },
     },
   },
@@ -39,11 +74,24 @@ const oas2 = {
 
 startServerStandalone({
   openapi: {
-    document: [oas1, oas2],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    document: [
+      openapiSchemaFromRealEndpoint,
+      openapiSchemaWithModificationsForSimulation,
+    ],
     handlers({ simulationStore }) {
       return {
         getDogs: (c, req, res) => {
+          let dogs = simulationStore.schema.boop.select(
+            simulationStore.store.getState()
+          );
+          res.status(200).json({ dogs });
+        },
+        putDogs: (c, req, res) => {
+          simulationStore.store.dispatch(
+            simulationStore.actions.updater(
+              simulationStore.schema.boop.increment()
+            )
+          );
           res.sendStatus(200);
         },
       };

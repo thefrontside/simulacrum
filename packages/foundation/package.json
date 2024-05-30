@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "start": "ts-node server.ts",
+    "start": "node --import=tsx server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -12,6 +12,8 @@
     "express": "^4.19.2",
     "openapi-backend": "^5.10.6",
     "openapi-merge": "^1.3.2",
-    "starfx": "^0.12.0"
+    "starfx": "^0.12.0",
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.5"
   }
 }
