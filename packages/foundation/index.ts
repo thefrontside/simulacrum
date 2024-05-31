@@ -11,7 +11,11 @@ type RecursivePartial<T> = {
   [P in keyof T]?: RecursivePartial<T[P]>;
 };
 
-export async function startServerStandalone({
+type ReturnTypes<T extends Record<string, () => any>> = {
+  [K in keyof T]: ReturnType<T[K]>;
+};
+
+export async function startServerStandalone<ES extends { actions: any; schema: SimulationInputSchema }>({
   openapi,
   port = 9000,
   extendStore,
@@ -22,12 +26,16 @@ export async function startServerStandalone({
     handlers: ({
       simulationStore,
     }: {
-      simulationStore: SimulationStore;
+      simulationStore: {
+        store: SimulationStore['store'];
+        schema: SimulationStore['schema'] & ReturnTypes<ReturnType<ES['schema']>>;
+        actions: SimulationStore['actions'] & ReturnTypes<ReturnType<ES['actions']>>;
+      };
     }) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
   };
   port: number;
-  extendStore?: { actions: any; schema: SimulationInputSchema };
+  extendStore?: ES;
   extend?(router: express.Router, simulationStore: SimulationStore): void;
 }) {
   let app = express();
