@@ -3,7 +3,8 @@ import { parallel, take, createStore } from "starfx";
 import type { SimulationInputSchema } from "./schema";
 import { generateSchemaWithInputSlices } from "./schema";
 
-export function setupStore({
+export type SimulationStore = ReturnType<typeof setupStore>;
+export function setupStore<ExtendedStoreSchema extends SimulationInputSchema>({
   logs = true,
   additionalTasks = [],
   initialState,
@@ -12,7 +13,7 @@ export function setupStore({
   logs: boolean;
   initialState?: Record<string, any>;
   additionalTasks?: Callable<unknown>[];
-  inputSchema: SimulationInputSchema;
+  inputSchema?: ExtendedStoreSchema;
 }) {
   let [schema, schemaInitialState] = generateSchemaWithInputSlices(inputSchema);
   let store = createStore({

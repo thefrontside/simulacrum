@@ -2,20 +2,28 @@ import express from "express";
 import { merge } from "lodash";
 import type { Handler, Request, Document } from "openapi-backend";
 import OpenAPIBackend from "openapi-backend";
-import type { SimulationStore } from "./store";
+import type { StoreThunks } from "./store";
 import { createSimulationStore } from "./store";
 import type { SimulationInputSchema } from "./store/schema";
+import type { SimulationStore } from "./store/setup";
+import type { RecursivePartial, ReturnTypes } from "./store/types";
 
-type RecursivePartial<T> = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  [P in keyof T]?: RecursivePartial<T[P]>;
-};
+export type ThunksCreated = ReturnType<StoreThunks["create"]>;
 
-type ReturnTypes<T extends Record<string, () => any>> = {
-  [K in keyof T]: ReturnType<T[K]>;
-};
-
-export async function startServerStandalone<ES extends { actions: any; schema: SimulationInputSchema }>({
+export async function startServerStandalone<
+  ExtendedStoreSchema extends SimulationInputSchema,
+  ExtendedStoreActions extends (arg: {
+    thunks: StoreThunks;
+    store: SimulationStore["store"];
+    schema: SimulationStore["schema"] &
+      ReturnTypes<ReturnType<ExtendedStoreSchema>>;
+  }) => { [Key: string]: ThunksCreated },
+  SimulationStoreContext extends {
+    store: SimulationStore["store"];
+    schema: ExtendedStoreSchema;
+    actions: ExtendedStoreActions;
+  }
+>({
   openapi,
   port = 9000,
   extendStore,
@@ -26,17 +34,16 @@ export async function startServerStandalone<ES extends { actions: any; schema: S
     handlers: ({
       simulationStore,
     }: {
-      simulationStore: {
-        store: SimulationStore['store'];
-        schema: SimulationStore['schema'] & ReturnTypes<ReturnType<ES['schema']>>;
-        actions: SimulationStore['actions'] & ReturnTypes<ReturnType<ES['actions']>>;
-      };
+      simulationStore: SimulationStoreContext;
     }) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
   };
   port: number;
-  extendStore?: ES;
-  extend?(router: express.Router, simulationStore: SimulationStore): void;
+  extendStore?: { schema: ExtendedStoreSchema; actions: ExtendedStoreActions };
+  extend?(
+    router: express.Router,
+    simulationStore: SimulationStoreContext
+  ): void;
 }) {
   let app = express();
   app.use(express.json());

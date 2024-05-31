@@ -1,5 +1,4 @@
 import { startServerStandalone } from "./index";
-import type { SimulationSlice } from "./store/schema";
 
 const openapiSchemaFromRealEndpoint = {
   openapi: "3.0.0",
@@ -99,8 +98,18 @@ startServerStandalone({
     apiRoot: "/api",
   },
   extendStore: {
-    actions: () => ({}),
-    schema: ({ slice }: { slice: SimulationSlice }) => {
+    actions: ({ thunks, schema }) => {
+      let upsertTest = thunks.create("user:upsert", function* boop(ctx, next) {
+        yield* schema.update(
+          schema.test.add({ [ctx.payload.id]: ctx.payload })
+        );
+
+        yield* next();
+      });
+
+      return { upsertTest };
+    },
+    schema: ({ slice }) => {
       let slices = {
         test: slice.table(),
         booping: slice.str(),

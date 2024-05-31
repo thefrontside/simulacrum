@@ -1,18 +1,18 @@
 import { createSchema, slice as immerSlice } from "starfx";
 
 export type SimulationSlice = typeof immerSlice;
-export type SimulationInputSchema = Parameters<
-  typeof generateSchemaWithInputSlices
->[0];
-type SimulationSchemaSlices = Omit<
+export type SimulationInputSchema = (args: {
+  slice: SimulationSlice;
+}) => SimulationSchemaSlicesSansBase;
+export type SimulationSchemaSlicesSansBase = Omit<
   Parameters<typeof createSchema>[0],
   "loaders" | "cache"
 >;
 
-export function generateSchemaWithInputSlices(
-  inputSchema: (args: { slice: SimulationSlice }) => SimulationSchemaSlices
-) {
-  let slices = inputSchema({ slice: immerSlice });
+export function generateSchemaWithInputSlices<
+  ExtendedStoreSchema extends SimulationInputSchema
+>(inputSchema?: ExtendedStoreSchema) {
+  let slices = inputSchema ? inputSchema({ slice: immerSlice }) : {};
 
   return createSchema({
     cache: immerSlice.table({ empty: {} }),
@@ -20,3 +20,7 @@ export function generateSchemaWithInputSlices(
     ...slices,
   });
 }
+
+export type SimulationSchemaSlices = ReturnType<
+  typeof generateSchemaWithInputSlices
+>;
