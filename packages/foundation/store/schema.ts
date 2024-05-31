@@ -17,7 +17,6 @@ export function generateSchemaWithInputSlices(
   return createSchema({
     cache: immerSlice.table({ empty: {} }),
     loaders: immerSlice.loaders(),
-    boop: immerSlice.num(),
     ...slices,
   });
 }

@@ -104,6 +104,7 @@ startServerStandalone({
       let slices = {
         test: slice.table(),
         booping: slice.str(),
+        boop: slice.num(),
       };
       return slices;
     },
