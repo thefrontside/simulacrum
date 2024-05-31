@@ -48,6 +48,7 @@ export async function startServerStandalone<
   let app = express();
   app.use(express.json());
   let simulationStore = createSimulationStore(extendStore);
+
   if (extend) {
     extend(app, simulationStore);
   }

@@ -1,4 +1,4 @@
-import { startServerStandalone } from "./index";
+import { startServerStandalone } from "../index";
 
 const openapiSchemaFromRealEndpoint = {
   openapi: "3.0.0",
@@ -72,6 +72,7 @@ const openapiSchemaWithModificationsForSimulation = {
 };
 
 startServerStandalone({
+  port: 9999,
   openapi: {
     document: [
       openapiSchemaFromRealEndpoint,
@@ -118,5 +119,12 @@ startServerStandalone({
       return slices;
     },
   },
-  port: 9999,
+  extend(router, simulationStore) {
+    router.get("/extended-route", (req, res) => {
+      let dogs = simulationStore.schema.boop.select(
+        simulationStore.store.getState()
+      );
+      res.status(200).json({ dogs });
+    });
+  },
 });
