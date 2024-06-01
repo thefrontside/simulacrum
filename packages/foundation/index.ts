@@ -31,11 +31,9 @@ export async function startServerStandalone<
 }: {
   openapi?: {
     document: Document | [Document, RecursivePartial<Document>];
-    handlers: ({
-      simulationStore,
-    }: {
-      simulationStore: SimulationStoreContext;
-    }) => Record<string, Handler | Record<string, Handler>>;
+    handlers: (
+      simulationStore: SimulationStoreContext
+    ) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
   };
   port: number;
@@ -74,7 +72,7 @@ export async function startServerStandalone<
         }
       }
     };
-    handlerObjectRegistration(handlers({ simulationStore }));
+    handlerObjectRegistration(handlers(simulationStore));
 
     api.register({
       validationFail: (c, req, res) =>

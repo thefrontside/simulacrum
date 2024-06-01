@@ -78,20 +78,14 @@ startServerStandalone({
       openapiSchemaFromRealEndpoint,
       openapiSchemaWithModificationsForSimulation,
     ],
-    handlers({ simulationStore }) {
+    handlers({ store, schema, actions }) {
       return {
         getDogs: (c, req, res) => {
-          let dogs = simulationStore.schema.boop.select(
-            simulationStore.store.getState()
-          );
+          let dogs = schema.boop.select(store.getState());
           res.status(200).json({ dogs });
         },
         putDogs: (c, req, res) => {
-          simulationStore.store.dispatch(
-            simulationStore.actions.updater(
-              simulationStore.schema.boop.increment()
-            )
-          );
+          store.dispatch(actions.updater(schema.boop.increment()));
           res.sendStatus(200);
         },
       };
