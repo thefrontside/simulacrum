@@ -1,15 +1,28 @@
 {
   "name": "@simulacrum/foundation-simulator",
   "version": "0.0.1",
-  "description": "",
-  "main": "server.ts",
+  "description": "Base simulator to build simulators for integration testing.",
+  "author": "Frontside Engineering <engineering@frontside.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
+  },
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "keywords": [
+    "simulation",
+    "emulation",
+    "mock",
+    "mocking",
+    "integration testing"
+  ],
+  "main": "dist/index.js",
   "scripts": {
     "start": "node --import=tsx example/server.ts",
     "start:server": "node --import=tsx example/server.ts",
     "start:extensive": "node --import=tsx example/extensiveServer.ts",
+    "prepack": "tsc --build tsconfig.dist.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
   "dependencies": {
     "express": "^4.19.2",
     "openapi-backend": "^5.10.6",
@@ -17,5 +30,8 @@
     "starfx": "^0.12.0",
     "tsx": "^4.11.0",
     "typescript": "^5.4.5"
+  },
+  "volta": {
+    "extends": "../../package.json"
   }
 }
