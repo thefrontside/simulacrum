@@ -2,28 +2,15 @@ import express from "express";
 import { merge } from "lodash";
 import type { Handler, Request, Document } from "openapi-backend";
 import OpenAPIBackend from "openapi-backend";
-import type { StoreThunks } from "./store";
+import { FxStore, QueryState } from "starfx";
+import type { Actions, StoreThunks } from "./store";
 import { createSimulationStore } from "./store";
-import type { SimulationInputSchema } from "./store/schema";
-import type { SimulationStore } from "./store/setup";
+import type { SimulationInputSchema, SimulationSchema } from "./store/schema";
 import type { RecursivePartial, ReturnTypes } from "./store/types";
 
 export type ThunksCreated = ReturnType<StoreThunks["create"]>;
 
-export async function startServerStandalone<
-  ExtendedStoreSchema extends SimulationInputSchema,
-  ExtendedStoreActions extends (arg: {
-    thunks: StoreThunks;
-    store: SimulationStore["store"];
-    schema: SimulationStore["schema"] &
-      ReturnTypes<ReturnType<ExtendedStoreSchema>>;
-  }) => { [Key: string]: ThunksCreated },
-  SimulationStoreContext extends {
-    store: SimulationStore["store"];
-    schema: ExtendedStoreSchema;
-    actions: ExtendedStoreActions;
-  }
->({
+export async function startServerStandalone<Input>({
   openapi,
   port = 9000,
   extendStore,
@@ -32,15 +19,15 @@ export async function startServerStandalone<
   openapi?: {
     document: Document | [Document, RecursivePartial<Document>];
     handlers: (
-      simulationStore: SimulationStoreContext
+      simulationStore: { store: FxStore<QueryState & Input>; schema: SimulationSchema<Input>; actions: Actions<Input> }
     ) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
   };
   port: number;
-  extendStore?: { schema: ExtendedStoreSchema; actions: ExtendedStoreActions };
+  extendStore?: { schema: SimulationInputSchema<Input>; actions: Actions<Input> };
   extend?(
     router: express.Router,
-    simulationStore: SimulationStoreContext
+    simulationStore: { store: FxStore<QueryState & Input>; schema: SimulationSchema<Input>; actions: Actions<Input> }
   ): void;
 }) {
   let app = express();
@@ -48,6 +35,7 @@ export async function startServerStandalone<
   let simulationStore = createSimulationStore(extendStore);
 
   if (extend) {
+    // TODO Add `updater` action
     extend(app, simulationStore);
   }
 
