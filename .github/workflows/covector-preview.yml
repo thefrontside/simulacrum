@@ -15,14 +15,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           registry-url: "https://registry.npmjs.org"
+          always-auth: true
       - run: npm config list
       - uses: volta-cli/action@v4
       - name: Install Node.js dependencies
         run: npm ci
-      - name: git config
-        run: |
-          git config --global user.name "${{ github.event.pull_request.user.name }}"
-          git config --global user.email "${{ github.event.pull_request.user.email }}"
 
       - name: covector status
         uses: jbolda/covector/packages/action@covector-v0
