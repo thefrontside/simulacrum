@@ -9,7 +9,7 @@
           "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
         }
       },
-      "publish": "npm publish --provenance --access public${ pkg.tag ? ' --tag latest' : '' }",
+      "publish": "npm publish --provenance --access public${ pkg.tag ? ' --tag preview' : '' }",
       "postpublish": {
         "use": "fetch:check",
         "options": {
