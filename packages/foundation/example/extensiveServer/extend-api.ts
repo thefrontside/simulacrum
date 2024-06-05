@@ -1,4 +1,4 @@
-export const extend = (router, simulationStore) => {
+export const extendRouter = (router, simulationStore) => {
   router.get("extended-route", (req, res) => {
     let dogs = simulationStore.schema.boop.select(
       simulationStore.store.getState()

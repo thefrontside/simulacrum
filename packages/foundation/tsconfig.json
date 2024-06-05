@@ -1,8 +1,9 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@frontside/tsconfig",
   "compilerOptions": {
     "baseUrl": ".",
-    "noEmit": true
+    "noEmit": true,
+    "declarationMap": true
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }

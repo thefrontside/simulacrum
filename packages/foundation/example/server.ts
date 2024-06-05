@@ -1,4 +1,5 @@
-import { startServerStandalone } from "../index";
+import { startFoundationSimulationServer } from "../src";
+import type { AnyState, SimulationStoreThunks, SimulationSlice } from "../src";
 
 const openapiSchemaFromRealEndpoint = {
   openapi: "3.0.0",
@@ -71,7 +72,7 @@ const openapiSchemaWithModificationsForSimulation = {
   },
 };
 
-startServerStandalone({
+startFoundationSimulationServer({
   port: 9999,
   openapi: {
     document: [
@@ -85,7 +86,8 @@ startServerStandalone({
           res.status(200).json({ dogs });
         },
         putDogs: (c, req, res) => {
-          store.dispatch(actions.updater(schema.boop.increment()));
+          store.dispatch(actions.batchUpdater([schema.boop.increment()]));
+          store.dispatch(actions.upsertTest({ ["1"]: { name: "Friend" } }));
           res.sendStatus(200);
         },
       };
@@ -93,18 +95,29 @@ startServerStandalone({
     apiRoot: "/api",
   },
   extendStore: {
-    actions: ({ thunks, schema }) => {
-      let upsertTest = thunks.create("user:upsert", function* boop(ctx, next) {
-        yield* schema.update(
-          schema.test.add({ [ctx.payload.id]: ctx.payload })
-        );
+    actions: ({
+      thunks,
+      schema,
+    }: {
+      thunks: SimulationStoreThunks;
+      schema: any;
+    }) => {
+      // TODO attempt to remove this type as a requirement
+      let upsertTest = thunks.create<AnyState>(
+        "user:upsert",
+        function* boop(ctx, next) {
+          yield* schema.update(
+            schema.test.add({ [ctx.payload.id]: ctx.payload })
+          );
 
-        yield* next();
-      });
+          yield* next();
+        }
+      );
 
       return { upsertTest };
     },
-    schema: ({ slice }) => {
+    schema: ({ slice }: { slice: SimulationSlice }) => {
+      // TODO attempt to remove this type as a requirement
       let slices = {
         test: slice.table(),
         booping: slice.str(),
@@ -113,7 +126,7 @@ startServerStandalone({
       return slices;
     },
   },
-  extend(router, simulationStore) {
+  extendRouter(router, simulationStore) {
     router.get("/extended-route", (req, res) => {
       let dogs = simulationStore.schema.boop.select(
         simulationStore.store.getState()

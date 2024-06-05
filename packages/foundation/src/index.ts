@@ -2,47 +2,72 @@ import express from "express";
 import { merge } from "lodash";
 import type { Handler, Request, Document } from "openapi-backend";
 import OpenAPIBackend from "openapi-backend";
-import { FxStore, QueryState } from "starfx";
-import type { Actions, StoreThunks } from "./store";
+import type {
+  SimulationStore,
+  ExtendSimulationActionsInput,
+  StoreThunks,
+} from "./store";
 import { createSimulationStore } from "./store";
-import type { SimulationInputSchema, SimulationSchema } from "./store/schema";
-import type { RecursivePartial, ReturnTypes } from "./store/types";
+import type {
+  ExtendSimulationSchemaInput,
+  SimulationSlice,
+} from "./store/schema";
+import type { RecursivePartial } from "./store/types";
 
-export type ThunksCreated = ReturnType<StoreThunks["create"]>;
+export type { Context } from "openapi-backend";
+export type { Request, Response } from "express";
+export type { AnyState } from "starfx";
+export type {
+  StoreThunks as SimulationStoreThunks,
+  SimulationSlice,
+  SimulationStore,
+};
 
-export async function startServerStandalone<Input>({
-  openapi,
+export async function createFoundationSimulationServer<
+  ExtendedSimulationSchema,
+  ExtendedSimulationActions
+>({
   port = 9000,
+  openapi,
   extendStore,
-  extend,
+  extendRouter,
 }: {
+  port: number;
   openapi?: {
-    document: Document | [Document, RecursivePartial<Document>];
+    document: Document | RecursivePartial<Document>[];
     handlers: (
-      simulationStore: { store: FxStore<QueryState & Input>; schema: SimulationSchema<Input>; actions: Actions<Input> }
+      simulationStore: SimulationStore<
+        ExtendedSimulationSchema,
+        ExtendedSimulationActions
+      >
     ) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
   };
-  port: number;
-  extendStore?: { schema: SimulationInputSchema<Input>; actions: Actions<Input> };
-  extend?(
+  extendStore?: {
+    schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
+    actions: ExtendSimulationActionsInput<ExtendedSimulationActions>;
+  };
+  extendRouter?(
     router: express.Router,
-    simulationStore: { store: FxStore<QueryState & Input>; schema: SimulationSchema<Input>; actions: Actions<Input> }
+    simulationStore: SimulationStore<
+      ExtendedSimulationSchema,
+      ExtendedSimulationActions
+    >
   ): void;
 }) {
+  console.time(`api listening at http://localhost:${port}, started in`);
   let app = express();
   app.use(express.json());
   let simulationStore = createSimulationStore(extendStore);
 
-  if (extend) {
-    // TODO Add `updater` action
-    extend(app, simulationStore);
+  if (extendRouter) {
+    extendRouter(app, simulationStore);
   }
 
   if (openapi) {
     let { document, handlers, apiRoot } = openapi;
     let mergedOAS = Array.isArray(document)
-      ? merge(document[0], document[1])
+      ? mergeDocumentArray(document)
       : document;
 
     let api = new OpenAPIBackend({ definition: mergedOAS, apiRoot });
@@ -81,15 +106,49 @@ export async function startServerStandalone<Input>({
     app.use((req, res) => api.handleRequest(req as Request, req, res));
   }
 
-  let server = app.listen(port, () =>
-    console.info(`api listening at http://localhost:${port}`)
-  );
+  return {
+    listen: async (portOverride?: number) => {
+      let listeningPort = portOverride ?? port;
+      let server = app.listen(listeningPort, () =>
+        console.timeEnd(
+          `api listening at http://localhost:${listeningPort}, started in`
+        )
+      );
 
-  if (!server.listening) {
-    await new Promise<void>((resolve) => {
-      server.once("listening", resolve);
-    });
-  }
+      if (!server.listening) {
+        await new Promise<void>((resolve) => {
+          server.once("listening", resolve);
+        });
+      }
 
-  return server;
+      return server;
+    },
+  };
+}
+
+const mergeDocumentArray = (
+  documents: RecursivePartial<Document>[]
+): Document => {
+  let [firstDocument, secondDocument, ...remainingDocuments] = documents;
+  let document = merge({ ...firstDocument }, { ...secondDocument });
+  if (remainingDocuments.length > 0)
+    return mergeDocumentArray([document].concat(remainingDocuments));
+  return document as Document;
+};
+
+export async function startFoundationSimulationServer<
+  ExtendedSimulationSchema,
+  ExtendedSimulationActions
+>(
+  arg: Parameters<
+    // eslint has a parsing error which means we can't fix this
+    //  it is however valid TypeScript
+    typeof createFoundationSimulationServer<
+      ExtendedSimulationSchema,
+      ExtendedSimulationActions
+    >
+  >[0]
+) {
+  let simulation = await createFoundationSimulationServer(arg);
+  return simulation.listen();
 }

@@ -1,19 +1,19 @@
-import type { Callable, FxStore, QueryState } from "starfx";
+import type { Callable } from "starfx";
 import { parallel, take, createStore } from "starfx";
-import type { SimulationInputSchema, SimulationSchema } from "./schema";
+import type { ExtendSimulationSchemaInput } from "./schema";
 import { generateSchemaWithInputSlices } from "./schema";
 
-export function setupStore<Input extends Record<string, any>>({
+export function setupStore<ExtendedSimulationSchema>({
   logs = true,
   additionalTasks = [],
   initialState,
   inputSchema,
 }: {
-  logs: boolean;
+  logs?: boolean;
   initialState?: Record<string, any>;
   additionalTasks?: Callable<unknown>[];
-  inputSchema: SimulationInputSchema<Input>;
-}): { store: FxStore<QueryState & Input>; schema: SimulationSchema<Input> } {
+  inputSchema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
+}) {
   let [schema, schemaInitialState] = generateSchemaWithInputSlices(inputSchema);
   let store = createStore({
     initialState: {
@@ -38,5 +38,5 @@ export function setupStore<Input extends Record<string, any>>({
     yield* group;
   });
 
-  return { store, schema } as any;
+  return { store, schema };
 }
