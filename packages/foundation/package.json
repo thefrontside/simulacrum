@@ -8,6 +8,11 @@
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thefrontside/simulacrum.git",
+    "directory": "packages/foundation"
+  },
   "keywords": [
     "simulation",
     "emulation",

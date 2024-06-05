@@ -17,8 +17,8 @@ jobs:
         run: npm ci
       - name: git config
         run: |
-          git config --global user.name "${{ github.event.pusher.name }}"
-          git config --global user.email "${{ github.event.pusher.email }}"
+          git config --global user.name "${{ github.event.pull_request.user.name }}"
+          git config --global user.email "${{ github.event.pull_request.user.email }}"
 
       - name: covector status
         uses: jbolda/covector/packages/action@covector-v0
