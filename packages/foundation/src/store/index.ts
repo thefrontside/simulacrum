@@ -11,12 +11,17 @@ let batchUpdater = thunks.create<StoreUpdater<AnyState>[]>(
     yield* next();
   }
 );
-export type StoreThunks = typeof thunks;
-export type ExtendSimulationActionsInput<T> = (arg: {
-  thunks: StoreThunks;
-  store: any;
-  schema: any;
-}) => T;
+
+type StoreThunks = typeof thunks;
+type Store<ExtendedSimulationSchema> = ReturnType<
+  typeof setupStore<ExtendedSimulationSchema>
+>;
+export type ExtendSimulationActionsInput<Actions, ExtendedSimulationSchema> =
+  (arg: {
+    thunks: StoreThunks;
+    store: Store<ExtendedSimulationSchema>["store"];
+    schema: Store<ExtendedSimulationSchema>["schema"];
+  }) => Actions;
 
 export function createSimulationStore<
   ExtendedSimulationSchema,
@@ -27,12 +32,17 @@ export function createSimulationStore<
     schema: inputSchema,
   }: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
-    actions: ExtendSimulationActionsInput<ExtendedSimulationActions>;
+    actions: ExtendSimulationActionsInput<
+      ExtendedSimulationActions,
+      ExtendedSimulationSchema
+    >;
   } = {
     schema:
       (() => ({})) as unknown as ExtendSimulationSchemaInput<ExtendedSimulationSchema>,
-    actions:
-      (() => ({})) as unknown as ExtendSimulationActionsInput<ExtendedSimulationActions>,
+    actions: (() => ({})) as unknown as ExtendSimulationActionsInput<
+      ExtendedSimulationActions,
+      ExtendedSimulationSchema
+    >,
   }
 ) {
   let additionalTasks = [thunks.bootup];
@@ -71,3 +81,11 @@ export type SimulationStore<
 > = ReturnType<
   CreateSimulationStore<ExtendedSimulationSchema, ExtendedSimulationActions>
 >;
+
+export type ExtendSimuationActions<
+  InputSchema extends ExtendSimulationSchemaInput<any>
+> = {
+  thunks: StoreThunks;
+  store: Store<ReturnType<InputSchema>>["store"];
+  schema: Store<ReturnType<InputSchema>>["schema"];
+};

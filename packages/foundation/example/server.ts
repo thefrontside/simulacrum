@@ -1,5 +1,11 @@
 import { startFoundationSimulationServer } from "../src";
-import type { AnyState, SimulationStoreThunks, SimulationSlice } from "../src";
+import type {
+  AnyState,
+  SimulationStoreThunks,
+  SimulationSlice,
+  ExtendSimuationActions,
+  ExtendSimulationSchema,
+} from "../src";
 
 const openapiSchemaFromRealEndpoint = {
   openapi: "3.0.0",
@@ -87,7 +93,8 @@ startFoundationSimulationServer({
         },
         putDogs: (c, req, res) => {
           store.dispatch(actions.batchUpdater([schema.boop.increment()]));
-          store.dispatch(actions.upsertTest({ ["1"]: { name: "Friend" } }));
+          // TODO the looped around TS does not seem to tackle this well
+          // store.dispatch(actions.upsertTest({ ["1"]: { name: "Friend" } }));
           res.sendStatus(200);
         },
       };
@@ -95,13 +102,7 @@ startFoundationSimulationServer({
     apiRoot: "/api",
   },
   extendStore: {
-    actions: ({
-      thunks,
-      schema,
-    }: {
-      thunks: SimulationStoreThunks;
-      schema: any;
-    }) => {
+    actions: ({ thunks, schema }) => {
       // TODO attempt to remove this type as a requirement
       let upsertTest = thunks.create<AnyState>(
         "user:upsert",
@@ -116,7 +117,7 @@ startFoundationSimulationServer({
 
       return { upsertTest };
     },
-    schema: ({ slice }: { slice: SimulationSlice }) => {
+    schema: ({ slice }: ExtendSimulationSchema) => {
       // TODO attempt to remove this type as a requirement
       let slices = {
         test: slice.table(),

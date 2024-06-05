@@ -1,5 +1,5 @@
 import type { ExtendedSimulationStore } from "./store";
-import type { Context, Request, Response } from "../../src";
+import type { SimulationHandlers } from "../../src";
 
 const openapiSchemaFromRealEndpoint = {
   openapi: "3.0.0",
@@ -77,21 +77,23 @@ let document = [
   openapiSchemaWithModificationsForSimulation,
 ];
 
-function handlers(simulationStore: ExtendedSimulationStore) {
+function handlers(
+  simulationStore: ExtendedSimulationStore
+): SimulationHandlers {
   return {
-    getDogs: (c: Context, req: Request, res: Response) => {
+    getDogs: (_c, _r, response) => {
       let dogs = simulationStore.schema.boop.select(
         simulationStore.store.getState()
       );
-      res.status(200).json({ dogs });
+      response.status(200).json({ dogs });
     },
-    putDogs: (c: Context, req: Request, res: Response) => {
+    putDogs: (c, req, response) => {
       simulationStore.store.dispatch(
         simulationStore.actions.batchUpdater([
           simulationStore.schema.boop.increment(),
         ])
       );
-      res.sendStatus(200);
+      response.sendStatus(200);
     },
   };
 }

@@ -5,23 +5,28 @@ import OpenAPIBackend from "openapi-backend";
 import type {
   SimulationStore,
   ExtendSimulationActionsInput,
-  StoreThunks,
+  ExtendSimuationActions,
 } from "./store";
 import { createSimulationStore } from "./store";
 import type {
   ExtendSimulationSchemaInput,
-  SimulationSlice,
+  ExtendSimulationSchema,
 } from "./store/schema";
 import type { RecursivePartial } from "./store/types";
 
-export type { Context } from "openapi-backend";
-export type { Request, Response } from "express";
+import type { Context as OpenAPIBackendContext } from "openapi-backend";
+import type {
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+} from "express";
+type SimulationHandlerFunctions = (
+  context: OpenAPIBackendContext,
+  request: ExpressRequest,
+  response: ExpressResponse
+) => void;
+export type SimulationHandlers = Record<string, SimulationHandlerFunctions>;
+export type { ExtendSimuationActions, ExtendSimulationSchema, SimulationStore };
 export type { AnyState } from "starfx";
-export type {
-  StoreThunks as SimulationStoreThunks,
-  SimulationSlice,
-  SimulationStore,
-};
 
 export async function createFoundationSimulationServer<
   ExtendedSimulationSchema,
@@ -45,7 +50,10 @@ export async function createFoundationSimulationServer<
   };
   extendStore?: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
-    actions: ExtendSimulationActionsInput<ExtendedSimulationActions>;
+    actions: ExtendSimulationActionsInput<
+      ExtendedSimulationActions,
+      ExtendedSimulationSchema
+    >;
   };
   extendRouter?(
     router: express.Router,

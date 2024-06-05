@@ -1,22 +1,29 @@
 import type {
   SimulationStore,
-  SimulationStoreThunks,
-  SimulationSlice,
+  ExtendSimuationActions,
+  ExtendSimulationSchema,
 } from "../../src";
 
-export type ExtendedStore = typeof extendStore;
+export type ExtendedSchema = typeof inputSchema;
+type ExtendActions = typeof inputActions;
 export type ExtendedSimulationStore = SimulationStore<
-  ReturnType<ExtendedStore["schema"]>,
-  ReturnType<ExtendedStore["actions"]>
+  ReturnType<ExtendedSchema>,
+  ReturnType<ExtendActions>
 >;
 
-const actions = ({
+const inputSchema = ({ slice }: ExtendSimulationSchema) => {
+  let slices = {
+    test: slice.table(),
+    booping: slice.str(),
+    boop: slice.num(),
+  };
+  return slices;
+};
+
+const inputActions = ({
   thunks,
   schema,
-}: {
-  thunks: SimulationStoreThunks;
-  schema: any;
-}) => {
+}: ExtendSimuationActions<ExtendedSchema>) => {
   let upsertTest = thunks.create("user:upsert", function* boop(ctx, next) {
     yield* schema.update(schema.test.add({ [ctx.payload.id]: ctx.payload }));
 
@@ -26,16 +33,7 @@ const actions = ({
   return { upsertTest };
 };
 
-const schema = ({ slice }: { slice: SimulationSlice }) => {
-  let slices = {
-    test: slice.table(),
-    booping: slice.str(),
-    boop: slice.num(),
-  };
-  return slices;
-};
-
 export const extendStore = {
-  actions,
-  schema,
+  actions: inputActions,
+  schema: inputSchema,
 };

@@ -1,11 +1,12 @@
 import { createSchema, slice as immerSlice } from "starfx";
 
-export type SimulationSlice = typeof immerSlice;
+type SimulationSlice = typeof immerSlice;
+export type ExtendSimulationSchema = {
+  slice: SimulationSlice;
+};
 export type ExtendSimulationSchemaInput<T> = ({
   slice,
-}: {
-  slice: SimulationSlice;
-}) => T;
+}: ExtendSimulationSchema) => T;
 
 export function generateSchemaWithInputSlices<ExtendedSimulationSchema>(
   inputSchema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>
