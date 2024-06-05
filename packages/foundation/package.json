@@ -23,6 +23,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "@simulacrum:registry": "https://registry.npmjs.org"
+  },
   "main": "dist/cjs/index.js",
   "exports": {
     "default": "./dist/cjs/index.js"
