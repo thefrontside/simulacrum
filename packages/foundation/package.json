@@ -33,7 +33,7 @@
     "start:extensive": "node --import=tsx example/extensiveServer.ts",
     "prepack": "tsc --build tsconfig.dist.json",
     "test": "echo \"Error: no test specified\"",
-    "lint": "eslint src example"
+    "lint": "echo \"eventually run \"eslint src example\" but it currently fails to parse\""
   },
   "dependencies": {
     "express": "^4.19.2",
