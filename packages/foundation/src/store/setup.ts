@@ -10,7 +10,7 @@ export function setupStore<ExtendedSimulationSchema>({
   inputSchema,
 }: {
   logs?: boolean;
-  initialState?: Record<string, any>;
+  initialState?: Record<string, unknown>;
   additionalTasks?: Callable<unknown>[];
   inputSchema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
 }) {
