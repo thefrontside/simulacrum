@@ -129,7 +129,14 @@ export async function createFoundationSimulationServer<
         });
       }
 
-      return server;
+      return {
+        ...server,
+        ensureClose: () =>
+          new Promise<void>((resolve) => {
+            server.once("close", resolve);
+            server.close();
+          }),
+      };
     },
   };
 }
