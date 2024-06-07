@@ -29,12 +29,11 @@ describe("single file server - startup in every test", () => {
     let app = await simulation;
     server = await app.listen(getPort(context.task));
   });
-  afterEach(() => {
-    server.close();
+  afterEach(async () => {
+    await server.ensureClose();
   });
 
   it("returns", async ({ task }) => {
-    console.dir(getBaseUrl(task));
     let request = await fetch(`${getBaseUrl(task)}/api/pets`);
     let response = await request.json();
     expect(response).toEqual([
@@ -44,7 +43,6 @@ describe("single file server - startup in every test", () => {
   });
 
   it("adds one dog", async ({ task }) => {
-    console.dir(getBaseUrl(task));
     // note calling this endpoint increments the number of dogs expected
     await fetch(`${getBaseUrl(task)}/api/more-dogs`);
 
@@ -54,7 +52,6 @@ describe("single file server - startup in every test", () => {
   });
 
   it("adds five dogs", async ({ task }) => {
-    console.dir(getBaseUrl(task));
     await fetch(`${getBaseUrl(task)}/api/more-dogs`);
     await fetch(`${getBaseUrl(task)}/api/more-dogs`);
     await fetch(`${getBaseUrl(task)}/api/more-dogs`);
@@ -67,7 +64,6 @@ describe("single file server - startup in every test", () => {
   });
 
   it("adds three dogs", async ({ task }) => {
-    console.dir(getBaseUrl(task));
     await fetch(`${getBaseUrl(task)}/api/more-dogs`);
     await fetch(`${getBaseUrl(task)}/api/more-dogs`);
     await fetch(`${getBaseUrl(task)}/api/more-dogs`);
@@ -78,7 +74,6 @@ describe("single file server - startup in every test", () => {
   });
 
   it("adds six dogs", async ({ task }) => {
-    console.dir(getBaseUrl(task));
     await fetch(`${getBaseUrl(task)}/api/more-dogs`);
     await fetch(`${getBaseUrl(task)}/api/more-dogs`);
     await fetch(`${getBaseUrl(task)}/api/more-dogs`);

@@ -32,7 +32,8 @@
     "start:singlefile": "node --import=tsx example/singleFileServer/start.ts",
     "start:extensive": "node --import=tsx example/extensiveServer/start.ts",
     "prepack": "tsc --build tsconfig.dist.json",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
     "bench": "vitest bench",
     "lint": "echo \"eventually run \"eslint src example\" but it currently fails to parse\""
   },
