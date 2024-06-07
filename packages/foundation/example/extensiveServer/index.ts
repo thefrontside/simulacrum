@@ -1,9 +1,9 @@
-import { startFoundationSimulationServer } from "../../src";
+import { createFoundationSimulationServer } from "../../src";
 import { openapi } from "./openapi";
 import { extendStore } from "./store";
 import { extendRouter } from "./extend-api";
 
-startFoundationSimulationServer({
+export const simulation = createFoundationSimulationServer({
   port: 9999,
   openapi,
   extendStore,

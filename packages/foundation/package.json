@@ -28,9 +28,9 @@
     "default": "./dist/cjs/index.js"
   },
   "scripts": {
-    "start": "node --import=tsx example/server.ts",
-    "start:server": "node --import=tsx example/server.ts",
-    "start:extensive": "node --import=tsx example/extensiveServer.ts",
+    "start": "node --import=tsx example/singleFileServer/start.ts",
+    "start:singlefile": "node --import=tsx example/singleFileServer/start.ts",
+    "start:extensive": "node --import=tsx example/extensiveServer/start.ts",
     "prepack": "tsc --build tsconfig.dist.json",
     "test": "echo \"Error: no test specified\"",
     "lint": "echo \"eventually run \"eslint src example\" but it currently fails to parse\""
