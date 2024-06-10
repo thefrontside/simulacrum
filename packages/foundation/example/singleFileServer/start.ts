@@ -1,3 +1,6 @@
 import { simulation } from "./index";
 
-simulation.then((app) => app.listen());
+let app = simulation();
+app.listen(undefined, () =>
+  console.log(`foundation server started at http://localhost:9999`)
+);

@@ -6,8 +6,8 @@ import type {
   SimulationStore,
   ExtendSimulationActionsInput,
   ExtendSimuationActions,
-} from "./store";
-import { createSimulationStore } from "./store";
+} from "./store/index";
+import { createSimulationStore } from "./store/index";
 import type {
   ExtendSimulationSchemaInput,
   ExtendSimulationSchema,
@@ -115,9 +115,9 @@ export function createFoundationSimulationServer<
     }
 
     return {
-      listen: async (portOverride?: number) => {
+      listen: async (portOverride?: number, callback?: () => void) => {
         let listeningPort = portOverride ?? port;
-        let server = app.listen(listeningPort);
+        let server = app.listen(listeningPort, callback);
 
         if (!server.listening) {
           await new Promise<void>((resolve) => {

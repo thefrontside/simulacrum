@@ -1,5 +1,5 @@
-import { createFoundationSimulationServer } from "../../src";
-import type { AnyState, ExtendSimulationSchema } from "../../src";
+import { createFoundationSimulationServer } from "../../src/index";
+import type { AnyState, ExtendSimulationSchema } from "../../src/index";
 
 const openapiSchemaFromRealEndpoint = {
   openapi: "3.0.0",
