@@ -11,10 +11,10 @@ let basePort = 9048;
 let host = "http://localhost";
 let url = `${host}:${basePort}`;
 
-describe.sequential("single file server - startup in every test", () => {
+describe.sequential("extensive server - start once", () => {
   let server;
   beforeAll(async () => {
-    let app = await simulation;
+    let app = simulation();
     server = await app.listen(basePort);
   });
   afterAll(async () => {

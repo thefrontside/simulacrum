@@ -11,7 +11,6 @@ const openapiSchemaFromRealEndpoint = {
     "/dogs": {
       get: {
         summary: "Get the dogs",
-        operationId: "getDogs",
         responses: {
           200: {
             description: "All of the dogs",
@@ -23,11 +22,6 @@ const openapiSchemaFromRealEndpoint = {
 };
 
 const openapiSchemaWithModificationsForSimulation = {
-  openapi: "3.0.0",
-  info: {
-    title: "API",
-    version: "1.0.0",
-  },
   paths: {
     "/pets": {
       get: {

@@ -23,10 +23,10 @@ let getBaseUrl = (task) => {
   return `${host}:${getPort(task)}`;
 };
 
-describe("single file server - startup in every test", () => {
+describe("extensive server - startup in every test - parallel", () => {
   let server;
   beforeEach(async (context) => {
-    let app = await simulation;
+    let app = simulation();
     server = await app.listen(getPort(context.task));
   });
   afterEach(async () => {

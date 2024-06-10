@@ -1,18 +1,9 @@
 import type { ExtendSimulationSchemaInput } from "./schema";
 import { setupStore } from "./setup";
-import { thunks } from "./thunks";
 import type { AnyState, StoreUpdater } from "starfx";
-import { updateStore } from "starfx";
+import { updateStore, createThunks, mdw } from "starfx";
 
-let batchUpdater = thunks.create<StoreUpdater<AnyState>[]>(
-  "update",
-  function* (ctx, next) {
-    yield* updateStore(ctx.payload);
-    yield* next();
-  }
-);
-
-type StoreThunks = typeof thunks;
+type StoreThunks = ReturnType<typeof createThunks>;
 type Store<ExtendedSimulationSchema> = ReturnType<
   typeof setupStore<ExtendedSimulationSchema>
 >;
@@ -45,6 +36,20 @@ export function createSimulationStore<
     >,
   }
 ) {
+  const thunks = createThunks();
+  // catch errors from task and logs them with extra info
+  thunks.use(mdw.err);
+  // where all the thunks get called in the middleware stack
+  thunks.use(thunks.routes());
+
+  let batchUpdater = thunks.create<StoreUpdater<AnyState>[]>(
+    "update",
+    function* (ctx, next) {
+      yield* updateStore(ctx.payload);
+      yield* next();
+    }
+  );
+
   let additionalTasks = [thunks.bootup];
   let { store, schema } = setupStore({
     logs: false,

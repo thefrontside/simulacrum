@@ -28,7 +28,7 @@ export type SimulationHandlers = Record<string, SimulationHandlerFunctions>;
 export type { ExtendSimuationActions, ExtendSimulationSchema, SimulationStore };
 export type { AnyState } from "starfx";
 
-export async function createFoundationSimulationServer<
+export function createFoundationSimulationServer<
   ExtendedSimulationSchema,
   ExtendedSimulationActions
 >({
@@ -63,91 +63,91 @@ export async function createFoundationSimulationServer<
     >
   ): void;
 }) {
-  console.time(`api listening at http://localhost:${port}, started in`);
-  let app = express();
-  app.use(express.json());
-  let simulationStore = createSimulationStore(extendStore);
+  return () => {
+    let app = express();
+    app.use(express.json());
+    let simulationStore = createSimulationStore(extendStore);
 
-  if (extendRouter) {
-    extendRouter(app, simulationStore);
-  }
+    if (extendRouter) {
+      extendRouter(app, simulationStore);
+    }
 
-  if (openapi) {
-    let { document, handlers, apiRoot } = openapi;
-    let mergedOAS = Array.isArray(document)
-      ? mergeDocumentArray(document)
-      : document;
+    if (openapi) {
+      let { document, handlers, apiRoot } = openapi;
+      let mergedOAS = Array.isArray(document)
+        ? mergeDocumentArray(document)
+        : document;
 
-    let api = new OpenAPIBackend({ definition: mergedOAS, apiRoot });
+      let api = new OpenAPIBackend({ definition: mergedOAS, apiRoot });
 
-    // register your framework specific request handlers here
-    let handlerObjectRegistration = (
-      handlerEntries: Record<string, Handler | Record<string, Handler>>,
-      prefix?: string
-    ) => {
-      for (let [key, handler] of Object.entries(handlerEntries)) {
-        if (typeof handler === "object") {
-          handlerObjectRegistration(handler, key);
-        } else {
-          api.register(`${prefix ? `${prefix}/` : ""}${key}`, handler);
+      // register your framework specific request handlers here
+      let handlerObjectRegistration = (
+        handlerEntries: Record<string, Handler | Record<string, Handler>>,
+        prefix?: string
+      ) => {
+        for (let [key, handler] of Object.entries(handlerEntries)) {
+          if (typeof handler === "object") {
+            handlerObjectRegistration(handler, key);
+          } else {
+            api.register(`${prefix ? `${prefix}/` : ""}${key}`, handler);
+          }
         }
-      }
-    };
-    handlerObjectRegistration(handlers(simulationStore));
-
-    api.register({
-      validationFail: (c, req, res) =>
-        res.status(400).json({ err: c.validation.errors }),
-      notFound: (c, req, res) => res.status(404).json({ error: "not found" }),
-      notImplemented: (c, req, res) => {
-        let { status, mock } = c.api.mockResponseForOperation(
-          // the route validates this exists and throws if it does not
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          c.operation.operationId!
-        );
-        return res.status(status).json(mock);
-      },
-    });
-
-    // initalize the backend
-    api.init();
-    app.use((req, res) => api.handleRequest(req as Request, req, res));
-  }
-
-  return {
-    listen: async (portOverride?: number) => {
-      let listeningPort = portOverride ?? port;
-      let server = app.listen(listeningPort, () =>
-        console.timeEnd(
-          `api listening at http://localhost:${listeningPort}, started in`
-        )
-      );
-
-      if (!server.listening) {
-        await new Promise<void>((resolve) => {
-          server.once("listening", resolve);
-        });
-      }
-
-      return {
-        ...server,
-        ensureClose: () =>
-          new Promise<void>((resolve) => {
-            server.once("close", resolve);
-            server.close();
-          }),
       };
-    },
+      handlerObjectRegistration(handlers(simulationStore));
+
+      api.register({
+        validationFail: (c, req, res) =>
+          res.status(400).json({ err: c.validation.errors }),
+        notFound: (c, req, res) => res.status(404).json({ error: "not found" }),
+        notImplemented: (c, req, res) => {
+          let { status, mock } = c.api.mockResponseForOperation(
+            // the route validates this exists and throws if it does not
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            c.operation.operationId!
+          );
+          return res.status(status).json(mock);
+        },
+      });
+
+      // initalize the backend
+      api.init();
+      app.use((req, res) => api.handleRequest(req as Request, req, res));
+    }
+
+    return {
+      listen: async (portOverride?: number) => {
+        let listeningPort = portOverride ?? port;
+        let server = app.listen(listeningPort);
+
+        if (!server.listening) {
+          await new Promise<void>((resolve) => {
+            server.once("listening", resolve);
+          });
+        }
+
+        return {
+          server,
+          ensureClose: async () => {
+            await new Promise<void>((resolve) => {
+              server.once("close", resolve);
+              server.closeIdleConnections();
+              server.closeAllConnections();
+              server.close();
+            });
+            // it takes a bit to close the server, but there is not method
+            //  that will cleanly await that process
+            await new Promise((resolve) => setTimeout(resolve, 20));
+          },
+        };
+      },
+    };
   };
 }
 
 const mergeDocumentArray = (
   documents: RecursivePartial<Document>[]
 ): Document => {
-  let [firstDocument, secondDocument, ...remainingDocuments] = documents;
-  let document = merge({ ...firstDocument }, { ...secondDocument });
-  if (remainingDocuments.length > 0)
-    return mergeDocumentArray([document].concat(remainingDocuments));
+  let document = merge({}, ...documents);
   return document as Document;
 };
 
@@ -164,6 +164,6 @@ export async function startFoundationSimulationServer<
     >
   >[0]
 ) {
-  let simulation = await createFoundationSimulationServer(arg);
+  let simulation = createFoundationSimulationServer(arg)();
   return simulation.listen();
 }
