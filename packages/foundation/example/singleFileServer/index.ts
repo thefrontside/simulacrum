@@ -107,6 +107,7 @@ export const simulation = createFoundationSimulationServer({
 
       return { upsertTest };
     },
+    selectors: () => ({}),
     schema: ({ slice }: ExtendSimulationSchema) => {
       // TODO attempt to remove this type as a requirement
       let slices = {

@@ -1,6 +1,7 @@
 import type { ExtendSimulationSchemaInput } from "./schema";
 import { setupStore } from "./setup";
 import type { AnyState, StoreUpdater } from "starfx";
+import { createSelector } from "starfx";
 import { updateStore, createThunks, mdw } from "starfx";
 
 type StoreThunks = ReturnType<typeof createThunks>;
@@ -13,13 +14,23 @@ export type ExtendSimulationActionsInput<Actions, ExtendedSimulationSchema> =
     store: Store<ExtendedSimulationSchema>["store"];
     schema: Store<ExtendedSimulationSchema>["schema"];
   }) => Actions;
+export type ExtendSimulationSelectorsInput<
+  Selectors,
+  ExtendedSimulationSchema
+> = (arg: {
+  store: Store<ExtendedSimulationSchema>["store"];
+  schema: Store<ExtendedSimulationSchema>["schema"];
+  createSelector: typeof createSelector;
+}) => Selectors;
 
 export function createSimulationStore<
   ExtendedSimulationSchema,
-  ExtendedSimulationActions
+  ExtendedSimulationActions,
+  ExtendedSimulationSelectors
 >(
   {
     actions: inputActions,
+    selectors: inputSelectors,
     schema: inputSchema,
   }: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
@@ -27,11 +38,19 @@ export function createSimulationStore<
       ExtendedSimulationActions,
       ExtendedSimulationSchema
     >;
+    selectors: ExtendSimulationSelectorsInput<
+      ExtendedSimulationSelectors,
+      ExtendedSimulationSchema
+    >;
   } = {
     schema:
       (() => ({})) as unknown as ExtendSimulationSchemaInput<ExtendedSimulationSchema>,
     actions: (() => ({})) as unknown as ExtendSimulationActionsInput<
       ExtendedSimulationActions,
+      ExtendedSimulationSchema
+    >,
+    selectors: (() => ({})) as unknown as ExtendSimulationSelectorsInput<
+      ExtendedSimulationSelectors,
       ExtendedSimulationSchema
     >,
   }
@@ -63,34 +82,52 @@ export function createSimulationStore<
     ...inputedActions,
   };
 
+  let inputedSelectors = inputSelectors({ store, schema, createSelector });
+
   return {
     store,
     schema,
     actions,
+    selectors: inputedSelectors,
   };
 }
 
 type CreateSimulationStore<
   ExtendedSimulationSchema,
-  ExtendedSimulationActions
+  ExtendedSimulationActions,
+  ExtendedSimulationSelectors
   // eslint has a parsing error which means we can't fix this
   //  it is however valid TypeScript
 > = typeof createSimulationStore<
   ExtendedSimulationSchema,
-  ExtendedSimulationActions
+  ExtendedSimulationActions,
+  ExtendedSimulationSelectors
 >;
 
 export type SimulationStore<
   ExtendedSimulationSchema,
-  ExtendedSimulationActions
+  ExtendedSimulationActions,
+  ExtendedSimulationSelectors
 > = ReturnType<
-  CreateSimulationStore<ExtendedSimulationSchema, ExtendedSimulationActions>
+  CreateSimulationStore<
+    ExtendedSimulationSchema,
+    ExtendedSimulationActions,
+    ExtendedSimulationSelectors
+  >
 >;
 
-export type ExtendSimuationActions<
+export type ExtendSimulationActions<
   InputSchema extends ExtendSimulationSchemaInput<any>
 > = {
   thunks: StoreThunks;
   store: Store<ReturnType<InputSchema>>["store"];
   schema: Store<ReturnType<InputSchema>>["schema"];
+};
+
+export type ExtendSimulationSelectors<
+  InputSchema extends ExtendSimulationSchemaInput<any>
+> = {
+  store: Store<ReturnType<InputSchema>>["store"];
+  schema: Store<ReturnType<InputSchema>>["schema"];
+  createSelector: typeof createSelector;
 };

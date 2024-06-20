@@ -1,4 +1,4 @@
-import { createFoundationSimulationServer } from "../../src";
+import { createFoundationSimulationServer } from "../../src/index";
 import { openapi } from "./openapi";
 import { extendStore } from "./store";
 import { extendRouter } from "./extend-api";

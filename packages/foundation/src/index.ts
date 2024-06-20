@@ -5,7 +5,9 @@ import OpenAPIBackend from "openapi-backend";
 import type {
   SimulationStore,
   ExtendSimulationActionsInput,
-  ExtendSimuationActions,
+  ExtendSimulationActions,
+  ExtendSimulationSelectorsInput,
+  ExtendSimulationSelectors,
 } from "./store/index";
 import { createSimulationStore } from "./store/index";
 import type {
@@ -26,7 +28,8 @@ type SimulationHandlerFunctions = (
 ) => void;
 export type SimulationHandlers = Record<string, SimulationHandlerFunctions>;
 export type {
-  ExtendSimuationActions,
+  ExtendSimulationActions,
+  ExtendSimulationSelectors,
   ExtendSimulationSchema,
   SimulationStore,
   Document,
@@ -35,7 +38,8 @@ export type { AnyState } from "starfx";
 
 export function createFoundationSimulationServer<
   ExtendedSimulationSchema,
-  ExtendedSimulationActions
+  ExtendedSimulationActions,
+  ExtendedSimulationSelectors
 >({
   port = 9000,
   openapi,
@@ -48,7 +52,8 @@ export function createFoundationSimulationServer<
     handlers: (
       simulationStore: SimulationStore<
         ExtendedSimulationSchema,
-        ExtendedSimulationActions
+        ExtendedSimulationActions,
+        ExtendedSimulationSelectors
       >
     ) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
@@ -59,12 +64,17 @@ export function createFoundationSimulationServer<
       ExtendedSimulationActions,
       ExtendedSimulationSchema
     >;
+    selectors: ExtendSimulationSelectorsInput<
+      ExtendedSimulationSelectors,
+      ExtendedSimulationSchema
+    >;
   };
   extendRouter?(
     router: express.Router,
     simulationStore: SimulationStore<
       ExtendedSimulationSchema,
-      ExtendedSimulationActions
+      ExtendedSimulationActions,
+      ExtendedSimulationSelectors
     >
   ): void;
 }) {
@@ -161,14 +171,16 @@ const mergeDocumentArray = (
 
 export async function startFoundationSimulationServer<
   ExtendedSimulationSchema,
-  ExtendedSimulationActions
+  ExtendedSimulationActions,
+  ExtendedSimulationSelectors
 >(
   arg: Parameters<
     // eslint has a parsing error which means we can't fix this
     //  it is however valid TypeScript
     typeof createFoundationSimulationServer<
       ExtendedSimulationSchema,
-      ExtendedSimulationActions
+      ExtendedSimulationActions,
+      ExtendedSimulationSelectors
     >
   >[0]
 ) {

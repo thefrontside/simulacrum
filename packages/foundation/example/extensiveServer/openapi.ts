@@ -54,6 +54,28 @@ const openapiSchemaWithModificationsForSimulation = {
         },
       },
     },
+    "/perfect-number-of-dogs": {
+      get: {
+        operationId: "perfectDogQuantity",
+        parameters: [
+          {
+            in: "query",
+            name: "numbers",
+            schema: {
+              type: "string",
+            },
+            required: true,
+            description:
+              "The list of numbers that which we use to determine the perfect quantity",
+          },
+        ],
+        responses: {
+          200: {
+            description: "Do you need more dogs?",
+          },
+        },
+      },
+    },
   },
   components: {
     responses: {
@@ -94,6 +116,15 @@ function handlers(
         ])
       );
       response.sendStatus(200);
+    },
+    perfectDogQuantity: (_c, request, response) => {
+      let numbers =
+        ((request?.query?.numbers as string) ?? "").split[","] ?? [];
+      let dogs = simulationStore.selectors.booleanSpecificNumbers(
+        simulationStore.store.getState(),
+        numbers
+      );
+      response.status(200).json({ dogs });
     },
   };
 }
