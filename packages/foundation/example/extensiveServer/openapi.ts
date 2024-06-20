@@ -98,8 +98,10 @@ function handlers(
   };
 }
 
-export const openapi = {
-  document,
-  handlers,
-  apiRoot: "/api",
-};
+export const openapi = [
+  {
+    document,
+    handlers,
+    apiRoot: "/api",
+  },
+];

@@ -25,7 +25,12 @@ type SimulationHandlerFunctions = (
   response: ExpressResponse
 ) => void;
 export type SimulationHandlers = Record<string, SimulationHandlerFunctions>;
-export type { ExtendSimuationActions, ExtendSimulationSchema, SimulationStore };
+export type {
+  ExtendSimuationActions,
+  ExtendSimulationSchema,
+  SimulationStore,
+  Document,
+};
 export type { AnyState } from "starfx";
 
 export function createFoundationSimulationServer<
@@ -39,7 +44,7 @@ export function createFoundationSimulationServer<
 }: {
   port: number;
   openapi?: {
-    document: Document | RecursivePartial<Document>[];
+    document: Document | (Document | RecursivePartial<Document>)[];
     handlers: (
       simulationStore: SimulationStore<
         ExtendedSimulationSchema,
@@ -47,7 +52,7 @@ export function createFoundationSimulationServer<
       >
     ) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
-  };
+  }[];
   extendStore?: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
     actions: ExtendSimulationActionsInput<
@@ -73,45 +78,48 @@ export function createFoundationSimulationServer<
     }
 
     if (openapi) {
-      let { document, handlers, apiRoot } = openapi;
-      let mergedOAS = Array.isArray(document)
-        ? mergeDocumentArray(document)
-        : document;
+      for (let spec of openapi) {
+        let { document, handlers, apiRoot } = spec;
+        let mergedOAS = Array.isArray(document)
+          ? mergeDocumentArray(document)
+          : document;
 
-      let api = new OpenAPIBackend({ definition: mergedOAS, apiRoot });
+        let api = new OpenAPIBackend({ definition: mergedOAS, apiRoot });
 
-      // register your framework specific request handlers here
-      let handlerObjectRegistration = (
-        handlerEntries: Record<string, Handler | Record<string, Handler>>,
-        prefix?: string
-      ) => {
-        for (let [key, handler] of Object.entries(handlerEntries)) {
-          if (typeof handler === "object") {
-            handlerObjectRegistration(handler, key);
-          } else {
-            api.register(`${prefix ? `${prefix}/` : ""}${key}`, handler);
+        // register your framework specific request handlers here
+        let handlerObjectRegistration = (
+          handlerEntries: Record<string, Handler | Record<string, Handler>>,
+          prefix?: string
+        ) => {
+          for (let [key, handler] of Object.entries(handlerEntries)) {
+            if (typeof handler === "object") {
+              handlerObjectRegistration(handler, key);
+            } else {
+              api.register(`${prefix ? `${prefix}/` : ""}${key}`, handler);
+            }
           }
-        }
-      };
-      handlerObjectRegistration(handlers(simulationStore));
+        };
+        handlerObjectRegistration(handlers(simulationStore));
 
-      api.register({
-        validationFail: (c, req, res) =>
-          res.status(400).json({ err: c.validation.errors }),
-        notFound: (c, req, res) => res.status(404).json({ error: "not found" }),
-        notImplemented: (c, req, res) => {
-          let { status, mock } = c.api.mockResponseForOperation(
-            // the route validates this exists and throws if it does not
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            c.operation.operationId!
-          );
-          return res.status(status).json(mock);
-        },
-      });
+        api.register({
+          validationFail: (c, req, res) =>
+            res.status(400).json({ err: c.validation.errors }),
+          notFound: (c, req, res) =>
+            res.status(404).json({ error: "not found" }),
+          notImplemented: (c, req, res) => {
+            let { status, mock } = c.api.mockResponseForOperation(
+              // the route validates this exists and throws if it does not
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              c.operation.operationId!
+            );
+            return res.status(status).json(mock);
+          },
+        });
 
-      // initalize the backend
-      api.init();
-      app.use((req, res) => api.handleRequest(req as Request, req, res));
+        // initalize the backend
+        api.init();
+        app.use((req, res) => api.handleRequest(req as Request, req, res));
+      }
     }
 
     return {
