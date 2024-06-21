@@ -9,7 +9,14 @@
           "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
         }
       },
-      "publish": "npm publish --access public"
+      "publish": "npm publish --provenance --access public${ pkg.tag ? ' --tag preview' : '' }",
+      "postpublish": {
+        "use": "fetch:check",
+        "options": {
+          "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
+        },
+        "retries": [5000, 5000, 5000]
+      }
     }
   },
   "changeTags": {
@@ -19,24 +26,15 @@
     "deps": "Dependencies"
   },
   "packages": {
-    "@simulacrum/client": {
-      "path": "./packages/client",
-      "manager": "javascript"
-    },
-    "@simulacrum/server": {
-      "path": "./packages/server",
+    "@simulacrum/foundation-simulator": {
+      "path": "./packages/foundation",
       "manager": "javascript",
-      "dependencies": ["@simulacrum/ui", "@simulacrum/client"]
+      "dependencies": []
     },
     "@simulacrum/auth0-simulator": {
       "path": "./packages/auth0",
       "manager": "javascript",
       "dependencies": ["@simulacrum/server", "@simulacrum/client"]
-    },
-    "@simulacrum/ui": {
-      "path": "./packages/ui",
-      "manager": "javascript",
-      "dependencies": []
     },
     "@simulacrum/ldap-simulator": {
       "path": "./packages/ldap",

@@ -1,5 +1,8 @@
 name: version or publish
 
+permissions:
+  id-token: write
+
 on:
   push:
     branches:

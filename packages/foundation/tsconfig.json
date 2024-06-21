@@ -1,0 +1,9 @@
+{
+  "extends": "@frontside/tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "noEmit": true,
+    "declarationMap": true
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

@@ -1,0 +1,55 @@
+{
+  "name": "@simulacrum/foundation-simulator",
+  "version": "0.0.1",
+  "description": "Base simulator to build simulators for integration testing.",
+  "author": "Frontside Engineering <engineering@frontside.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
+  },
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thefrontside/simulacrum.git",
+    "directory": "packages/foundation"
+  },
+  "keywords": [
+    "simulation",
+    "emulation",
+    "mock",
+    "mocking",
+    "integration testing"
+  ],
+  "files": [
+    "dist"
+  ],
+  "main": "dist/cjs/index.js",
+  "exports": {
+    "default": "./dist/cjs/index.js"
+  },
+  "scripts": {
+    "start": "node --import=tsx ./example/singleFileServer/start.ts",
+    "start:singlefile": "node --import=tsx ./example/singleFileServer/start.ts",
+    "start:extensive": "node --import=tsx ./example/extensiveServer/start.ts",
+    "prepack": "tsc --build tsconfig.dist.json",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "bench": "vitest bench",
+    "lint": "echo \"eventually run \"eslint src example\" but it currently fails to parse\""
+  },
+  "dependencies": {
+    "ajv-formats": "^3.0.1",
+    "express": "^4.19.2",
+    "openapi-backend": "^5.10.6",
+    "openapi-merge": "^1.3.2",
+    "starfx": "^0.12.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.11.0",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}

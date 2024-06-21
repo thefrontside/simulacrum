@@ -12,6 +12,9 @@
     },
     {
       "path": "../packages/github-api/tsconfig.dist.json"
+    },
+    {
+      "path": "../packages/foundation/tsconfig.dist.json"
     }
   ]
 }
