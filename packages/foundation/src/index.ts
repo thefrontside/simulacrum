@@ -73,6 +73,7 @@ export function createFoundationSimulationServer<
       ExtendedSimulationSelectors,
       ExtendedSimulationSchema
     >;
+    logs?: boolean;
   };
   extendRouter?(
     router: express.Router,

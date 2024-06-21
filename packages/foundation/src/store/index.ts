@@ -1,26 +1,28 @@
 import { generateSchemaWithInputSlices } from "./schema";
 import type { ExtendSimulationSchemaInput } from "./schema";
-import { setupStore } from "./setup";
 import type { AnyState, StoreUpdater, Callable } from "starfx";
 import { parallel, take, createStore, createSelector } from "starfx";
 import { updateStore, createThunks, mdw } from "starfx";
 
 type StoreThunks = ReturnType<typeof createThunks>;
-type Store<ExtendedSimulationSchema> = ReturnType<
-  typeof setupStore<ExtendedSimulationSchema>
+type GeneratedSchema<ExtendedSimulationSchema> = ReturnType<
+  typeof generateSchemaWithInputSlices<ExtendedSimulationSchema>
+>;
+type GeneratedStore<ExtendedSimulationSchema> = ReturnType<
+  typeof createStore<GeneratedSchema<ExtendedSimulationSchema>[1]>
 >;
 export type ExtendSimulationActionsInput<Actions, ExtendedSimulationSchema> =
   (arg: {
     thunks: StoreThunks;
-    store: Store<ExtendedSimulationSchema>["store"];
-    schema: Store<ExtendedSimulationSchema>["schema"];
+    store: GeneratedStore<ExtendedSimulationSchema>;
+    schema: GeneratedSchema<ExtendedSimulationSchema>[0];
   }) => Actions;
 export type ExtendSimulationSelectorsInput<
   Selectors,
   ExtendedSimulationSchema
 > = (arg: {
-  store: Store<ExtendedSimulationSchema>["store"];
-  schema: Store<ExtendedSimulationSchema>["schema"];
+  store: GeneratedStore<ExtendedSimulationSchema>;
+  schema: GeneratedSchema<ExtendedSimulationSchema>[0];
   createSelector: typeof createSelector;
 }) => Selectors;
 
@@ -44,7 +46,7 @@ export function createSimulationStore<
       ExtendedSimulationSelectors,
       ExtendedSimulationSchema
     >;
-    logs: boolean;
+    logs?: boolean;
   } = {
     schema:
       (() => ({})) as unknown as ExtendSimulationSchemaInput<ExtendedSimulationSchema>,
@@ -142,14 +144,14 @@ export type ExtendSimulationActions<
   InputSchema extends ExtendSimulationSchemaInput<any>
 > = {
   thunks: StoreThunks;
-  store: Store<ReturnType<InputSchema>>["store"];
-  schema: Store<ReturnType<InputSchema>>["schema"];
+  store: GeneratedStore<ReturnType<InputSchema>>;
+  schema: GeneratedSchema<ReturnType<InputSchema>>[0];
 };
 
 export type ExtendSimulationSelectors<
   InputSchema extends ExtendSimulationSchemaInput<any>
 > = {
-  store: Store<ReturnType<InputSchema>>["store"];
-  schema: Store<ReturnType<InputSchema>>["schema"];
+  store: GeneratedStore<ReturnType<InputSchema>>;
+  schema: GeneratedSchema<ReturnType<InputSchema>>[0];
   createSelector: typeof createSelector;
 };
