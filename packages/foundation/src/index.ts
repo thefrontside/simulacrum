@@ -103,11 +103,7 @@ export function createFoundationSimulationServer<
           definition: mergedOAS,
           apiRoot,
           customizeAjv: (ajv) => {
-            addFormats(ajv, {
-              mode: "fast",
-              formats: ["email", "uri", "date-time", "uuid"],
-            });
-
+            addFormats(ajv);
             return ajv;
           },
         });
