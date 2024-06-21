@@ -54,6 +54,30 @@ const openapiSchemaWithModificationsForSimulation = {
         },
       },
     },
+    "/puppies": {
+      // would more likely be `post`,
+      //  but easier to test a get from the brower
+      get: {
+        operationId: "putPuppies",
+        parameters: [
+          {
+            in: "query",
+            name: "quantity",
+            schema: {
+              type: "integer",
+            },
+            required: true,
+            description:
+              "The comma separated list of numbers that which we use to determine the perfect quantity",
+          },
+        ],
+        responses: {
+          200: {
+            description: "You had puppies!",
+          },
+        },
+      },
+    },
     "/perfect-number-of-dogs": {
       get: {
         operationId: "perfectDogQuantity",
@@ -104,7 +128,7 @@ function handlers(
 ): SimulationHandlers {
   return {
     getDogs: (_c, _r, response) => {
-      let dogs = simulationStore.schema.boop.select(
+      let dogs = simulationStore.schema.dogs.select(
         simulationStore.store.getState()
       );
       response.status(200).json({ dogs });
@@ -112,10 +136,21 @@ function handlers(
     putDogs: (c, req, response) => {
       simulationStore.store.dispatch(
         simulationStore.actions.batchUpdater([
-          simulationStore.schema.boop.increment(),
+          simulationStore.schema.dogs.increment(),
         ])
       );
-      response.sendStatus(200);
+      response.status(200).send(`added 1 dog`);
+    },
+    putPuppies: (_c, request, response) => {
+      let rawQuantity = request.query.quantity as string;
+      let quantity = parseInt(rawQuantity, 10);
+      console.dir({ quantity });
+      simulationStore.store.dispatch(
+        simulationStore.actions.addLotsOfDogs({ quantity })
+      );
+      response
+        .status(200)
+        .send(`added ${quantity} ${quantity === 1 ? "dog" : "dogs"}`);
     },
     perfectDogQuantity: (_c, request, response) => {
       let numbers =

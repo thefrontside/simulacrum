@@ -17,9 +17,7 @@ export type ExtendedSimulationStore = SimulationStore<
 
 const inputSchema = ({ slice }: ExtendSimulationSchema) => {
   let slices = {
-    test: slice.table(),
-    booping: slice.str(),
-    boop: slice.num(),
+    dogs: slice.num(),
   };
   return slices;
 };
@@ -28,13 +26,16 @@ const inputActions = ({
   thunks,
   schema,
 }: ExtendSimulationActions<ExtendedSchema>) => {
-  let upsertTest = thunks.create("user:upsert", function* boop(ctx, next) {
-    yield* schema.update(schema.test.add({ [ctx.payload.id]: ctx.payload }));
+  let addLotsOfDogs = thunks.create<{ quantity: number }>(
+    "dogs:add-lots",
+    function* boop(ctx, next) {
+      yield* schema.update(schema.dogs.increment(ctx.payload.quantity));
 
-    yield* next();
-  });
+      yield* next();
+    }
+  );
 
-  return { upsertTest };
+  return { addLotsOfDogs };
 };
 
 const inputSelectors = ({
@@ -42,7 +43,7 @@ const inputSelectors = ({
   schema,
 }: ExtendSimulationSelectors<ExtendedSchema>) => {
   let booleanSpecificNumbers = createSelector(
-    schema.boop.select,
+    schema.dogs.select,
     (_: AnyState, input: number[]) => input,
     (boop, numbers) => {
       return numbers.includes(boop);

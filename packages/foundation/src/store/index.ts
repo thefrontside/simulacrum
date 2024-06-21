@@ -1,7 +1,8 @@
+import { generateSchemaWithInputSlices } from "./schema";
 import type { ExtendSimulationSchemaInput } from "./schema";
 import { setupStore } from "./setup";
-import type { AnyState, StoreUpdater } from "starfx";
-import { createSelector } from "starfx";
+import type { AnyState, StoreUpdater, Callable } from "starfx";
+import { parallel, take, createStore, createSelector } from "starfx";
 import { updateStore, createThunks, mdw } from "starfx";
 
 type StoreThunks = ReturnType<typeof createThunks>;
@@ -32,6 +33,7 @@ export function createSimulationStore<
     actions: inputActions,
     selectors: inputSelectors,
     schema: inputSchema,
+    logs = false,
   }: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
     actions: ExtendSimulationActionsInput<
@@ -42,6 +44,7 @@ export function createSimulationStore<
       ExtendedSimulationSelectors,
       ExtendedSimulationSchema
     >;
+    logs: boolean;
   } = {
     schema:
       (() => ({})) as unknown as ExtendSimulationSchemaInput<ExtendedSimulationSchema>,
@@ -53,6 +56,7 @@ export function createSimulationStore<
       ExtendedSimulationSelectors,
       ExtendedSimulationSchema
     >,
+    logs: false,
   }
 ) {
   const thunks = createThunks();
@@ -70,10 +74,12 @@ export function createSimulationStore<
   );
 
   let additionalTasks = [thunks.bootup];
-  let { store, schema } = setupStore({
-    logs: false,
-    additionalTasks,
-    inputSchema,
+
+  let [schema, schemaInitialState] = generateSchemaWithInputSlices(inputSchema);
+  let store = createStore({
+    initialState: {
+      ...schemaInitialState,
+    },
   });
 
   let inputedActions = inputActions({ thunks, store, schema });
@@ -81,6 +87,22 @@ export function createSimulationStore<
     batchUpdater,
     ...inputedActions,
   };
+
+  let tsks: Callable<unknown>[] = [...additionalTasks];
+  if (logs) {
+    // log all actions dispatched
+    tsks.push(function* logActions() {
+      while (true) {
+        let action = yield* take("*");
+        console.dir(action, { depth: 5 });
+      }
+    });
+  }
+
+  store.run(function* () {
+    let group = yield* parallel(tsks);
+    yield* group;
+  });
 
   let inputedSelectors = inputSelectors({ store, schema, createSelector });
 
