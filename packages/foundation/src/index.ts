@@ -26,11 +26,6 @@ import type {
 } from "./store/schema";
 import type { RecursivePartial } from "./store/types";
 
-import type { Context as OpenAPIBackendContext } from "openapi-backend";
-import type {
-  Request as ExpressRequest,
-  Response as ExpressResponse,
-} from "express";
 type SimulationHandlerFunctions = (
   context: OpenAPIBackendContext,
   request: ExpressRequest,
@@ -135,8 +130,8 @@ export function createFoundationSimulationServer<
         api.register({
           validationFail: (c, req, res) =>
             res.status(400).json({ err: c.validation.errors }),
-          notFound: (c, req, res) =>
-            res.status(404).json({ error: "not found" }),
+          // if route not in API, continue to next API or `app.all('*')` fallback
+          notFound: (c, req, res, next) => next(),
           notImplemented: (c, req, res) => {
             let { status, mock } = c.api.mockResponseForOperation(
               // the route validates this exists and throws if it does not
@@ -149,9 +144,14 @@ export function createFoundationSimulationServer<
 
         // initalize the backend
         api.init();
-        app.use((req, res) => api.handleRequest(req as Request, req, res));
+        app.use((req, res, next) =>
+          api.handleRequest(req as Request, req, res, next)
+        );
       }
     }
+
+    // if no extendRouter routes or openapi routes handle this, return 404
+    app.all("*", (req, res) => res.status(404).json({ error: "not found" }));
 
     return {
       listen: async (portOverride?: number, callback?: () => void) => {
