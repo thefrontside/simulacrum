@@ -1,7 +1,18 @@
 import express from "express";
+import type {
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+} from "express";
 import { merge } from "lodash";
-import type { Handler, Request, Document } from "openapi-backend";
 import OpenAPIBackend from "openapi-backend";
+import type {
+  Handler,
+  Request,
+  Document,
+  Context as OpenAPIBackendContext,
+} from "openapi-backend";
+import addFormats from "ajv-formats";
+import { createSimulationStore } from "./store/index";
 import type {
   SimulationStore,
   ExtendSimulationActionsInput,
@@ -9,7 +20,6 @@ import type {
   ExtendSimulationSelectorsInput,
   ExtendSimulationSelectors,
 } from "./store/index";
-import { createSimulationStore } from "./store/index";
 import type {
   ExtendSimulationSchemaInput,
   ExtendSimulationSchema,
@@ -94,7 +104,18 @@ export function createFoundationSimulationServer<
           ? mergeDocumentArray(document)
           : document;
 
-        let api = new OpenAPIBackend({ definition: mergedOAS, apiRoot });
+        let api = new OpenAPIBackend({
+          definition: mergedOAS,
+          apiRoot,
+          customizeAjv: (ajv) => {
+            addFormats(ajv, {
+              mode: "fast",
+              formats: ["email", "uri", "date-time", "uuid"],
+            });
+
+            return ajv;
+          },
+        });
 
         // register your framework specific request handlers here
         let handlerObjectRegistration = (
