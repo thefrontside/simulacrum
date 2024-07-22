@@ -34,7 +34,7 @@ export const generateRoutesHTML = (routes: SimulationRoute[]) => {
 
           .routes {
             display: grid;
-            grid-template-columns: 20px auto auto auto;
+            grid-template-columns: 1fr 6fr 2fr auto;
             column-gap: 15px;
           }
           .route-actions {
