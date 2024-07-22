@@ -2,6 +2,7 @@ import express from "express";
 import type {
   Request as ExpressRequest,
   Response as ExpressResponse,
+  NextFunction as ExpressNextFunction,
 } from "express";
 import { fdir } from "fdir";
 import fs from "node:fs";
@@ -26,13 +27,17 @@ import type {
 import type {
   ExtendSimulationSchemaInput,
   ExtendSimulationSchema,
+  SimulationRoute,
 } from "./store/schema";
 import type { RecursivePartial } from "./store/types";
+import { generateRoutesHTML } from "./routeTemplate";
 
 type SimulationHandlerFunctions = (
   context: OpenAPIBackendContext,
   request: ExpressRequest,
-  response: ExpressResponse
+  response: ExpressResponse,
+  next: ExpressNextFunction,
+  routeMetadata: SimulationRoute
 ) => void;
 export type SimulationHandlers = Record<string, SimulationHandlerFunctions>;
 export type {
@@ -92,6 +97,7 @@ export function createFoundationSimulationServer<
   return () => {
     let app = express();
     app.use(express.json());
+    app.use(express.urlencoded({ extended: false }));
     let simulationStore = createSimulationStore(extendStore);
 
     if (serveJsonFiles) {
@@ -165,13 +171,73 @@ export function createFoundationSimulationServer<
         });
 
         // initalize the backend
-        api.init();
-        app.use((req, res, next) =>
-          api.handleRequest(req as Request, req, res, next)
-        );
+        api.init().then((init) => {
+          const router = init.router;
+          const operations = router.getOperations();
+          const simulationRoutes = operations.reduce((routes, operation) => {
+            const url = `${router.apiRoot}${operation.path}`;
+            routes[`${operation.method}:${url}`] = {
+              type: "OpenAPI",
+              url,
+              method: operation.method as SimulationRoute["method"],
+              calls: 0,
+              defaultCode: 200,
+              responses: Object.keys(operation.responses ?? {}).map((key) =>
+                parseInt(key)
+              ),
+            };
+            return routes;
+          }, {} as Record<string, SimulationRoute>);
+          simulationStore.store.dispatch(
+            simulationStore.actions.batchUpdater([
+              simulationStore.schema.simulationRoutes.add(simulationRoutes),
+            ])
+          );
+          return init;
+        });
+        app.use((req, res, next) => {
+          const routeId = `${req.method.toLowerCase()}:${req.path}`;
+          const routeMetadata =
+            simulationStore.schema.simulationRoutes.selectById(
+              simulationStore.store.getState(),
+              {
+                id: routeId,
+              }
+            );
+          return api.handleRequest(
+            req as Request,
+            req,
+            res,
+            next,
+            routeMetadata
+          );
+        });
       }
     }
 
+    app.get("/", (req, res) => {
+      let routes = simulationStore.schema.simulationRoutes.selectTableAsList(
+        simulationStore.store.getState()
+      );
+      if (routes.length === 0) {
+        res.sendStatus(404);
+      } else {
+        res.status(200).send(generateRoutesHTML(routes));
+      }
+    });
+    app.post("/", (req, res) => {
+      const formValue = req.body;
+      const entries = {} as Record<string, Partial<SimulationRoute>>;
+      for (let [key, value] of Object.entries(formValue)) {
+        entries[key] = { defaultCode: parseInt(value as string) };
+      }
+      simulationStore.store.dispatch(
+        simulationStore.actions.batchUpdater([
+          simulationStore.schema.simulationRoutes.patch(entries),
+        ])
+      );
+      res.redirect("/");
+    });
     // if no extendRouter routes or openapi routes handle this, return 404
     app.all("*", (req, res) => res.status(404).json({ error: "not found" }));
 
