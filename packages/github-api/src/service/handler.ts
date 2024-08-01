@@ -1,50 +1,35 @@
-import { createServer } from '@graphql-yoga/node';
-import { createResolvers } from './resolvers';
-import type { ServerInstance, SimulatedData } from './types';
-import path from 'path';
-import fs from 'fs';
+import { createSchema, createYoga } from "graphql-yoga";
+import { createResolvers } from "./resolvers";
+import type { ServerInstance } from "./types";
+import path from "path";
+import fs from "fs";
+import type { ExtendedSimulationStore } from "../store";
 
 function getSchema(): string {
-  let root = path.dirname(path.join('..', '..', '..')) === 'dist' ? path.join(__dirname, '..', '..', '..', '..') : path.join(__dirname, '..', '..', '..');
+  let root =
+    path.dirname(path.join("..", "..", "..")) === "dist"
+      ? path.join(__dirname, "..", "..", "..", "..")
+      : path.join(__dirname, "..", "..");
 
-  return fs.readFileSync(path.join(
-        root,
-        'schema',
-        'schema.docs-enterprise.graphql',
-      ), 'utf-8');
+  return fs.readFileSync(
+    path.join(root, "schema", "schema.docs-enterprise.graphql"),
+    "utf-8"
+  );
 }
 
-export function createHandler({
-  users,
-  githubRepositories,
-  githubOrganizations,
-}: SimulatedData): ServerInstance {
+export function createHandler(
+  simulationStore: ExtendedSimulationStore
+): ServerInstance {
   let schema = getSchema();
-  let resolvers = createResolvers({
-    users,
-    githubRepositories,
-    githubOrganizations,
-  });
+  let resolvers = createResolvers(simulationStore);
 
-  let graphqlServer = createServer({
-    schema: {
+  let yoga = createYoga({
+    maskedErrors: false,
+    schema: createSchema({
       typeDefs: schema,
       resolvers,
-    },
-    maskedErrors: false,
-    logging: {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      debug(..._args) {},
-      warn(...args) {
-        console.dir(...args);
-      },
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      info(..._args) {},
-      error(...args) {
-        console.error(...args);
-      },
-    },
+    }),
   });
 
-  return graphqlServer;
+  return yoga;
 }

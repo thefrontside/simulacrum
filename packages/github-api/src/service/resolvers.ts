@@ -1,59 +1,72 @@
-import type { PageArgs } from '../relay';
-import { applyRelayPagination } from '../relay';
-import type { Resolvers, SimulatedData } from './types';
-import { toGraphql } from './graphgen-to-graphql';
-import { assert } from 'assert-ts';
+import type { PageArgs } from "./relay";
+import { applyRelayPagination } from "./relay";
+import type { Resolvers } from "../__generated__/resolvers-types";
+import { toGraphql } from "./to-graphql";
+import { assert } from "assert-ts";
+import type { ExtendedSimulationStore } from "../store";
 
-export function createResolvers({
-  users,
-  githubRepositories,
-  githubOrganizations,
-}: SimulatedData): Resolvers {
+export function createResolvers(
+  simulationStore: ExtendedSimulationStore
+): Resolvers {
   return {
     Query: {
-      viewer(_: unknown, { size, cursor }: { size: number; cursor?: string }) {
-        let orgs = [...users]
-          .flatMap((e) => e.githubAccount?.organizations)
-          .flatMap((org) => (!!org ? [org] : []));
-
-        return {
-          organizations: applyRelayPagination(
-            orgs,
-            { first: size, after: cursor },
-            (org) => toGraphql(org)
-          ),
-        };
+      viewer() {
+        let user = simulationStore.schema.users.selectById(
+          simulationStore.store.getState(),
+          { id: "user:1" as any }
+        );
+        assert(!!user, `no logged in user`);
+        return toGraphql(simulationStore, "User", user);
       },
       organization(_: unknown, { login }: { login: string }) {
-        let [org] = [...githubOrganizations].filter((o) => o.login === login);
+        let orgs = simulationStore.schema.githubOrganizations.selectTableAsList(
+          simulationStore.store.getState()
+        );
+        let [org] = orgs.filter((o) => o.login === login);
         assert(!!org, `no organization found for ${login}`);
-        return toGraphql(org);
+        let __typename = (org?.id ?? ":").split(":")[0];
+        assert(
+          __typename === "githuborganization",
+          `incorrectly structured GitHubOrganization id ${org.id}`
+        );
+        console.dir({ org });
+        let shaped = toGraphql(simulationStore, "Organization", org);
+        return shaped;
       },
       organizations(pageArgs: PageArgs) {
-        let orgs = [...githubOrganizations];
-        return applyRelayPagination(orgs, pageArgs, (org) => toGraphql(org));
+        let orgs = simulationStore.schema.githubOrganizations.selectTableAsList(
+          simulationStore.store.getState()
+        );
+        return applyRelayPagination(orgs, pageArgs, (org) =>
+          toGraphql(simulationStore, "Organization", org)
+        );
       },
       repository(_, { owner, name }: { owner: string; name: string }) {
-        let repo = [...githubRepositories].find(
-          (r) =>
-            r.name.toLowerCase() === name &&
-            r.nameWithOwner.toLowerCase() === `${owner}/${name}`.toLowerCase()
-        );
+        let repo = simulationStore.schema.githubRepositories
+          .selectTableAsList(simulationStore.store.getState())
+          .find(
+            (r) =>
+              r.name.toLowerCase() === name &&
+              r.nameWithOwner.toLowerCase() === `${owner}/${name}`.toLowerCase()
+          );
         assert(!!repo, `no repository found for ${name}`);
-        return toGraphql(repo);
+        return toGraphql(simulationStore, "Repository", repo);
       },
       repositoryOwner(_, { login }: { login: string }) {
-        let [org] = [...githubOrganizations].filter((o) => o.login === login);
-        if (org) return toGraphql(org);
+        let [org] = simulationStore.schema.githubOrganizations
+          .selectTableAsList(simulationStore.store.getState())
+          .filter((o) => o.login === login);
+        // let [org] = [...githubOrganizations].filter((o) => o.login === login);
+        if (org) return toGraphql(simulationStore, "Organization", org);
 
-        let [userAccount] = [...users].filter(
-          (u) => u.githubAccount.login === login
-        );
+        let [userAccount] = simulationStore.schema.users
+          .selectTableAsList(simulationStore.store.getState())
+          .filter((u) => u?.githubAccount?.login === login);
         assert(
           !!userAccount,
           `no github organization or account found for ${login}`
         );
-        if (userAccount) return toGraphql(userAccount.githubAccount);
+        if (userAccount) return toGraphql(simulationStore, "User", userAccount);
       },
     },
   };

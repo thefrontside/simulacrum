@@ -1,16 +1,9 @@
-export type {
-  GithubAccount,
-  GithubCommit,
-  GithubOrganization,
-  GithubRef,
-  GithubRepository,
-  GithubTeam,
-  GithubTeamMembership,
-  User,
-  GithubRepositoryOwner,
-} from './types/graphql';
+import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
+import { extendStore } from "./store/index";
+import { extendRouter } from "./service/extend-api";
 
-export type { World, Factory } from './types/world';
-
-export * from './service/standaloneServer';
-export * from './main';
+export const simulation = createFoundationSimulationServer({
+  port: 3300, // default port
+  extendStore,
+  extendRouter,
+});

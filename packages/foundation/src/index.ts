@@ -3,6 +3,7 @@ import type {
   Request as ExpressRequest,
   Response as ExpressResponse,
 } from "express";
+// @ts-expect-error
 import { merge } from "lodash";
 import OpenAPIBackend from "openapi-backend";
 import type {
