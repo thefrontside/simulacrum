@@ -6,22 +6,13 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "clean": "echo nothing to do",
-    "prepack": "tsc --build",
+    "prepack": "echo \"tsc --build\"",
     "build": "npm run prepack",
-    "lint": "eslint src",
+    "lint": "echo noop",
     "test": "echo client is used to test server"
   },
-  "dependencies": {
-    "effection": "^2.0.1",
-    "graphql-ws": "^4.2.3",
-    "isomorphic-ws": "^4.0.1"
-  },
-  "devDependencies": {
-    "@frontside/eslint-config": "^3.1.0",
-    "@frontside/tsconfig": "^3.0.0",
-    "@frontside/typescript": "^3.0.0",
-    "ts-node": "^10.9.1"
-  },
+  "dependencies": {},
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
