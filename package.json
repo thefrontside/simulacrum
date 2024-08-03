@@ -35,5 +35,7 @@
     "node": "20.16.0",
     "npm": "10.8.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@frontside/tsconfig": "^3.0.0"
+  }
 }
