@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo skip",
-    "prepack": "echo 'parcel build'",
+    "prepack": "echo \"parcel build\"",
     "start": "parcel serve",
     "watch": "parcel watch",
     "build": "npm run prepack",

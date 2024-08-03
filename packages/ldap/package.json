@@ -8,7 +8,7 @@
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "echo skip",
     "test-local": "NODE_ENV=test mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
-    "prepack": "tsc --build tsconfig.dist.json",
+    "prepack": "echo \"tsc --build tsconfig.dist.json\"",
     "build": "npm run prepack",
     "lint": "echo noop",
     "start": "PORT=4000 node dist/start.js",

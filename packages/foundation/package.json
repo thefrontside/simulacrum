@@ -45,6 +45,7 @@
     "starfx": "^0.12.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "tsx": "^4.11.0",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"

@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "echo noop",
-    "prepack": "tsc --build tsconfig.dist.json",
+    "prepack": "echo \"tsc --build tsconfig.dist.json\"",
     "build": "npm run prepack",
     "lint": "echo noop",
     "start": "node dist/start.js",

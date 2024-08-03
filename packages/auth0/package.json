@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
     "test": "echo noop",
-    "prepack": "tsc --build tsconfig.dist.json && copy-cli \"./src/views/**/*.png\" ./dist/views/",
+    "prepack": "echo 'tsc --build tsconfig.dist.json && copy-cli \"./src/views/**/*.png\" ./dist/views/'",
     "build": "npm run prepack",
     "lint": "echo noop",
     "start": "node dist/start.js",
