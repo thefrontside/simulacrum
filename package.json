@@ -32,13 +32,8 @@
     "npm": ">=9"
   },
   "volta": {
-    "node": "20.14.0",
-    "npm": "10.8.1"
+    "node": "20.16.0",
+    "npm": "10.8.2"
   },
-  "devDependencies": {
-    "@effection/fetch": "^2.0.1",
-    "deepmerge": "^4.2.2",
-    "process": "^0.11.10",
-    "punycode": "^1.4.1"
-  }
+  "devDependencies": {}
 }
