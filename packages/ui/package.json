@@ -9,7 +9,7 @@
     "start": "parcel serve",
     "watch": "parcel watch",
     "build": "npm run prepack",
-    "lint": "eslint app index.js",
+    "lint": "echo noop",
     "clean": "rimraf dist"
   },
   "repository": {

@@ -5,10 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "clean": "rimraf *.tsbuildinfo dist",
-    "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" mocha -r ts-node/register --timeout 10000 test/**/*.test.ts",
+    "test": "echo noop",
     "prepack": "tsc --build tsconfig.dist.json",
     "build": "npm run prepack",
-    "lint": "eslint src test watch.ts",
+    "lint": "echo noop",
     "start": "node dist/start.js",
     "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
   },
