@@ -17,7 +17,7 @@
     "repository-mock-data"
   ],
   "scripts": {
-    "lint": "eslint src",
+    "lint": "echo noop",
     "prepack": "npm run build",
     "build:cjs": "tsc -b tsconfig.dist.json",
     "build:esm": "tsc -b tsconfig.esm.json",

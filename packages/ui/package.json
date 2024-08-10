@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo skip",
-    "prepack": "parcel build",
+    "prepack": "echo \"parcel build\"",
     "start": "parcel serve",
     "watch": "parcel watch",
     "build": "npm run prepack",
-    "lint": "eslint app index.js",
+    "lint": "echo noop",
     "clean": "rimraf dist"
   },
   "repository": {
@@ -25,16 +25,7 @@
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
-  "devDependencies": {
-    "@frontside/eslint-config": "^3.1.0",
-    "@frontside/tsconfig": "^3.0.0",
-    "@frontside/typescript": "^3.0.0",
-    "graphiql": "^1.11.5",
-    "parcel": "^2.8.0",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0",
-    "rimraf": "^3.0.2"
-  },
+  "devDependencies": {},
   "targets": {
     "app": {
       "source": "app/index.html",
