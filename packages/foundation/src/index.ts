@@ -3,6 +3,9 @@ import type {
   Request as ExpressRequest,
   Response as ExpressResponse,
 } from "express";
+import { fdir } from "fdir";
+import fs from "node:fs";
+import path from "node:path";
 import { merge } from "lodash";
 import OpenAPIBackend from "openapi-backend";
 import type {
@@ -47,11 +50,13 @@ export function createFoundationSimulationServer<
   ExtendedSimulationSelectors
 >({
   port = 9000,
+  serveJsonFiles,
   openapi,
   extendStore,
   extendRouter,
 }: {
   port: number;
+  serveJsonFiles?: string;
   openapi?: {
     document: Document | (Document | RecursivePartial<Document>)[];
     handlers: (
@@ -88,6 +93,26 @@ export function createFoundationSimulationServer<
     let app = express();
     app.use(express.json());
     let simulationStore = createSimulationStore(extendStore);
+
+    if (serveJsonFiles) {
+      const jsonFiles = new fdir()
+        .filter((path, _isDirectory) => path.endsWith(".json"))
+        .withDirs()
+        .withRelativePaths()
+        .crawl(serveJsonFiles)
+        .sync();
+
+      if (jsonFiles.length > 0) {
+        for (let jsonFile of jsonFiles) {
+          const route = jsonFile.slice(0, jsonFile.length - 5);
+          const filename = path.join(serveJsonFiles, jsonFile);
+          app.get(`/${route}`, (_req, res) => {
+            res.setHeader("content-type", "application/json");
+            fs.createReadStream(filename).pipe(res);
+          });
+        }
+      }
+    }
 
     if (extendRouter) {
       extendRouter(app, simulationStore);
