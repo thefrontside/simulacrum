@@ -26,8 +26,7 @@ export const generateRoutesHTML = (
           }
           body {
             margin: 0 auto;
-            max-width: 720px;
-            padding: 0 16px;
+            padding: 0 12ch;
             font-family: sans-serif;
           }
 
