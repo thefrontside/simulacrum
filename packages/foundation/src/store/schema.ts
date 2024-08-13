@@ -9,7 +9,7 @@ export type ExtendSimulationSchemaInput<T> = ({
 }: ExtendSimulationSchema) => T;
 
 export interface SimulationRoute {
-  type: "OpenAPI" | "Explicit";
+  type: "JSON" | "OpenAPI" | "Explicit";
   url: string;
   method: "get" | "post" | "delete" | "patch";
   calls: number;

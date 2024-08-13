@@ -109,14 +109,32 @@ export function createFoundationSimulationServer<
         .sync();
 
       if (jsonFiles.length > 0) {
+        const simulationRoutes = [];
         for (let jsonFile of jsonFiles) {
-          const route = jsonFile.slice(0, jsonFile.length - 5);
+          const route = `/${jsonFile.slice(0, jsonFile.length - 5)}`;
           const filename = path.join(serveJsonFiles, jsonFile);
-          app.get(`/${route}`, (_req, res) => {
+          app.get(route, (_req, res) => {
             res.setHeader("content-type", "application/json");
             fs.createReadStream(filename).pipe(res);
           });
+
+          simulationRoutes.push(
+            simulationStore.schema.simulationRoutes.add({
+              [`get:${route}`]: {
+                type: "JSON",
+                url: route,
+                method: "get",
+                calls: 0,
+                defaultCode: 200,
+                responses: [200],
+              },
+            })
+          );
         }
+
+        simulationStore.store.dispatch(
+          simulationStore.actions.batchUpdater(simulationRoutes)
+        );
       }
     }
 

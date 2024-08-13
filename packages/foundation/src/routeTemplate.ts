@@ -34,7 +34,7 @@ export const generateRoutesHTML = (routes: SimulationRoute[]) => {
 
           .routes {
             display: grid;
-            grid-template-columns: 1fr 6fr 2fr auto;
+            grid-template-columns: 1fr 5fr 1fr 1fr 2fr;
             column-gap: 15px;
           }
           .route-actions {
@@ -54,6 +54,7 @@ export const generateRoutesHTML = (routes: SimulationRoute[]) => {
             }
 
             a {
+              color: aqua;
             }
           }
         </style>
@@ -62,16 +63,21 @@ export const generateRoutesHTML = (routes: SimulationRoute[]) => {
         <main class="my-12">
           <h1>Simulation Routes</h1>
           <div class="routes">
+            <span>Method</span>
+            <span>URL</span>
+            <span>Status</span>
+            <span>Metrics</span>
+            <span>Response Options</span>
             ${routes
               .map(
                 (route) =>
                   `<span>${route.method.toUpperCase()}</span><a href=${
                     route.url
-                  }>${route.url}</a><span>returns: ${
+                  }>${route.url}</a><span>code ${
                     route.defaultCode
-                  }, called ${
+                  }</span><span>${
                     route.calls
-                  } times</span><div class="route-actions">${route.responses
+                  } calls</span><div class="route-actions">${route.responses
                     .map((response) =>
                       responseSubmit(routeToId(route), response)
                     )
