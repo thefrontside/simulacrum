@@ -8,6 +8,13 @@ export type ExtendSimulationSchemaInput<T> = ({
   slice,
 }: ExtendSimulationSchema) => T;
 
+export interface SimulationLog {
+  timestamp: number;
+  level: "debug" | "info" | "error";
+  message: string;
+  meta?: Record<string, any>;
+}
+
 export interface SimulationRoute {
   type: "JSON" | "OpenAPI" | "Explicit";
   url: string;
@@ -25,6 +32,7 @@ export function generateSchemaWithInputSlices<ExtendedSimulationSchema>(
   let schemaAndInitialState = createSchema({
     cache: immerSlice.table({ empty: {} }),
     loaders: immerSlice.loaders(),
+    simulationLogs: immerSlice.table<SimulationLog>(),
     simulationRoutes: immerSlice.table<SimulationRoute>({
       empty: {
         type: "Explicit",

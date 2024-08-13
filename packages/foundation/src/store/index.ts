@@ -74,6 +74,26 @@ export function createSimulationStore<
       yield* next();
     }
   );
+  let simulationLog = thunks.create<{
+    method: string;
+    url: string;
+    query: Record<string, any>;
+    body: any;
+  }>("simulationLog", function* (ctx, next) {
+    const { method, url, query, body } = ctx.payload;
+    const timestamp = Date.now();
+    yield* schema.update(
+      schema.simulationLogs.add({
+        [timestamp]: {
+          timestamp,
+          level: "info",
+          message: `${method} ${url}`,
+          meta: { method, url, query, body },
+        },
+      })
+    );
+    yield* next();
+  });
 
   let additionalTasks = [thunks.bootup];
 
@@ -86,6 +106,7 @@ export function createSimulationStore<
 
   let inputedActions = inputActions({ thunks, store, schema });
   let actions = {
+    simulationLog,
     batchUpdater,
     ...inputedActions,
   };

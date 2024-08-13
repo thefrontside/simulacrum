@@ -1,4 +1,4 @@
-import type { SimulationRoute } from "./store/schema";
+import type { SimulationLog, SimulationRoute } from "./store/schema";
 
 const responseSubmit = (routeId: string, response: number) => /* HTML */ `<form
   action=""
@@ -8,7 +8,10 @@ const responseSubmit = (routeId: string, response: number) => /* HTML */ `<form
 </form>`;
 const routeToId = (route: SimulationRoute) => `${route.method}:${route.url}`;
 
-export const generateRoutesHTML = (routes: SimulationRoute[]) => {
+export const generateRoutesHTML = (
+  routes: SimulationRoute[],
+  logs: SimulationLog[]
+) => {
   return /* HTML */ `<!DOCTYPE html>
     <html>
       <head>
@@ -61,7 +64,8 @@ export const generateRoutesHTML = (routes: SimulationRoute[]) => {
       </head>
       <body>
         <main class="my-12">
-          <h1>Simulation Routes</h1>
+          <h1>Simulation</h1>
+          <h2>Routes</h2>
           <div class="routes">
             <span>Method</span>
             <span>URL</span>
@@ -84,6 +88,10 @@ export const generateRoutesHTML = (routes: SimulationRoute[]) => {
                     .join("")}</div>`
               )
               .join("\n")}
+          </div>
+          <h2>Logs</h2>
+          <div class="simulation-logs">
+            ${logs.map((log) => `<div>${log.message}</div>`).join("")}
           </div>
         </main>
       </body>

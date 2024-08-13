@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import type {
   Request as ExpressRequest,
   Response as ExpressResponse,
@@ -96,9 +97,22 @@ export function createFoundationSimulationServer<
 }) {
   return () => {
     let app = express();
+    app.use(cors());
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
     let simulationStore = createSimulationStore(extendStore);
+
+    app.use((req, res, next) => {
+      simulationStore.store.dispatch(
+        simulationStore.actions.simulationLog({
+          method: req.method,
+          url: req.url,
+          query: req.query,
+          body: req.body,
+        })
+      );
+      next();
+    });
 
     if (serveJsonFiles) {
       const jsonFiles = new fdir()
@@ -237,10 +251,13 @@ export function createFoundationSimulationServer<
       let routes = simulationStore.schema.simulationRoutes.selectTableAsList(
         simulationStore.store.getState()
       );
+      let logs = simulationStore.schema.simulationLogs.selectTableAsList(
+        simulationStore.store.getState()
+      );
       if (routes.length === 0) {
         res.sendStatus(404);
       } else {
-        res.status(200).send(generateRoutesHTML(routes));
+        res.status(200).send(generateRoutesHTML(routes, logs));
       }
     });
     app.post("/", (req, res) => {
@@ -272,6 +289,7 @@ export function createFoundationSimulationServer<
 
         return {
           server,
+          simulationStore,
           ensureClose: async () => {
             await new Promise<void>((resolve) => {
               server.once("close", resolve);
