@@ -207,7 +207,9 @@ export function createFoundationSimulationServer<
           const router = init.router;
           const operations = router.getOperations();
           const simulationRoutes = operations.reduce((routes, operation) => {
-            const url = `${router.apiRoot}${operation.path}`;
+            const url = `${router.apiRoot === "/" ? "" : router.apiRoot}${
+              operation.path
+            }`;
             routes[`${operation.method}:${url}`] = {
               type: "OpenAPI",
               url,
