@@ -5,6 +5,7 @@ import type {
   Response as ExpressResponse,
   NextFunction as ExpressNextFunction,
 } from "express";
+import type { ILayer, IRoute } from "express-serve-static-core";
 import { fdir } from "fdir";
 import fs from "node:fs";
 import path from "node:path";
@@ -114,6 +115,38 @@ export function createFoundationSimulationServer<
       next();
     });
 
+    if (extendRouter) {
+      extendRouter(app, simulationStore);
+
+      if (app?._router?.stack) {
+        const layers: IRoute[] = app._router.stack
+          .map((stack: ILayer) => stack.route)
+          .filter(Boolean);
+
+        const simulationRoutes = [];
+        for (let layer of layers) {
+          for (let stack of layer.stack) {
+            simulationRoutes.push(
+              simulationStore.schema.simulationRoutes.add({
+                [`${stack.method}:${layer.path}`]: {
+                  type: "JSON",
+                  url: layer.path,
+                  method: stack.method as SimulationRoute["method"],
+                  calls: 0,
+                  defaultCode: 200,
+                  responses: [200],
+                },
+              })
+            );
+          }
+        }
+
+        simulationStore.store.dispatch(
+          simulationStore.actions.batchUpdater(simulationRoutes)
+        );
+      }
+    }
+
     if (serveJsonFiles) {
       const jsonFiles = new fdir()
         .filter((path, _isDirectory) => path.endsWith(".json"))
@@ -127,7 +160,7 @@ export function createFoundationSimulationServer<
         for (let jsonFile of jsonFiles) {
           const route = `/${jsonFile.slice(0, jsonFile.length - 5)}`;
           const filename = path.join(serveJsonFiles, jsonFile);
-          app.get(route, (_req, res) => {
+          app.get(route, function staticJson(_req, res) {
             res.setHeader("content-type", "application/json");
             fs.createReadStream(filename).pipe(res);
           });
@@ -150,10 +183,6 @@ export function createFoundationSimulationServer<
           simulationStore.actions.batchUpdater(simulationRoutes)
         );
       }
-    }
-
-    if (extendRouter) {
-      extendRouter(app, simulationStore);
     }
 
     if (openapi) {
