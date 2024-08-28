@@ -28,6 +28,7 @@ import type {
   ExtendSimulationSchema,
 } from "./store/schema";
 import type { RecursivePartial } from "./store/types";
+import { delayMiddleware } from "./middleware/delay";
 
 type SimulationHandlerFunctions = (
   context: OpenAPIBackendContext,
@@ -50,12 +51,14 @@ export function createFoundationSimulationServer<
   ExtendedSimulationSelectors
 >({
   port = 9000,
+  delayResponses,
   serveJsonFiles,
   openapi,
   extendStore,
   extendRouter,
 }: {
   port: number;
+  delayResponses?: number | { minimum: number; maximum: number };
   serveJsonFiles?: string;
   openapi?: {
     document: Document | (Document | RecursivePartial<Document>)[];
@@ -93,6 +96,7 @@ export function createFoundationSimulationServer<
     let app = express();
     app.use(express.json());
     let simulationStore = createSimulationStore(extendStore);
+    app.use(delayMiddleware(delayResponses));
 
     if (serveJsonFiles) {
       const jsonFiles = new fdir()
