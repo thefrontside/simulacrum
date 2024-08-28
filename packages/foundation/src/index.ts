@@ -104,6 +104,7 @@ export function createFoundationSimulationServer<
     let simulationStore = createSimulationStore(extendStore);
 
     app.use((req, res, next) => {
+      // add each response to the internal log
       simulationStore.store.dispatch(
         simulationStore.actions.simulationLog({
           method: req.method,
@@ -278,6 +279,7 @@ export function createFoundationSimulationServer<
       }
     }
 
+    // return simulation helper page
     app.get("/", (req, res) => {
       let routes = simulationStore.schema.simulationRoutes.selectTableAsList(
         simulationStore.store.getState()

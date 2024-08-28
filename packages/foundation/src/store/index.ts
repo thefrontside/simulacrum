@@ -1,7 +1,7 @@
 import { generateSchemaWithInputSlices } from "./schema";
 import type { ExtendSimulationSchemaInput } from "./schema";
 import type { AnyState, StoreUpdater, Callable } from "starfx";
-import { parallel, take, createStore, createSelector } from "starfx";
+import { parallel, take, select, createStore, createSelector } from "starfx";
 import { updateStore, createThunks, mdw } from "starfx";
 
 type StoreThunks = ReturnType<typeof createThunks>;
@@ -82,6 +82,7 @@ export function createSimulationStore<
   }>("simulationLog", function* (ctx, next) {
     const { method, url, query, body } = ctx.payload;
     const timestamp = Date.now();
+
     yield* schema.update(
       schema.simulationLogs.add({
         [timestamp]: {
@@ -92,6 +93,17 @@ export function createSimulationStore<
         },
       })
     );
+
+    // attempt to increment `route.calls`
+    const id = `${method.toLowerCase()}:${url}`;
+    const route = yield* select(schema.simulationRoutes.selectById, {
+      id,
+    });
+    if (route.url !== "")
+      yield* schema.update(
+        schema.simulationRoutes.merge({ [id]: { calls: route.calls + 1 } })
+      );
+
     yield* next();
   });
 
