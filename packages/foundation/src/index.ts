@@ -28,6 +28,7 @@ import type {
   ExtendSimulationSchema,
 } from "./store/schema";
 import type { RecursivePartial } from "./store/types";
+import { apiProxy } from "./middleware/proxy";
 
 type SimulationHandlerFunctions = (
   context: OpenAPIBackendContext,
@@ -50,12 +51,14 @@ export function createFoundationSimulationServer<
   ExtendedSimulationSelectors
 >({
   port = 9000,
+  proxyAndSave,
   serveJsonFiles,
   openapi,
   extendStore,
   extendRouter,
 }: {
   port: number;
+  proxyAndSave: string;
   serveJsonFiles?: string;
   openapi?: {
     document: Document | (Document | RecursivePartial<Document>)[];
@@ -91,6 +94,11 @@ export function createFoundationSimulationServer<
 }) {
   return () => {
     let app = express();
+
+    if (process.env.SIM_PROXY || proxyAndSave) {
+      app.use(apiProxy(proxyAndSave));
+    }
+
     app.use(express.json());
     let simulationStore = createSimulationStore(extendStore);
 
