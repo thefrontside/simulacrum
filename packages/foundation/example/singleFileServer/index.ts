@@ -93,6 +93,7 @@ export const simulation = createFoundationSimulationServer({
     },
   ],
   extendStore: {
+    logs: false,
     actions: ({ thunks, schema }) => {
       // TODO attempt to remove this type as a requirement
       let upsertTest = thunks.create<AnyState>(
