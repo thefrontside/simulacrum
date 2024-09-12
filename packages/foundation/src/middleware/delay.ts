@@ -10,21 +10,13 @@ export function delayMiddleware(
   const delayMax =
     typeof delayResponses === "number" ? undefined : delayResponses?.maximum;
 
-  const minFromProcess = process.env.SIM_RESPONSE_DELAY_MIN
-    ? process.env.SIM_RESPONSE_DELAY_MIN
-    : process.env.SIM_RESPONSE_DELAY;
-  const min = minFromProcess ? parseInt(minFromProcess, 10) : delayMin;
-
-  const maxFromProcess = process.env.SIM_RESPONSE_DELAY_MAX;
-  const max = maxFromProcess ? parseInt(maxFromProcess, 10) : delayMax;
-
   return async function delayHandler(
     request: Request,
     response: Response,
     next: NextFunction
   ) {
-    if (min || max) {
-      let timeoutDuration = calculateTimeoutDuration(min, max);
+    if (delayMin || delayMax) {
+      let timeoutDuration = calculateTimeoutDuration(delayMin, delayMax);
       await new Promise<void>((resolve) => {
         let timeoutHandle: NodeJS.Timeout | undefined = undefined;
 
