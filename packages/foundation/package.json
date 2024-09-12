@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "ajv-formats": "^3.0.1",
+    "cors": "^2.8.5",
     "express": "^4.19.2",
     "fdir": "^6.2.0",
     "http-proxy-middleware": "^3.0.0",

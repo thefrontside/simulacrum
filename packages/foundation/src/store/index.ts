@@ -1,7 +1,7 @@
 import { generateSchemaWithInputSlices } from "./schema";
 import type { ExtendSimulationSchemaInput } from "./schema";
 import type { AnyState, StoreUpdater, Callable } from "starfx";
-import { parallel, take, createStore, createSelector } from "starfx";
+import { parallel, take, select, createStore, createSelector } from "starfx";
 import { updateStore, createThunks, mdw } from "starfx";
 
 type StoreThunks = ReturnType<typeof createThunks>;
@@ -74,6 +74,38 @@ export function createSimulationStore<
       yield* next();
     }
   );
+  let simulationLog = thunks.create<{
+    method: string;
+    url: string;
+    query: Record<string, any>;
+    body: any;
+  }>("simulationLog", function* (ctx, next) {
+    const { method, url, query, body } = ctx.payload;
+    const timestamp = Date.now();
+
+    yield* schema.update(
+      schema.simulationLogs.add({
+        [timestamp]: {
+          timestamp,
+          level: "info",
+          message: `${method} ${url}`,
+          meta: { method, url, query, body },
+        },
+      })
+    );
+
+    // attempt to increment `route.calls`
+    const id = `${method.toLowerCase()}:${url}`;
+    const route = yield* select(schema.simulationRoutes.selectById, {
+      id,
+    });
+    if (route.url !== "")
+      yield* schema.update(
+        schema.simulationRoutes.merge({ [id]: { calls: route.calls + 1 } })
+      );
+
+    yield* next();
+  });
 
   let additionalTasks = [thunks.bootup];
 
@@ -86,6 +118,7 @@ export function createSimulationStore<
 
   let inputedActions = inputActions({ thunks, store, schema });
   let actions = {
+    simulationLog,
     batchUpdater,
     ...inputedActions,
   };
