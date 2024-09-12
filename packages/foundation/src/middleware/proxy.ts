@@ -12,7 +12,7 @@ export function apiProxy(proxyAndSave: string) {
     // secure: false,
     changeOrigin: true, // needed for virtual hosted sites
     ws: true,
-    target: process.env.SIM_PROXY ?? proxyAndSave,
+    target: proxyAndSave,
     /**
      * IMPORTANT: avoid res.end being called automatically
      **/
