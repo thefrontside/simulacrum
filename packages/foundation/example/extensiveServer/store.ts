@@ -54,6 +54,7 @@ const inputSelectors = ({
 };
 
 export const extendStore = {
+  logs: false,
   actions: inputActions,
   selectors: inputSelectors,
   schema: inputSchema,
