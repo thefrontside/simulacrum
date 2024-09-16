@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/foundation-simulator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Base simulator to build simulators for integration testing.",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
