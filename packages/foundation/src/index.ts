@@ -32,6 +32,7 @@ import type {
   SimulationRoute,
 } from "./store/schema";
 import type { RecursivePartial } from "./store/types";
+import { apiProxy } from "./middleware/proxy";
 import { delayMiddleware } from "./middleware/delay";
 import { generateRoutesHTML } from "./routeTemplate";
 
@@ -58,6 +59,7 @@ export function createFoundationSimulationServer<
   ExtendedSimulationSelectors
 >({
   port = 9000,
+  proxyAndSave,
   delayResponses,
   serveJsonFiles,
   openapi,
@@ -65,6 +67,7 @@ export function createFoundationSimulationServer<
   extendRouter,
 }: {
   port: number;
+  proxyAndSave: string;
   delayResponses?: number | { minimum: number; maximum: number };
   serveJsonFiles?: string;
   openapi?: {
@@ -101,9 +104,15 @@ export function createFoundationSimulationServer<
 }) {
   return () => {
     let app = express();
+
+    if (proxyAndSave) {
+      app.use(apiProxy(proxyAndSave));
+    }
+
     app.use(cors());
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
+
     let simulationStore = createSimulationStore(extendStore);
     app.use(delayMiddleware(delayResponses));
 
