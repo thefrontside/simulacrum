@@ -33,6 +33,7 @@ import type {
 } from "./store/schema";
 import type { RecursivePartial } from "./store/types";
 import { apiProxy } from "./middleware/proxy";
+import { delayMiddleware } from "./middleware/delay";
 import { generateRoutesHTML } from "./routeTemplate";
 
 type SimulationHandlerFunctions = (
@@ -59,6 +60,7 @@ export function createFoundationSimulationServer<
 >({
   port = 9000,
   proxyAndSave,
+  delayResponses,
   serveJsonFiles,
   openapi,
   extendStore,
@@ -66,6 +68,7 @@ export function createFoundationSimulationServer<
 }: {
   port: number;
   proxyAndSave: string;
+  delayResponses?: number | { minimum: number; maximum: number };
   serveJsonFiles?: string;
   openapi?: {
     document: Document | (Document | RecursivePartial<Document>)[];
@@ -111,6 +114,7 @@ export function createFoundationSimulationServer<
     app.use(express.urlencoded({ extended: false }));
 
     let simulationStore = createSimulationStore(extendStore);
+    app.use(delayMiddleware(delayResponses));
 
     app.use((req, res, next) => {
       // add each response to the internal log
