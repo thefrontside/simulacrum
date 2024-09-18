@@ -63,6 +63,7 @@ export function createFoundationSimulationServer<
       >
     ) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
+    additionalOptions?: { validate: boolean };
   }[];
   extendStore?: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
@@ -96,7 +97,7 @@ export function createFoundationSimulationServer<
 
     if (openapi) {
       for (let spec of openapi) {
-        let { document, handlers, apiRoot } = spec;
+        let { document, handlers, apiRoot, additionalOptions } = spec;
         let mergedOAS = Array.isArray(document)
           ? mergeDocumentArray(document)
           : document;
@@ -104,6 +105,7 @@ export function createFoundationSimulationServer<
         let api = new OpenAPIBackend({
           definition: mergedOAS,
           apiRoot,
+          ...additionalOptions,
           customizeAjv: (ajv) => {
             addFormats(ajv);
             return ajv;
