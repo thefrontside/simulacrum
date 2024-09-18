@@ -68,6 +68,7 @@ const openapiSchemaWithModificationsForSimulation = {
 
 export const simulation = createFoundationSimulationServer({
   port: 9999,
+  serveJsonFiles: `${__dirname}/jsonFiles`,
   openapi: [
     {
       document: [
@@ -92,6 +93,7 @@ export const simulation = createFoundationSimulationServer({
     },
   ],
   extendStore: {
+    logs: false,
     actions: ({ thunks, schema }) => {
       // TODO attempt to remove this type as a requirement
       let upsertTest = thunks.create<AnyState>(

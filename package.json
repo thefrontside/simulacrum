@@ -38,6 +38,7 @@
     "npm": "10.8.2"
   },
   "devDependencies": {
+    "@frontside/tsconfig": "^3.0.0",
     "@graphql-codegen/cli": "^5.x.x"
   }
 }

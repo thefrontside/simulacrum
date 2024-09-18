@@ -16,6 +16,9 @@ const openapiSchemaFromRealEndpoint = {
           200: {
             description: "All of the dogs",
           },
+          404: {
+            description: "The dogs have gone missing!",
+          },
         },
       },
     },
@@ -127,11 +130,15 @@ function handlers(
   simulationStore: ExtendedSimulationStore
 ): SimulationHandlers {
   return {
-    getDogs: (_c, _r, response) => {
+    getDogs: (_c, request, response, _next, routeMetadata) => {
       let dogs = simulationStore.schema.dogs.select(
         simulationStore.store.getState()
       );
-      response.status(200).json({ dogs });
+      if (routeMetadata.defaultCode === 200) {
+        response.status(200).json({ dogs });
+      } else {
+        response.sendStatus(routeMetadata.defaultCode);
+      }
     },
     putDogs: (c, req, response) => {
       simulationStore.store.dispatch(
