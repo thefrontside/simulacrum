@@ -6,12 +6,14 @@ import type {
   User,
   Repository,
   Organization,
+  Team,
 } from "../__generated__/resolvers-types";
 
 interface GraphQLData {
   User: User;
   Repository: Repository;
   Organization: Organization;
+  Team: Team;
 }
 
 export function toGraphql<T extends keyof GraphQLData>(
@@ -21,10 +23,11 @@ export function toGraphql<T extends keyof GraphQLData>(
 ): Pick<GraphQLData, T>[T] {
   switch (__typename) {
     case "User":
+      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       return {
         __typename,
         ...entity,
-        ...toGithubRepositoryOwner(simulationStore, __typename, entity),
+        ...toGithubRepositoryOwner(simulationStore, __typename, entity as User),
         name: entity.name,
         bio: entity.bio,
         createdAt: entity.createdAt,
@@ -42,6 +45,7 @@ export function toGraphql<T extends keyof GraphQLData>(
         },
       };
     case "Repository":
+      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       return {
         name: entity.name,
         description: entity.description,
@@ -77,8 +81,13 @@ export function toGraphql<T extends keyof GraphQLData>(
         isArchived: entity.isArchived,
       };
     case "Organization":
+      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       return {
-        ...toGithubRepositoryOwner(simulationStore, __typename, entity),
+        ...toGithubRepositoryOwner(
+          simulationStore,
+          __typename,
+          entity as Organization
+        ),
         __typename,
         id: entity.id,
         name: entity.name,
@@ -86,12 +95,13 @@ export function toGraphql<T extends keyof GraphQLData>(
         email: entity.email,
         createdAt: entity.createdAt,
         teams(pageArgs: PageArgs) {
-          return applyRelayPagination(entity.teams, pageArgs, (team) =>
+          return applyRelayPagination(entity.teams, pageArgs, (team: Team) =>
             toGraphql(simulationStore, "Team", team)
           );
         },
       };
     default:
+      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       return entity;
   }
 }
@@ -102,14 +112,23 @@ export function toGraphql<T extends keyof GraphQLData>(
 function toGithubRepositoryOwner(
   simulationStore: ExtendedSimulationStore,
   __typename: string,
-  entity: GithubOrganization | GithubAccount
+  entity: AnyState
 ) {
   return {
     avatarUrl: entity.avatarUrl,
     login: entity.login,
     repositories(pageArgs: PageArgs) {
-      return applyRelayPagination(entity.repositories, pageArgs, (repository) =>
-        toGraphql(simulationStore, "Repository", repository)
+      return applyRelayPagination(
+        // @ts-expect-error not a fully qualified return per type, TODO fill it out
+        simulationStore.schema.githubRepositories.selectByIds(
+          simulationStore.store.getState(),
+          {
+            ids: entity.repositories,
+          }
+        ),
+        pageArgs,
+        (repository: Repository) =>
+          toGraphql(simulationStore, "Repository", repository)
       );
     },
     resourcePath: entity.resourcePath,

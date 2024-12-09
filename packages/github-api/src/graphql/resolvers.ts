@@ -10,6 +10,7 @@ export function createResolvers(
 ): Resolvers {
   return {
     Query: {
+      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       viewer() {
         let user = simulationStore.schema.users.selectById(
           simulationStore.store.getState(),
@@ -18,6 +19,7 @@ export function createResolvers(
         assert(!!user, `no logged in user`);
         return toGraphql(simulationStore, "User", user);
       },
+      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       organization(_: unknown, { login }: { login: string }) {
         let orgs = simulationStore.schema.githubOrganizations.selectTableAsList(
           simulationStore.store.getState()
@@ -29,10 +31,10 @@ export function createResolvers(
           __typename === "githuborganization",
           `incorrectly structured GitHubOrganization id ${org.id}`
         );
-        console.dir({ org });
         let shaped = toGraphql(simulationStore, "Organization", org);
         return shaped;
       },
+      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       organizations(pageArgs: PageArgs) {
         let orgs = simulationStore.schema.githubOrganizations.selectTableAsList(
           simulationStore.store.getState()
@@ -41,6 +43,7 @@ export function createResolvers(
           toGraphql(simulationStore, "Organization", org)
         );
       },
+      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       repository(_, { owner, name }: { owner: string; name: string }) {
         let repo = simulationStore.schema.githubRepositories
           .selectTableAsList(simulationStore.store.getState())
@@ -52,6 +55,7 @@ export function createResolvers(
         assert(!!repo, `no repository found for ${name}`);
         return toGraphql(simulationStore, "Repository", repo);
       },
+      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       repositoryOwner(_, { login }: { login: string }) {
         let [org] = simulationStore.schema.githubOrganizations
           .selectTableAsList(simulationStore.store.getState())
@@ -61,7 +65,8 @@ export function createResolvers(
 
         let [userAccount] = simulationStore.schema.users
           .selectTableAsList(simulationStore.store.getState())
-          .filter((u) => u?.githubAccount?.login === login);
+          // TODO should we use u?.githubAccount?.login here?
+          .filter((u) => u?.login === login);
         assert(
           !!userAccount,
           `no github organization or account found for ${login}`

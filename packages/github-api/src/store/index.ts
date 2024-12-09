@@ -3,9 +3,32 @@ import type {
   ExtendSimulationActions,
   ExtendSimulationSelectors,
   ExtendSimulationSchema,
+  TableOutput,
+  AnyState,
 } from "@simulacrum/foundation-simulator";
 
-export type ExtendedSchema = typeof inputSchema;
+export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
+  users: (
+    n: string
+  ) => TableOutput<GitHubUser, AnyState, GitHubUser | undefined>;
+  githubRepositories: (
+    n: string
+  ) => TableOutput<
+    GitHubRepositories,
+    AnyState,
+    GitHubRepositories | undefined
+  >;
+  githubOrganizations: (
+    n: string
+  ) => TableOutput<
+    GitHubOrganizations,
+    AnyState,
+    GitHubOrganizations | undefined
+  >;
+  blob: (
+    n: string
+  ) => TableOutput<GitHubBlob, AnyState, GitHubBlob | undefined>;
+};
 type ExtendActions = typeof inputActions;
 type ExtendSelectors = typeof inputSelectors;
 export type ExtendedSimulationStore = SimulationStore<
@@ -14,20 +37,49 @@ export type ExtendedSimulationStore = SimulationStore<
   ReturnType<ExtendSelectors>
 >;
 
+interface GitHubUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+  login: string;
+  organizations: string[];
+}
+
+interface GitHubRepositories {
+  id: string;
+  name: string;
+  nameWithOwner: string;
+  packages?: string[];
+}
+
+interface GitHubOrganizations {
+  id: string;
+  login: string;
+  entityName: string;
+  name: string;
+  email: string;
+  description: string;
+  createdAt: number;
+  teams: string[] | undefined;
+}
+
+interface GitHubBlob {}
+
 const inputSchema = ({ slice }: ExtendSimulationSchema) => {
   let slices = {
-    users: slice.table({
+    users: slice.table<GitHubUser>({
       initialState: {
         "user:1": {
           id: "user:1",
           firstName: "Default",
           lastName: "User",
+          login: "defaultUser",
           organizations: ["githuborganization:1"],
         },
       },
     }),
-    githubRepositories: slice.table(),
-    githubOrganizations: slice.table({
+    githubRepositories: slice.table<GitHubRepositories>(),
+    githubOrganizations: slice.table<GitHubOrganizations>({
       initialState: {
         "githuborganization:1": {
           id: "githuborganization:1",
@@ -41,7 +93,7 @@ const inputSchema = ({ slice }: ExtendSimulationSchema) => {
         },
       },
     }),
-    blob: slice.table(),
+    blob: slice.table<GitHubBlob>(),
   };
   return slices;
 };
