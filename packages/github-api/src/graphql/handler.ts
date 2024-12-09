@@ -1,6 +1,5 @@
 import { createSchema, createYoga } from "graphql-yoga";
 import { createResolvers } from "./resolvers";
-import type { ServerInstance } from "./types";
 import path from "path";
 import fs from "fs";
 import type { ExtendedSimulationStore } from "../store";
@@ -17,9 +16,7 @@ function getSchema(): string {
   );
 }
 
-export function createHandler(
-  simulationStore: ExtendedSimulationStore
-): ServerInstance {
+export function createHandler(simulationStore: ExtendedSimulationStore) {
   let schema = getSchema();
   let resolvers = createResolvers(simulationStore);
 

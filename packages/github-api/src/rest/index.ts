@@ -16,6 +16,11 @@ export const openapi = [
     document,
     handlers,
     apiRoot: "/api/v3",
-    additionalOptions: { validate: false },
+    additionalOptions: {
+      ajvOpts: {
+        strictTypes: false,
+        allErrors: true,
+      },
+    },
   },
 ];
