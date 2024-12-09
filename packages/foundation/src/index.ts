@@ -52,7 +52,21 @@ export type {
   SimulationStore,
   Document,
 };
-export type { AnyState } from "starfx";
+export type { AnyState, TableOutput } from "starfx";
+
+export type FoundationSimulator<T> = () => {
+  listen(
+    portOverride?: number,
+    callback?: (() => void) | undefined
+  ): Promise<{
+    server: import("http").Server<
+      typeof import("http").IncomingMessage,
+      typeof import("http").ServerResponse
+    >;
+    simulationStore: T;
+    ensureClose: () => Promise<void>;
+  }>;
+};
 
 export function createFoundationSimulationServer<
   ExtendedSimulationSchema,
