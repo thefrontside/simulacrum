@@ -1,9 +1,8 @@
 import type { SimulationHandlers } from "@simulacrum/foundation-simulator";
 import type { ExtendedSimulationStore } from "../store";
-// import fetch from "node-fetch";
-import githubAPI from "../../schema/api.github.com.json";
+import { getSchema } from "src/utils";
 
-let document = [githubAPI];
+let document = getSchema("api.github.com.json");
 
 function handlers(
   simulationStore: ExtendedSimulationStore

@@ -1,23 +1,10 @@
 import { createSchema, createYoga } from "graphql-yoga";
 import { createResolvers } from "./resolvers";
-import path from "path";
-import fs from "fs";
+import { getSchema } from "../utils";
 import type { ExtendedSimulationStore } from "../store";
 
-function getSchema(): string {
-  let root =
-    path.dirname(path.join("..", "..", "..")) === "dist"
-      ? path.join(__dirname, "..", "..", "..", "..")
-      : path.join(__dirname, "..", "..");
-
-  return fs.readFileSync(
-    path.join(root, "schema", "schema.docs-enterprise.graphql"),
-    "utf-8"
-  );
-}
-
 export function createHandler(simulationStore: ExtendedSimulationStore) {
-  let schema = getSchema();
+  let schema = getSchema("schema.docs-enterprise.graphql");
   let resolvers = createResolvers(simulationStore);
 
   let yoga = createYoga({
