@@ -30,7 +30,7 @@ export const extendRouter = (
 
   router.post(
     [
-      "/api/v3/login/oauth/access_token",
+      "/login/oauth/access_token",
       "/api/v3/app/installations/:id/access_tokens",
     ],
     (_request, response) => {

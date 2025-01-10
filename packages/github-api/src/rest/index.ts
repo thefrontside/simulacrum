@@ -138,7 +138,7 @@ const handlers =
         const user = users[0];
         const data = {
           id: parseInt(user?.id ?? "1", 10) as Number,
-          login: user?.githubAccount.login,
+          login: user?.login,
           email: user?.email,
           name: user?.displayName,
         };

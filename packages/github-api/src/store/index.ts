@@ -39,9 +39,11 @@ export type ExtendedSimulationStore = SimulationStore<
 
 interface GitHubUser {
   id: string;
+  login: string;
   firstName: string;
   lastName: string;
-  login: string;
+  displayName: string;
+  email: string;
   organizations: string[];
 }
 
