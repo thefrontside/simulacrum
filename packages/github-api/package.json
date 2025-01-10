@@ -24,10 +24,12 @@
     "test": "echo not.....yet"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.3.0",
     "@simulacrum/foundation-simulator": "0.2.0",
     "assert-ts": "^0.3.4",
     "graphql": "^16.9.0",
-    "graphql-yoga": "^5.10.4"
+    "graphql-yoga": "^5.10.4",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",

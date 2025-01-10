@@ -52,7 +52,7 @@ export type {
   SimulationStore,
   Document,
 };
-export type { AnyState, TableOutput } from "starfx";
+export type { AnyState, TableOutput, IdProp } from "starfx";
 
 export type FoundationSimulator<T> = () => {
   listen(

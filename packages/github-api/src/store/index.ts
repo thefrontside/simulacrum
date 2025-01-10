@@ -6,6 +6,15 @@ import type {
   TableOutput,
   AnyState,
 } from "@simulacrum/foundation-simulator";
+import {
+  convertInitialStateToStoreState,
+  type GitHubStore,
+  type GitHubBlob,
+  type GitHubInitialStore,
+  type GitHubOrganization,
+  type GitHubRepository,
+  type GitHubUser,
+} from "./entities";
 
 export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
   users: (
@@ -13,17 +22,13 @@ export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
   ) => TableOutput<GitHubUser, AnyState, GitHubUser | undefined>;
   repositories: (
     n: string
-  ) => TableOutput<
-    GitHubRepositories,
-    AnyState,
-    GitHubRepositories | undefined
-  >;
+  ) => TableOutput<GitHubRepository, AnyState, GitHubRepository | undefined>;
   organizations: (
     n: string
   ) => TableOutput<
-    GitHubOrganizations,
+    GitHubOrganization,
     AnyState,
-    GitHubOrganizations | undefined
+    GitHubOrganization | undefined
   >;
   blobs: (
     n: string
@@ -37,60 +42,29 @@ export type ExtendedSimulationStore = SimulationStore<
   ReturnType<ExtendSelectors>
 >;
 
-interface GitHubUser {
-  id: string;
-  login: string;
-  firstName: string;
-  lastName: string;
-  displayName: string;
-  email: string;
-  organizations: string[];
-}
-
-interface GitHubRepositories {
-  id: string;
-  name: string;
-  nameWithOwner: string;
-  packages?: string[];
-}
-
-interface GitHubOrganizations {
-  id: string;
-  login: string;
-  entityName: string;
-  name: string;
-  email: string;
-  description: string;
-  createdAt: number;
-  teams: string[] | undefined;
-}
-
-export interface GitHubBlob {
-  id: string;
-  content: string;
-  encoding: "string" | "base64";
-  owner: string;
-  repo: string;
-  path: string;
-  sha: string;
-}
-
 const inputSchema =
-  (initialState: any) =>
+  (initialState?: GitHubStore) =>
   ({ slice }: ExtendSimulationSchema) => {
+    const storeInitialState = !initialState
+      ? undefined
+      : convertInitialStateToStoreState(initialState);
     let slices = {
-      users: slice.table<GitHubUser>({
-        initialState: initialState.users,
-      }),
-      repositories: slice.table<GitHubRepositories>({
-        initialState: initialState.repositories,
-      }),
-      organizations: slice.table<GitHubOrganizations>({
-        initialState: initialState.organizations,
-      }),
-      blobs: slice.table<GitHubBlob>({
-        initialState: initialState.blobs,
-      }),
+      users: slice.table<GitHubUser>(
+        !storeInitialState ? {} : { initialState: storeInitialState.users }
+      ),
+      repositories: slice.table<GitHubRepository>(
+        !storeInitialState
+          ? {}
+          : { initialState: storeInitialState.repositories }
+      ),
+      organizations: slice.table<GitHubOrganization>(
+        !storeInitialState
+          ? {}
+          : { initialState: storeInitialState.organizations }
+      ),
+      blobs: slice.table<GitHubBlob>(
+        !storeInitialState ? {} : { initialState: storeInitialState.blobs }
+      ),
     };
     return slices;
   };
@@ -148,7 +122,7 @@ const inputSelectors = ({
   return { allGithubOrganizations, getBlob, getBlobAtOwnerRepo };
 };
 
-export const extendStore = (initialState: any) => ({
+export const extendStore = (initialState?: GitHubStore) => ({
   actions: inputActions,
   selectors: inputSelectors,
   schema: inputSchema(initialState),
