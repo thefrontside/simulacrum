@@ -11,21 +11,21 @@ export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
   users: (
     n: string
   ) => TableOutput<GitHubUser, AnyState, GitHubUser | undefined>;
-  githubRepositories: (
+  repositories: (
     n: string
   ) => TableOutput<
     GitHubRepositories,
     AnyState,
     GitHubRepositories | undefined
   >;
-  githubOrganizations: (
+  organizations: (
     n: string
   ) => TableOutput<
     GitHubOrganizations,
     AnyState,
     GitHubOrganizations | undefined
   >;
-  blob: (
+  blobs: (
     n: string
   ) => TableOutput<GitHubBlob, AnyState, GitHubBlob | undefined>;
 };
@@ -63,40 +63,35 @@ interface GitHubOrganizations {
   teams: string[] | undefined;
 }
 
-interface GitHubBlob {}
+export interface GitHubBlob {
+  id: string;
+  content: string;
+  encoding: "string" | "base64";
+  owner: string;
+  repo: string;
+  path: string;
+  sha: string;
+}
 
-const inputSchema = ({ slice }: ExtendSimulationSchema) => {
-  let slices = {
-    users: slice.table<GitHubUser>({
-      initialState: {
-        "user:1": {
-          id: "user:1",
-          firstName: "Default",
-          lastName: "User",
-          login: "defaultUser",
-          organizations: ["githuborganization:1"],
-        },
-      },
-    }),
-    githubRepositories: slice.table<GitHubRepositories>(),
-    githubOrganizations: slice.table<GitHubOrganizations>({
-      initialState: {
-        "githuborganization:1": {
-          id: "githuborganization:1",
-          login: "default-org",
-          entityName: "",
-          name: "login",
-          email: "org@example.com",
-          description: "Default Org",
-          createdAt: Date.now(),
-          teams: [],
-        },
-      },
-    }),
-    blob: slice.table<GitHubBlob>(),
+const inputSchema =
+  (initialState: any) =>
+  ({ slice }: ExtendSimulationSchema) => {
+    let slices = {
+      users: slice.table<GitHubUser>({
+        initialState: initialState.users,
+      }),
+      repositories: slice.table<GitHubRepositories>({
+        initialState: initialState.repositories,
+      }),
+      organizations: slice.table<GitHubOrganizations>({
+        initialState: initialState.organizations,
+      }),
+      blobs: slice.table<GitHubBlob>({
+        initialState: initialState.blobs,
+      }),
+    };
+    return slices;
   };
-  return slices;
-};
 
 const inputActions = ({
   thunks,
@@ -109,11 +104,50 @@ const inputSelectors = ({
   createSelector,
   schema,
 }: ExtendSimulationSelectors<ExtendedSchema>) => {
-  return {};
+  const allGithubOrganizations = createSelector(
+    schema.organizations.selectTableAsList,
+    (ghOrgs) => {
+      return ghOrgs;
+    }
+  );
+
+  const getBlob = createSelector(
+    schema.blobs.selectTableAsList,
+    (_state: AnyState, owner: string, repo: string, sha_or_path: string) => ({
+      owner,
+      repo,
+      sha_or_path,
+    }),
+    (blobs, { owner, repo, sha_or_path }) => {
+      const blob = blobs.find(
+        (blob) =>
+          blob.owner === owner &&
+          blob.repo === repo &&
+          (blob.path === sha_or_path || blob.sha === sha_or_path)
+      );
+      return blob;
+    }
+  );
+
+  const getBlobAtOwnerRepo = createSelector(
+    schema.blobs.selectTableAsList,
+    (_state: AnyState, owner: string, repo: string) => ({
+      owner,
+      repo,
+    }),
+    (blobs, { owner, repo }) => {
+      const blob = blobs.filter(
+        (blob) => blob.owner === owner && blob.repo === repo
+      );
+      return blob;
+    }
+  );
+
+  return { allGithubOrganizations, getBlob, getBlobAtOwnerRepo };
 };
 
-export const extendStore = {
+export const extendStore = (initialState: any) => ({
   actions: inputActions,
   selectors: inputSelectors,
-  schema: inputSchema,
-};
+  schema: inputSchema(initialState),
+});
