@@ -15,6 +15,11 @@ import {
   type GitHubRepository,
   type GitHubUser,
 } from "./entities";
+import type { ExtendSimulationSchemaInput } from "@simulacrum/foundation-simulator/src/store/schema";
+import type {
+  ExtendSimulationActionsInput,
+  ExtendSimulationSelectorsInput,
+} from "@simulacrum/foundation-simulator/src/store";
 
 export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
   users: (
@@ -43,11 +48,15 @@ export type ExtendedSimulationStore = SimulationStore<
 >;
 
 const inputSchema =
-  (initialState?: GitHubStore) =>
+  <T>(
+    initialState?: GitHubStore,
+    extendedSchema?: ExtendSimulationSchemaInput<T>
+  ) =>
   ({ slice }: ExtendSimulationSchema) => {
     const storeInitialState = !initialState
       ? undefined
       : convertInitialStateToStoreState(initialState);
+    const extended = extendedSchema ? extendedSchema({ slice }) : {};
     let slices = {
       users: slice.table<GitHubUser>(
         !storeInitialState ? {} : { initialState: storeInitialState.users }
@@ -65,21 +74,26 @@ const inputSchema =
       blobs: slice.table<GitHubBlob>(
         !storeInitialState ? {} : { initialState: storeInitialState.blobs }
       ),
+      ...extended,
     };
     return slices;
   };
 
-const inputActions = ({
-  thunks,
-  schema,
-}: ExtendSimulationActions<ExtendedSchema>) => {
+const inputActions = (args: ExtendSimulationActions<ExtendedSchema>) => {
   return {};
 };
 
-const inputSelectors = ({
-  createSelector,
-  schema,
-}: ExtendSimulationSelectors<ExtendedSchema>) => {
+const extendActions =
+  (extendedActions?: ExtendSimulationActionsInput<any, ExtendedSchema>) =>
+  (args: ExtendSimulationActions<ExtendedSchema>) => {
+    return extendedActions
+      ? // @ts-expect-error schema is cyclical, ignore extension for now
+        { ...inputActions(args), ...extendedActions(args) }
+      : inputActions(args);
+  };
+
+const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
+  const { createSelector, schema } = args;
   const allGithubOrganizations = createSelector(
     schema.organizations.selectTableAsList,
     (ghOrgs) => {
@@ -122,8 +136,32 @@ const inputSelectors = ({
   return { allGithubOrganizations, getBlob, getBlobAtOwnerRepo };
 };
 
-export const extendStore = (initialState?: GitHubStore) => ({
-  actions: inputActions,
-  selectors: inputSelectors,
-  schema: inputSchema(initialState),
+const extendSelectors =
+  (extendedSelectors?: ExtendSimulationSelectorsInput<any, ExtendedSchema>) =>
+  (args: ExtendSimulationSelectors<ExtendedSchema>) => {
+    return extendedSelectors
+      ? // @ts-expect-error schema is cyclical, ignore extension for now
+        { ...inputSelectors(args), ...extendedSelectors(args) }
+      : inputSelectors(args);
+  };
+
+export const extendStore = <T>(
+  initialState: GitHubStore | undefined,
+  extended:
+    | {
+        actions: ExtendSimulationActionsInput<
+          any,
+          ExtendSimulationSchemaInput<T>
+        >;
+        selectors: ExtendSimulationSelectorsInput<
+          any,
+          ExtendSimulationSchemaInput<T>
+        >;
+        schema?: ExtendSimulationSchemaInput<T>;
+      }
+    | undefined
+) => ({
+  actions: extendActions(extended?.actions),
+  selectors: extendSelectors(extended?.selectors),
+  schema: inputSchema(initialState, extended?.schema),
 });

@@ -137,10 +137,10 @@ const handlers =
         );
         const user = users[0];
         const data = {
-          id: parseInt(user?.id ?? "1", 10) as Number,
+          id: parseInt(user?.id?.toString() ?? "1", 10) as Number,
           login: user?.login,
           email: user?.email,
-          name: user?.displayName,
+          name: user?.name,
         };
         response.status(200).json(data);
       },
