@@ -33,7 +33,7 @@ export function toGraphql<T extends keyof GraphQLData>(
         createdAt: entity.createdAt,
         organizations(pageArgs: PageArgs) {
           return applyRelayPagination(
-            simulationStore.schema.githubOrganizations.selectByIds(
+            simulationStore.schema.organizations.selectByIds(
               simulationStore.store.getState(),
               {
                 ids: entity.organizations,
@@ -120,7 +120,7 @@ function toGithubRepositoryOwner(
     repositories(pageArgs: PageArgs) {
       return applyRelayPagination(
         // @ts-expect-error not a fully qualified return per type, TODO fill it out
-        simulationStore.schema.githubRepositories.selectByIds(
+        simulationStore.schema.repositories.selectByIds(
           simulationStore.store.getState(),
           {
             ids: entity.repositories,

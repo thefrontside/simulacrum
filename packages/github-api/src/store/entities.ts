@@ -23,10 +23,13 @@ export const githubRepositorySchema = z
   .object({
     id: z.string().or(z.number()).default(""),
     name: z.string(),
+    owner: z.string(),
+    full_name: z.string().optional().default(""),
     packages: z.array(z.string()).optional(),
   })
   .transform((repo) => {
     repo.id = repo.name;
+    repo.full_name = `${repo.owner}/${repo.name}`;
     return repo;
   });
 export type GitHubRepository = z.infer<typeof githubRepositorySchema>;

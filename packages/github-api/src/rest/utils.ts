@@ -1,4 +1,4 @@
-import type { GitHubBlob } from "../store";
+import type { GitHubBlob } from "../store/entities";
 
 export const blobAsBase64 = ({
   blob,
