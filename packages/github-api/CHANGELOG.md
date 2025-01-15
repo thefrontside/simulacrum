@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.5.0]
+
+### Enhancements
+
+- [`7d39c71`](https://github.com/thefrontside/simulacrum/commit/7d39c71164bf42f3c0ca90a428ccf03532a40eb4) Rebuilding on top of the foundation simulator to establish a mutable state. Also begin handling REST-based routes.
+
 ## \[0.4.0]
 
 - [`955dd7f`](https://github.com/thefrontside/simulacrum/commit/955dd7f248f6f1352b6be10327dda48a0ffcea58)([#267](https://github.com/thefrontside/simulacrum/pull/267)) Adds the `repositoryOwner` resolver.
