@@ -1,5 +1,6 @@
 import {
   createFoundationSimulationServer,
+  type SimulationHandlers,
   type FoundationSimulator,
 } from "@simulacrum/foundation-simulator";
 import { ExtendedSimulationStore, extendStore } from "./store/index";
@@ -15,7 +16,14 @@ export type GitHubSimulator = ({
   extend,
 }: {
   initialState?: GitHubInitialStore;
-  extend?: Pick<SimulationInput, "extendStore" | "extendRouter" | "openapi">;
+  extend?: {
+    extendStore?: SimulationInput["extendStore"];
+    openapiHandlers?: (
+      simulationStore: ExtendedSimulationStore
+    ) => SimulationHandlers;
+    extendRouter?: SimulationInput["extendRouter"];
+  };
+  // | Pick<SimulationInput, "extendStore" | "extendRouter" | "openapi">
 }) => ReturnType<FoundationSimulator<ExtendedSimulationStore>>;
 
 type SimulationInput = Parameters<typeof createFoundationSimulationServer>[0];
@@ -27,7 +35,7 @@ export const simulation: GitHubSimulator = ({ initialState, extend }) => {
     port: 3300, // default port
     extendStore: extendStore(parsedInitialState, extend?.extendStore),
     extendRouter,
-    openapi: openapi(parsedInitialState),
+    openapi: openapi(parsedInitialState, extend?.openapiHandlers),
   })();
 };
 

@@ -6,7 +6,12 @@ import { blobAsBase64, commitStatusResponse, gitTrees } from "./utils";
 let document = getSchema("api.github.com.json");
 
 const handlers =
-  (initialState: any) =>
+  (
+    initialState: Record<string, any> | undefined,
+    extendedHandlers:
+      | ((simulationStore: ExtendedSimulationStore) => SimulationHandlers)
+      | undefined
+  ) =>
   (simulationStore: ExtendedSimulationStore): SimulationHandlers => {
     if (!initialState) return {};
     // L# refer to openapi spec json files
@@ -157,13 +162,19 @@ const handlers =
         );
         response.status(200).json(ghOrgs);
       },
+      ...(extendedHandlers ? extendedHandlers(simulationStore) : {}),
     };
   };
 
-export const openapi = (initialState) => [
+export const openapi = (
+  initialState: Record<string, any> | undefined,
+  openapiHandlers:
+    | ((simulationStore: ExtendedSimulationStore) => SimulationHandlers)
+    | undefined
+) => [
   {
     document,
-    handlers: handlers(initialState),
+    handlers: handlers(initialState, openapiHandlers),
     apiRoot: "/api/v3",
     additionalOptions: {
       ajvOpts: {
