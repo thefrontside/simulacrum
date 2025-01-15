@@ -7,10 +7,9 @@ type SchemaFile =
   | "api.github.com.json";
 
 export function getSchema(schemaFile: SchemaFile) {
-  let root =
-    path.dirname(path.join("..", "..")) === "dist"
-      ? path.join(__dirname, "..", "..", "..")
-      : path.join(__dirname, "..");
+  let root = path.join(__dirname, "..").endsWith("dist")
+    ? path.join(__dirname, "..", "..")
+    : path.join(__dirname, "..");
 
   const fileString = fs.readFileSync(
     path.join(root, "schema", schemaFile),

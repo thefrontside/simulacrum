@@ -7,6 +7,11 @@
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thefrontside/simulacrum.git",
+    "directory": "packages/github-api"
+  },
   "files": [
     "dist",
     "README.md",
@@ -20,6 +25,7 @@
     "build:esm": "tsc --build tsconfig.esm.json",
     "build": "npm run generate && npm run build:cjs && npm run build:esm && copyfiles -f src/schema/* dist/schema",
     "start": "node --import=tsx ./example/start.ts",
+    "start:bin": "node ./bin/start.js",
     "generate": "graphql-codegen",
     "test": "echo not.....yet"
   },

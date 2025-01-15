@@ -27,15 +27,15 @@ export type GitHubSimulator = ({
 }) => ReturnType<FoundationSimulator<ExtendedSimulationStore>>;
 
 type SimulationInput = Parameters<typeof createFoundationSimulationServer>[0];
-export const simulation: GitHubSimulator = ({ initialState, extend }) => {
-  const parsedInitialState = !initialState
+export const simulation: GitHubSimulator = (args) => {
+  const parsedInitialState = !args?.initialState
     ? undefined
-    : gitubInitialStoreSchema.parse(initialState);
+    : gitubInitialStoreSchema.parse(args?.initialState);
   return createFoundationSimulationServer({
     port: 3300, // default port
-    extendStore: extendStore(parsedInitialState, extend?.extendStore),
+    extendStore: extendStore(parsedInitialState, args?.extend?.extendStore),
     extendRouter,
-    openapi: openapi(parsedInitialState, extend?.openapiHandlers),
+    openapi: openapi(parsedInitialState, args?.extend?.openapiHandlers),
   })();
 };
 

@@ -1,6 +1,6 @@
 import type { SimulationHandlers } from "@simulacrum/foundation-simulator";
 import type { ExtendedSimulationStore } from "../store";
-import { getSchema } from "src/utils";
+import { getSchema } from "../utils";
 import { blobAsBase64, commitStatusResponse, gitTrees } from "./utils";
 
 let document = getSchema("api.github.com.json");
