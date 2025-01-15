@@ -17,6 +17,7 @@ import type {
   Document,
   Context as OpenAPIBackendContext,
 } from "openapi-backend";
+import type { Options as AjvOpts } from "ajv";
 import addFormats from "ajv-formats";
 import { createSimulationStore } from "./store/index";
 import type {
@@ -51,7 +52,21 @@ export type {
   SimulationStore,
   Document,
 };
-export type { AnyState } from "starfx";
+export type { AnyState, TableOutput, IdProp } from "starfx";
+
+export type FoundationSimulator<T> = () => {
+  listen(
+    portOverride?: number,
+    callback?: (() => void) | undefined
+  ): Promise<{
+    server: import("http").Server<
+      typeof import("http").IncomingMessage,
+      typeof import("http").ServerResponse
+    >;
+    simulationStore: T;
+    ensureClose: () => Promise<void>;
+  }>;
+};
 
 export function createFoundationSimulationServer<
   ExtendedSimulationSchema,
@@ -67,7 +82,7 @@ export function createFoundationSimulationServer<
   extendRouter,
 }: {
   port: number;
-  proxyAndSave: string;
+  proxyAndSave?: string;
   delayResponses?: number | { minimum: number; maximum: number };
   serveJsonFiles?: string;
   openapi?: {
@@ -80,6 +95,7 @@ export function createFoundationSimulationServer<
       >
     ) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
+    additionalOptions?: { validate?: boolean; ajvOpts?: AjvOpts };
   }[];
   extendStore?: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
@@ -201,7 +217,7 @@ export function createFoundationSimulationServer<
 
     if (openapi) {
       for (let spec of openapi) {
-        let { document, handlers, apiRoot } = spec;
+        let { document, handlers, apiRoot, additionalOptions } = spec;
         let mergedOAS = Array.isArray(document)
           ? mergeDocumentArray(document)
           : document;
@@ -209,6 +225,8 @@ export function createFoundationSimulationServer<
         let api = new OpenAPIBackend({
           definition: mergedOAS,
           apiRoot,
+          validate: additionalOptions?.validate,
+          ajvOpts: { ...additionalOptions?.ajvOpts },
           customizeAjv: (ajv) => {
             addFormats(ajv);
             return ajv;

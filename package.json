@@ -1,6 +1,7 @@
 {
   "name": "@simulacrum/repository",
   "version": "0.0.0",
+  "private": true,
   "description": "Composable simulations for testing, development, and application previews",
   "scripts": {
     "clean": "npm run clean -ws",
@@ -29,13 +30,15 @@
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "engines": {
-    "npm": ">=9"
+    "node": ">=20",
+    "npm": ">=10"
   },
   "volta": {
     "node": "20.16.0",
     "npm": "10.8.2"
   },
   "devDependencies": {
-    "@frontside/tsconfig": "^3.0.0"
+    "@frontside/tsconfig": "^3.0.0",
+    "@graphql-codegen/cli": "^5.x.x"
   }
 }
