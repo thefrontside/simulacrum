@@ -20,7 +20,7 @@ jobs:
           token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
           command: "status"
           comment: true
-      - run: echo ${{ steps.covector.outputs.status }}
+      - run: echo ${{ steps.covector.outputs.packagesPublished }}
 
   preview:
     name: Publish Preview Package
