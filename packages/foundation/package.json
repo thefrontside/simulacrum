@@ -46,10 +46,8 @@
     "lodash": "^4.17.21",
     "openapi-backend": "^5.11.1",
     "openapi-merge": "^1.3.3",
-    "starfx": "^0.12.0"
-  },
-  "peerDependencies": {
-    "react-dom": ">=17"
+    "starfx": "^0.12.0",
+    "react-dom": "^17.0 || ^18.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
