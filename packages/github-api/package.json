@@ -18,6 +18,7 @@
     "schema",
     "repository-mock-data"
   ],
+  "bin": "bin/start.js",
   "scripts": {
     "lint": "echo noop",
     "prepack": "npm run build",
