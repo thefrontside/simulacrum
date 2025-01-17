@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.5.1]
+
+### Bug Fixes
+
+- [`2741f00`](https://github.com/thefrontside/simulacrum/commit/2741f00faef7d7ac0af317261699e7b98cf72300) The bin file was not specified so running with `npx` directly was broken.
+
+### Dependencies
+
+- Upgraded to `@simulacrum/foundation-simulator@0.2.1`
+
 ## \[0.5.0]
 
 ### Enhancements
