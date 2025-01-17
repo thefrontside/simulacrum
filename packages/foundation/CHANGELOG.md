@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.2.1]
+
+### Bug Fixes
+
+- [`6a6fc71`](https://github.com/thefrontside/simulacrum/commit/6a6fc716cfdb7ae50baea6504e25c389acbeeb8f) Due to upstream dep requirements, the `react-redux` depends on `react-dom`. Including it as a dependency to resolve this issue, but we will work to remove it from the dependency chain as that code path is not utilized in this library.
+
 ## \[0.2.0]
 
 ### New Features
