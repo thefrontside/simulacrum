@@ -44,7 +44,7 @@
     "@simulacrum/github-api-simulator": {
       "path": "./packages/github-api",
       "manager": "javascript",
-      "dependencies": []
+      "dependencies": ["@simulacrum/foundation-simulator"]
     }
   }
 }

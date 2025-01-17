@@ -14,7 +14,7 @@ import {
 export type GitHubSimulator = ({
   initialState,
   extend,
-}: {
+}?: {
   initialState?: GitHubInitialStore;
   extend?: {
     extendStore?: SimulationInput["extendStore"];
@@ -23,11 +23,10 @@ export type GitHubSimulator = ({
     ) => SimulationHandlers;
     extendRouter?: SimulationInput["extendRouter"];
   };
-  // | Pick<SimulationInput, "extendStore" | "extendRouter" | "openapi">
 }) => ReturnType<FoundationSimulator<ExtendedSimulationStore>>;
 
 type SimulationInput = Parameters<typeof createFoundationSimulationServer>[0];
-export const simulation: GitHubSimulator = (args) => {
+export const simulation: GitHubSimulator = (args = {}) => {
   const parsedInitialState = !args?.initialState
     ? undefined
     : gitubInitialStoreSchema.parse(args?.initialState);
