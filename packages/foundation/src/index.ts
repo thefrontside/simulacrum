@@ -74,6 +74,7 @@ export function createFoundationSimulationServer<
   ExtendedSimulationSelectors
 >({
   port = 9000,
+  verbose,
   proxyAndSave,
   delayResponses,
   serveJsonFiles,
@@ -82,6 +83,7 @@ export function createFoundationSimulationServer<
   extendRouter,
 }: {
   port: number;
+  verbose?: boolean;
   proxyAndSave?: string;
   delayResponses?: number | { minimum: number; maximum: number };
   serveJsonFiles?: string;
@@ -95,7 +97,11 @@ export function createFoundationSimulationServer<
       >
     ) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
-    additionalOptions?: { validate?: boolean; ajvOpts?: AjvOpts };
+    additionalOptions?: {
+      validate?: boolean;
+      quick?: boolean;
+      ajvOpts?: AjvOpts;
+    };
   }[];
   extendStore?: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
@@ -225,7 +231,8 @@ export function createFoundationSimulationServer<
         let api = new OpenAPIBackend({
           definition: mergedOAS,
           apiRoot,
-          validate: additionalOptions?.validate,
+          quick: additionalOptions?.quick,
+          validate: additionalOptions?.validate ?? true,
           ajvOpts: { ...additionalOptions?.ajvOpts },
           customizeAjv: (ajv) => {
             addFormats(ajv);
@@ -260,6 +267,30 @@ export function createFoundationSimulationServer<
               c.operation.operationId!
             );
             return res.status(status).json(mock);
+          },
+          postResponseHandler: (
+            c: OpenAPIBackendContext,
+            _req: ExpressRequest,
+            res: ExpressResponse
+          ) => {
+            const valid = c.api.validateResponse(c.response, c.operation);
+            if (valid.errors) {
+              if (verbose)
+                console.dir(
+                  { errors: valid.errors, operation: c.operation },
+                  { depth: 10 }
+                );
+
+              if (!res.headersSent)
+                res.status(502).json({
+                  status: 502,
+                  err: valid.errors,
+                  operation: c.operation,
+                });
+            } else {
+              if (!res.headersSent)
+                res.status(c.response.status).json(c.response.json);
+            }
           },
         });
 
