@@ -10,10 +10,10 @@ import {
   convertInitialStateToStoreState,
   type GitHubStore,
   type GitHubBlob,
-  type GitHubInitialStore,
   type GitHubOrganization,
   type GitHubRepository,
   type GitHubUser,
+  type GitHubBranch,
 } from "./entities";
 import type { ExtendSimulationSchemaInput } from "@simulacrum/foundation-simulator/src/store/schema";
 import type {
@@ -28,6 +28,9 @@ export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
   repositories: (
     n: string
   ) => TableOutput<GitHubRepository, AnyState, GitHubRepository | undefined>;
+  branches: (
+    n: string
+  ) => TableOutput<GitHubBranch, AnyState, GitHubBranch | undefined>;
   organizations: (
     n: string
   ) => TableOutput<
@@ -53,9 +56,7 @@ const inputSchema =
     extendedSchema?: ExtendSimulationSchemaInput<T>
   ) =>
   ({ slice }: ExtendSimulationSchema) => {
-    const storeInitialState = !initialState
-      ? undefined
-      : convertInitialStateToStoreState(initialState);
+    const storeInitialState = convertInitialStateToStoreState(initialState);
     const extended = extendedSchema ? extendedSchema({ slice }) : {};
     let slices = {
       users: slice.table<GitHubUser>(
@@ -65,6 +66,9 @@ const inputSchema =
         !storeInitialState
           ? {}
           : { initialState: storeInitialState.repositories }
+      ),
+      branches: slice.table<GitHubBranch>(
+        !storeInitialState ? {} : { initialState: storeInitialState.branches }
       ),
       organizations: slice.table<GitHubOrganization>(
         !storeInitialState
@@ -101,6 +105,20 @@ const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
     }
   );
 
+  const allReposWithOrgs = createSelector(
+    schema.repositories.selectTableAsList,
+    schema.organizations.selectTable,
+    (repos, orgMap) => {
+      return repos.map((repo) => {
+        const linkedRepo = { ...repo, owner: { ...orgMap[repo.owner] } };
+        // TODO better option than delete?
+        delete linkedRepo.owner.name;
+        delete linkedRepo.owner.email;
+        return linkedRepo;
+      });
+    }
+  );
+
   const getBlob = createSelector(
     schema.blobs.selectTableAsList,
     (_state: AnyState, owner: string, repo: string, sha_or_path: string) => ({
@@ -133,7 +151,12 @@ const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
     }
   );
 
-  return { allGithubOrganizations, getBlob, getBlobAtOwnerRepo };
+  return {
+    allGithubOrganizations,
+    allReposWithOrgs,
+    getBlob,
+    getBlobAtOwnerRepo,
+  };
 };
 
 const extendSelectors =

@@ -15,6 +15,8 @@ const handlers =
   (simulationStore: ExtendedSimulationStore): SimulationHandlers => {
     if (!initialState) return {};
     // L# refer to openapi spec json files
+    // note for any cases where it `return`s an object,
+    //  that will validate the response per the schema
     return {
       // L#61612 /user/installations
       "apps/list-installations": async (_context, _request, response) => {
@@ -33,26 +35,31 @@ const handlers =
         _request,
         response
       ) => {
-        const repos = simulationStore.schema.repositories.selectTableAsList(
+        const repos = simulationStore.selectors.allReposWithOrgs(
           simulationStore.store.getState()
         );
-        response.status(200).json(repos);
+        return {
+          status: 200,
+          json: {
+            total_count: repos.length,
+            repositories: repos,
+          },
+        };
       },
 
       // L#18386 /orgs/{org}/repos
       "repos/list-for-org": async (_context, _request, response) => {
-        const repos = simulationStore.schema.repositories.selectTableAsList(
+        const repos = simulationStore.selectors.allReposWithOrgs(
           simulationStore.store.getState()
         );
-        response.status(200).json(repos);
+        return { status: 200, json: repos };
       },
-      // L#29067 /repos/{owner}/{repo}/branchesb
+      // L#29067 /repos/{owner}/{repo}/branches
       "repos/list-branches": async (_context, _request, response) => {
-        // TODO branches
-        const branches = simulationStore.schema.repositories.selectTableAsList(
+        const branches = simulationStore.schema.branches.selectTableAsList(
           simulationStore.store.getState()
         );
-        response.status(200).json(branches);
+        return { status: 200, json: branches };
       },
       // L#36879 /repos/{owner}/{repo}/commits/{ref}/status
       "repos/get-combined-status-for-ref": async (
@@ -177,10 +184,9 @@ export const openapi = (
     handlers: handlers(initialState, openapiHandlers),
     apiRoot: "/api/v3",
     additionalOptions: {
-      ajvOpts: {
-        strictTypes: false,
-        allErrors: true,
-      },
+      // starts up quicker and avoids the precompile step which throws a ton of errors
+      //  based on openapi-backend handling of GitHub schema
+      quick: true,
     },
   },
 ];

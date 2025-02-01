@@ -19,7 +19,7 @@ It is built on `@simulaction/foundation-simulator` where we can pull in the GH O
 It may be run directly from the `bin` script.
 
 ```shell
-npx @simulacrum/foundation-simulator
+npx @simulacrum/github-api-simulator
 ```
 
 If you need deeper control and want to input data, import the server and run it with a Nodejs script. It exports a named function, `simulation`, which you may use to start the server.
