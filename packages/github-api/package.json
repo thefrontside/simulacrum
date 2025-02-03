@@ -52,18 +52,8 @@
     "typescript": "^5.4.5"
   },
   "exports": {
-    ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
-    },
-    "./github-topics.json": {
-      "import": "./repository-mock-data/github-topics.json",
-      "require": "./repository-mock-data/github-topics.json"
-    },
-    "./repository-names.json": {
-      "import": "./repository-mock-data/github-topics.json",
-      "require": "./repository-mock-data/repository-names.json"
-    },
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.js",
     "development": "./src/index.ts"
   },
   "typesVersions": {
