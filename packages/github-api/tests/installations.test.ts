@@ -34,11 +34,10 @@ describe.sequential("GET repo endpoints", () => {
     });
   });
 
-  describe.only("/orgs/{org}/installation", () => {
+  describe("/orgs/{org}/installation", () => {
     it("validates with 200 response", async () => {
       let request = await fetch(`${url}/orgs/lovely-org/installation`);
       let response = await request.json();
-      if (request.status === 502) console.dir(response, { depth: 8 });
       expect(request.status).toEqual(200);
       expect(response).toEqual(
         expect.objectContaining({
@@ -56,9 +55,11 @@ describe.sequential("GET repo endpoints", () => {
       let response = await request.json();
       if (request.status === 502) console.dir(response);
       expect(request.status).toEqual(200);
-      expect(response.repositories).toEqual([
-        expect.objectContaining({ name: "awesome-repo" }),
-      ]);
+      expect(response).toEqual(
+        expect.objectContaining({
+          account: expect.objectContaining({ login: "lovely-org" }),
+        })
+      );
     });
   });
 });

@@ -56,10 +56,10 @@ const handlers =
       },
       // GET /repos/{owner}/{repo}/installation - Get a repository installation for the authenticated app
       "apps/get-repo-installation": async (context, _request, response) => {
-        const { org } = context.request.params;
+        const { owner } = context.request.params;
         const install = simulationStore.selectors.getAppInstallation(
           simulationStore.store.getState(),
-          org
+          owner
         );
         return { status: 200, json: install };
       },
