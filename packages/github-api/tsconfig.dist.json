@@ -2,8 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "dist/cjs",
-    "rootDir": "src",
-    "noEmit": false
+    "rootDir": "src"
   },
   "exclude": ["test"]
 }

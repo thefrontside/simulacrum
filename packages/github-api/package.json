@@ -48,16 +48,14 @@
     "typescript": "^5.4.5"
   },
   "exports": {
-    "exports": {
-      "import": {
-        "types": "./dist/cjs/index.d.ts",
-        "development": "./src/index.ts",
-        "default": "./dist/cjs/index.js"
-      },
-      "require": {
-        "types": "./dist/cjs/index.d.ts",
-        "default": "./dist/cjs/index.js"
-      }
+    "import": {
+      "types": "./dist/esm/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/esm/index.js"
+    },
+    "require": {
+      "types": "./dist/cjs/index.d.ts",
+      "default": "./dist/cjs/index.js"
     }
   },
   "typesVersions": {

@@ -4,8 +4,7 @@
     "outDir": "dist/esm",
     "rootDir": "src",
     "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node"
+    "module": "ESNext"
   },
   "exclude": ["test"]
 }
