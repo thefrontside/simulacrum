@@ -7,14 +7,16 @@
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "license": "Apache-2.0",
+  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git",
     "directory": "packages/github-api"
   },
   "files": [
-    "dist",
     "README.md",
+    "dist",
+    "src",
     "schema",
     "repository-mock-data"
   ],
@@ -50,14 +52,9 @@
     "typescript": "^5.4.5"
   },
   "exports": {
-    "development": "./src/index.ts",
     ".": {
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
-    },
-    "./main": {
-      "import": "./dist/esm/main.js",
-      "require": "./dist/cjs/main.js"
     },
     "./github-topics.json": {
       "import": "./repository-mock-data/github-topics.json",
@@ -66,7 +63,8 @@
     "./repository-names.json": {
       "import": "./repository-mock-data/github-topics.json",
       "require": "./repository-mock-data/repository-names.json"
-    }
+    },
+    "development": "./src/index.ts"
   },
   "typesVersions": {
     "*": {
