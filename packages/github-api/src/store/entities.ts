@@ -19,6 +19,58 @@ export const githubUserSchema = z
   });
 export type GitHubUser = z.infer<typeof githubUserSchema>;
 
+const githubEntityPermissionSchema = z
+  .object({
+    admin: z.boolean().optional().default(false),
+    push: z.boolean().optional().default(false),
+    pull: z.boolean().optional().default(true),
+  })
+  .optional()
+  .default({ admin: false, push: false, pull: true });
+
+export const githubAppInstallationSchema = z
+  .object({
+    id: z.number().optional(),
+    account: z.string(),
+    repository_selection: z.enum(["all", "selected"]).optional().default("all"),
+    app_id: z.number().optional().default(1),
+    access_tokens_url: z.string().optional(),
+    repositories_url: z.string().optional(),
+    html_url: z.string().optional(),
+    client_id: z.string().optional().default("Iv1.ab1112223334445c"),
+    target_id: z.number().optional(),
+    target_type: z.enum(["Organization", "User"]).optional(),
+    permissions: githubEntityPermissionSchema,
+    events: z.array(z.any()).optional().default([]),
+    updated_at: z
+      .string()
+      .optional()
+      .default(() => faker.date.recent().toISOString()),
+    created_at: z
+      .string()
+      .optional()
+      .default(() => faker.date.recent().toISOString()),
+    single_file_name: z.string().optional().default("config.yml"),
+    has_multiple_single_files: z.boolean().optional().default(true),
+    single_file_paths: z.array(z.string()).optional().default([]),
+    app_slug: z.string().optional().default("simulator-app"),
+    suspended_at: z.nullable(z.string()).optional().default(null),
+    suspended_by: z.nullable(z.string()).optional().default(null),
+  })
+  .transform((install) => {
+    install.id = faker.number.int();
+
+    const host = "localhost:3300";
+    // api endpoint
+    install.access_tokens_url = `https://${host}/app/installations/1/access_tokens`;
+    install.repositories_url = `https://${host}/installation/repositories`;
+    // main site
+    install.html_url = `https://${host}/organizations/github/settings/installations/1`;
+
+    return install;
+  });
+export type GitHubAppInstallation = z.infer<typeof githubAppInstallationSchema>;
+
 export const githubRepositorySchema = z
   .object({
     id: z.number().optional(),
@@ -118,15 +170,7 @@ export const githubRepositorySchema = z
     open_issues_count: z.number().optional().default(9001),
     open_issues: z.number().optional().default(9001),
 
-    permissions: z
-      .object({
-        admin: z.boolean().optional().default(false),
-        push: z.boolean().optional().default(false),
-        pull: z.boolean().optional().default(true),
-      })
-      .optional()
-      .default({ admin: false, push: false, pull: true }),
-
+    permissions: githubEntityPermissionSchema,
     security_and_analysis: z
       .object({
         advanced_security: z
@@ -327,13 +371,25 @@ export const githubBlobSchema = z
   });
 export type GitHubBlob = z.infer<typeof githubBlobSchema>;
 
-export const gitubInitialStoreSchema = z.object({
-  users: z.array(githubUserSchema),
-  repositories: z.array(githubRepositorySchema),
-  branches: z.array(githubBranchSchema),
-  organizations: z.array(githubOrganizationSchema),
-  blobs: z.array(githubBlobSchema),
-});
+export const gitubInitialStoreSchema = z
+  .object({
+    users: z.array(githubUserSchema),
+    installations: z.array(githubAppInstallationSchema).optional().default([]),
+    organizations: z.array(githubOrganizationSchema),
+    repositories: z.array(githubRepositorySchema),
+    branches: z.array(githubBranchSchema),
+    blobs: z.array(githubBlobSchema),
+  })
+  .transform((initialStore) => {
+    initialStore.installations = initialStore.organizations.map((org) => {
+      return githubAppInstallationSchema.parse({
+        account: org.login,
+        target_id: org.id,
+        target_type: org.type,
+      });
+    });
+    return initialStore;
+  });
 export type GitHubStore = z.output<typeof gitubInitialStoreSchema>;
 export type GitHubInitialStore = z.input<typeof gitubInitialStoreSchema>;
 
@@ -353,6 +409,7 @@ export const convertInitialStateToStoreState = (
   // TODO try to make this generic?
   const storeObject = {
     users: convertToObj(initialState.users, "login"),
+    installations: convertToObj(initialState.installations, "id"),
     repositories: convertToObj(initialState.repositories, "name"),
     branches: convertToObj(initialState.branches, "name"),
     organizations: convertToObj(initialState.organizations, "login"),

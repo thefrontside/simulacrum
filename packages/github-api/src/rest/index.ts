@@ -14,11 +14,10 @@ const handlers =
   ) =>
   (simulationStore: ExtendedSimulationStore): SimulationHandlers => {
     if (!initialState) return {};
-    // L# refer to openapi spec json files
     // note for any cases where it `return`s an object,
     //  that will validate the response per the schema
     return {
-      // L#61612 /user/installations
+      // GET /user/installations
       "apps/list-installations": async (_context, _request, response) => {
         const ghOrgs = simulationStore.selectors.allGithubOrganizations(
           simulationStore.store.getState()
@@ -46,8 +45,26 @@ const handlers =
           },
         };
       },
+      // GET /orgs/{org}/installation - Get an organization installation for the authenticated app
+      "apps/get-org-installation": async (context, _request, response) => {
+        const { org } = context.request.params;
+        const install = simulationStore.selectors.getAppInstallation(
+          simulationStore.store.getState(),
+          org
+        );
+        return { status: 200, json: install };
+      },
+      // GET /repos/{owner}/{repo}/installation - Get a repository installation for the authenticated app
+      "apps/get-repo-installation": async (context, _request, response) => {
+        const { org } = context.request.params;
+        const install = simulationStore.selectors.getAppInstallation(
+          simulationStore.store.getState(),
+          org
+        );
+        return { status: 200, json: install };
+      },
 
-      // L#18386 /orgs/{org}/repos
+      // GET /orgs/{org}/repos
       "repos/list-for-org": async (_context, _request, response) => {
         const repos = simulationStore.selectors.allReposWithOrgs(
           simulationStore.store.getState()
@@ -61,7 +78,7 @@ const handlers =
         );
         return { status: 200, json: branches };
       },
-      // L#36879 /repos/{owner}/{repo}/commits/{ref}/status
+      // GET /repos/{owner}/{repo}/commits/{ref}/status
       "repos/get-combined-status-for-ref": async (
         _context,
         request,
@@ -76,7 +93,7 @@ const handlers =
         });
         response.status(200).json(commitStatus);
       },
-      // L#37116 /repos/{owner}/{repo}/contents/{path}
+      // GET /repos/{owner}/{repo}/contents/{path}
       "repos/get-content": async (context, request, response) => {
         const { owner, repo, path } = context.request.params;
         const blob = simulationStore.selectors.getBlob(
@@ -98,7 +115,7 @@ const handlers =
           response.status(200).json(data);
         }
       },
-      // L#40919 /repos/{owner}/{repo}/git/blobs/{file_sha}
+      // GET /repos/{owner}/{repo}/git/blobs/{file_sha}
       "git/get-blob": async (context, request, response) => {
         const { owner, repo, file_sha } = context.request.params;
         const blob = simulationStore.selectors.getBlob(
@@ -120,7 +137,7 @@ const handlers =
           response.status(200).json(data);
         }
       },
-      // L#41860 /repos/{owner}/{repo}/git/trees/{tree_sha}
+      // GET /repos/{owner}/{repo}/git/trees/{tree_sha}
       "git/get-tree": async (_context, request, response) => {
         const { owner, repo, ref } = request.params;
         const blobs = simulationStore.selectors.getBlobAtOwnerRepo(
@@ -142,7 +159,7 @@ const handlers =
         }
       },
 
-      // L#58975 /user
+      // GET /user
       "users/get-authenticated": async (_context, _request, response) => {
         const users = simulationStore.schema.users.selectTableAsList(
           simulationStore.store.getState()
@@ -157,7 +174,7 @@ const handlers =
         response.status(200).json(data);
       },
 
-      // L#62462 /user/memberships/orgs
+      // GET /user/memberships/orgs
       "orgs/list-memberships-for-authenticated-user": async (
         _context,
         _request,

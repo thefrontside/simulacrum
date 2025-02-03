@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { simulation } from "../src/index";
 
-let basePort = 3301;
+let basePort = 3302;
 let host = "http://localhost";
 let url = `${host}:${basePort}/api/v3`;
 
@@ -23,25 +23,42 @@ describe.sequential("GET repo endpoints", () => {
     await server.ensureClose();
   });
 
-  describe("/orgs/{org}/repos", () => {
+  describe("/installation/repositories", () => {
     it("validates with 200 response", async () => {
-      let request = await fetch(`${url}/orgs/lovel-org/repos`);
+      let request = await fetch(`${url}/installation/repositories`);
       let response = await request.json();
       expect(request.status).toEqual(200);
-      expect(response).toEqual([
+      expect(response.repositories).toEqual([
         expect.objectContaining({ name: "awesome-repo" }),
       ]);
     });
   });
 
-  describe("/repos/{org}/{repo}/branches", () => {
+  describe.only("/orgs/{org}/installation", () => {
+    it("validates with 200 response", async () => {
+      let request = await fetch(`${url}/orgs/lovely-org/installation`);
+      let response = await request.json();
+      if (request.status === 502) console.dir(response, { depth: 8 });
+      expect(request.status).toEqual(200);
+      expect(response).toEqual(
+        expect.objectContaining({
+          account: expect.objectContaining({ login: "lovely-org" }),
+        })
+      );
+    });
+  });
+
+  describe("/repos/{owner}/{repo}/installation", () => {
     it("validates with 200 response", async () => {
       let request = await fetch(
-        `${url}/repos/lovely-org/awesome-repo/branches`
+        `${url}/repos/lovely-org/awesome-repo/installation`
       );
       let response = await request.json();
+      if (request.status === 502) console.dir(response);
       expect(request.status).toEqual(200);
-      expect(response).toEqual([expect.objectContaining({ name: "main" })]);
+      expect(response.repositories).toEqual([
+        expect.objectContaining({ name: "awesome-repo" }),
+      ]);
     });
   });
 });

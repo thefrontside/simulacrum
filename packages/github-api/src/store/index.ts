@@ -14,6 +14,7 @@ import {
   type GitHubRepository,
   type GitHubUser,
   type GitHubBranch,
+  GitHubAppInstallation,
 } from "./entities";
 import type { ExtendSimulationSchemaInput } from "@simulacrum/foundation-simulator/src/store/schema";
 import type {
@@ -25,6 +26,13 @@ export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
   users: (
     n: string
   ) => TableOutput<GitHubUser, AnyState, GitHubUser | undefined>;
+  installations: (
+    n: string
+  ) => TableOutput<
+    GitHubAppInstallation,
+    AnyState,
+    GitHubAppInstallation | undefined
+  >;
   repositories: (
     n: string
   ) => TableOutput<GitHubRepository, AnyState, GitHubRepository | undefined>;
@@ -61,6 +69,11 @@ const inputSchema =
     let slices = {
       users: slice.table<GitHubUser>(
         !storeInitialState ? {} : { initialState: storeInitialState.users }
+      ),
+      installations: slice.table<GitHubAppInstallation>(
+        !storeInitialState
+          ? {}
+          : { initialState: storeInitialState.installations }
       ),
       repositories: slice.table<GitHubRepository>(
         !storeInitialState
@@ -102,6 +115,24 @@ const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
     schema.organizations.selectTableAsList,
     (ghOrgs) => {
       return ghOrgs;
+    }
+  );
+
+  const getAppInstallation = createSelector(
+    schema.installations.selectTableAsList,
+    schema.organizations.selectTableAsList,
+    (_: AnyState, org: string) => org,
+    (installations, orgs, org) => {
+      const appInstall = installations.find(
+        (install) => install.account === org
+      );
+      const account = orgs.find((o) => o.login === appInstall?.account);
+      return {
+        ...appInstall,
+        account: { ...account },
+        target_id: account?.id,
+        target_type: account?.type,
+      };
     }
   );
 
@@ -153,6 +184,7 @@ const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
 
   return {
     allGithubOrganizations,
+    getAppInstallation,
     allReposWithOrgs,
     getBlob,
     getBlobAtOwnerRepo,
