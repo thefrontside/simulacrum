@@ -52,9 +52,17 @@
     "typescript": "^5.4.5"
   },
   "exports": {
-    "import": "./dist/esm/index.js",
-    "require": "./dist/cjs/index.js",
-    "development": "./src/index.ts"
+    "exports": {
+      "import": {
+        "types": "./dist/cjs/index.d.ts",
+        "development": "./src/index.ts",
+        "default": "./dist/cjs/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
   },
   "typesVersions": {
     "*": {
