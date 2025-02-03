@@ -5,7 +5,7 @@ let basePort = 3300;
 let host = "http://localhost";
 let url = `${host}:${basePort}/api/v3`;
 
-describe.sequential("extensive server - start once", () => {
+describe.sequential("GET repo endpoints", () => {
   let server;
   beforeAll(async () => {
     let app = simulation({
