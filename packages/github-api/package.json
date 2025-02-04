@@ -3,9 +3,6 @@
   "version": "0.5.1",
   "private": false,
   "description": "Provides common functionality to frontend app and plugins.",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -13,8 +10,9 @@
     "directory": "packages/github-api"
   },
   "files": [
-    "dist",
     "README.md",
+    "dist",
+    "src",
     "schema",
     "repository-mock-data"
   ],
@@ -28,7 +26,9 @@
     "start": "node --import=tsx ./example/start.ts",
     "start:bin": "node ./bin/start.js",
     "generate": "graphql-codegen",
-    "test": "echo not.....yet"
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "bench": "vitest bench"
   },
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
@@ -48,21 +48,14 @@
     "typescript": "^5.4.5"
   },
   "exports": {
-    ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+    "import": {
+      "types": "./dist/esm/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/esm/index.js"
     },
-    "./main": {
-      "import": "./dist/esm/main.js",
-      "require": "./dist/cjs/main.js"
-    },
-    "./github-topics.json": {
-      "import": "./repository-mock-data/github-topics.json",
-      "require": "./repository-mock-data/github-topics.json"
-    },
-    "./repository-names.json": {
-      "import": "./repository-mock-data/github-topics.json",
-      "require": "./repository-mock-data/repository-names.json"
+    "require": {
+      "types": "./dist/cjs/index.d.ts",
+      "default": "./dist/cjs/index.js"
     }
   },
   "typesVersions": {

@@ -10,10 +10,11 @@ import {
   convertInitialStateToStoreState,
   type GitHubStore,
   type GitHubBlob,
-  type GitHubInitialStore,
   type GitHubOrganization,
   type GitHubRepository,
   type GitHubUser,
+  type GitHubBranch,
+  GitHubAppInstallation,
 } from "./entities";
 import type { ExtendSimulationSchemaInput } from "@simulacrum/foundation-simulator/src/store/schema";
 import type {
@@ -25,9 +26,19 @@ export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
   users: (
     n: string
   ) => TableOutput<GitHubUser, AnyState, GitHubUser | undefined>;
+  installations: (
+    n: string
+  ) => TableOutput<
+    GitHubAppInstallation,
+    AnyState,
+    GitHubAppInstallation | undefined
+  >;
   repositories: (
     n: string
   ) => TableOutput<GitHubRepository, AnyState, GitHubRepository | undefined>;
+  branches: (
+    n: string
+  ) => TableOutput<GitHubBranch, AnyState, GitHubBranch | undefined>;
   organizations: (
     n: string
   ) => TableOutput<
@@ -53,18 +64,24 @@ const inputSchema =
     extendedSchema?: ExtendSimulationSchemaInput<T>
   ) =>
   ({ slice }: ExtendSimulationSchema) => {
-    const storeInitialState = !initialState
-      ? undefined
-      : convertInitialStateToStoreState(initialState);
+    const storeInitialState = convertInitialStateToStoreState(initialState);
     const extended = extendedSchema ? extendedSchema({ slice }) : {};
     let slices = {
       users: slice.table<GitHubUser>(
         !storeInitialState ? {} : { initialState: storeInitialState.users }
       ),
+      installations: slice.table<GitHubAppInstallation>(
+        !storeInitialState
+          ? {}
+          : { initialState: storeInitialState.installations }
+      ),
       repositories: slice.table<GitHubRepository>(
         !storeInitialState
           ? {}
           : { initialState: storeInitialState.repositories }
+      ),
+      branches: slice.table<GitHubBranch>(
+        !storeInitialState ? {} : { initialState: storeInitialState.branches }
       ),
       organizations: slice.table<GitHubOrganization>(
         !storeInitialState
@@ -101,6 +118,38 @@ const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
     }
   );
 
+  const getAppInstallation = createSelector(
+    schema.installations.selectTableAsList,
+    schema.organizations.selectTableAsList,
+    (_: AnyState, org: string) => org,
+    (installations, orgs, org) => {
+      const appInstall = installations.find(
+        (install) => install.account === org
+      );
+      const account = orgs.find((o) => o.login === appInstall?.account);
+      return {
+        ...appInstall,
+        account: { ...account },
+        target_id: account?.id,
+        target_type: account?.type,
+      };
+    }
+  );
+
+  const allReposWithOrgs = createSelector(
+    schema.repositories.selectTableAsList,
+    schema.organizations.selectTable,
+    (repos, orgMap) => {
+      return repos.map((repo) => {
+        const linkedRepo = { ...repo, owner: { ...orgMap[repo.owner] } };
+        // TODO better option than delete?
+        delete linkedRepo.owner.name;
+        delete linkedRepo.owner.email;
+        return linkedRepo;
+      });
+    }
+  );
+
   const getBlob = createSelector(
     schema.blobs.selectTableAsList,
     (_state: AnyState, owner: string, repo: string, sha_or_path: string) => ({
@@ -133,7 +182,13 @@ const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
     }
   );
 
-  return { allGithubOrganizations, getBlob, getBlobAtOwnerRepo };
+  return {
+    allGithubOrganizations,
+    getAppInstallation,
+    allReposWithOrgs,
+    getBlob,
+    getBlobAtOwnerRepo,
+  };
 };
 
 const extendSelectors =

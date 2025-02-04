@@ -273,23 +273,30 @@ export function createFoundationSimulationServer<
             _req: ExpressRequest,
             res: ExpressResponse
           ) => {
-            const valid = c.api.validateResponse(c.response, c.operation);
-            if (valid.errors) {
-              if (verbose)
-                console.dir(
-                  { errors: valid.errors, operation: c.operation },
-                  { depth: 10 }
-                );
+            if (c?.response?.json) {
+              const valid = c.api.validateResponse(
+                c.response.json,
+                c.operation,
+                c.response.status
+              );
+              if (valid.errors) {
+                if (verbose)
+                  console.dir(
+                    { errors: valid.errors, operation: c.operation },
+                    { depth: 10 }
+                  );
 
-              if (!res.headersSent)
-                res.status(502).json({
-                  status: 502,
-                  err: valid.errors,
-                  operation: c.operation,
-                });
-            } else {
-              if (!res.headersSent)
-                res.status(c.response.status).json(c.response.json);
+                if (!res.headersSent)
+                  res.status(502).json({
+                    status: 502,
+                    err: valid.errors,
+                    response: c.response,
+                    operation: c.operation,
+                  });
+              } else {
+                if (!res.headersSent)
+                  res.status(c.response.status).json(c.response.json);
+              }
             }
           },
         });

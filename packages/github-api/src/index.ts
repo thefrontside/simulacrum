@@ -42,5 +42,6 @@ export {
   githubUserSchema,
   githubOrganizationSchema,
   githubRepositorySchema,
+  githubBranchSchema,
   githubBlobSchema,
 } from "./store/entities";
