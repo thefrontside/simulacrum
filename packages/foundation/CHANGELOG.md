@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.3.0]
+
+### New Features
+
+- [`07e0560`](https://github.com/thefrontside/simulacrum/commit/07e0560b3289a34dfc1a971aa983e16928cb64bc) Based on handler `return` versus `response.status().json()` and the new `verbose` option, log out or return 502 on failed validation of response data based on OpenAPI schema.
+- [`07e0560`](https://github.com/thefrontside/simulacrum/commit/07e0560b3289a34dfc1a971aa983e16928cb64bc) Add `verbose` option to enable contextual logging for debugging purposes.
+
 ## \[0.2.1]
 
 ### Bug Fixes

@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/github-api-simulator",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": false,
   "description": "Provides common functionality to frontend app and plugins.",
   "license": "Apache-2.0",
@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
-    "@simulacrum/foundation-simulator": "0.2.1",
+    "@simulacrum/foundation-simulator": "0.3.0",
     "assert-ts": "^0.3.4",
     "graphql": "^16.9.0",
     "graphql-yoga": "^5.10.4",

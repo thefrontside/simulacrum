@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.5.2]
+
+### Bug Fixes
+
+- [`85816d8`](https://github.com/thefrontside/simulacrum/commit/85816d831839a1f525415adc9a24bad4eebd88b5) Validate and correct responses with OpenAPI specification for `/installation/repositories`, `/orgs/{org}/repos`, `/repos/{org}/{repo}/branches`, `orgs/{org}/installation`, and `/repos/{owner}/{repo}/installation` when passing in `initialState`.
+
+### Dependencies
+
+- Upgraded to `@simulacrum/foundation-simulator@0.3.0`
+
 ## \[0.5.1]
 
 ### Bug Fixes
