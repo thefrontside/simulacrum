@@ -1,9 +1,7 @@
 import type { SimulationHandlers } from "@simulacrum/foundation-simulator";
 import type { ExtendedSimulationStore } from "../store";
-import { getSchema } from "../utils";
+import { getSchema, type SchemaFile } from "../utils";
 import { blobAsBase64, commitStatusResponse, gitTrees } from "./utils";
-
-let document = getSchema("api.github.com.json");
 
 const handlers =
   (
@@ -192,14 +190,16 @@ const handlers =
 
 export const openapi = (
   initialState: Record<string, any> | undefined,
+  apiRoot: string,
+  apiSchema: SchemaFile | string,
   openapiHandlers:
     | ((simulationStore: ExtendedSimulationStore) => SimulationHandlers)
     | undefined
 ) => [
   {
-    document,
+    document: getSchema(apiSchema),
     handlers: handlers(initialState, openapiHandlers),
-    apiRoot: "/api/v3",
+    apiRoot,
     additionalOptions: {
       // starts up quicker and avoids the precompile step which throws a ton of errors
       //  based on openapi-backend handling of GitHub schema

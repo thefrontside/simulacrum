@@ -3,7 +3,7 @@ import { simulation } from "../src/index";
 
 let basePort = 3301;
 let host = "http://localhost";
-let url = `${host}:${basePort}/api/v3`;
+let url = `${host}:${basePort}`;
 
 describe.sequential("GET repo endpoints", () => {
   let server;
