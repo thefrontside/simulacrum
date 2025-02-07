@@ -10,12 +10,17 @@ import {
   type GitHubInitialStore,
   gitubInitialStoreSchema,
 } from "./store/entities";
+import type { SchemaFile } from "./utils";
 
 export type GitHubSimulator = ({
   initialState,
+  apiUrl,
+  apiSchema,
   extend,
 }?: {
   initialState?: GitHubInitialStore;
+  apiUrl?: string;
+  apiSchema?: SchemaFile | string;
   extend?: {
     extendStore?: SimulationInput["extendStore"];
     openapiHandlers?: (
@@ -34,7 +39,12 @@ export const simulation: GitHubSimulator = (args = {}) => {
     port: 3300, // default port
     extendStore: extendStore(parsedInitialState, args?.extend?.extendStore),
     extendRouter,
-    openapi: openapi(parsedInitialState, args?.extend?.openapiHandlers),
+    openapi: openapi(
+      parsedInitialState,
+      args?.apiUrl ?? "/",
+      args?.apiSchema ?? "api.github.com.json",
+      args?.extend?.openapiHandlers
+    ),
   })();
 };
 
