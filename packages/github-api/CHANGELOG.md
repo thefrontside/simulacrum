@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.5.3]
+
+### Bug Fixes
+
+- [`e565f7b`](https://github.com/thefrontside/simulacrum/commit/e565f7b9f32390cd18d38001650a9e4c757fd608) *Possibly breaking* We incorrectly used the hosted schema with an Enterprise endpoint. Correcting this to default to the hosted endpoint with the hosted schema. Use `apiUrl` and `apiSchema` if there is need to adjust for Enterprise use cases.
+
 ## \[0.5.2]
 
 ### Bug Fixes
