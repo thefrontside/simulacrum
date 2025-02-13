@@ -34,3 +34,9 @@ app.listen(3300, () =>
 ```
 
 It accepts an `{ initialState }` arg which allows one to define deeper data for the REST endpoints, and is required for GraphQL. You may additionaly `{ extend }` and provide more custom handling for your unique situation. This can also be used as a pattern to test updates to the simulator within your own setup prior to opening and discussing a pull request. It uses the `@simulacrum/foundation-simulator` which can referred to for documentation to `extend`.
+
+## Authentication and Authorization
+
+The simulator doesn't verify any tokens or permissions passed to it. This enables easily querying as needed. However, many systems are built with the expectation to undergo an Authenication flow as a first step. If this your situation, we recommend generating fake credentials that are valid, but not actually used in any environment. You may then commit these to the repository for use in any tests or local development.
+
+This simulator should handle any of the authentication flows and return responses which Octokit or similar would consider valid. From there, you may proceed to query as normal.

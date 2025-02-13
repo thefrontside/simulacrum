@@ -1,4 +1,3 @@
-[![CircleCI](https://circleci.com/gh/thefrontside/simulacrum.svg?style=shield)](https://circleci.com/gh/thefrontside/simulacrum)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Created by Frontside](https://img.shields.io/badge/created%20by-frontside-26abe8.svg)](https://frontside.com)
 [![Chat on Discord](https://img.shields.io/discord/700803887132704931?Label=Discord)](https://discord.gg/XT5EYHcNaq)
@@ -13,9 +12,18 @@ Simulacrum removes these constraints from your process by allowing you to simula
 
 ## Existing Simulators
 
-* [auth0](packages/auth0) - [@simulacrum/auth0-simulator](https://www.npmjs.com/package/@simulacrum/auth0-simulator)
-* [ldap](packages/ldap) - [@simulacrum/ldap-simulator](https://www.npmjs.com/package/@simulacrum/ldap-simulator)
-* [github-api](packages/github-api) - [@simulacrum/github-api-simulator](https://www.npmjs.com/package/@simulacrum/github-api-simulator)
+- [github-api](packages/github-api) - [@simulacrum/github-api-simulator](https://www.npmjs.com/package/@simulacrum/github-api-simulator)
+- [auth0](packages/auth0) - [@simulacrum/auth0-simulator](https://www.npmjs.com/package/@simulacrum/auth0-simulator)
+- [ldap](packages/ldap) - [@simulacrum/ldap-simulator](https://www.npmjs.com/package/@simulacrum/ldap-simulator)
+
+> [!WARNING]  
+> Both the Auth0 and LDAP simulator will not be runnable from this branch. They are undergoing a large refactor on top of the Foundation simulator. For the previous iterations, see the `v0` branch which contain the previous functionality.
+
+These simulators are (or will be) built on top of the Foundation simulator. This simulator gives some base level functionality which is likely to be used in every simulator.
+
+It is built with the expectation to be extended and meet your needs for any custom simulators as well. If you need assistance in building a simulator for your needs, please reach out to [Frontside for this or any other consulting services](https://frontside.com/).
+
+- [foundation](packages/foundation) - [@simulacrum/foundation-simulator](https://www.npmjs.com/package/@simulacrum/foundation-simulator)
 
 ## Usage
 
@@ -23,15 +31,15 @@ Simulacrum is based on a client server architecture. The server can hold any num
 
 To create a simulation in a simulacrum server with one of its available simulators. In this case, we'll assume that there is an `auth0` simulator on the server that we can use to create a simulation.
 
-``` javascript
-import { Client, createClient } from '@simulacrum/client';
+```javascript
+import { Client, createClient } from "@simulacrum/client";
 
-let client = createClient('http://localhost:4000');
+let client = createClient("http://localhost:4000");
 let simulation = await client.createSimulation("auth0");
 // =>
 // services:{
 //   auth0:{
-//     port: 4400 
+//     port: 4400
 //   }
 // }
 //
@@ -41,10 +49,10 @@ The resulting simulation has a list of service endpoints that you can use to con
 
 To create a user that you can log in as, you would run the `person` scenario. This will create a person with realistic data.
 
-``` javascript
+```javascript
 let person = await client.given(simulation, "person");
-person.name // => Paul Waters
-person.email // => paul.waters@gmail.com
+person.name; // => Paul Waters
+person.email; // => paul.waters@gmail.com
 ```
 
 If you have an application that uses `auth0`, check out [`@simulacrum/auth0-simulator`](./packages/auth0) on how you can get started.
