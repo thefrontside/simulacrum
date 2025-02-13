@@ -32,9 +32,10 @@ const handlers =
         _request,
         response
       ) => {
-        const repos = simulationStore.selectors.allReposWithOrgs(
-          simulationStore.store.getState()
-        );
+        const repos =
+          simulationStore.selectors.allReposWithOrgs(
+            simulationStore.store.getState()
+          ) ?? [];
         return {
           status: 200,
           json: {
@@ -50,27 +51,33 @@ const handlers =
           simulationStore.store.getState(),
           org
         );
+        if (!install) return response.status(404).send("Not Found");
         return { status: 200, json: install };
       },
       // GET /repos/{owner}/{repo}/installation - Get a repository installation for the authenticated app
       "apps/get-repo-installation": async (context, _request, response) => {
-        const { owner } = context.request.params;
+        const { owner, repo } = context.request.params;
         const install = simulationStore.selectors.getAppInstallation(
           simulationStore.store.getState(),
-          owner
+          owner,
+          repo
         );
+        if (!install) return response.status(404).send("Not Found");
         return { status: 200, json: install };
       },
 
       // GET /orgs/{org}/repos
-      "repos/list-for-org": async (_context, _request, response) => {
+      "repos/list-for-org": async (context, _request, response) => {
+        const { org } = context.request.params;
         const repos = simulationStore.selectors.allReposWithOrgs(
-          simulationStore.store.getState()
+          simulationStore.store.getState(),
+          org
         );
+        if (!repos) return response.status(404).send("Not Found");
         return { status: 200, json: repos };
       },
       // L#29067 /repos/{owner}/{repo}/branches
-      "repos/list-branches": async (_context, _request, response) => {
+      "repos/list-branches": async (_context, _request, _response) => {
         const branches = simulationStore.schema.branches.selectTableAsList(
           simulationStore.store.getState()
         );
@@ -78,11 +85,11 @@ const handlers =
       },
       // GET /repos/{owner}/{repo}/commits/{ref}/status
       "repos/get-combined-status-for-ref": async (
-        _context,
+        context,
         request,
         response
       ) => {
-        const { owner, repo, ref } = request.params;
+        const { owner, repo, ref } = context.request.params;
         const commitStatus = commitStatusResponse({
           host: `${request.protocol}://${request.headers.host}`,
           owner,
