@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/github-api-simulator",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "private": false,
   "description": "Provides common functionality to frontend app and plugins.",
   "license": "Apache-2.0",
