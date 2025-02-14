@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.5.4]
+
+### Enhancements
+
+- [`e920b0d`](https://github.com/thefrontside/simulacrum/commit/e920b0dc4803cd228650f27aa52e693b4d662e43) All existing custom routes, repository and installations endpoints, now return a 404 in cases where there are no associated resources to match the real API functionality.
+
 ## \[0.5.3]
 
 ### Bug Fixes
