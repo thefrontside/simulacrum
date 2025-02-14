@@ -121,12 +121,23 @@ const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
   const getAppInstallation = createSelector(
     schema.installations.selectTableAsList,
     schema.organizations.selectTableAsList,
-    (_: AnyState, org: string) => org,
-    (installations, orgs, org) => {
+    schema.repositories.selectTableAsList,
+    (_: AnyState, org: string, repo?: string) => ({ org, repo }),
+    (installations, orgs, repos, { org, repo }) => {
       const appInstall = installations.find(
         (install) => install.account === org
       );
-      const account = orgs.find((o) => o.login === appInstall?.account);
+      if (!appInstall) return undefined;
+      let account = undefined;
+      if (repo) {
+        const repoData = repos.find(
+          (r) => r.owner === appInstall?.account && r.name === repo
+        );
+        if (repoData) account = orgs.find((o) => o.login === repoData.owner);
+      } else {
+        account = orgs.find((o) => o.login === appInstall?.account);
+      }
+      if (!account) return undefined;
       return {
         ...appInstall,
         account: { ...account },
@@ -139,7 +150,10 @@ const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
   const allReposWithOrgs = createSelector(
     schema.repositories.selectTableAsList,
     schema.organizations.selectTable,
-    (repos, orgMap) => {
+    (_: AnyState, org?: string) => org,
+    (allRepos, orgMap, org) => {
+      if (org && !orgMap?.[org]) return undefined;
+      const repos = !org ? allRepos : allRepos.filter((r) => r.owner === org);
       return repos.map((repo) => {
         const linkedRepo = { ...repo, owner: { ...orgMap[repo.owner] } };
         // TODO better option than delete?

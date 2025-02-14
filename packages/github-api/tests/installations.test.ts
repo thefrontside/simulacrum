@@ -45,6 +45,11 @@ describe.sequential("GET repo endpoints", () => {
         })
       );
     });
+
+    it("handles non-existant org", async () => {
+      let request = await fetch(`${url}/orgs/doesnt-exist/installation`);
+      expect(request.status).toEqual(404);
+    });
   });
 
   describe("/repos/{owner}/{repo}/installation", () => {
@@ -53,13 +58,33 @@ describe.sequential("GET repo endpoints", () => {
         `${url}/repos/lovely-org/awesome-repo/installation`
       );
       let response = await request.json();
-      if (request.status === 502) console.dir(response);
       expect(request.status).toEqual(200);
       expect(response).toEqual(
         expect.objectContaining({
           account: expect.objectContaining({ login: "lovely-org" }),
         })
       );
+    });
+
+    it("handles non-existant org", async () => {
+      let request = await fetch(
+        `${url}/repos/an-org/awesome-repo/installation`
+      );
+      expect(request.status).toEqual(404);
+    });
+
+    it("handles non-existant repo", async () => {
+      let request = await fetch(
+        `${url}/repos/lovely-org/not-awesome-repo/installation`
+      );
+      expect(request.status).toEqual(404);
+    });
+
+    it("handles non-existant org and repo", async () => {
+      let request = await fetch(
+        `${url}/repos/lovely-but-not/awesome/installation`
+      );
+      expect(request.status).toEqual(404);
     });
   });
 });
