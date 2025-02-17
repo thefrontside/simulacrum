@@ -74,6 +74,7 @@ export function createFoundationSimulationServer<
   ExtendedSimulationSelectors
 >({
   port = 9000,
+  simulationContextPage = "/",
   verbose,
   proxyAndSave,
   delayResponses,
@@ -82,7 +83,8 @@ export function createFoundationSimulationServer<
   extendStore,
   extendRouter,
 }: {
-  port: number;
+  port?: number;
+  simulationContextPage?: string;
   verbose?: boolean;
   proxyAndSave?: string;
   delayResponses?: number | { minimum: number; maximum: number };
@@ -349,7 +351,7 @@ export function createFoundationSimulationServer<
     }
 
     // return simulation helper page
-    app.get("/", (req, res) => {
+    app.get(simulationContextPage, (req, res) => {
       let routes = simulationStore.schema.simulationRoutes.selectTableAsList(
         simulationStore.store.getState()
       );
@@ -362,7 +364,7 @@ export function createFoundationSimulationServer<
         res.status(200).send(generateRoutesHTML(routes, logs));
       }
     });
-    app.post("/", (req, res) => {
+    app.post(simulationContextPage, (req, res) => {
       const formValue = req.body;
       const entries = {} as Record<string, Partial<SimulationRoute>>;
       for (let [key, value] of Object.entries(formValue)) {
@@ -373,7 +375,7 @@ export function createFoundationSimulationServer<
           simulationStore.schema.simulationRoutes.patch(entries),
         ])
       );
-      res.redirect("/");
+      res.redirect(simulationContextPage);
     });
     // if no extendRouter routes or openapi routes handle this, return 404
     app.all("*", (req, res) => res.status(404).json({ error: "not found" }));

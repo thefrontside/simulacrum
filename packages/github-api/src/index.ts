@@ -37,6 +37,7 @@ export const simulation: GitHubSimulator = (args = {}) => {
     : gitubInitialStoreSchema.parse(args?.initialState);
   return createFoundationSimulationServer({
     port: 3300, // default port
+    simulationContextPage: "/simulation",
     extendStore: extendStore(parsedInitialState, args?.extend?.extendStore),
     extendRouter,
     openapi: openapi(
