@@ -6,11 +6,25 @@ Imagine writing a bot for a GitHub App or creating a frontend app to query infor
 
 The idea is decoupling "mock data" from a specific test, and putting it in a "prod-like" setup where we can change a URL config, etc, to go from fake data to production endpoints. We don't muddy up production code-paths with `isLocal` and then the data you write is useful both in local dev, tests run locally, and tests run in CI.
 
-With this type of abstraction, we able to share the effort. The effort previously put into mocks can scale outside that single test, test suite and even outside of the project. With the `github-api-simulator`, we can all maintain and expand the simulator.
+With this type of abstraction, we are able to share the effort. The effort previously put into mocks can scale outside that single test, test suite and even outside of the project. With the `github-api-simulator`, we can all maintain and expand the simulator.
 
 ## Usage
 
 See the examples folder for setting this up in your project. Depending on your test setup and use cases, this simulation server will need to run alongside your development server in your project. The default configuration of the simulation server can be run with the `bin` script after it is installed.
+
+If you are using a client such as `octokit.js`, you will need to override the default URL to point at the locally running simulation instance. The following is an example for setting up a GitHub `App` instance with `octokit.js`.
+
+```js
+const ghBaseUrl = "http://localhost:3300";
+const app = new App({
+  appId,
+  privateKey,
+  webhooks: { secret: webhookSecret },
+  Octokit: Octokit.defaults({
+    baseUrl: ghBaseUrl,
+  }),
+});
+```
 
 It is built on `@simulaction/foundation-simulator` where we can pull in the GH OpenAPI spec and use their embedded examples to build upon. Every REST endpoint will be handled will return some response.
 
