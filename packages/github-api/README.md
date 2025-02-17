@@ -14,6 +14,8 @@ See the examples folder for setting this up in your project. Depending on your t
 
 It is built on `@simulaction/foundation-simulator` where we can pull in the GH OpenAPI spec and use their embedded examples to build upon. Every REST endpoint will be handled will return some response.
 
+For a list of all handled routes and a simple logger while running the simulator, visit the `/simulation` route in your browser.
+
 ## API
 
 It may be run directly from the `bin` script.
