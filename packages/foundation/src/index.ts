@@ -47,8 +47,11 @@ type SimulationHandlerFunctions = (
 export type SimulationHandlers = Record<string, SimulationHandlerFunctions>;
 export type {
   ExtendSimulationActions,
+  ExtendSimulationActionsInput,
   ExtendSimulationSelectors,
+  ExtendSimulationSelectorsInput,
   ExtendSimulationSchema,
+  ExtendSimulationSchemaInput,
   SimulationStore,
   Document,
 };

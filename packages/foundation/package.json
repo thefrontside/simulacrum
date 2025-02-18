@@ -7,7 +7,6 @@
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git",
@@ -21,22 +20,22 @@
     "integration testing"
   ],
   "files": [
-    "dist"
+    "README.md",
+    "dist",
+    "src"
   ],
-  "main": "dist/cjs/index.js",
-  "exports": {
-    "development": "./src/index.ts",
-    "default": "./dist/cjs/index.js"
-  },
   "scripts": {
     "start": "node --import=tsx ./example/singleFileServer/start.ts",
     "start:singlefile": "node --import=tsx ./example/singleFileServer/start.ts",
     "start:extensive": "node --import=tsx ./example/extensiveServer/start.ts",
-    "prepack": "tsc --build tsconfig.dist.json",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "bench": "vitest bench",
-    "lint": "echo \"eventually run \"eslint src example\" but it currently fails to parse\""
+    "lint": "echo \"eventually run \"eslint src example\" but it currently fails to parse\"",
+    "prepack": "npm run build",
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc -build tsconfig.dist.json",
+    "build:esm": "tsc --build tsconfig.esm.json"
   },
   "dependencies": {
     "ajv-formats": "^3.0.1",
@@ -56,6 +55,24 @@
     "tsx": "^4.19.2",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
+  },
+  "exports": {
+    "development": "./src/index.ts",
+    "import": {
+      "types": "./dist/esm/index.d.ts",
+      "default": "./dist/esm/index.js"
+    },
+    "require": {
+      "types": "./dist/cjs/index.d.ts",
+      "default": "./dist/cjs/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/esm/index.d.ts"
+      ]
+    }
   },
   "volta": {
     "extends": "../../package.json"
