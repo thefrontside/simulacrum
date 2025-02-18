@@ -1,14 +1,24 @@
 {
   "name": "@simulacrum/github-api-simulator",
   "version": "0.5.3",
-  "private": false,
   "description": "Provides common functionality to frontend app and plugins.",
   "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git",
     "directory": "packages/github-api"
   },
+  "keywords": [
+    "github-api",
+    "simulation",
+    "emulation",
+    "mock",
+    "mocking",
+    "integration testing"
+  ],
   "files": [
     "README.md",
     "dist",
@@ -18,17 +28,17 @@
   ],
   "bin": "bin/start.js",
   "scripts": {
-    "lint": "echo noop",
-    "prepack": "npm run build",
-    "build:cjs": "tsc -build tsconfig.dist.json",
-    "build:esm": "tsc --build tsconfig.esm.json",
-    "build": "npm run generate && npm run build:cjs && npm run build:esm && copyfiles -f src/schema/* dist/schema",
     "start": "node --import=tsx ./example/start.ts",
     "start:bin": "node ./bin/start.js",
-    "generate": "graphql-codegen",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "bench": "vitest bench"
+    "bench": "vitest bench",
+    "lint": "echo noop",
+    "prepack": "npm run build",
+    "build": "npm run generate && npm run build:cjs && npm run build:esm && copyfiles -f src/schema/* dist/schema",
+    "generate": "graphql-codegen",
+    "build:cjs": "tsc -build tsconfig.dist.json",
+    "build:esm": "tsc --build tsconfig.esm.json"
   },
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
