@@ -20,7 +20,9 @@
     "integration testing"
   ],
   "files": [
-    "dist"
+    "README.md",
+    "dist",
+    "src"
   ],
   "scripts": {
     "start": "node --import=tsx ./example/singleFileServer/start.ts",
@@ -55,9 +57,9 @@
     "vitest": "^1.6.0"
   },
   "exports": {
+    "development": "./src/index.ts",
     "import": {
       "types": "./dist/esm/index.d.ts",
-      "development": "./src/index.ts",
       "default": "./dist/esm/index.js"
     },
     "require": {
