@@ -34,12 +34,7 @@
     "@simulacrum/auth0-simulator": {
       "path": "./packages/auth0",
       "manager": "javascript",
-      "dependencies": ["@simulacrum/server", "@simulacrum/client"]
-    },
-    "@simulacrum/ldap-simulator": {
-      "path": "./packages/ldap",
-      "manager": "javascript",
-      "dependencies": ["@simulacrum/server", "@simulacrum/client"]
+      "dependencies": ["@simulacrum/foundation-simulator"]
     },
     "@simulacrum/github-api-simulator": {
       "path": "./packages/github-api",
