@@ -1,5 +1,16 @@
 # Changelog
 
+## \[0.10.1]
+
+### Bug Fixes
+
+- [`dd8a08c`](https://github.com/thefrontside/simulacrum/commit/dd8a08cebc1c527e358d187b1292844bc864b190) Add extensions to all imports including bare `/index` imports. With an updated version of TypeScript, this allowed a build which correctly added extensions to every relative import improving compatibility with Node and file resolution.
+
+### Dependencies
+
+- Upgraded to `@simulacrum/foundation-simulator@0.4.1`
+- [`5cfed5e`](https://github.com/thefrontside/simulacrum/commit/5cfed5e28ca154b48d3457fb320c92ec7e521a4b) Add missing dependency on the `@simulacrum/foundation-simulator` and `@faker-js/faker`.
+
 ## \[0.10.0]
 
 ### Enhancements

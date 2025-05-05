@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.4.1]
+
+### Bug Fixes
+
+- [`dd8a08c`](https://github.com/thefrontside/simulacrum/commit/dd8a08cebc1c527e358d187b1292844bc864b190) Add extensions to all imports including bare `/index` imports. With an updated version of TypeScript, this allowed a build which correctly added extensions to every relative import improving compatibility with Node and file resolution.
+
 ## \[0.4.0]
 
 ### New Features
