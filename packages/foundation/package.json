@@ -47,8 +47,7 @@
     "lodash": "^4.17.21",
     "openapi-backend": "^5.11.1",
     "openapi-merge": "^1.3.3",
-    "starfx": "^0.12.0",
-    "react-dom": "^17.0 || ^18.0"
+    "starfx": "https://pkg.pr.new/neurosnap/starfx@ede810b"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
