@@ -2,7 +2,7 @@
 
 ## \[0.10.2]
 
-- [`496b98b`](https://github.com/thefrontside/simulacrum/commit/496b98b53bff4faf1310bebff1c43fc469cb52c5) ([#313](https://github.com/thefrontside/simulacrum/pull/313)) Update the auth0 simulator to include an email claim in the access token when email is present in scope.
+- [`496b98b`](https://github.com/thefrontside/simulacrum/commit/496b98b53bff4faf1310bebff1c43fc469cb52c5) ([#313](https://github.com/thefrontside/simulacrum/pull/313)) Update the auth0 simulator to include an email claim in the access token when email is present in scope. Thanks @taylorreece!
 
 ## \[0.10.1]
 
