@@ -94,6 +94,7 @@ export const createTokens = async ({
     access_token: createJsonWebToken({
       ...accessToken,
       ...context.accessToken,
+      ...(scope.split(" ").includes("email") ? { email: user.email } : {}),
     }),
     id_token: createJsonWebToken({
       ...userData,
