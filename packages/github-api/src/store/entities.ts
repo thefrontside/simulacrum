@@ -21,7 +21,7 @@ export const githubUserSchema = z
       .optional(),
   })
   .transform((user) => {
-    user.id = faker.number.int();
+    user.id = faker.number.int({ min: 1000 });
     if (!user.name) user.name = user.login;
     if (!user.email)
       user.email = faker.internet.email({ firstName: user.name });
@@ -68,7 +68,7 @@ export const githubAppInstallationSchema = z
     suspended_by: z.nullable(z.string()).optional().default(null),
   })
   .transform((install) => {
-    install.id = faker.number.int();
+    install.id = faker.number.int({ min: 2000 });
 
     const host = "localhost:3300";
     // api endpoint
@@ -217,7 +217,7 @@ export const githubRepositorySchema = z
       }),
   })
   .transform((repo) => {
-    repo.id = faker.number.int();
+    repo.id = faker.number.int({ min: 3000 });
     repo.node_id = repo.name;
     repo.full_name = `${repo.owner}/${repo.name}`;
 
@@ -267,7 +267,7 @@ export const githubRepositorySchema = z
     repo.svn_url = `http://svn.github.com/${repo.full_name}`;
 
     repo.homepage = `http://${host}`;
-    repo.topics = ["octocat", "atom", "electron", "api"];
+    repo.topics = ["octocat", "boilerplate", "tauri", "api"];
 
     return repo;
   });
@@ -331,7 +331,7 @@ export const githubOrganizationSchema = z
     public_members_url: z.string().optional(),
   })
   .transform((org) => {
-    org.id = faker.number.int();
+    org.id = faker.number.int({ min: 4000 });
     if (!org?.name) org.name = org.login;
     if (!org.email)
       org.email = faker.internet.email({
@@ -340,17 +340,17 @@ export const githubOrganizationSchema = z
       });
 
     const host = "localhost:3300";
-    org.url = `https://${host}/orgs/${org.login}`;
-    org.html_url = `https://github.com/octocat`;
-    org.followers_url = `https://${host}/users/octocat/followers`;
-    org.following_url = `https://${host}/users/octocat/following{/other_user}`;
-    org.gists_url = `https://${host}/users/octocat/gists{/gist_id}`;
-    org.starred_url = `https://${host}/users/octocat/starred{/owner}{/repo}`;
-    org.subscriptions_url = `https://${host}/users/octocat/subscriptions`;
-    org.organizations_url = `https://${host}/users/octocat/orgs`;
-    org.repos_url = `https://${host}/users/octocat/repos`;
-    org.events_url = `https://${host}/users/octocat/events{/privacy}`;
-    org.received_events_url = `https://${host}/users/octocat/received_events`;
+    org.url = `http://${host}/orgs/${org.login}`;
+    org.html_url = `http://github.com/${org.login}`;
+    org.followers_url = `http://${host}/users/${org.login}/followers`;
+    org.following_url = `http://${host}/users/${org.login}/following{/other_user}`;
+    org.gists_url = `http://${host}/users/${org.login}/gists{/gist_id}`;
+    org.starred_url = `http://${host}/users/${org.login}/starred{/owner}{/repo}`;
+    org.subscriptions_url = `http://${host}/users/${org.login}/subscriptions`;
+    org.organizations_url = `http://${host}/users/${org.login}/orgs`;
+    org.repos_url = `http://${host}/users/${org.login}/repos`;
+    org.events_url = `http://${host}/users/${org.login}/events{/privacy}`;
+    org.received_events_url = `http://${host}/users/${org.login}/received_events`;
 
     org.repos_url = `${org.url}/repos`;
     org.events_url = `${org.url}/events`;
