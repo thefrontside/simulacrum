@@ -29,6 +29,7 @@ export type GitHubSimulator = ({
     extendRouter?: SimulationInput["extendRouter"];
   };
 }) => ReturnType<FoundationSimulator<ExtendedSimulationStore>>;
+export type InitialState = GitHubInitialStore;
 
 type SimulationInput = Parameters<typeof createFoundationSimulationServer>[0];
 export const simulation: GitHubSimulator = (args = {}) => {

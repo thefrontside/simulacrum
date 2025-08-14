@@ -4,14 +4,24 @@ import { faker } from "@faker-js/faker";
 
 export const githubUserSchema = z
   .object({
-    id: z.string().or(z.number()).default(""),
+    id: z.number().default(1000),
     login: z.string(),
     name: z.string().optional(),
+    bio: z.string().default(""),
     email: z.string().optional(),
+    url: z.string().url().optional(),
+    avatar_url: z
+      .string()
+      .optional()
+      .default("https://github.com/images/error/octocat_happy.gif"),
     organizations: z.array(z.string()),
+    created_at: z
+      .string()
+      .default(() => faker.date.recent().toISOString())
+      .optional(),
   })
   .transform((user) => {
-    user.id = user.login;
+    user.id = faker.number.int();
     if (!user.name) user.name = user.login;
     if (!user.email)
       user.email = faker.internet.email({ firstName: user.name });
@@ -30,10 +40,10 @@ const githubEntityPermissionSchema = z
 
 export const githubAppInstallationSchema = z
   .object({
-    id: z.number().optional(),
+    id: z.number().default(2000),
     account: z.string(),
     repository_selection: z.enum(["all", "selected"]).optional().default("all"),
-    app_id: z.number().optional().default(1),
+    app_id: z.number().default(1),
     access_tokens_url: z.string().optional(),
     repositories_url: z.string().optional(),
     html_url: z.string().optional(),
@@ -73,7 +83,7 @@ export type GitHubAppInstallation = z.infer<typeof githubAppInstallationSchema>;
 
 export const githubRepositorySchema = z
   .object({
-    id: z.number().optional(),
+    id: z.number().default(3000),
     node_id: z.string().optional(),
     name: z.string(),
     description: z
@@ -212,49 +222,49 @@ export const githubRepositorySchema = z
     repo.full_name = `${repo.owner}/${repo.name}`;
 
     const host = "localhost:3300";
-    repo.url = `http://${host}/repos/octocat/Hello-World`;
-    repo.html_url = `http://${host}/repos/octocat/Hello-World`;
-    repo.archive_url = `http://${host}/repos/octocat/Hello-World/{archive_format}{/ref}`;
-    repo.assignees_url = `http://${host}/repos/octocat/Hello-World/assignees{/user}`;
-    repo.blobs_url = `http://${host}/repos/octocat/Hello-World/git/blobs{/sha}`;
-    repo.branches_url = `http://${host}/repos/octocat/Hello-World/branches{/branch}`;
-    repo.collaborators_url = `http://${host}/repos/octocat/Hello-World/collaborators{/collaborator}`;
-    repo.comments_url = `http://${host}/repos/octocat/Hello-World/comments{/number}`;
-    repo.commits_url = `http://${host}/repos/octocat/Hello-World/commits{/sha}`;
-    repo.compare_url = `http://${host}/repos/octocat/Hello-World/compare/{base}...{head}`;
-    repo.contents_url = `http://${host}/repos/octocat/Hello-World/contents/{+path}`;
-    repo.contributors_url = `http://${host}/repos/octocat/Hello-World/contributors`;
-    repo.deployments_url = `http://${host}/repos/octocat/Hello-World/deployments`;
-    repo.downloads_url = `http://${host}/repos/octocat/Hello-World/downloads`;
-    repo.events_url = `http://${host}/repos/octocat/Hello-World/events`;
-    repo.forks_url = `http://${host}/repos/octocat/Hello-World/forks`;
-    repo.git_commits_url = `http://${host}/repos/octocat/Hello-World/git/commits{/sha}`;
-    repo.git_refs_url = `http://${host}/repos/octocat/Hello-World/git/refs{/sha}`;
-    repo.git_tags_url = `http://${host}/repos/octocat/Hello-World/git/tags{/sha}`;
-    repo.git_url = `git:github.com/octocat/Hello-World.git`;
-    repo.issue_comment_url = `http://${host}/repos/octocat/Hello-World/issues/comments{/number}`;
-    repo.issue_events_url = `http://${host}/repos/octocat/Hello-World/issues/events{/number}`;
-    repo.issues_url = `http://${host}/repos/octocat/Hello-World/issues{/number}`;
-    repo.keys_url = `http://${host}/repos/octocat/Hello-World/keys{/key_id}`;
-    repo.labels_url = `http://${host}/repos/octocat/Hello-World/labels{/name}`;
-    repo.languages_url = `http://${host}/repos/octocat/Hello-World/languages`;
-    repo.merges_url = `http://${host}/repos/octocat/Hello-World/merges`;
-    repo.milestones_url = `http://${host}/repos/octocat/Hello-World/milestones{/number}`;
-    repo.notifications_url = `http://${host}/repos/octocat/Hello-World/notifications{?since,all,participating}`;
-    repo.pulls_url = `http://${host}/repos/octocat/Hello-World/pulls{/number}`;
-    repo.releases_url = `http://${host}/repos/octocat/Hello-World/releases{/id}`;
-    repo.ssh_url = `git@github.com:octocat/Hello-World.git`;
-    repo.stargazers_url = `http://${host}/repos/octocat/Hello-World/stargazers`;
-    repo.statuses_url = `http://${host}/repos/octocat/Hello-World/statuses/{sha}`;
-    repo.subscribers_url = `http://${host}/repos/octocat/Hello-World/subscribers`;
-    repo.subscription_url = `http://${host}/repos/octocat/Hello-World/subscription`;
-    repo.tags_url = `http://${host}/repos/octocat/Hello-World/tags`;
-    repo.teams_url = `http://${host}/repos/octocat/Hello-World/teams`;
-    repo.trees_url = `http://${host}/repos/octocat/Hello-World/git/trees{/sha}`;
-    repo.clone_url = `http://github.com/octocat/Hello-World.git`;
-    repo.mirror_url = `git:git.example.com/octocat/Hello-World`;
-    repo.hooks_url = `http://${host}/repos/octocat/Hello-World/hooks`;
-    repo.svn_url = `http://svn.github.com/octocat/Hello-World`;
+    repo.url = `http://${host}/repos/${repo.full_name}`;
+    repo.html_url = `http://${host}/repos/${repo.full_name}`;
+    repo.archive_url = `http://${host}/repos/${repo.full_name}/{archive_format}{/ref}`;
+    repo.assignees_url = `http://${host}/repos/${repo.full_name}/assignees{/user}`;
+    repo.blobs_url = `http://${host}/repos/${repo.full_name}/git/blobs{/sha}`;
+    repo.branches_url = `http://${host}/repos/${repo.full_name}/branches{/branch}`;
+    repo.collaborators_url = `http://${host}/repos/${repo.full_name}/collaborators{/collaborator}`;
+    repo.comments_url = `http://${host}/repos/${repo.full_name}/comments{/number}`;
+    repo.commits_url = `http://${host}/repos/${repo.full_name}/commits{/sha}`;
+    repo.compare_url = `http://${host}/repos/${repo.full_name}/compare/{base}...{head}`;
+    repo.contents_url = `http://${host}/repos/${repo.full_name}/contents/{+path}`;
+    repo.contributors_url = `http://${host}/repos/${repo.full_name}/contributors`;
+    repo.deployments_url = `http://${host}/repos/${repo.full_name}/deployments`;
+    repo.downloads_url = `http://${host}/repos/${repo.full_name}/downloads`;
+    repo.events_url = `http://${host}/repos/${repo.full_name}/events`;
+    repo.forks_url = `http://${host}/repos/${repo.full_name}/forks`;
+    repo.git_commits_url = `http://${host}/repos/${repo.full_name}/git/commits{/sha}`;
+    repo.git_refs_url = `http://${host}/repos/${repo.full_name}/git/refs{/sha}`;
+    repo.git_tags_url = `http://${host}/repos/${repo.full_name}/git/tags{/sha}`;
+    repo.git_url = `git:github.com/${repo.full_name}.git`;
+    repo.issue_comment_url = `http://${host}/repos/${repo.full_name}/issues/comments{/number}`;
+    repo.issue_events_url = `http://${host}/repos/${repo.full_name}/issues/events{/number}`;
+    repo.issues_url = `http://${host}/repos/${repo.full_name}/issues{/number}`;
+    repo.keys_url = `http://${host}/repos/${repo.full_name}/keys{/key_id}`;
+    repo.labels_url = `http://${host}/repos/${repo.full_name}/labels{/name}`;
+    repo.languages_url = `http://${host}/repos/${repo.full_name}/languages`;
+    repo.merges_url = `http://${host}/repos/${repo.full_name}/merges`;
+    repo.milestones_url = `http://${host}/repos/${repo.full_name}/milestones{/number}`;
+    repo.notifications_url = `http://${host}/repos/${repo.full_name}/notifications{?since,all,participating}`;
+    repo.pulls_url = `http://${host}/repos/${repo.full_name}/pulls{/number}`;
+    repo.releases_url = `http://${host}/repos/${repo.full_name}/releases{/id}`;
+    repo.ssh_url = `git@github.com:${repo.full_name}.git`;
+    repo.stargazers_url = `http://${host}/repos/${repo.full_name}/stargazers`;
+    repo.statuses_url = `http://${host}/repos/${repo.full_name}/statuses/{sha}`;
+    repo.subscribers_url = `http://${host}/repos/${repo.full_name}/subscribers`;
+    repo.subscription_url = `http://${host}/repos/${repo.full_name}/subscription`;
+    repo.tags_url = `http://${host}/repos/${repo.full_name}/tags`;
+    repo.teams_url = `http://${host}/repos/${repo.full_name}/teams`;
+    repo.trees_url = `http://${host}/repos/${repo.full_name}/git/trees{/sha}`;
+    repo.clone_url = `http://github.com/${repo.full_name}.git`;
+    repo.mirror_url = `git:git.example.com/${repo.full_name}`;
+    repo.hooks_url = `http://${host}/repos/${repo.full_name}/hooks`;
+    repo.svn_url = `http://svn.github.com/${repo.full_name}`;
 
     repo.homepage = `http://${host}`;
     repo.topics = ["octocat", "atom", "electron", "api"];
@@ -285,7 +295,7 @@ export type GitHubBranch = z.infer<typeof githubBranchSchema>;
 
 export const githubOrganizationSchema = z
   .object({
-    id: z.number().optional(),
+    id: z.number().default(4000),
     login: z.string(),
     name: z.string().optional(),
     email: z.string().optional(),
@@ -304,7 +314,7 @@ export const githubOrganizationSchema = z
       .default("https://github.com/images/error/octocat_happy.gif"),
     gravatar_id: z.string().optional().default(""),
     site_admin: z.boolean().optional().default(true),
-    url: z.string().optional(),
+    url: z.string().url().optional(),
     html_url: z.string().optional(),
     followers_url: z.string().optional(),
     following_url: z.string().optional(),
@@ -357,7 +367,6 @@ export type GitHubOrganization = z.infer<typeof githubOrganizationSchema>;
 
 export const githubBlobSchema = z
   .object({
-    id: z.string().or(z.number()).default(""),
     content: z.string().optional().default(faker.lorem.paragraphs),
     encoding: z
       .union([z.literal("string"), z.literal("base64")])
@@ -377,7 +386,6 @@ export const githubBlobSchema = z
       return z.NEVER;
     }
 
-    blob.id = `${blob.owner}/${blob.repo}/${blob?.path ?? blob.sha ?? "00000"}`;
     return blob;
   });
 export type GitHubBlob = z.infer<typeof githubBlobSchema>;
@@ -409,7 +417,7 @@ export const convertToObj = <T extends { [k: string]: any }>(
   key: IdProp = "id"
 ): Record<IdProp, T> =>
   arrayOfObjects.reduce((final, obj: T) => {
-    final[obj[key]] = obj;
+    final[obj[key].toString()] = obj;
     return final;
   }, {} as Record<IdProp, T>);
 

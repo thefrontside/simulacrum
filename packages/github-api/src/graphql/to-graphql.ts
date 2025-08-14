@@ -1,13 +1,19 @@
 import type { PageArgs } from "./relay.ts";
 import { applyRelayPagination } from "./relay.ts";
 import type { ExtendedSimulationStore } from "../store/index.ts";
-import type { AnyState } from "@simulacrum/foundation-simulator";
 import type {
-  User,
-  Repository,
-  Organization,
-  Team,
+  GitHubUser,
+  GitHubRepository,
+  GitHubOrganization,
+} from "../store/entities.ts";
+import {
+  type User,
+  type Repository,
+  type Organization,
+  type Team,
+  RepositoryVisibility,
 } from "../__generated__/resolvers-types.ts";
+import assert from "assert-ts";
 
 interface GraphQLData {
   User: User;
@@ -15,28 +21,60 @@ interface GraphQLData {
   Organization: Organization;
   Team: Team;
 }
+interface DataSchemas {
+  User: GitHubUser;
+  Repository: GitHubRepository;
+  Organization: GitHubOrganization;
+}
 
-export function toGraphql<T extends keyof GraphQLData>(
+export function deriveOwner(
+  simulationStore: ExtendedSimulationStore,
+  login: string
+) {
+  let [org] = simulationStore.schema.organizations
+    .selectTableAsList(simulationStore.store.getState())
+    .filter((o) => o.login === login);
+  console.dir(org, { depth: null });
+  if (org)
+    return toGraphql(
+      simulationStore,
+      "Organization",
+      org
+    ) as GraphQLData["Organization"];
+
+  let [userAccount] = simulationStore.schema.users
+    .selectTableAsList(simulationStore.store.getState())
+    // TODO should we use u?.githubAccount?.login here?
+    .filter((u) => u?.login === login);
+  assert(!!userAccount, `no github organization or account found for ${login}`);
+  return toGraphql(simulationStore, "User", userAccount) as GraphQLData["User"];
+}
+
+export function toGraphql<T extends keyof (DataSchemas | GraphQLData)>(
   simulationStore: ExtendedSimulationStore,
   __typename: T,
-  entity: AnyState
-): Pick<GraphQLData, T>[T] {
+  entity: DataSchemas[T]
+):
+  | GraphQLData["User"]
+  | GraphQLData["Repository"]
+  | GraphQLData["Organization"] {
   switch (__typename) {
     case "User":
-      // @ts-expect-error not a fully qualified return per type, TODO fill it out
-      return {
+      const user = entity as DataSchemas["User"];
+      const gqlUser: GraphQLData["User"] = {
+        ...toGithubRepositoryOwner(simulationStore, __typename, user),
         __typename,
-        ...entity,
-        ...toGithubRepositoryOwner(simulationStore, __typename, entity as User),
-        name: entity.name,
-        bio: entity.bio,
-        createdAt: entity.createdAt,
+        id: user.id.toString(),
+        name: user.name,
+        bio: user.bio,
+        createdAt: user.created_at,
+        // @ts-expect-error type mismatch as it doesn't perfectly align with *Connection
         organizations(pageArgs: PageArgs) {
           return applyRelayPagination(
             simulationStore.schema.organizations.selectByIds(
               simulationStore.store.getState(),
               {
-                ids: entity.organizations,
+                ids: user.organizations,
               }
             ),
             pageArgs,
@@ -44,65 +82,76 @@ export function toGraphql<T extends keyof GraphQLData>(
           );
         },
       };
+      return gqlUser;
+    case "Organization":
+      const org = entity as DataSchemas["Organization"];
+      const gqlOrg: GraphQLData["Organization"] = {
+        ...toGithubRepositoryOwner(simulationStore, __typename, org),
+        __typename,
+        id: org.id.toString(),
+        name: org.name,
+        description: org.description,
+        email: org.email,
+        createdAt: org.created_at,
+        // @ts-expect-error type mismatch as it doesn't perfectly align with *Connection
+        teams(pageArgs: PageArgs) {
+          return applyRelayPagination([], pageArgs, (team: Team) => team);
+        },
+        // @ts-expect-error type mismatch as it doesn't perfectly align with *Connection
+        membersWithRole(pageArgs: PageArgs) {
+          return applyRelayPagination([], pageArgs, (team: Team) => team);
+        },
+      };
+      return gqlOrg;
     case "Repository":
-      // @ts-expect-error not a fully qualified return per type, TODO fill it out
-      return {
-        name: entity.name,
-        description: entity.description,
-        nameWithOwner: entity.nameWithOwner,
-        login: entity.login,
-        url: entity.url,
-        createdAt: entity.createdAt,
+      const repo = entity as DataSchemas["Repository"];
+      const gqlRepo: GraphQLData["Repository"] = {
+        __typename,
+        id: repo.id.toString(),
+        name: repo.name,
+        description: repo.description,
+        nameWithOwner: repo.full_name,
+        url: repo.url,
+        createdAt: repo.created_at,
+        // @ts-expect-error type mismatch as it doesn't perfectly align with *Connection
         collaborators(pageArgs: PageArgs) {
-          return applyRelayPagination(entity.collaborators, pageArgs);
+          // TODO fill in real collaborators
+          return applyRelayPagination([], pageArgs);
         },
-        owner(pageArgs: PageArgs) {
-          return toGraphql(simulationStore, entity.owner, pageArgs);
+        get owner() {
+          return deriveOwner(simulationStore, repo.owner);
         },
+        // @ts-expect-error
         defaultBranchRef: {
-          name: entity.defaultBranchRef.name,
-          target: entity.defaultBranchRef.target,
+          id: repo.default_branch,
+          name: repo.default_branch,
         },
+        // @ts-expect-error type mismatch as it doesn't perfectly align with *Connection
         languages(pageArgs: PageArgs) {
-          return applyRelayPagination(entity.languages, pageArgs, (l) => ({
+          // TODO fill in all languages instead of just primary
+          return applyRelayPagination([repo.language], pageArgs, (l) => ({
             name: l,
           }));
         },
+        // @ts-expect-error type mismatch as it doesn't perfectly align with *Connection
         repositoryTopics(pageArgs: PageArgs) {
-          return applyRelayPagination(
-            entity.repositoryTopics,
-            pageArgs,
-            (t) => ({
-              topic: { name: t },
-            })
-          );
+          return applyRelayPagination(repo.topics, pageArgs, (t) => ({
+            topic: { name: t },
+          }));
         },
-        visibility: entity.visibility,
-        isArchived: entity.isArchived,
+        visibility:
+          repo.visibility === "public"
+            ? RepositoryVisibility.Public
+            : RepositoryVisibility.Private,
+        isArchived: repo.archived,
+        isFork: repo.fork,
       };
-    case "Organization":
-      // @ts-expect-error not a fully qualified return per type, TODO fill it out
-      return {
-        ...toGithubRepositoryOwner(
-          simulationStore,
-          __typename,
-          entity as Organization
-        ),
-        __typename,
-        id: entity.id,
-        name: entity.name,
-        description: entity.description,
-        email: entity.email,
-        createdAt: entity.createdAt,
-        teams(pageArgs: PageArgs) {
-          return applyRelayPagination(entity.teams, pageArgs, (team: Team) =>
-            toGraphql(simulationStore, "Team", team)
-          );
-        },
-      };
+      return gqlRepo;
     default:
-      // @ts-expect-error not a fully qualified return per type, TODO fill it out
-      return entity;
+      console.error(`toGraphql: unhandled __typename ${__typename}`, {
+        entity,
+      });
+      throw new Error("derp");
   }
 }
 
@@ -112,25 +161,22 @@ export function toGraphql<T extends keyof GraphQLData>(
 function toGithubRepositoryOwner(
   simulationStore: ExtendedSimulationStore,
   __typename: string,
-  entity: AnyState
+  entity: DataSchemas["User"] | DataSchemas["Organization"]
 ) {
   return {
-    avatarUrl: entity.avatarUrl,
+    avatarUrl: entity.avatar_url,
     login: entity.login,
     repositories(pageArgs: PageArgs) {
       return applyRelayPagination(
-        // @ts-expect-error not a fully qualified return per type, TODO fill it out
-        simulationStore.schema.repositories.selectByIds(
-          simulationStore.store.getState(),
-          {
-            ids: entity.repositories,
-          }
-        ),
+        simulationStore.schema.repositories
+          .selectTableAsList(simulationStore.store.getState())
+          .filter((repo) => repo.owner === entity.login),
         pageArgs,
-        (repository: Repository) =>
+        (repository: DataSchemas["Repository"]) =>
           toGraphql(simulationStore, "Repository", repository)
       );
     },
+    // @ts-expect-error TODO fill in data properly
     resourcePath: entity.resourcePath,
     url: entity.url,
   };

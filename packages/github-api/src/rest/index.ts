@@ -30,7 +30,7 @@ const handlers =
       "apps/list-repos-accessible-to-installation": async (
         _context,
         _request,
-        response
+        _response
       ) => {
         const repos =
           simulationStore.selectors.allReposWithOrgs(

@@ -1,7 +1,7 @@
 import type { PageArgs } from "./relay.ts";
 import { applyRelayPagination } from "./relay.ts";
 import type { Resolvers } from "../__generated__/resolvers-types.ts";
-import { toGraphql } from "./to-graphql.ts";
+import { toGraphql, deriveOwner } from "./to-graphql.ts";
 import { assert } from "assert-ts";
 import type { ExtendedSimulationStore } from "../store/index.ts";
 
@@ -26,13 +26,7 @@ export function createResolvers(
         );
         let [org] = orgs.filter((o) => o.login === login);
         assert(!!org, `no organization found for ${login}`);
-        let __typename = (org?.id?.toString() ?? ":").split(":")[0];
-        assert(
-          __typename === "githuborganization",
-          `incorrectly structured GitHubOrganization id ${org.id}`
-        );
-        let shaped = toGraphql(simulationStore, "Organization", org);
-        return shaped;
+        return toGraphql(simulationStore, "Organization", org);
       },
       // @ts-expect-error not a fully qualified return per type, TODO fill it out
       organizations(pageArgs: PageArgs) {
@@ -57,21 +51,7 @@ export function createResolvers(
       },
       // @ts-expect-error not a fully qualified return per type, TODO fill it out
       repositoryOwner(_, { login }: { login: string }) {
-        let [org] = simulationStore.schema.organizations
-          .selectTableAsList(simulationStore.store.getState())
-          .filter((o) => o.login === login);
-        // let [org] = [...githubOrganizations].filter((o) => o.login === login);
-        if (org) return toGraphql(simulationStore, "Organization", org);
-
-        let [userAccount] = simulationStore.schema.users
-          .selectTableAsList(simulationStore.store.getState())
-          // TODO should we use u?.githubAccount?.login here?
-          .filter((u) => u?.login === login);
-        assert(
-          !!userAccount,
-          `no github organization or account found for ${login}`
-        );
-        if (userAccount) return toGraphql(simulationStore, "User", userAccount);
+        return deriveOwner(simulationStore, login);
       },
     },
   };
