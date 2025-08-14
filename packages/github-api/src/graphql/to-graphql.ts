@@ -128,10 +128,10 @@ export function toGraphql<T extends keyof (DataSchemas | GraphQLData)>(
         },
         // @ts-expect-error type mismatch as it doesn't perfectly align with *Connection
         languages(pageArgs: PageArgs) {
-          // TODO fill in all languages instead of just primary
-          return applyRelayPagination([repo.language], pageArgs, (l) => ({
-            name: l,
-          }));
+          return applyRelayPagination(
+            repo.language ? [{ id: repo.language, name: repo.language }] : [],
+            pageArgs
+          );
         },
         // @ts-expect-error type mismatch as it doesn't perfectly align with *Connection
         repositoryTopics(pageArgs: PageArgs) {

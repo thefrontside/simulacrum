@@ -433,6 +433,84 @@ describe.sequential("graphql queries", () => {
     });
   });
 
+  describe("getOrganizationRepository With Fragment", () => {
+    const query = gql`
+      fragment RepositoryNode on Repository {
+        url
+        defaultBranchRef {
+          name
+        }
+        ... on Repository {
+          __typename
+          isArchived
+          visibility
+          name
+          nameWithOwner
+          url
+          description
+          languages(first: 10) {
+            nodes {
+              __typename
+              name
+            }
+          }
+          repositoryTopics(first: 10) {
+            nodes {
+              __typename
+              topic {
+                name
+              }
+            }
+          }
+          owner {
+            ... on Organization {
+              __typename
+              login
+            }
+            ... on User {
+              __typename
+              login
+            }
+          }
+        }
+      }
+      query repositories($cursor: String, $org: String!, $first: Int) {
+        repositoryOwner(login: $org) {
+          repositories(first: $first, after: $cursor, isFork: false) {
+            totalCount
+            nodes {
+              ...RepositoryNode
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      }
+    `;
+    const variables = {
+      org: "lovely-org",
+    };
+    it("responds successfully to fetch", async () => {
+      let request = await fetch(`${url}/graphql`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          query,
+          variables,
+        }),
+      });
+      let response = await request.json();
+      expect(request.status).toEqual(200);
+      expect(response.errors).toBe(undefined);
+    });
+    it("responds successfully to graphql client", async () => {
+      let request = await client(query, variables);
+      expect(request).toBeDefined();
+    });
+  });
+
   describe("getTeamMembers", () => {
     const query = gql`
       query members($org: String!, $teamSlug: String!, $cursor: String) {
