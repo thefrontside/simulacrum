@@ -18,7 +18,9 @@ jobs:
         uses: jbolda/covector/packages/action@covector-v0
         id: covector
         with:
-          token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
+          # in a fork, this token is undefined, but internally we would try and fail then fallback
+          # normally with the default GITHUB_TOKEN in a fork it will still be defined, but with limited permissions
+          token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN || 'pr_from_fork' }}
           command: "status"
           comment: true
       - run: echo ${{ steps.covector.outputs.packagesPublished }}
