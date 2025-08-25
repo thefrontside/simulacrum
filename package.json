@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "description": "Composable simulations for testing, development, and application previews",
+  "author": "Frontside Engineering <engineering@frontside.com>",
+  "license": "MIT",
   "scripts": {
     "clean": "npm run clean --workspaces",
     "test": "npm run test --workspaces",
@@ -24,15 +26,13 @@
     "simulation",
     "emulation"
   ],
-  "author": "Charles Lowell <cowboyd@frontside.io>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "engines": {
     "node": ">=20",
-    "npm": ">=10"
+    "npm": ">=11"
   },
   "volta": {
     "node": "20.19.1",
@@ -40,6 +40,7 @@
   },
   "devDependencies": {
     "@frontside/tsconfig": "^3.0.0",
-    "@graphql-codegen/cli": "^5.x.x"
+    "@graphql-codegen/cli": "^5.x.x",
+    "tsx": "^4.20.5"
   }
 }
