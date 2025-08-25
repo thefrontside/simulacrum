@@ -28,7 +28,10 @@ export function useService(
 ): Operation<void> {
   return resource(function* (provide) {
     if (cmd.startsWith("npm")) {
-      throw new Error("scripts run with node don't respect signals");
+      // see https://github.com/npm/cli/issues/6684
+      throw new Error(
+        "scripts run with npm don't respect signals to properly shutdown"
+      );
     }
     const process = yield* useProcess(cmd, options.processOptions);
 
