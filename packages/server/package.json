@@ -20,6 +20,11 @@
     "integration testing"
   ],
   "type": "module",
+  "files": [
+    "README.md",
+    "dist",
+    "src"
+  ],
   "scripts": {
     "clean": "echo skip",
     "test": "node --import tsx --test test/*.test.ts",
