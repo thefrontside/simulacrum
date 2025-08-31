@@ -41,6 +41,7 @@
   "devDependencies": {
     "@frontside/tsconfig": "^3.0.0",
     "@graphql-codegen/cli": "^5.x.x",
+    "tsdown": "^0.14.2",
     "tsx": "^4.20.5"
   }
 }

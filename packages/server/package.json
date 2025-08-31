@@ -28,7 +28,7 @@
   "scripts": {
     "clean": "echo skip",
     "test": "node --import tsx --test test/*.test.ts",
-    "prepack": "tsc -build tsconfig.esm.json",
+    "prepack": "tsdown",
     "build": "npm run prepack",
     "lint": "echo noop",
     "test:service-main": "node --import tsx ./test/service-main.ts"
@@ -40,12 +40,24 @@
   },
   "devDependencies": {},
   "exports": {
-    "development": "./src/index.ts",
-    "import": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
-    "default": "./dist/index.js"
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "./package.json": "./package.json"
+    }
   },
   "volta": {
     "extends": "../../package.json"
