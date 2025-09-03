@@ -55,7 +55,6 @@
     "@types/cookie-session": "^2.0.49",
     "@types/jsesc": "^3.0.3",
     "@types/jsonwebtoken": "^9.0.9",
-    "typescript": "^5.8.3",
     "vitest": "^1.6.0"
   },
   "module": "./dist/index.js",

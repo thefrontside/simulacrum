@@ -39,6 +39,7 @@
     "@arethetypeswrong/core": "^0.18.2",
     "publint": "^0.3.12",
     "tsdown": "^0.14.2",
-    "tsx": "^4.20.5"
+    "tsx": "^4.20.5",
+    "typescript": "5.8.3"
   }
 }

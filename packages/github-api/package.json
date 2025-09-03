@@ -35,7 +35,7 @@
     "test:watch": "vitest watch",
     "bench": "vitest bench",
     "lint": "echo noop",
-    "prepack": "npm run generate && npm run build && copyfiles -f src/schema/* dist/schema",
+    "prepack": "npm run generate && npm run build",
     "build": "tsdown",
     "generate": "graphql-codegen"
   },
