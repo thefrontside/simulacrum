@@ -28,8 +28,8 @@
   "scripts": {
     "clean": "echo skip",
     "test": "node --import tsx --test test/*.test.ts",
-    "prepack": "tsdown",
-    "build": "npm run prepack",
+    "prepack": "npm run build",
+    "build": "tsdown",
     "lint": "echo noop",
     "test:service-main": "node --import tsx ./test/service-main.ts"
   },

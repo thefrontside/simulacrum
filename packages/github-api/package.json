@@ -19,6 +19,7 @@
     "mocking",
     "integration testing"
   ],
+  "type": "module",
   "files": [
     "README.md",
     "dist",
@@ -26,7 +27,7 @@
     "schema",
     "repository-mock-data"
   ],
-  "bin": "bin/start.js",
+  "bin": "bin/start.cjs",
   "scripts": {
     "start": "node --import=tsx ./example/start.ts",
     "start:bin": "node ./bin/start.js",
@@ -34,12 +35,9 @@
     "test:watch": "vitest watch",
     "bench": "vitest bench",
     "lint": "echo noop",
-    "prepack": "npm run build",
-    "build": "npm run generate && npm run build:cjs && npm run build:esm && copyfiles -f src/schema/* dist/schema",
-    "generate": "graphql-codegen",
-    "build:cjs": "tsc -build tsconfig.dist.json",
-    "build:esm": "tsc --build tsconfig.esm.json",
-    "clean": "npm run build:cjs -- --clean && npm run build:esm -- --clean"
+    "prepack": "npm run generate && npm run build && copyfiles -f src/schema/* dist/schema",
+    "build": "tsdown",
+    "generate": "graphql-codegen"
   },
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
@@ -53,27 +51,33 @@
     "@graphql-codegen/cli": "^5.0.2",
     "@graphql-codegen/typescript": "^4.0.9",
     "@graphql-codegen/typescript-resolvers": "^4.2.1",
-    "@types/express": "^4.17.21",
-    "copyfiles": "^2.4.1",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "@types/express": "^4.17.21"
   },
   "exports": {
-    "development": "./src/index.ts",
-    "import": {
-      "types": "./dist/esm/index.d.ts",
-      "default": "./dist/esm/index.js"
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
-    "require": {
-      "types": "./dist/cjs/index.d.ts",
-      "default": "./dist/cjs/index.js"
-    }
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
       "*": [
         "dist/esm/index.d.ts"
       ]
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "./package.json": "./package.json"
     }
   },
   "volta": {

@@ -19,6 +19,7 @@
     "mocking",
     "integration testing"
   ],
+  "type": "module",
   "files": [
     "README.md",
     "dist",
@@ -33,10 +34,7 @@
     "bench": "vitest bench",
     "lint": "echo \"eventually run \"eslint src example\" but it currently fails to parse\"",
     "prepack": "npm run build",
-    "build": "npm run build:cjs && npm run build:esm",
-    "build:cjs": "tsc -build tsconfig.dist.json",
-    "build:esm": "tsc --build tsconfig.esm.json",
-    "clean": "npm run build:cjs -- --clean && npm run build:esm -- --clean"
+    "build": "tsdown"
   },
   "dependencies": {
     "ajv-formats": "^3.0.1",
@@ -53,26 +51,34 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/lodash": "^4.17.13",
-    "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "vitest": "^1.6.0"
   },
   "exports": {
-    "development": "./src/index.ts",
-    "import": {
-      "types": "./dist/esm/index.d.ts",
-      "default": "./dist/esm/index.js"
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
-    "require": {
-      "types": "./dist/cjs/index.d.ts",
-      "default": "./dist/cjs/index.js"
-    }
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
       "*": [
         "dist/esm/index.d.ts"
       ]
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "./package.json": "./package.json"
     }
   },
   "volta": {

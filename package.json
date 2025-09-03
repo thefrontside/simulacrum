@@ -8,11 +8,8 @@
   "scripts": {
     "clean": "npm run clean --workspaces",
     "test": "npm run test --workspaces",
-    "build": "npm run prepack --workspaces",
     "prepack": "npm run prepack --workspaces",
     "lint": "npm run lint --workspaces -- --fix",
-    "build:tsc": "tsc -b ./packages/foundation/tsconfig.dist.json",
-    "watch:tsc": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.packages.json --watch",
     "covector": "npx covector"
   },
   "repository": {
@@ -39,8 +36,8 @@
     "npm": "11.3.0"
   },
   "devDependencies": {
-    "@frontside/tsconfig": "^3.0.0",
-    "@graphql-codegen/cli": "^5.x.x",
+    "@arethetypeswrong/core": "^0.18.2",
+    "publint": "^0.3.12",
     "tsdown": "^0.14.2",
     "tsx": "^4.20.5"
   }

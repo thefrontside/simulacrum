@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const auth0APIsimulator = require("../dist");
+const auth0APIsimulator = require("../dist/index.js");
 const { defaultUser } = require("../dist/store/entities.js");
 
 const app = auth0APIsimulator.simulation();
