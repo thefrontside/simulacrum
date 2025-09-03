@@ -16,5 +16,5 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
 
-      - run: npm run build
+      - run: npm run prepack
       - run: npm test

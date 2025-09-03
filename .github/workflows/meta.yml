@@ -40,7 +40,7 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci
       - name: Build All
-        run: npm run build
+        run: npm run prepack
 
       - name: Publish Preview Versions
         run: npx pkg-pr-new publish ${{ needs.covector.outputs.packagesReadyPathsSpaced }}
