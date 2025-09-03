@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/server",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "Helpers and control plane to handle simulators and observability",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",

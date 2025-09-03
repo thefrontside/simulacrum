@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.7.0]
+
+### Enhancements
+
+- [`9064492`](https://github.com/thefrontside/simulacrum/commit/90644922ce14e87a1daa92d31173213b8f8f0d55) ([#318](https://github.com/thefrontside/simulacrum/pull/318)) BREAKING CHANGE: Shift to helpers to allow one to more easily set up and run simulators. This provides an `effection` Operation to allow one to easily run processes through a function. This is useful for starting up simulators as required for a test.
+
 ## \[0.6.3]
 
 - When creating a person with the person simulator, we now allow passing in a specific `id` to use.
