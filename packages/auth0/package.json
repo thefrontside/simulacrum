@@ -17,7 +17,7 @@
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
-  "type": "module",
+  "type": "commonjs",
   "files": [
     "bin/**/*",
     "dist/**/*"

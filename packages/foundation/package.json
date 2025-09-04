@@ -19,7 +19,7 @@
     "mocking",
     "integration testing"
   ],
-  "type": "module",
+  "type": "commonjs",
   "files": [
     "README.md",
     "dist",
