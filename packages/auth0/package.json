@@ -2,7 +2,7 @@
   "name": "@simulacrum/auth0-simulator",
   "version": "0.10.2",
   "description": "Run local instance of Auth0 API for local development and integration testing",
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "bin": "bin/start.cjs",
   "scripts": {
     "start": "node --import=tsx ./example/index.ts",
@@ -57,21 +57,21 @@
     "@types/jsonwebtoken": "^9.0.9",
     "vitest": "^1.6.0"
   },
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.cts",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },
   "publishConfig": {
     "exports": {
       ".": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.js"
       },
       "./package.json": "./package.json"
     }
