@@ -10,7 +10,7 @@ import type { Server, IncomingMessage, ServerResponse } from "node:http";
 import { fdir } from "fdir";
 import fs from "node:fs";
 import path from "node:path";
-import { merge } from "lodash";
+import { defu } from "defu";
 import OpenAPIBackend from "openapi-backend";
 import type {
   Handler,
@@ -433,7 +433,7 @@ export function createFoundationSimulationServer<
 const mergeDocumentArray = (
   documents: RecursivePartial<Document>[]
 ): Document => {
-  let document = merge({}, ...documents);
+  let document = defu({}, ...documents);
   return document as Document;
 };
 

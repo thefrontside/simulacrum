@@ -1,6 +1,7 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
+  name: "github-api",
   entry: "./src/index.ts",
   exports: { devExports: "development" },
   format: ["esm", "cjs"],
