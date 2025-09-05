@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { simulation } from "../example/singleFileServer/index.ts";
+import type { FoundationSimulatorListening } from "../src/index.ts";
 
 /*
  * In this test file, we start the server once for the whole suite.
@@ -12,7 +13,7 @@ let host = "http://localhost";
 let url = `${host}:${basePort}`;
 
 describe.sequential("single file server - start once", () => {
-  let server;
+  let server: FoundationSimulatorListening<any>;
   beforeAll(async () => {
     let app = simulation();
     server = await app.listen(basePort);

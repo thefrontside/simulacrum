@@ -2,23 +2,22 @@
   "name": "@simulacrum/auth0-simulator",
   "version": "0.10.2",
   "description": "Run local instance of Auth0 API for local development and integration testing",
-  "main": "dist/index.js",
-  "bin": "bin/start.js",
+  "main": "./dist/index.cjs",
+  "bin": "bin/start.cjs",
   "scripts": {
     "start": "node --import=tsx ./example/index.ts",
     "start:bin": "node ./bin/start.js",
     "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest run --fileParallelism=false",
     "test:watch": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest watch --fileParallelism=false",
-    "prepack": "tsc --build tsconfig.dist.json && npm run copyAssets",
-    "copyAssets": "node -e \"require('fs').cpSync('./src/views/public/', './dist/views/public/', {recursive: true});\"",
-    "build": "npm run prepack",
-    "clean": "tsc --build --clean tsconfig.dist.json",
+    "prepack": "npm run build",
+    "build": "tsdown",
     "lint": "echo noop"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
+  "type": "module",
   "files": [
     "bin/**/*",
     "dist/**/*"
@@ -56,9 +55,26 @@
     "@types/cookie-session": "^2.0.49",
     "@types/jsesc": "^3.0.3",
     "@types/jsonwebtoken": "^9.0.9",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3",
     "vitest": "^1.6.0"
+  },
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "./package.json": "./package.json"
+    }
   },
   "volta": {
     "extends": "../../package.json"

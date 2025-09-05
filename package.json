@@ -3,14 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "description": "Composable simulations for testing, development, and application previews",
+  "author": "Frontside Engineering <engineering@frontside.com>",
+  "license": "MIT",
   "scripts": {
     "clean": "npm run clean --workspaces",
     "test": "npm run test --workspaces",
-    "build": "npm run prepack --workspaces",
     "prepack": "npm run prepack --workspaces",
     "lint": "npm run lint --workspaces -- --fix",
-    "build:tsc": "tsc -b ./packages/foundation/tsconfig.dist.json",
-    "watch:tsc": "npm run build && \"$(npm bin)/tsc\" -b ./tsconfig.packages.json --watch",
     "covector": "npx covector"
   },
   "repository": {
@@ -24,22 +23,23 @@
     "simulation",
     "emulation"
   ],
-  "author": "Charles Lowell <cowboyd@frontside.io>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "engines": {
     "node": ">=20",
-    "npm": ">=10"
+    "npm": ">=11"
   },
   "volta": {
     "node": "20.19.1",
     "npm": "11.3.0"
   },
   "devDependencies": {
-    "@frontside/tsconfig": "^3.0.0",
-    "@graphql-codegen/cli": "^5.x.x"
+    "@arethetypeswrong/core": "^0.18.2",
+    "publint": "^0.3.12",
+    "tsdown": "^0.14.2",
+    "tsx": "^4.20.5",
+    "typescript": "5.8.3"
   }
 }

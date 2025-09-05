@@ -14,7 +14,7 @@ export function delayMiddleware(
     request: Request,
     response: Response,
     next: NextFunction
-  ) {
+  ): Promise<void> {
     if (delayMin || delayMax) {
       let timeoutDuration = calculateTimeoutDuration(delayMin, delayMax);
       await new Promise<void>((resolve) => {

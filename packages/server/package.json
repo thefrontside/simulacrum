@@ -1,33 +1,64 @@
 {
   "name": "@simulacrum/server",
-  "version": "0.6.3",
-  "description": "A server containing simulation state, and the control API to manipulate it",
-  "main": "dist/index.js",
-  "scripts": {
-    "clean": "echo skip",
-    "test": "echo noop",
-    "prepack": "echo \"tsc --build tsconfig.dist.json\"",
-    "build": "npm run prepack",
-    "lint": "echo noop",
-    "start": "node dist/start.js",
-    "watch": "ts-node -P ./tsconfig.watch.json ./watch.ts"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thefrontside/simulacrum.git"
-  },
-  "keywords": [
-    "simulation",
-    "emulation"
-  ],
+  "version": "0.7.0",
+  "description": "Helpers and control plane to handle simulators and observability",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme",
-  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thefrontside/simulacrum.git",
+    "directory": "packages/server"
+  },
+  "keywords": [
+    "simulation",
+    "emulation",
+    "mock",
+    "mocking",
+    "integration testing"
+  ],
+  "type": "module",
+  "files": [
+    "README.md",
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "clean": "echo skip",
+    "test": "node --import tsx --test test/*.test.ts",
+    "prepack": "npm run build",
+    "build": "tsdown",
+    "lint": "echo noop",
+    "test:service-main": "node --import tsx ./test/service-main.ts"
+  },
+  "dependencies": {
+    "effection": "^3.6.0",
+    "@effectionx/tinyexec": "^0.2.0",
+    "@effectionx/context-api": "^0.1.0"
+  },
   "devDependencies": {},
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "./package.json": "./package.json"
+    }
+  },
   "volta": {
     "extends": "../../package.json"
   }

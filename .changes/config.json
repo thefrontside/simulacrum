@@ -26,6 +26,11 @@
     "deps": "Dependencies"
   },
   "packages": {
+    "@simulacrum/server": {
+      "path": "./packages/server",
+      "manager": "javascript",
+      "dependencies": []
+    },
     "@simulacrum/foundation-simulator": {
       "path": "./packages/foundation",
       "manager": "javascript",
