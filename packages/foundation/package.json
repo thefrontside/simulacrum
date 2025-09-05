@@ -49,7 +49,6 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
-    "@types/lodash": "^4.17.13",
     "vitest": "^1.6.0"
   },
   "exports": {
