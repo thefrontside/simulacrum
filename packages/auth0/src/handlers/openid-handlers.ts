@@ -19,13 +19,13 @@ export const createOpenIdHandlers = (
 ): Record<OpenIdRoutes, RequestHandler> => {
   return {
     ["/.well-known/jwks.json"]: function (_, res) {
-      res.json(JWKS);
+      res.status(200).json(JWKS);
     },
 
     ["/.well-known/openid-configuration"]: function (req, res) {
       let url = removeTrailingSlash(serviceURL(req));
 
-      res.json({
+      res.status(200).json({
         issuer: `${url}/`,
         authorization_endpoint: [url, "authorize"].join("/"),
         token_endpoint: [url, "oauth", "token"].join("/"),

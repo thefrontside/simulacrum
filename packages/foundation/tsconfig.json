@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "noEmit": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "isolatedDeclarations": true
   },
   "include": ["src/**/*.ts", "test/**/*.ts"]
 }

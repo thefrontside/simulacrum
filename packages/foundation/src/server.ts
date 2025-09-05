@@ -4,9 +4,13 @@ import fs from "fs";
 import type { Application } from "express";
 import {
   createServer as createHttpsServer,
+  type Server as ServerHTTPS,
   type ServerOptions as SSLOptions,
 } from "https";
-import { createServer as createHttpServer } from "http";
+import {
+  createServer as createHttpServer,
+  type Server as ServerHTTP,
+} from "http";
 
 const rootDir = path.join(homedir(), ".simulacrum");
 const certificatesDir = path.join(rootDir, "certs");
@@ -22,7 +26,7 @@ const paths = {
   },
 } as const;
 
-export const mkcertText = `
+export const mkcertText: string = `
 In order to run an https service from localhost you need locally-trusted development certificates.
 
 mkcert (https://github.com/FiloSottile/mkcert) makes this pretty easy:
@@ -45,13 +49,18 @@ export class NoSSLError extends Error {
   }
 }
 
-export const createAppServer = (
+type Servers = {
+  http: ServerHTTP;
+  https: ServerHTTPS;
+};
+
+export const createAppServer = <P extends keyof Servers>(
   app: Application,
-  protocol: "http" | "https"
-) => {
+  protocol: P
+): Servers[P] => {
   switch (protocol) {
     case "http":
-      return createHttpServer(app);
+      return createHttpServer(app) as Servers[P];
     case "https":
       if (
         [paths.ssl.keyFile, paths.ssl.pemFile].some((f) => !fs.existsSync(f))
@@ -65,11 +74,11 @@ export const createAppServer = (
       // https://github.com/FiloSottile/mkcert/issues/76
       // one solution is to monkey patch secureContext
       // https://medium.com/trabe/monkey-patching-tls-in-node-js-to-support-self-signed-certificates-with-custom-root-cas-25c7396dfd2a
-      let ssl: SSLOptions = {
+      const ssl: SSLOptions = {
         key: fs.readFileSync(paths.ssl.keyFile),
         cert: fs.readFileSync(paths.ssl.pemFile),
       } as const;
 
-      return createHttpsServer(ssl, app);
+      return createHttpsServer(ssl, app) as Servers[P];
   }
 };

@@ -6,6 +6,7 @@ import type {
   NextFunction as ExpressNextFunction,
 } from "express";
 import type { ILayer, IRoute } from "express-serve-static-core";
+import type { Server, IncomingMessage, ServerResponse } from "node:http";
 import { fdir } from "fdir";
 import fs from "node:fs";
 import path from "node:path";
@@ -58,18 +59,18 @@ export type {
 };
 export type { AnyState, TableOutput, IdProp } from "starfx";
 
-export type FoundationSimulator<T> = () => {
+export type FoundationSimulatorListening<ExtendedSimulationStore> = {
+  server: Server<typeof IncomingMessage, typeof ServerResponse>;
+  port: number | undefined;
+  simulationStore: ExtendedSimulationStore;
+  ensureClose: () => Promise<void>;
+};
+
+export type FoundationSimulator<ExtendedSimulationStore> = {
   listen(
     portOverride?: number,
     callback?: (() => void) | undefined
-  ): Promise<{
-    server: import("http").Server<
-      typeof import("http").IncomingMessage,
-      typeof import("http").ServerResponse
-    >;
-    simulationStore: T;
-    ensureClose: () => Promise<void>;
-  }>;
+  ): Promise<FoundationSimulatorListening<ExtendedSimulationStore>>;
 };
 
 export function createFoundationSimulationServer<
@@ -384,13 +385,19 @@ export function createFoundationSimulationServer<
       res.redirect(simulationContextPage);
     });
     // if no extendRouter routes or openapi routes handle this, return 404
-    app.all("*", (req, res) => res.status(404).json({ error: "not found" }));
+    app.all("/{*splat}", (req, res) =>
+      res.status(404).json({ error: "not found" })
+    );
 
     const genericAppServer = createAppServer(app, protocol);
     return {
       listen: async (portOverride?: number, callback?: () => void) => {
         const listeningPort = portOverride ?? port;
-        const server = genericAppServer.listen(listeningPort, callback);
+        const server = genericAppServer.listen(
+          listeningPort,
+          "localhost",
+          callback
+        );
 
         if (!server.listening) {
           await new Promise<void>((resolve) => {
@@ -444,7 +451,16 @@ export async function startFoundationSimulationServer<
       ExtendedSimulationSelectors
     >
   >[0]
-) {
+): Promise<{
+  server: Server<typeof IncomingMessage, typeof ServerResponse>;
+  port?: number | undefined;
+  simulationStore: SimulationStore<
+    ExtendedSimulationSchema,
+    ExtendedSimulationActions,
+    ExtendedSimulationSelectors
+  >;
+  ensureClose: () => Promise<void>;
+}> {
   let simulation = createFoundationSimulationServer(arg)();
   return simulation.listen();
 }

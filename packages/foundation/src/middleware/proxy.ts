@@ -1,12 +1,20 @@
 import {
   createProxyMiddleware,
+  RequestHandler,
   responseInterceptor,
   type Options as ProxyOptions,
 } from "http-proxy-middleware";
 import fsPromise from "node:fs/promises";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 
-export function apiProxy(proxyAndSave: string) {
+export function apiProxy(
+  proxyAndSave: string
+): RequestHandler<
+  IncomingMessage,
+  ServerResponse<IncomingMessage>,
+  (err?: any) => void
+> {
   const options: ProxyOptions = {
     logger: console,
     // secure: false,
@@ -20,7 +28,7 @@ export function apiProxy(proxyAndSave: string) {
     on: {
       proxyRes: responseInterceptor(
         async (responseBuffer, proxyRes, req, res) => {
-          const filename = `./src/serve${req.url ?? "log"}.json`;
+          const filename = `./src/serve${req.url ?? "/log"}.json`;
 
           // check response can parse as json
           let jsonResponse;

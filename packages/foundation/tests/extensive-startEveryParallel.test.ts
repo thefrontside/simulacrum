@@ -1,5 +1,15 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  Custom,
+  Test,
+} from "vitest";
 import { simulation } from "../example/extensiveServer/index.ts";
+import type { FoundationSimulatorListening } from "../src/index.ts";
+import type { ExtendedSimulationStore } from "../example/extensiveServer/store.ts";
 
 /*
  * In this test file, we expect each test to start up and shut down it's own server.
@@ -9,7 +19,7 @@ import { simulation } from "../example/extensiveServer/index.ts";
 
 let basePort = 9050;
 let host = "http://localhost";
-let getPort = (task) => {
+let getPort = (task: Readonly<Test<{}> | Custom<{}>>) => {
   let taskID = task.id;
   let endNumberAsString = taskID.split("_").at(-1);
   if (!endNumberAsString)
@@ -19,12 +29,12 @@ let getPort = (task) => {
   let endNumber = parseInt(endNumberAsString, 10);
   return basePort + endNumber;
 };
-let getBaseUrl = (task) => {
+let getBaseUrl = (task: Readonly<Test<{}> | Custom<{}>>) => {
   return `${host}:${getPort(task)}`;
 };
 
 describe("extensive server - startup in every test - parallel", () => {
-  let server;
+  let server: FoundationSimulatorListening<ExtendedSimulationStore>;
   beforeEach(async (context) => {
     let app = simulation();
     server = await app.listen(getPort(context.task));

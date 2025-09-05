@@ -50,8 +50,7 @@
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",
     "@graphql-codegen/typescript": "^4.0.9",
-    "@graphql-codegen/typescript-resolvers": "^4.2.1",
-    "@types/express": "^4.17.21"
+    "@graphql-codegen/typescript-resolvers": "^4.2.1"
   },
   "exports": {
     ".": {
