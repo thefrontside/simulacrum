@@ -185,7 +185,6 @@ describe("Auth0 simulator", () => {
         },
         body: `wctx=${fields}`,
       });
-      console.dir(res);
 
       expect(res.status).toBe(200);
       expect(res.statusText).toBe("OK");

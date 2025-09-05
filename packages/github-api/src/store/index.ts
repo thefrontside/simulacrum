@@ -107,7 +107,9 @@ const extendActions =
       : inputActions(args);
   };
 
-const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
+const inputSelectors = (
+  args: ExtendSimulationSelectors<ExtendedSchema>
+): Record<string, ReturnType<typeof createSelector>> => {
   const { createSelector, schema } = args;
   const allGithubOrganizations = createSelector(
     schema.organizations.selectTableAsList,

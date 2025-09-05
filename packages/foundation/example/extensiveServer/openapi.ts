@@ -160,8 +160,9 @@ function handlers(
         .send(`added ${quantity} ${quantity === 1 ? "dog" : "dogs"}`);
     },
     perfectDogQuantity: (_c, request, response) => {
-      let numbers =
-        ((request?.query?.numbers as string) ?? "").split[","] ?? [];
+      let numbers = (
+        ((request?.query?.numbers as string) ?? "").split(",") ?? []
+      ).map((n) => parseInt(n, 10));
       let dogs = simulationStore.selectors.booleanSpecificNumbers(
         simulationStore.store.getState(),
         numbers

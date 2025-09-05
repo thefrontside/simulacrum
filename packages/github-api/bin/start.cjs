@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const githubAPIsimulator = require("../dist/index.js");
+const githubAPIsimulator = require("../dist/index.cjs");
 
 const app = githubAPIsimulator.simulation();
 app.listen(3300, () =>

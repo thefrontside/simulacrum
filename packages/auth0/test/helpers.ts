@@ -2,9 +2,9 @@ import { createFoundationSimulationServer } from "@simulacrum/foundation-simulat
 
 export const frontendSimulation = createFoundationSimulationServer({
   port: 3000,
-  // dummy route so it returns a 200 at `/'
+  // dummy route so it returns a 200 at `/`
   extendRouter(router, simulationStore) {
-    router.get("/api", (req, res) => {
+    router.get("/", (req, res) => {
       res.sendStatus(200);
     });
   },

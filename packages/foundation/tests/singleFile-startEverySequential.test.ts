@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { simulation } from "../example/singleFileServer/index.ts";
+import type { FoundationSimulatorListening } from "../src/index.ts";
 
 /*
  * In this test file, we expect each test to start up and shut down the server.
@@ -13,7 +14,7 @@ let url = `${host}:${basePort}`;
 describe.sequential(
   "single file server - startup in every test - sequential",
   () => {
-    let server;
+    let server: FoundationSimulatorListening<any>;
     beforeEach(async () => {
       let app = simulation();
       server = await app.listen(basePort);
