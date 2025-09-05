@@ -19,7 +19,7 @@
     "mocking",
     "integration testing"
   ],
-  "type": "commonjs",
+  "type": "module",
   "files": [
     "README.md",
     "dist",
@@ -56,8 +56,8 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -68,14 +68,14 @@
       ]
     }
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
   "publishConfig": {
     "exports": {
       ".": {
-        "import": "./dist/index.mjs",
-        "require": "./dist/index.js"
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
       },
       "./package.json": "./package.json"
     }
