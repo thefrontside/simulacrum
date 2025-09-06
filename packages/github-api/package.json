@@ -37,7 +37,8 @@
     "lint": "echo noop",
     "prepack": "npm run generate && npm run build",
     "build": "tsdown",
-    "generate": "graphql-codegen"
+    "generate": "graphql-codegen",
+    "sync:schema:rest": "node --import=tsx ./sync.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
