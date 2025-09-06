@@ -11,7 +11,7 @@ import { fdir } from "fdir";
 import fs from "node:fs";
 import path from "node:path";
 import { defu } from "defu";
-import OpenAPIBackend from "openapi-backend";
+import { OpenAPIBackend } from "openapi-backend";
 import type {
   Handler,
   Request,

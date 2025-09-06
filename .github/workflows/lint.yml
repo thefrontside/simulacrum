@@ -15,3 +15,11 @@ jobs:
 
       - name: Run linters
         run: npm run lint
+
+      # note this is required for type checking
+      # in part due to graphql codegen
+      - name: Build All
+        run: npm run prepack
+
+      - name: Run tsc
+        run: npm run tsc

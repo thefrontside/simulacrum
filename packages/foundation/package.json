@@ -33,6 +33,7 @@
     "test:watch": "vitest watch",
     "bench": "vitest bench",
     "lint": "echo \"eventually run \"eslint src example\" but it currently fails to parse\"",
+    "tsc": "tsc --noEmit",
     "prepack": "npm run build",
     "build": "tsdown"
   },
