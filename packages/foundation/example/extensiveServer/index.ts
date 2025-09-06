@@ -5,7 +5,7 @@ import { extendRouter } from "./extend-api.ts";
 
 export const simulation = createFoundationSimulationServer({
   port: 9999,
-  serveJsonFiles: `${__dirname}/jsonFiles`,
+  serveJsonFiles: `${import.meta.dirname}/jsonFiles`,
   openapi,
   extendStore,
   extendRouter,
