@@ -20,7 +20,8 @@ jobs:
         with:
           # in a fork, this token is undefined, but internally we would try and fail then fallback
           # normally with the default GITHUB_TOKEN in a fork it will still be defined, but with limited permissions
-          token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN || 'pr_from_fork' }}
+          # as a fallback we use the GITHUB_TOKEN which should then throw the appropriate error expected by covector
+          token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           command: "status"
           comment: true
       - run: echo ${{ steps.covector.outputs.packagesPublished }}
