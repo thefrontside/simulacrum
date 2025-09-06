@@ -9,7 +9,8 @@
     "clean": "npm run clean --workspaces",
     "test": "npm run test --workspaces",
     "prepack": "npm run prepack --workspaces",
-    "lint": "npm run lint --workspaces -- --fix",
+    "lint": "npm run lint --workspaces --if-present -- --fix",
+    "tsc": "npm run tsc --workspaces --if-present",
     "covector": "npx covector"
   },
   "repository": {

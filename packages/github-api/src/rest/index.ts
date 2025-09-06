@@ -20,6 +20,7 @@ const handlers =
         const ghOrgs = simulationStore.selectors.allGithubOrganizations(
           simulationStore.store.getState()
         );
+        // @ts-expect-error this shouldn't be an any TODO fix
         const data = ghOrgs.map((org, index) => ({
           id: index,
           account: org,
@@ -194,6 +195,7 @@ const handlers =
         );
         return {
           status: 200,
+          // @ts-expect-error this shouldn't be an any TODO fix
           json: organizations.map((organization) => ({
             url: `${organization.url}/memberships`,
             state: "active",

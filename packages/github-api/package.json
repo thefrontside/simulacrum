@@ -35,6 +35,7 @@
     "test:watch": "vitest watch",
     "bench": "vitest bench",
     "lint": "echo noop",
+    "tsc": "tsc --noEmit",
     "prepack": "npm run generate && npm run build",
     "build": "tsdown",
     "generate": "graphql-codegen"
