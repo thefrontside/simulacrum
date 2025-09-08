@@ -42,7 +42,7 @@ export type GrantType =
 
 export type ScopeConfig =
   | string
-  | { audience?: string; clientID: string; scope: string }[];
+  | { audience?: string | undefined; clientID: string; scope: string }[];
 
 export type Auth0Configuration = Required<Pick<ConfigSchema, ReadonlyFields>> &
   Omit<ConfigSchema, ReadonlyFields>;
@@ -106,7 +106,7 @@ export interface RefreshToken {
   scope: string;
   sessionUid?: string;
   user: { id: string };
-  nonce?: string;
+  nonce?: string | undefined;
 }
 
 type Token<P> = {

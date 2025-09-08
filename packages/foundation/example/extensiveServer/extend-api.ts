@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ExtendedSimulationStore } from "./store";
+import type { ExtendedSimulationStore } from "./store.ts";
 
 export const extendRouter = (
   router: Router,
