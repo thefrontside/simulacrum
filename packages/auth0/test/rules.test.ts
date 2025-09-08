@@ -1,5 +1,6 @@
 import { describe, it, beforeEach, afterEach, expect } from "vitest";
 import { simulation } from "../src/index.ts";
+import type { FoundationSimulatorListening } from "@simulacrum/foundation-simulator";
 import jwt from "jsonwebtoken";
 import { assert } from "assert-ts";
 import { frontendSimulation } from "./helpers.ts";
@@ -82,7 +83,7 @@ async function createSimulation(
 describe("rules", () => {
   describe("accessToken claims", () => {
     let code: string;
-    let server;
+    let server: FoundationSimulatorListening<unknown>;
 
     beforeEach(async ({ task }) => {
       ({ code, server } = await createSimulation(
@@ -106,9 +107,11 @@ describe("rules", () => {
       });
 
       expect(res.ok).toBe(true);
-      let token = await res.json();
+      let token = (await res.json()) as unknown as { access_token: string };
 
-      let accessToken = jwt.decode(token.access_token, { complete: true });
+      const accessToken = jwt.decode(token.access_token, {
+        complete: true,
+      }) as unknown as { payload: Record<string, unknown> };
 
       assert(!!accessToken);
 
@@ -124,7 +127,7 @@ describe("rules", () => {
 
   describe("augment user", () => {
     let code: string;
-    let server;
+    let server: FoundationSimulatorListening<unknown>;
 
     beforeEach(async () => {
       ({ code, server } = await createSimulation("test/fixtures/rules-user"));
@@ -146,12 +149,14 @@ describe("rules", () => {
         }),
       });
 
-      let token = await res.json();
+      let token = (await res.json()) as unknown as { id_token: string };
 
-      let idToken = jwt.decode(token.id_token, { complete: true });
+      let idToken = jwt.decode(token.id_token, {
+        complete: true,
+      }) as unknown as { payload: Record<string, unknown> };
 
-      expect(idToken?.payload.picture).toContain("https://i.pravatar.cc");
-      expect(idToken?.payload.name).toBe(person.name);
+      expect(idToken.payload.picture).toContain("https://i.pravatar.cc");
+      expect(idToken.payload.name).toBe(person.name);
     });
   });
 
@@ -179,11 +184,13 @@ describe("rules", () => {
         }),
       });
 
-      let token = await res.json();
+      const token = (await res.json()) as unknown as { id_token: string };
 
-      let idToken = jwt.decode(token.id_token, { complete: true });
-      expect(idToken?.payload.name).toBe(otherPerson.name);
-      expect(idToken?.payload.trustProfile).toContain("friend");
+      let idToken = jwt.decode(token.id_token, {
+        complete: true,
+      }) as unknown as { payload: Record<string, unknown> };
+      expect(idToken.payload.name).toBe(otherPerson.name);
+      expect(idToken.payload.trustProfile).toContain("friend");
       await server.ensureClose();
     });
 
@@ -209,11 +216,13 @@ describe("rules", () => {
         }),
       });
 
-      let token = await res.json();
+      const token = (await res.json()) as unknown as { id_token: string };
 
-      let idToken = jwt.decode(token.id_token, { complete: true });
-      expect(idToken?.payload.name).toBe(otherPerson.name);
-      expect(idToken?.payload.trustProfile).toContain("foe");
+      let idToken = jwt.decode(token.id_token, {
+        complete: true,
+      }) as unknown as { payload: Record<string, unknown> };
+      expect(idToken.payload.name).toBe(otherPerson.name);
+      expect(idToken.payload.trustProfile).toContain("foe");
       await server.ensureClose();
     });
   });
@@ -238,10 +247,12 @@ describe("rules", () => {
           }),
         });
 
-        let token = await res.json();
+        const token = (await res.json()) as unknown as { id_token: string };
 
-        let idToken = jwt.decode(token.id_token, { complete: true });
-        expect(idToken?.payload.name).toBe(person.name);
+        const idToken = jwt.decode(token.id_token, {
+          complete: true,
+        }) as unknown as { payload: Record<string, unknown> };
+        expect(idToken.payload.name).toBe(person.name);
 
         expect(idToken?.payload.checkURLOne).toBe("https://frontside.com");
         expect(idToken?.payload.checkURLOneStatus).toBe(200);
@@ -272,10 +283,12 @@ describe("rules", () => {
           }),
         });
 
-        let token = await res.json();
+        const token = (await res.json()) as unknown as { id_token: string };
 
-        let idToken = jwt.decode(token.id_token, { complete: true });
-        expect(idToken?.payload.name).toBe(person.name);
+        const idToken = jwt.decode(token.id_token, {
+          complete: true,
+        }) as unknown as { payload: Record<string, unknown> };
+        expect(idToken.payload.name).toBe(person.name);
 
         expect(idToken?.payload.checkURLOne).toBe("https://frontside.com");
         expect(idToken?.payload.checkURLOneStatus).toBe(200);

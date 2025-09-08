@@ -1,5 +1,6 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { defaultUser, simulation } from "../src/index.ts";
+import type { FoundationSimulatorListening } from "@simulacrum/foundation-simulator";
 import { issueRefreshToken } from "../src/auth/refresh-token.ts";
 import { frontendSimulation } from "./helpers.ts";
 import { assert } from "assert-ts";
@@ -72,8 +73,8 @@ describe("refresh token", () => {
 
   describe("get refresh token", () => {
     let code: string;
-    let server;
-    let frontendServer;
+    let server: FoundationSimulatorListening<unknown>;
+    let frontendServer: FoundationSimulatorListening<unknown>;
 
     beforeAll(async () => {
       frontendServer = await frontendSimulation.listen();
@@ -96,7 +97,7 @@ describe("refresh token", () => {
         }),
       });
 
-      let token = await res.json();
+      const token = (await res.json()) as unknown as { refresh_token: string };
 
       let refreshToken = JSON.parse(decode(token.refresh_token));
 
@@ -116,7 +117,11 @@ describe("refresh token", () => {
         }),
       });
 
-      let result = await res.json();
+      const result = (await res.json()) as unknown as {
+        access_token: string;
+        id_token: string;
+        refresh_token: string;
+      };
 
       expect(typeof result.access_token).toBe("string");
       expect(typeof result.id_token).toBe("string");

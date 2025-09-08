@@ -3,21 +3,16 @@ import {
   type SimulationHandlers,
   type FoundationSimulator,
 } from "@simulacrum/foundation-simulator";
-import { ExtendedSimulationStore, extendStore } from "./store/index.ts";
+import { type ExtendedSimulationStore, extendStore } from "./store/index.ts";
 import { extendRouter } from "./handlers/index.ts";
 import {
   type Auth0InitialStore,
   auth0InitialStoreSchema,
 } from "./store/entities.ts";
 import { getConfig } from "./config/get-config.ts";
-import { Auth0Configuration } from "./types.ts";
+import { type Auth0Configuration } from "./types.ts";
 
-export type Auth0Simulator = ({
-  debug,
-  initialState,
-  extend,
-  options,
-}?: {
+export type Auth0Simulator = (args?: {
   debug?: boolean;
   initialState?: Auth0InitialStore;
   extend?: {

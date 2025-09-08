@@ -7,7 +7,11 @@ export function useProcess(
   cmd: string,
   options?: ProcessOptions
 ): Operation<TinyProcess> {
-  let [command, ...args] = cmd.split(/\s+/);
+  const parts = cmd.split(/\s+/).filter(Boolean);
+  const [command, ...args] = parts;
+  if (!command) {
+    throw new Error("useProcess: command must not be empty");
+  }
   return x(command, args, {
     ...options,
     nodeOptions: { ...options?.nodeOptions, detached: true },

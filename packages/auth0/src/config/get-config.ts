@@ -18,8 +18,9 @@ function getPort({ domain, port }: Auth0Configuration): number {
   }
 
   if (domain) {
-    if (domain.split(":").length === 2) {
-      return parseInt(domain.split(":")[1]);
+    const parts = domain.split(":");
+    if (parts.length === 2) {
+      return parseInt(parts[1]!);
     }
   }
 

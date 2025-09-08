@@ -151,7 +151,7 @@ const handlers =
           owner,
           repo
         );
-        if (!blobs) {
+        if (!blobs || !owner || !repo || !ref) {
           response.status(404).send("fixture does not exist");
         } else {
           const tree = gitTrees({

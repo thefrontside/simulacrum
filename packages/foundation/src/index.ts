@@ -19,7 +19,7 @@ import type {
   Context as OpenAPIBackendContext,
 } from "openapi-backend";
 import type { Options as AjvOpts } from "ajv";
-import addFormats from "ajv-formats";
+import * as addFormats from "ajv-formats";
 import { createSimulationStore } from "./store/index.ts";
 import type {
   SimulationStore,
@@ -239,12 +239,16 @@ export function createFoundationSimulationServer<
 
         let api = new OpenAPIBackend({
           definition: mergedOAS,
-          apiRoot,
-          quick: additionalOptions?.quick,
+          apiRoot: apiRoot ?? "/",
+          quick: additionalOptions?.quick ?? false,
           validate: additionalOptions?.validate ?? true,
           ajvOpts: { ...additionalOptions?.ajvOpts },
           customizeAjv: (ajv) => {
-            addFormats(ajv);
+            // support both ESM default export and CommonJS namespace shapes
+            const _addFormats = (addFormats as any)?.default ?? addFormats;
+            if (typeof _addFormats === "function") {
+              _addFormats(ajv);
+            }
             return ajv;
           },
         });

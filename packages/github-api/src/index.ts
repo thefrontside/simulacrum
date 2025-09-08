@@ -3,7 +3,7 @@ import {
   type SimulationHandlers,
   type FoundationSimulator,
 } from "@simulacrum/foundation-simulator";
-import { ExtendedSimulationStore, extendStore } from "./store/index.ts";
+import { type ExtendedSimulationStore, extendStore } from "./store/index.ts";
 import { extendRouter } from "./extend-api.ts";
 import { openapi } from "./rest/index.ts";
 import {

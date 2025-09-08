@@ -1,12 +1,13 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import { simulation } from "../src/index.ts";
+import type { FoundationSimulatorListening } from "@simulacrum/foundation-simulator";
 import { JWKS } from "../src/auth/constants.ts";
 
 let basePort = 4401;
 let host = "https://localhost";
 let auth0Url = `${host}:${basePort}`;
 describe("openid routes", () => {
-  let server;
+  let server: FoundationSimulatorListening<unknown>;
   beforeAll(async () => {
     const app = simulation();
     server = await app.listen(basePort);
@@ -19,7 +20,7 @@ describe("openid routes", () => {
     it("returns the JWKS keys", async () => {
       let res: Response = await fetch(`${auth0Url}/.well-known/jwks.json`);
 
-      let json: typeof JWKS = await res.json();
+      const json = (await res.json()) as typeof JWKS;
 
       expect(res.ok).toBe(true);
 
@@ -31,7 +32,7 @@ describe("openid routes", () => {
         `${auth0Url}/.well-known/openid-configuration`
       );
 
-      let json: { token_endpoint: string } = await res.json();
+      const json = await res.json();
 
       expect(res.ok).toBe(true);
 

@@ -18,8 +18,8 @@ import {
   createRefreshToken,
   issueRefreshToken,
 } from "../auth/refresh-token.ts";
-import { ExtendedSimulationStore } from "../store/index.ts";
-import { Auth0User } from "../store/entities.ts";
+import { type ExtendedSimulationStore } from "../store/index.ts";
+import { type Auth0User } from "../store/entities.ts";
 
 export const createTokens = async ({
   body,
