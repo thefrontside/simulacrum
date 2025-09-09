@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.5.0]
+
+### Enhancements
+
+- [`c52b964`](https://github.com/thefrontside/simulacrum/commit/c52b9649ad7505bf41e43a640d05d6ee5b9b73a7) ([#322](https://github.com/thefrontside/simulacrum/pull/322) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) POSSIBLY BREAKING: Switch to ESM modules with a dual published CJS option. This was enabled by swapping out lodash for defu to merge OpenAPI specifications.
+- [`95bc2cf`](https://github.com/thefrontside/simulacrum/commit/95bc2cf102839e7f869498f0bf9d7e3f0dce7d84) ([#323](https://github.com/thefrontside/simulacrum/pull/323) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) POSSIBLY BREAKING: Update the express v5. If you are using the extended router, you may need to confirm your routes against the express v5 migration guide.
+- [`33efe53`](https://github.com/thefrontside/simulacrum/commit/33efe53806407c2b36d6c3c927301473bcf6fd31) ([#329](https://github.com/thefrontside/simulacrum/pull/329) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Add additional TypeScript configure in workspace to further refine type checks. Run `tsc` in CI for every package.
+- [`6b452c3`](https://github.com/thefrontside/simulacrum/commit/6b452c3cf3c8bd5f025a1993cf4ad63a5597e242) ([#320](https://github.com/thefrontside/simulacrum/pull/320) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Switch to using `tsdown` to help build both ESM and CJS versions of the package. This also includes helpers to ensure that the published package has all of the required properties and configuration.
+- [`ec6991f`](https://github.com/thefrontside/simulacrum/commit/ec6991f28624cecdf7828fdf1977c6e18747932a) ([#324](https://github.com/thefrontside/simulacrum/pull/324) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Upgrade to `starfx@0.15.0`. This settles out and upgrades upstream dependencies. You may see `reselect` warnings now showing in your terminal for items with broken memoization.
+
 ## \[0.4.1]
 
 ### Bug Fixes
