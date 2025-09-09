@@ -268,7 +268,7 @@ export const createAuth0Handlers = (
       res.status(200).json(userinfo);
     },
 
-    ["/passwordless/start"]: async function (req, res, next) {
+    ["/passwordless/start"]: function (req, res, next) {
       logger.log({ "/passwordless/start": { body: req.body } });
 
       try {
@@ -276,25 +276,29 @@ export const createAuth0Handlers = (
 
         // Validate required fields
         if (!client_id) {
-          return res.status(400).json({ error: "client_id is required" });
+          res.status(400).json({ error: "client_id is required" });
+          return;
         }
 
         if (!connection || (connection !== "email" && connection !== "sms")) {
-          return res.status(400).json({
+          res.status(400).json({
             error: "connection must be 'email' or 'sms'",
           });
+          return;
         }
 
         if (connection === "email" && !email) {
-          return res.status(400).json({
+          res.status(400).json({
             error: "email is required when connection is 'email'",
           });
+          return;
         }
 
         if (connection === "sms" && !phone_number) {
-          return res.status(400).json({
+          res.status(400).json({
             error: "phone_number is required when connection is 'sms'",
           });
+          return;
         }
 
         // Return appropriate response based on connection type

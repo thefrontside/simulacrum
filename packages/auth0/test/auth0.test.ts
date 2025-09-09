@@ -468,12 +468,17 @@ describe("Auth0 simulator", () => {
 
         expect(res.ok).toBe(true);
 
-        let json = await res.json();
+        const json = (await res.json()) as {
+          id_token: string;
+          access_token: string;
+        };
 
-        idToken = jwt.decode(json.id_token, { complete: true }) as IdToken;
+        idToken = jwt.decode(json.id_token, {
+          complete: true,
+        }) as unknown as IdToken;
         accessToken = jwt.decode(json.access_token, {
           complete: true,
-        }) as AccessToken;
+        }) as unknown as AccessToken;
       });
 
       it("should return tokens for valid passwordless OTP request", () => {
@@ -488,7 +493,9 @@ describe("Auth0 simulator", () => {
       });
 
       it("access_token should contain audience as aud", () => {
-        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
+        expect(accessToken.payload.aud).toBe(
+          "https://thefrontside.auth0.com/api/v0/"
+        );
       });
 
       it("should fail with invalid username", async () => {
@@ -863,7 +870,12 @@ describe("Auth0 simulator", () => {
         expect(res.ok).toBe(true);
         expect(res.status).toBe(200);
 
-        const json = await res.json();
+        const json = (await res.json()) as {
+          _id: string;
+          email: string;
+          email_verified: boolean;
+        };
+
         expect(json).toEqual({
           _id: "000000000000000000000000",
           email: "test@example.com",
@@ -887,7 +899,12 @@ describe("Auth0 simulator", () => {
         expect(res.ok).toBe(true);
         expect(res.status).toBe(200);
 
-        const json = await res.json();
+        const json = (await res.json()) as {
+          _id: string;
+          email: string;
+          email_verified: boolean;
+        };
+
         expect(json).toEqual({
           _id: "000000000000000000000000",
           email: "user@domain.com",
@@ -911,7 +928,7 @@ describe("Auth0 simulator", () => {
         expect(res.ok).toBe(false);
         expect(res.status).toBe(400);
 
-        const json = await res.json();
+        const json = (await res.json()) as { error: string };
         expect(json).toEqual({
           error: "email is required when connection is 'email'",
         });
@@ -940,7 +957,12 @@ describe("Auth0 simulator", () => {
         expect(res.ok).toBe(true);
         expect(res.status).toBe(200);
 
-        const json = await res.json();
+        const json = (await res.json()) as {
+          _id: string;
+          phone_number: string;
+          phone_verified: boolean;
+        };
+
         expect(json).toEqual({
           _id: "000000000000000000000000",
           phone_number: "+1234567890",
@@ -964,7 +986,7 @@ describe("Auth0 simulator", () => {
         expect(res.ok).toBe(false);
         expect(res.status).toBe(400);
 
-        const json = await res.json();
+        const json = (await res.json()) as { error: string };
         expect(json).toEqual({
           error: "phone_number is required when connection is 'sms'",
         });
@@ -988,7 +1010,7 @@ describe("Auth0 simulator", () => {
         expect(res.ok).toBe(false);
         expect(res.status).toBe(400);
 
-        const json = await res.json();
+        const json = (await res.json()) as { error: string };
         expect(json).toEqual({
           error: "client_id is required",
         });
@@ -1010,7 +1032,7 @@ describe("Auth0 simulator", () => {
         expect(res.ok).toBe(false);
         expect(res.status).toBe(400);
 
-        const json = await res.json();
+        const json = (await res.json()) as { error: string };
         expect(json).toEqual({
           error: "connection must be 'email' or 'sms'",
         });
@@ -1033,7 +1055,7 @@ describe("Auth0 simulator", () => {
         expect(res.ok).toBe(false);
         expect(res.status).toBe(400);
 
-        const json = await res.json();
+        const json = (await res.json()) as { error: string };
         expect(json).toEqual({
           error: "connection must be 'email' or 'sms'",
         });
