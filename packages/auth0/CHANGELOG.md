@@ -1,5 +1,22 @@
 # Changelog
 
+## \[0.11.0]
+
+### New Features
+
+- [`467e783`](https://github.com/thefrontside/simulacrum/commit/467e783d8330bc729444ef85dab25eada34a51f2) ([#326](https://github.com/thefrontside/simulacrum/pull/326) by [@rparet](https://github.com/thefrontside/simulacrum/../../rparet)) Add support for passwordless auth
+
+### Enhancements
+
+- [`c52b964`](https://github.com/thefrontside/simulacrum/commit/c52b9649ad7505bf41e43a640d05d6ee5b9b73a7) ([#322](https://github.com/thefrontside/simulacrum/pull/322) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) POSSIBLY BREAKING: Switch to ESM modules with a dual published CJS option. This was enabled by swapping out lodash for defu to merge OpenAPI specifications.
+- [`95bc2cf`](https://github.com/thefrontside/simulacrum/commit/95bc2cf102839e7f869498f0bf9d7e3f0dce7d84) ([#323](https://github.com/thefrontside/simulacrum/pull/323) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) POSSIBLY BREAKING: Update the express v5. If you are using the extended router, you may need to confirm your routes against the express v5 migration guide.
+- [`33efe53`](https://github.com/thefrontside/simulacrum/commit/33efe53806407c2b36d6c3c927301473bcf6fd31) ([#329](https://github.com/thefrontside/simulacrum/pull/329) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Add additional TypeScript configure in workspace to further refine type checks. Run `tsc` in CI for every package.
+- [`6b452c3`](https://github.com/thefrontside/simulacrum/commit/6b452c3cf3c8bd5f025a1993cf4ad63a5597e242) ([#320](https://github.com/thefrontside/simulacrum/pull/320) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Switch to using `tsdown` to help build both ESM and CJS versions of the package. This also includes helpers to ensure that the published package has all of the required properties and configuration.
+
+### Dependencies
+
+- Upgraded to `@simulacrum/foundation-simulator@0.5.0`
+
 ## \[0.10.2]
 
 - [`496b98b`](https://github.com/thefrontside/simulacrum/commit/496b98b53bff4faf1310bebff1c43fc469cb52c5) ([#313](https://github.com/thefrontside/simulacrum/pull/313) by [@taylorreece](https://www.github.com/taylorreece)) Update the auth0 simulator to include an email claim in the access token when email is present in scope.

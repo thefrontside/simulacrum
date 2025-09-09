@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.7.1]
+
+### Enhancements
+
+- [`33efe53`](https://github.com/thefrontside/simulacrum/commit/33efe53806407c2b36d6c3c927301473bcf6fd31) ([#329](https://github.com/thefrontside/simulacrum/pull/329) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Add additional TypeScript configure in workspace to further refine type checks. Run `tsc` in CI for every package.
+
+### Bug Fixes
+
+- [`d035a5b`](https://github.com/thefrontside/simulacrum/commit/d035a5be52fb53621acd148e5bd2a66f613d1773) ([#325](https://github.com/thefrontside/simulacrum/pull/325) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Properly pass down `nodeOptions`. We were spreading the root options object which meant options like `cwd` were not being picked up.
+
 ## \[0.7.0]
 
 ### Enhancements
