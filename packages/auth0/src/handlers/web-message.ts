@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import { assert } from "assert-ts";
 import { encode } from "base64-url";
-import type { QueryParams } from "src/types";
+import type { QueryParams } from "../types.ts";
 import { webMessage } from "../views/web-message.ts";
 
 export const createWebMessageHandler = (): RequestHandler =>

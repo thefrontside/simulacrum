@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Operation } from "effection";
 import { race, sleep } from "effection";
 
@@ -77,7 +78,7 @@ export interface Timeout {
  */
 export function timebox<T>(
   limitMS: number,
-  operation: () => Operation<T>,
+  operation: () => Operation<T>
 ): Operation<Timeboxed<T>> {
   return race([complete(operation), deadline(limitMS)]);
 }

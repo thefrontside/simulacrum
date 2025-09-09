@@ -1,7 +1,7 @@
 import {
   type Operation,
   type Result,
-  Stream,
+  type Stream,
   each,
   resource,
   scoped,

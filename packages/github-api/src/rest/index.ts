@@ -20,7 +20,6 @@ const handlers =
         const ghOrgs = simulationStore.selectors.allGithubOrganizations(
           simulationStore.store.getState()
         );
-        // @ts-expect-error this shouldn't be an any TODO fix
         const data = ghOrgs.map((org, index) => ({
           id: index,
           account: org,
@@ -151,7 +150,7 @@ const handlers =
           owner,
           repo
         );
-        if (!blobs) {
+        if (!blobs || !owner || !repo || !ref) {
           response.status(404).send("fixture does not exist");
         } else {
           const tree = gitTrees({
@@ -195,7 +194,6 @@ const handlers =
         );
         return {
           status: 200,
-          // @ts-expect-error this shouldn't be an any TODO fix
           json: organizations.map((organization) => ({
             url: `${organization.url}/memberships`,
             state: "active",

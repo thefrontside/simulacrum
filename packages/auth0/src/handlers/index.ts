@@ -7,12 +7,9 @@ import { defaultErrorHandler } from "../middleware/error-handling.ts";
 import { createAuth0Handlers } from "./auth0-handlers.ts";
 import { createOpenIdHandlers } from "./openid-handlers.ts";
 import path from "path";
-import { fileURLToPath } from "url";
-import { Auth0Configuration } from "../types.ts";
+import { type Auth0Configuration } from "../types.ts";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const publicDir = path.join(__dirname, "..", "views", "public");
+const publicDir = path.join(import.meta.dirname, "..", "views", "public");
 export const extendRouter =
   (config: Auth0Configuration, debug = false) =>
   (router: Express, simulationStore: ExtendedSimulationStore) => {

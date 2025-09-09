@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IdProp } from "@simulacrum/foundation-simulator";
+import { type IdProp } from "@simulacrum/foundation-simulator";
 import { faker } from "@faker-js/faker";
 
 export const githubUserSchema = z

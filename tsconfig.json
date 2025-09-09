@@ -1,22 +1,38 @@
 {
   "compilerOptions": {
     "strict": true,
-    "target": "ES2020",
-    "module": "ES2020",
-    "moduleResolution": "bundler",
+    "noEmit": true,
+    "lib": ["es2022"],
+    "module": "node16",
+    "target": "es2022",
+    "moduleResolution": "node16",
     "skipLibCheck": true,
+    "noEmitOnError": true,
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
-    "composite": true,
-    "incremental": true,
-    "noEmitOnError": true,
-    "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "rewriteRelativeImportExtensions": true,
-    "noResolve": false
-    // eventually we should turn this on
+    // so graphql codegen is included to type checks
+    "noResolve": false,
+    "checkJs": true,
+    "composite": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitAny": true,
+    "noUncheckedSideEffectImports": true
+    // TODO eventually we should turn this on
+    // "noUnusedLocals": true,
+    // TODO eventually we should turn this on
+    // "noUnusedParameters": true,
+    // TODO eventually we should turn this on
     // "isolatedDeclarations": true
   }
 }
