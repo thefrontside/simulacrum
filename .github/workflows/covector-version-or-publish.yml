@@ -42,6 +42,7 @@ jobs:
           token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
           command: "version-or-publish"
           createRelease: true
+          recognizeContributors: true
 
       # We need to run npm again so that `package-lock.json`
       # is updated if it needs to be before the PR is created
