@@ -189,7 +189,9 @@ const verifyUserExistsInStore = ({
   let username: string;
   let password: string | undefined;
 
-  if (grant_type === "password") {
+  if (grant_type === "http://auth0.com/oauth/grant-type/passwordless/otp") {
+    username = body.username;
+  } else if (grant_type === "password") {
     username = body.username;
     password = body.password;
   } else {
@@ -197,9 +199,8 @@ const verifyUserExistsInStore = ({
     // but naively using it to handle other cases at the moment
     assert(typeof code !== "undefined", "400::no code in /oauth/token");
     [nonce, username] = decodeBase64(code).split(":");
+    assert(!!username, `400::no nonce in store for ${code}`);
   }
-
-  assert(!!username, `400::no nonce in store for ${code}`);
 
   let user: Auth0User | undefined = personQuery((person) => {
     assert(!!person.email, `500::no email defined on person scenario`);
