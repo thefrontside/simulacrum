@@ -114,7 +114,7 @@ const inputSelectors = (
   const allGithubOrganizations = createSelector(
     schema.organizations.selectTableAsList,
     (ghOrgs) => {
-      return ghOrgs;
+      return [...ghOrgs];
     }
   );
 
@@ -122,8 +122,9 @@ const inputSelectors = (
     schema.installations.selectTableAsList,
     schema.organizations.selectTableAsList,
     schema.repositories.selectTableAsList,
-    (_: AnyState, org: string, repo?: string) => ({ org, repo }),
-    (installations, orgs, repos, { org, repo }) => {
+    (_: AnyState, org: string, repo?: string) => org,
+    (_: AnyState, org: string, repo?: string) => repo,
+    (installations, orgs, repos, org, repo) => {
       const appInstall = installations.find(
         (install) => install.account === org
       );
