@@ -24,7 +24,8 @@ export type Routes =
   | "/login/callback"
   | "/oauth/token"
   | "/v2/logout"
-  | "/userinfo";
+  | "/userinfo"
+  | "/passwordless/start";
 
 export type AuthSession = { username: string; nonce: string };
 
@@ -265,6 +266,54 @@ export const createAuth0Handlers = (
       };
 
       res.status(200).json(userinfo);
+    },
+
+    ["/passwordless/start"]: async function (req, res, next) {
+      logger.log({ "/passwordless/start": { body: req.body } });
+
+      try {
+        const { client_id, connection, email, phone_number, send } = req.body;
+
+        // Validate required fields
+        if (!client_id) {
+          return res.status(400).json({ error: "client_id is required" });
+        }
+
+        if (!connection || (connection !== "email" && connection !== "sms")) {
+          return res.status(400).json({
+            error: "connection must be 'email' or 'sms'",
+          });
+        }
+
+        if (connection === "email" && !email) {
+          return res.status(400).json({
+            error: "email is required when connection is 'email'",
+          });
+        }
+
+        if (connection === "sms" && !phone_number) {
+          return res.status(400).json({
+            error: "phone_number is required when connection is 'sms'",
+          });
+        }
+
+        // Return appropriate response based on connection type
+        if (connection === "email") {
+          res.status(200).json({
+            _id: "000000000000000000000000",
+            email: email,
+            email_verified: false,
+          });
+        } else {
+          res.status(200).json({
+            _id: "000000000000000000000000",
+            phone_number: phone_number,
+            phone_verified: false,
+          });
+        }
+      } catch (error) {
+        next(error);
+      }
     },
   };
 };

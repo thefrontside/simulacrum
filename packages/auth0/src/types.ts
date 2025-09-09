@@ -38,7 +38,8 @@ export type GrantType =
   | "password"
   | "client_credentials"
   | "authorization_code"
-  | "refresh_token";
+  | "refresh_token"
+  | "http://auth0.com/oauth/grant-type/passwordless/otp";
 
 export type ScopeConfig =
   | string

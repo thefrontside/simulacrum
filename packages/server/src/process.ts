@@ -9,6 +9,7 @@ export function useProcess(
 ): Operation<TinyProcess> {
   let [command, ...args] = cmd.split(/\s+/);
   return x(command, args, {
-    nodeOptions: { ...options, detached: true },
+    ...options,
+    nodeOptions: { ...options?.nodeOptions, detached: true },
   });
 }

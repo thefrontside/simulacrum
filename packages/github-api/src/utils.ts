@@ -9,7 +9,7 @@ const schemaDefaults = [
 export type SchemaFile = (typeof schemaDefaults)[number];
 
 export function getSchema(schemaFile: SchemaFile | string) {
-  let root = path.join(__dirname, "..");
+  let root = path.join(import.meta.dirname, "..");
 
   const fileString = fs.readFileSync(
     (schemaDefaults as unknown as string[]).includes(schemaFile)

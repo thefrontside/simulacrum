@@ -8,9 +8,7 @@
     "prepack": "echo \"parcel build\"",
     "start": "parcel serve",
     "watch": "parcel watch",
-    "build": "npm run prepack",
-    "lint": "echo noop",
-    "clean": "echo skip"
+    "build": "npm run prepack"
   },
   "repository": {
     "type": "git",

@@ -5,10 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "clean": "echo nothing to do",
     "prepack": "echo \"tsc --build\"",
     "build": "npm run prepack",
-    "lint": "echo noop",
     "test": "echo client is used to test server"
   },
   "dependencies": {},
