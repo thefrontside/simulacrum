@@ -38,9 +38,9 @@
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.2",
-    "publint": "^0.3.12",
-    "tsdown": "^0.14.2",
-    "tsx": "^4.20.5",
+    "publint": "^0.3.13",
+    "tsdown": "^0.15.4",
+    "tsx": "^4.20.6",
     "typescript": "5.8.3"
   }
 }
