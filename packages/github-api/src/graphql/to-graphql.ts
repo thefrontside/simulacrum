@@ -13,7 +13,7 @@ import {
   type Team,
   RepositoryVisibility,
 } from "../__generated__/resolvers-types.ts";
-import assert from "assert-ts";
+import { assert } from "assert-ts";
 
 interface GraphQLData {
   User: User;
