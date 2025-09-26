@@ -41,6 +41,7 @@
     "publint": "^0.3.12",
     "tsdown": "^0.14.2",
     "tsx": "^4.20.5",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "vitest": "^3.2.4"
   }
 }
