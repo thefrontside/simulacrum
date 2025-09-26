@@ -177,10 +177,10 @@ export function createFoundationSimulationServer<
     if (extendRouter) {
       extendRouter(app, simulationStore);
 
-      if (app?._router?.stack) {
-        const layers: IRoute[] = app._router.stack
-          .map((stack: ILayer) => stack.route)
-          .filter(Boolean);
+      if (app?.router?.stack) {
+        const layers: IRoute[] = app.router
+          .stack!.map((stack: ILayer) => stack.route)
+          .filter((r): r is IRoute => Boolean(r));
 
         const simulationRoutes = [];
         for (let layer of layers) {
