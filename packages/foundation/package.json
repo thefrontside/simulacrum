@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/foundation-simulator",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Base simulator to build simulators for integration testing.",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
@@ -46,8 +46,7 @@
     "http-proxy-middleware": "^3.0.5",
     "lodash": "^4.17.21",
     "openapi-backend": "^5.15.0",
-    "starfx": "^0.12.0",
-    "react-dom": "^17.0 || ^18.0"
+    "starfx": "^0.15.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/server",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Helpers and control plane to handle simulators and observability",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
@@ -31,6 +31,7 @@
     "prepack": "npm run build",
     "build": "tsdown",
     "lint": "echo noop",
+    "tsc": "tsc --noEmit",
     "test:service-main": "node --import tsx ./test/service-main.ts"
   },
   "dependencies": {

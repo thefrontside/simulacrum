@@ -2,8 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "noEmit": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    // for codegen as it doesn't adhere
+    "verbatimModuleSyntax": false
   },
-  "include": ["src/**/*.ts", "test/**/*.ts"]
+  "include": ["src/**/*.ts", "test/**/*.ts", "example/**/*.ts"]
 }

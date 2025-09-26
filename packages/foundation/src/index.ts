@@ -19,7 +19,7 @@ import type {
   Context as OpenAPIBackendContext,
 } from "openapi-backend";
 import type { Options as AjvOpts } from "ajv";
-import addFormats from "ajv-formats";
+import * as addFormats from "ajv-formats";
 import { createSimulationStore } from "./store/index.ts";
 import type {
   SimulationStore,
@@ -39,6 +39,7 @@ import { delayMiddleware } from "./middleware/delay.ts";
 import { generateRoutesHTML } from "./routeTemplate.ts";
 import { createAppServer } from "./server.ts";
 
+// for use in the OpenAPI handler functions
 type SimulationHandlerFunctions = (
   context: OpenAPIBackendContext,
   request: ExpressRequest,
@@ -47,6 +48,7 @@ type SimulationHandlerFunctions = (
   routeMetadata: SimulationRoute
 ) => void;
 export type SimulationHandlers = Record<string, SimulationHandlerFunctions>;
+
 export type {
   ExtendSimulationActions,
   ExtendSimulationActionsInput,
@@ -57,8 +59,20 @@ export type {
   SimulationStore,
   Document,
 };
+
+// public, nameable shape for downstream packages that wish to extend the
+// foundation simulation store without importing deep cyclical types.
+export type ExtendStoreConfig<Schema, Actions, Selectors> = {
+  schema?: ExtendSimulationSchemaInput<Schema>;
+  actions?: ExtendSimulationActionsInput<Actions, Schema>;
+  selectors?: ExtendSimulationSelectorsInput<Selectors, Schema>;
+  logs?: boolean;
+};
+
 export type { AnyState, TableOutput, IdProp } from "starfx";
 
+// the return type after a server is listening, useful for
+// referring to the running server while testing
 export type FoundationSimulatorListening<ExtendedSimulationStore> = {
   server: Server<typeof IncomingMessage, typeof ServerResponse>;
   port: number | undefined;
@@ -239,12 +253,16 @@ export function createFoundationSimulationServer<
 
         let api = new OpenAPIBackend({
           definition: mergedOAS,
-          apiRoot,
-          quick: additionalOptions?.quick,
+          apiRoot: apiRoot ?? "/",
+          quick: additionalOptions?.quick ?? false,
           validate: additionalOptions?.validate ?? true,
           ajvOpts: { ...additionalOptions?.ajvOpts },
           customizeAjv: (ajv) => {
-            addFormats(ajv);
+            // support both ESM default export and CommonJS namespace shapes
+            const _addFormats = (addFormats as any)?.default ?? addFormats;
+            if (typeof _addFormats === "function") {
+              _addFormats(ajv);
+            }
             return ajv;
           },
         });
@@ -437,6 +455,9 @@ const mergeDocumentArray = (
   return document as Document;
 };
 
+/**
+ * Configures and immediately starts the foundation simulation server.
+ */
 export async function startFoundationSimulationServer<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,

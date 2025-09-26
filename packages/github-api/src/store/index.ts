@@ -6,8 +6,8 @@ import type {
   ExtendSimulationActionsInput,
   ExtendSimulationSelectors,
   ExtendSimulationSelectorsInput,
-  TableOutput,
   AnyState,
+  ExtendStoreConfig,
 } from "@simulacrum/foundation-simulator";
 import {
   convertInitialStateToStoreState,
@@ -17,37 +17,10 @@ import {
   type GitHubRepository,
   type GitHubUser,
   type GitHubBranch,
-  GitHubAppInstallation,
+  type GitHubAppInstallation,
 } from "./entities.ts";
 
-export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
-  users: (
-    n: string
-  ) => TableOutput<GitHubUser, AnyState, GitHubUser | undefined>;
-  installations: (
-    n: string
-  ) => TableOutput<
-    GitHubAppInstallation,
-    AnyState,
-    GitHubAppInstallation | undefined
-  >;
-  repositories: (
-    n: string
-  ) => TableOutput<GitHubRepository, AnyState, GitHubRepository | undefined>;
-  branches: (
-    n: string
-  ) => TableOutput<GitHubBranch, AnyState, GitHubBranch | undefined>;
-  organizations: (
-    n: string
-  ) => TableOutput<
-    GitHubOrganization,
-    AnyState,
-    GitHubOrganization | undefined
-  >;
-  blobs: (
-    n: string
-  ) => TableOutput<GitHubBlob, AnyState, GitHubBlob | undefined>;
-};
+type ExtendedSchema = ReturnType<typeof inputSchema>;
 type ExtendActions = typeof inputActions;
 type ExtendSelectors = typeof inputSelectors;
 export type ExtendedSimulationStore = SimulationStore<
@@ -55,6 +28,13 @@ export type ExtendedSimulationStore = SimulationStore<
   ReturnType<ExtendActions>,
   ReturnType<ExtendSelectors>
 >;
+
+// Public type for consumers of this package to declare the shape of an
+// `extendStore` argument. It mirrors the foundation `ExtendStoreConfig`
+// but wires the schema input type used by this package so callers can
+// provide schema/actions/selectors extensions with correct generic params.
+export type GitHubExtendStoreInput<TSchema, TActions, TSelectors> =
+  ExtendStoreConfig<ExtendSimulationSchemaInput<TSchema>, TActions, TSelectors>;
 
 const inputSchema =
   <T>(
@@ -94,23 +74,36 @@ const inputSchema =
     return slices;
   };
 
-const inputActions = (args: ExtendSimulationActions<ExtendedSchema>) => {
-  return {};
+const inputActions = (
+  args: ExtendSimulationActions<ExtendedSchema>
+): ExtendSimulationActions<ExtendedSchema> => {
+  return {} as ExtendSimulationActions<ExtendedSchema>;
 };
 
 const extendActions =
-  (extendedActions?: ExtendSimulationActionsInput<any, ExtendedSchema>) =>
+  <A>(extendedActions?: ExtendSimulationActionsInput<A, ExtendedSchema>) =>
   (args: ExtendSimulationActions<ExtendedSchema>) => {
-    return extendedActions
-      ? // @ts-expect-error schema is cyclical, ignore extension for now
-        { ...inputActions(args), ...extendedActions(args) }
-      : inputActions(args);
+    const base = inputActions(args);
+    if (!extendedActions) return base;
+
+    // Call the extension through a narrow bridge type that returns a
+    // Partial of the outward actions shape. We still cast the supplied
+    // extension to the bridge to avoid introducing cyclical public types,
+    // but the result is strongly-typed as a Partial of the expected shape.
+    type BridgeActionFn = (
+      arg: ExtendSimulationActions<ExtendedSchema>
+    ) => Partial<ExtendSimulationActions<ExtendedSchema>>;
+    const extResult = (extendedActions as unknown as BridgeActionFn)(args);
+    return {
+      ...(base as object),
+      ...(extResult as object),
+    } as ExtendSimulationActions<ExtendedSchema>;
   };
 
-const inputSelectors = (
-  args: ExtendSimulationSelectors<ExtendedSchema>
-): Record<string, ReturnType<typeof createSelector>> => {
-  const { createSelector, schema } = args;
+const inputSelectors = ({
+  createSelector,
+  schema,
+}: ExtendSimulationSelectors<ExtendedSchema>) => {
   const allGithubOrganizations = createSelector(
     schema.organizations.selectTableAsList,
     schema.repositories.selectTableAsList,
@@ -126,8 +119,9 @@ const inputSelectors = (
     schema.installations.selectTableAsList,
     schema.organizations.selectTableAsList,
     schema.repositories.selectTableAsList,
-    (_: AnyState, org: string, repo?: string) => ({ org, repo }),
-    (installations, orgs, repos, { org, repo }) => {
+    (_: AnyState, org: string, repo?: string) => org,
+    (_: AnyState, org: string, repo?: string) => repo,
+    (installations, orgs, repos, org, repo) => {
       const appInstall = installations.find(
         (install) => install.account === org
       );
@@ -214,31 +208,40 @@ const inputSelectors = (
 };
 
 const extendSelectors =
-  (extendedSelectors?: ExtendSimulationSelectorsInput<any, ExtendedSchema>) =>
+  <S>(extendedSelectors?: ExtendSimulationSelectorsInput<S, ExtendedSchema>) =>
   (args: ExtendSimulationSelectors<ExtendedSchema>) => {
-    return extendedSelectors
-      ? // @ts-expect-error schema is cyclical, ignore extension for now
-        { ...inputSelectors(args), ...extendedSelectors(args) }
-      : inputSelectors(args);
+    const base = inputSelectors(args);
+    if (!extendedSelectors) return base;
+
+    // Call the extension through a narrow bridge type that returns a
+    // Partial of the outward selectors shape. Casting to this bridge
+    // preserves a nameable external signature while keeping useful types
+    // for the merged result.
+    type BridgeSelectorFn = (
+      arg: ExtendSimulationSelectors<ExtendedSchema>
+    ) => Partial<ExtendSimulationSelectors<ExtendedSchema>>;
+    const extResult = (extendedSelectors as unknown as BridgeSelectorFn)(args);
+    return {
+      ...(base as object),
+      ...(extResult as object),
+    } as ExtendSimulationSelectors<ExtendedSchema>;
   };
 
 export const extendStore = <T>(
   initialState: GitHubStore | undefined,
-  extended:
-    | {
-        actions: ExtendSimulationActionsInput<
-          any,
-          ExtendSimulationSchemaInput<T>
-        >;
-        selectors: ExtendSimulationSelectorsInput<
-          any,
-          ExtendSimulationSchemaInput<T>
-        >;
-        schema?: ExtendSimulationSchemaInput<T>;
-      }
-    | undefined
+  extended?: ExtendStoreConfig<ExtendSimulationSchemaInput<T>, unknown, unknown>
 ) => ({
-  actions: extendActions(extended?.actions),
-  selectors: extendSelectors(extended?.selectors),
+  actions: extendActions(
+    extended?.actions as unknown as ExtendSimulationActionsInput<
+      unknown,
+      ExtendedSchema
+    >
+  ),
+  selectors: extendSelectors(
+    extended?.selectors as unknown as ExtendSimulationSelectorsInput<
+      unknown,
+      ExtendSimulationSchemaInput<T>
+    >
+  ),
   schema: inputSchema(initialState, extended?.schema),
 });

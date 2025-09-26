@@ -38,11 +38,12 @@ export type GrantType =
   | "password"
   | "client_credentials"
   | "authorization_code"
-  | "refresh_token";
+  | "refresh_token"
+  | "http://auth0.com/oauth/grant-type/passwordless/otp";
 
 export type ScopeConfig =
   | string
-  | { audience?: string; clientID: string; scope: string }[];
+  | { audience?: string | undefined; clientID: string; scope: string }[];
 
 export type Auth0Configuration = Required<Pick<ConfigSchema, ReadonlyFields>> &
   Omit<ConfigSchema, ReadonlyFields>;
@@ -106,7 +107,7 @@ export interface RefreshToken {
   scope: string;
   sessionUid?: string;
   user: { id: string };
-  nonce?: string;
+  nonce?: string | undefined;
 }
 
 type Token<P> = {

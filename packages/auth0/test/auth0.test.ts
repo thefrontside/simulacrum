@@ -8,6 +8,7 @@ import {
   expect,
 } from "vitest";
 import { defaultUser, simulation } from "../src/index.ts";
+import type { FoundationSimulatorListening } from "@simulacrum/foundation-simulator";
 
 import { stringify } from "querystring";
 import { decode, encode } from "base64-url";
@@ -35,8 +36,8 @@ let person = defaultUser;
 let frontendUrl = `http://localhost:3000/login`;
 
 describe("Auth0 simulator", () => {
-  let server;
-  let frontendServer;
+  let server: FoundationSimulatorListening<unknown>;
+  let frontendServer: FoundationSimulatorListening<unknown>;
   beforeAll(async () => {
     frontendServer = await frontendSimulation.listen();
     const app = simulation();
@@ -264,12 +265,17 @@ describe("Auth0 simulator", () => {
 
         expect(res.ok).toBe(true);
 
-        let json = await res.json();
+        const json = (await res.json()) as {
+          id_token: string;
+          access_token: string;
+        };
 
-        idToken = jwt.decode(json.id_token, { complete: true }) as IdToken;
+        idToken = jwt.decode(json.id_token, {
+          complete: true,
+        }) as unknown as IdToken;
         accessToken = jwt.decode(json.access_token, {
           complete: true,
-        }) as AccessToken;
+        }) as unknown as AccessToken;
       });
 
       it("should return an iss field with a forward slash", () => {
@@ -332,12 +338,17 @@ describe("Auth0 simulator", () => {
 
         expect(res.ok).toBe(true);
 
-        let json = await res.json();
+        const json = (await res.json()) as {
+          id_token: string;
+          access_token: string;
+        };
 
-        idToken = jwt.decode(json.id_token, { complete: true }) as IdToken;
+        idToken = jwt.decode(json.id_token, {
+          complete: true,
+        }) as unknown as IdToken;
         accessToken = jwt.decode(json.access_token, {
           complete: true,
-        }) as AccessToken;
+        }) as unknown as AccessToken;
       });
 
       it("id_token should contain client_id as aud", () => {
@@ -371,11 +382,14 @@ describe("Auth0 simulator", () => {
 
         expect(res.ok).toBe(true);
 
-        let json = await res.json();
+        const json = (await res.json()) as {
+          id_token: string;
+          access_token: string;
+        };
 
         accessToken = jwt.decode(json.access_token, {
           complete: true,
-        }) as AccessToken;
+        }) as unknown as AccessToken;
       });
 
       it("access_token should contain audience as aud", () => {
@@ -407,12 +421,17 @@ describe("Auth0 simulator", () => {
 
         expect(res.ok).toBe(true);
 
-        let json = await res.json();
+        const json = (await res.json()) as {
+          id_token: string;
+          access_token: string;
+        };
 
-        idToken = jwt.decode(json.id_token, { complete: true }) as IdToken;
+        idToken = jwt.decode(json.id_token, {
+          complete: true,
+        }) as unknown as IdToken;
         accessToken = jwt.decode(json.access_token, {
           complete: true,
-        }) as AccessToken;
+        }) as unknown as AccessToken;
       });
 
       it("id_token should contain client_id as aud", () => {
@@ -425,12 +444,103 @@ describe("Auth0 simulator", () => {
         );
       });
     });
+
+    describe("grant_type=http://auth0.com/oauth/grant-type/passwordless/otp", () => {
+      let idToken: IdToken;
+      let accessToken: AccessToken;
+
+      beforeEach(async () => {
+        let res: Response = await fetch(`${auth0Url}/oauth/token`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: "http://auth0.com/oauth/grant-type/passwordless/otp",
+            username: person.email,
+            // these are different than the simulator defined values
+            // to confirm we can auth and create tokens with the passed values
+            client_id: "test-id-to-confirm-it-uses-this",
+            audience: "https://thefrontside.auth0.com/api/v0/",
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+
+        const json = (await res.json()) as {
+          id_token: string;
+          access_token: string;
+        };
+
+        idToken = jwt.decode(json.id_token, {
+          complete: true,
+        }) as unknown as IdToken;
+        accessToken = jwt.decode(json.access_token, {
+          complete: true,
+        }) as unknown as AccessToken;
+      });
+
+      it("should return tokens for valid passwordless OTP request", () => {
+        expect(idToken).toBeDefined();
+        expect(accessToken).toBeDefined();
+        expect(idToken.payload.email).toBe(person.email);
+        expect(accessToken.payload.sub).toBeDefined();
+      });
+
+      it("id_token should contain client_id as aud", () => {
+        expect(idToken.payload.aud).toBe("test-id-to-confirm-it-uses-this");
+      });
+
+      it("access_token should contain audience as aud", () => {
+        expect(accessToken.payload.aud).toBe(
+          "https://thefrontside.auth0.com/api/v0/"
+        );
+      });
+
+      it("should fail with invalid username", async () => {
+        let res: Response = await fetch(`${auth0Url}/oauth/token`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: "http://auth0.com/oauth/grant-type/passwordless/otp",
+            username: "invalid@example.com",
+            client_id: "test-id",
+            audience: "https://thefrontside.auth0.com/api/v0/",
+          }),
+        });
+
+        expect(res.ok).toBe(false);
+        expect(res.status).toBe(401);
+      });
+
+      it("should fail with missing username", async () => {
+        let res: Response = await fetch(`${auth0Url}/oauth/token`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...Fields,
+            grant_type: "http://auth0.com/oauth/grant-type/passwordless/otp",
+            client_id: "test-id",
+            audience: "https://thefrontside.auth0.com/api/v0/",
+          }),
+        });
+
+        expect(res.ok).toBe(false);
+        expect(res.status).toBe(500);
+      });
+    });
   });
 
   describe("m2m token at /oauth/token", () => {
     describe("should return scope", () => {
       let auth0Url = `${host}:${basePort + 1}`;
-      let server2;
+      let server2: FoundationSimulatorListening<unknown>;
       beforeAll(async () => {
         const app = simulation({
           options: {
@@ -472,11 +582,11 @@ describe("Auth0 simulator", () => {
 
         expect(res.ok).toBe(true);
 
-        let json = await res.json();
+        const json = (await res.json()) as { access_token: string };
 
         let accessToken = jwt.decode(json.access_token, {
           complete: true,
-        }) as AccessToken;
+        }) as unknown as AccessToken;
 
         expect(accessToken.payload.scope).toBe("custom:access");
       });
@@ -497,11 +607,14 @@ describe("Auth0 simulator", () => {
 
         expect(res.ok).toBe(true);
 
-        let json = await res.json();
+        const json = (await res.json()) as {
+          id_token: string;
+          access_token: string;
+        };
 
         let accessToken = jwt.decode(json.access_token, {
           complete: true,
-        }) as AccessToken;
+        }) as unknown as AccessToken;
 
         expect(accessToken.payload.scope).toBe("more-custom:access");
       });
@@ -522,11 +635,11 @@ describe("Auth0 simulator", () => {
 
         expect(res.ok).toBe(true);
 
-        let json = await res.json();
+        const json = (await res.json()) as { access_token: string };
 
         let accessToken = jwt.decode(json.access_token, {
           complete: true,
-        }) as AccessToken;
+        }) as unknown as AccessToken;
 
         expect(accessToken.payload.scope).toBe("custom:special-access");
       });
@@ -546,11 +659,11 @@ describe("Auth0 simulator", () => {
 
         expect(res.ok).toBe(true);
 
-        let json = await res.json();
+        const json = (await res.json()) as { access_token: string };
 
         let accessToken = jwt.decode(json.access_token, {
           complete: true,
-        }) as AccessToken;
+        }) as unknown as AccessToken;
 
         expect(accessToken.payload.scope).toBe(
           "openid profile email offline_access"
@@ -561,7 +674,7 @@ describe("Auth0 simulator", () => {
     describe("should fail", () => {
       let serverPort = basePort + 2;
       let auth0Url = `${host}:${serverPort}`;
-      let server2;
+      let server2: FoundationSimulatorListening<unknown>;
       beforeAll(async () => {
         const app = simulation({
           options: {
@@ -662,7 +775,7 @@ describe("Auth0 simulator", () => {
           }),
         });
 
-        token = await res.json();
+        token = (await res.json()) as unknown as TokenSet;
       });
 
       it("should retrieve userinfo from token", async () => {
@@ -673,7 +786,7 @@ describe("Auth0 simulator", () => {
           },
         });
 
-        let user = await res.json();
+        let user = (await res.json()) as { name: string };
 
         expect(user.name).toBe(person.name);
       });
@@ -688,7 +801,7 @@ describe("Auth0 simulator", () => {
           }
         );
 
-        let user = await res.json();
+        let user = (await res.json()) as { name: string };
 
         expect(user.name).toBe(person.name);
       });
@@ -714,7 +827,7 @@ describe("Auth0 simulator", () => {
           }),
         });
 
-        token = await resToFail.json();
+        token = (await resToFail.json()) as unknown as TokenSet;
 
         let res: Response = await fetch(`${auth0Url}/userinfo`, {
           headers: {
@@ -730,6 +843,222 @@ describe("Auth0 simulator", () => {
           )
         ).toBe(true);
         expect(res.status).toBe(500);
+      });
+    });
+  });
+
+  describe("/passwordless/start", () => {
+    describe("email connection", () => {
+      it("should return success response for valid email request", async () => {
+        const res: Response = await fetch(`${auth0Url}/passwordless/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client_id: Fields.client_id,
+            connection: "email",
+            email: "test@example.com",
+            send: "link",
+            authParams: {
+              scope: "openid",
+              state: "test-state",
+            },
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+        expect(res.status).toBe(200);
+
+        const json = (await res.json()) as {
+          _id: string;
+          email: string;
+          email_verified: boolean;
+        };
+
+        expect(json).toEqual({
+          _id: "000000000000000000000000",
+          email: "test@example.com",
+          email_verified: false,
+        });
+      });
+
+      it("should return success response for email request without send parameter", async () => {
+        const res: Response = await fetch(`${auth0Url}/passwordless/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client_id: Fields.client_id,
+            connection: "email",
+            email: "user@domain.com",
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+        expect(res.status).toBe(200);
+
+        const json = (await res.json()) as {
+          _id: string;
+          email: string;
+          email_verified: boolean;
+        };
+
+        expect(json).toEqual({
+          _id: "000000000000000000000000",
+          email: "user@domain.com",
+          email_verified: false,
+        });
+      });
+
+      it("should return error when email is missing for email connection", async () => {
+        const res: Response = await fetch(`${auth0Url}/passwordless/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client_id: Fields.client_id,
+            connection: "email",
+            send: "link",
+          }),
+        });
+
+        expect(res.ok).toBe(false);
+        expect(res.status).toBe(400);
+
+        const json = (await res.json()) as { error: string };
+        expect(json).toEqual({
+          error: "email is required when connection is 'email'",
+        });
+      });
+    });
+
+    describe("sms connection", () => {
+      it("should return success response for valid sms request", async () => {
+        const res: Response = await fetch(`${auth0Url}/passwordless/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client_id: Fields.client_id,
+            connection: "sms",
+            phone_number: "+1234567890",
+            send: "code",
+            authParams: {
+              scope: "openid",
+              state: "test-state",
+            },
+          }),
+        });
+
+        expect(res.ok).toBe(true);
+        expect(res.status).toBe(200);
+
+        const json = (await res.json()) as {
+          _id: string;
+          phone_number: string;
+          phone_verified: boolean;
+        };
+
+        expect(json).toEqual({
+          _id: "000000000000000000000000",
+          phone_number: "+1234567890",
+          phone_verified: false,
+        });
+      });
+
+      it("should return error when phone_number is missing for sms connection", async () => {
+        const res: Response = await fetch(`${auth0Url}/passwordless/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client_id: Fields.client_id,
+            connection: "sms",
+            send: "code",
+          }),
+        });
+
+        expect(res.ok).toBe(false);
+        expect(res.status).toBe(400);
+
+        const json = (await res.json()) as { error: string };
+        expect(json).toEqual({
+          error: "phone_number is required when connection is 'sms'",
+        });
+      });
+    });
+
+    describe("validation errors", () => {
+      it("should return error when client_id is missing", async () => {
+        const res: Response = await fetch(`${auth0Url}/passwordless/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            connection: "email",
+            email: "test@example.com",
+            send: "link",
+          }),
+        });
+
+        expect(res.ok).toBe(false);
+        expect(res.status).toBe(400);
+
+        const json = (await res.json()) as { error: string };
+        expect(json).toEqual({
+          error: "client_id is required",
+        });
+      });
+
+      it("should return error when connection is missing", async () => {
+        const res: Response = await fetch(`${auth0Url}/passwordless/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client_id: Fields.client_id,
+            email: "test@example.com",
+            send: "link",
+          }),
+        });
+
+        expect(res.ok).toBe(false);
+        expect(res.status).toBe(400);
+
+        const json = (await res.json()) as { error: string };
+        expect(json).toEqual({
+          error: "connection must be 'email' or 'sms'",
+        });
+      });
+
+      it("should return error when connection is invalid", async () => {
+        const res: Response = await fetch(`${auth0Url}/passwordless/start`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client_id: Fields.client_id,
+            connection: "invalid",
+            email: "test@example.com",
+            send: "link",
+          }),
+        });
+
+        expect(res.ok).toBe(false);
+        expect(res.status).toBe(400);
+
+        const json = (await res.json()) as { error: string };
+        expect(json).toEqual({
+          error: "connection must be 'email' or 'sms'",
+        });
       });
     });
   });

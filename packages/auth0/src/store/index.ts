@@ -14,7 +14,7 @@ import {
   defaultUser,
   type Auth0User,
   type AuthSession,
-  Auth0InitialStore,
+  type Auth0InitialStore,
 } from "./entities.ts";
 
 export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {

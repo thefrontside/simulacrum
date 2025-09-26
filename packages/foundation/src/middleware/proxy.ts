@@ -1,6 +1,6 @@
 import {
   createProxyMiddleware,
-  RequestHandler,
+  type RequestHandler,
   responseInterceptor,
   type Options as ProxyOptions,
 } from "http-proxy-middleware";
