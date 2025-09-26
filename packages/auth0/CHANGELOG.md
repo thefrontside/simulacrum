@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.11.1]
+
+### Bug Fixes
+
+- [`356bfdd`](https://github.com/thefrontside/simulacrum/commit/356bfddfd55203d0f444922e6fcef087ed461252) Fix `typesVersion` pointing to old directories. Update `tsdown`.
+
+### Dependencies
+
+- Upgraded to `@simulacrum/foundation-simulator@0.5.1`
+
 ## \[0.11.0]
 
 ### New Features

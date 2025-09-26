@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.7.2]
+
+### Bug Fixes
+
+- [`356bfdd`](https://github.com/thefrontside/simulacrum/commit/356bfddfd55203d0f444922e6fcef087ed461252) Fix `typesVersion` pointing to old directories. Update `tsdown`.
+
 ## \[0.7.1]
 
 ### Enhancements
