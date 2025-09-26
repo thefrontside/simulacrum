@@ -64,7 +64,8 @@
   "typesVersions": {
     "*": {
       "*": [
-        "dist/esm/index.d.ts"
+        "./dist/*",
+        "./*"
       ]
     }
   },
