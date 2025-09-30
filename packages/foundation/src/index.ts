@@ -413,7 +413,6 @@ export function createFoundationSimulationServer<
         const listeningPort = portOverride ?? port;
         const server = genericAppServer.listen(
           listeningPort,
-          "localhost",
           callback
         );
 
