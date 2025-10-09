@@ -27,6 +27,7 @@
   ],
   "scripts": {
     "start": "node --import=tsx ./example/singleFileServer/start.ts",
+    "start:simple": "node --import=tsx ./example/simpleStart/index.ts",
     "start:singlefile": "node --import=tsx ./example/singleFileServer/start.ts",
     "start:extensive": "node --import=tsx ./example/extensiveServer/start.ts",
     "test": "vitest run",
