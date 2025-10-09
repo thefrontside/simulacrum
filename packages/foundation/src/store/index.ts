@@ -49,22 +49,36 @@ export function createSimulationStore<
   ExtendedSimulationTasks
 >(
   {
-    actions: inputActions,
-    selectors: inputSelectors,
+    actions:
+      inputActions = (() => ({})) as unknown as ExtendSimulationActionsInput<
+        ExtendedSimulationActions,
+        ExtendedSimulationSchema
+      >,
+    selectors:
+      inputSelectors = (() => ({})) as unknown as ExtendSimulationSelectorsInput<
+        ExtendedSimulationSelectors,
+        ExtendedSimulationSchema
+      >,
     schema: inputSchema,
-    tasks: inputTasks,
+    tasks: inputTasks = (() => ({
+      tasks: [],
+      actions: {},
+    })) as unknown as ExtendSimulationTaskInput<
+      ExtendedSimulationTasks,
+      ExtendedSimulationSchema
+    >,
     logs = false,
   }: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
-    actions: ExtendSimulationActionsInput<
+    actions?: ExtendSimulationActionsInput<
       ExtendedSimulationActions,
       ExtendedSimulationSchema
     >;
-    selectors: ExtendSimulationSelectorsInput<
+    selectors?: ExtendSimulationSelectorsInput<
       ExtendedSimulationSelectors,
       ExtendedSimulationSchema
     >;
-    tasks: ExtendSimulationTaskInput<
+    tasks?: ExtendSimulationTaskInput<
       ExtendedSimulationTasks,
       ExtendedSimulationSchema
     >;

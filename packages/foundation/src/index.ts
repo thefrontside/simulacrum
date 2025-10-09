@@ -134,15 +134,15 @@ export function createFoundationSimulationServer<
   }[];
   extendStore?: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
-    actions: ExtendSimulationActionsInput<
+    actions?: ExtendSimulationActionsInput<
       ExtendedSimulationActions,
       ExtendedSimulationSchema
     >;
-    selectors: ExtendSimulationSelectorsInput<
+    selectors?: ExtendSimulationSelectorsInput<
       ExtendedSimulationSelectors,
       ExtendedSimulationSchema
     >;
-    tasks: ExtendSimulationTaskInput<
+    tasks?: ExtendSimulationTaskInput<
       ExtendedSimulationTasks,
       ExtendedSimulationSchema
     >;
