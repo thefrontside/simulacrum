@@ -77,7 +77,11 @@ const handlers =
           org
         );
         if (!install) return response.status(404).send("Not Found");
-        return { status: 200, json: install };
+        response.status(200).json(install);
+        // note that we can't use the return here because the schema has
+        // a nullable field that openapi-backend chokes on
+        // see https://github.com/typicode/openapi-backend/issues/747
+        // return { status: 200, json: install };
       },
       // GET /repos/{owner}/{repo}/installation - Get a repository installation for the authenticated app
       "apps/get-repo-installation": async (context, _request, response) => {
@@ -88,7 +92,11 @@ const handlers =
           repo
         );
         if (!install) return response.status(404).send("Not Found");
-        return { status: 200, json: install };
+        response.status(200).json(install);
+        // note that we can't use the return here because the schema has
+        // a nullable field that openapi-backend chokes on
+        // see https://github.com/typicode/openapi-backend/issues/747
+        // return { status: 200, json: install };
       },
 
       // GET /orgs/{org}/repos

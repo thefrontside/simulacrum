@@ -77,8 +77,7 @@ export const simulation = (
     : gitubInitialStoreSchema.parse(args?.initialState);
   const extendStore = mergeStoreConfig<_GitHubSchema>(
     parsedInitialState,
-    args?.extend
-      ?.extendStore as unknown as import("./store/index.ts").GitHubExtendStoreInput<
+    args?.extend?.extendStore as unknown as GitHubExtendStoreInput<
       _GitHubSchema,
       _GitHubActions,
       _GitHubSelectors

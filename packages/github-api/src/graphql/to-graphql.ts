@@ -34,7 +34,6 @@ export function deriveOwner(
   let [org] = simulationStore.schema.organizations
     .selectTableAsList(simulationStore.store.getState())
     .filter((o) => o.login === login);
-  console.dir(org, { depth: null });
   if (org)
     return toGraphql(
       simulationStore,
