@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import { type Express } from "express";
 import { stringify } from "querystring";
 import { createHandler } from "./graphql/handler.ts";
 import type { ExtendedSimulationStore } from "./store/index.ts";

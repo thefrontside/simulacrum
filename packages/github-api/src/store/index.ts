@@ -106,8 +106,12 @@ const inputSelectors = ({
 }: ExtendSimulationSelectors<ExtendedSchema>) => {
   const allGithubOrganizations = createSelector(
     schema.organizations.selectTableAsList,
-    (ghOrgs) => {
-      return [...ghOrgs];
+    schema.repositories.selectTableAsList,
+    (ghOrgs, repos) => {
+      return ghOrgs.map((ghOrg) => {
+        const repositories = repos.filter((r) => r.owner === ghOrg.login);
+        return { ...ghOrg, repositories };
+      });
     }
   );
 
@@ -149,7 +153,11 @@ const inputSelectors = ({
       if (org && !orgMap?.[org]) return undefined;
       const repos = !org ? allRepos : allRepos.filter((r) => r.owner === org);
       return repos.map((repo) => {
-        const linkedRepo = { ...repo, owner: { ...orgMap[repo.owner] } };
+        const linkedRepo = {
+          ...repo,
+          id: Number(repo.id),
+          owner: { ...orgMap[repo.owner], id: Number(orgMap[repo.owner].id) },
+        };
         // TODO better option than delete?
         delete linkedRepo.owner.name;
         delete linkedRepo.owner.email;

@@ -26,11 +26,36 @@ const handlers =
         }));
         response.status(200).json(data);
       },
+      // POST /app/installations/{installation_id}/access_tokens
+      "apps/create-installation-access-token": async (
+        _context,
+        _request,
+        _response
+      ) => {
+        const repositories =
+          simulationStore.selectors.allReposWithOrgs(
+            simulationStore.store.getState()
+          ) ?? [];
+        const token = "ghs_16C7e42F292c6912E7710c838347Ae178B4a";
+        return {
+          status: 201,
+          json: {
+            token,
+            expires_at: "2030-07-11T22:14:10Z",
+            permissions: {
+              issues: "write",
+              contents: "read",
+            },
+            repository_selection: "selected",
+            repositories,
+          },
+        };
+      },
       // L#4134 /installation/repositories
       "apps/list-repos-accessible-to-installation": async (
         _context,
         _request,
-        response
+        _response
       ) => {
         const repos =
           simulationStore.selectors.allReposWithOrgs(
@@ -52,7 +77,11 @@ const handlers =
           org
         );
         if (!install) return response.status(404).send("Not Found");
-        return { status: 200, json: install };
+        return response.status(200).json(install);
+        // note that we can't use the return here because the schema has
+        // a nullable field that openapi-backend chokes on
+        // see https://github.com/typicode/openapi-backend/issues/747
+        // return { status: 200, json: install };
       },
       // GET /repos/{owner}/{repo}/installation - Get a repository installation for the authenticated app
       "apps/get-repo-installation": async (context, _request, response) => {
@@ -63,7 +92,11 @@ const handlers =
           repo
         );
         if (!install) return response.status(404).send("Not Found");
-        return { status: 200, json: install };
+        return response.status(200).json(install);
+        // note that we can't use the return here because the schema has
+        // a nullable field that openapi-backend chokes on
+        // see https://github.com/typicode/openapi-backend/issues/747
+        // return { status: 200, json: install };
       },
 
       // GET /orgs/{org}/repos

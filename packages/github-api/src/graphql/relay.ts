@@ -1,5 +1,3 @@
-/* eslint-disable eqeqeq */
-/* eslint-disable @typescript-eslint/no-shadow */
 export interface PageArgs {
   first?: number;
   before?: string;
@@ -36,11 +34,11 @@ const identity = <A>(a: A): A => a;
 export function applyRelayPagination<T, R>(
   nodes: T[],
   args: PageArgs,
-  mapper: (a: T) => R = identity as (a: T) => R,
+  mapper: (a: T) => R = identity as (a: T) => R
 ): Page<R> {
   let range = applyCursorsToEdges(nodes, args.before, args.after);
 
-  let edges = edgesToReturn(range, args.first, args.last).map(edge => ({
+  let edges = edgesToReturn(range, args.first, args.last).map((edge) => ({
     ...edge,
     node: mapper(edge.node),
   }));
@@ -51,7 +49,7 @@ export function applyRelayPagination<T, R>(
   return {
     totalCount: nodes.length,
     edges,
-    nodes: edges.map(e => e.node),
+    nodes: edges.map((e) => e.node),
     pageInfo: {
       get hasNextPage() {
         let { first, before } = args;
