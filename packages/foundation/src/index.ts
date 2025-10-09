@@ -38,6 +38,7 @@ import { apiProxy } from "./middleware/proxy.ts";
 import { delayMiddleware } from "./middleware/delay.ts";
 import { generateRoutesHTML } from "./routeTemplate.ts";
 import { createAppServer } from "./server.ts";
+import type { IdProp } from "starfx";
 
 // for use in the OpenAPI handler functions
 type SimulationHandlerFunctions = (
@@ -60,6 +61,15 @@ export type {
   Document,
 };
 
+export const convertObjToProp = <T extends { [k: string]: any }>(
+  arrayOfObjects: T[],
+  key: IdProp = "id"
+): Record<IdProp, T> =>
+  arrayOfObjects.reduce((final, obj: T) => {
+    final[obj[key].toString()] = obj;
+    return final;
+  }, {} as Record<IdProp, T>);
+
 // public, nameable shape for downstream packages that wish to extend the
 // foundation simulation store without importing deep cyclical types.
 export type ExtendStoreConfig<Schema, Actions, Selectors> = {
@@ -70,6 +80,8 @@ export type ExtendStoreConfig<Schema, Actions, Selectors> = {
 };
 
 export type { AnyState, TableOutput, IdProp } from "starfx";
+
+export type PartialDocument = RecursivePartial<Document>;
 
 // the return type after a server is listening, useful for
 // referring to the running server while testing
@@ -448,9 +460,7 @@ export function createFoundationSimulationServer<
   };
 }
 
-const mergeDocumentArray = (
-  documents: RecursivePartial<Document>[]
-): Document => {
+const mergeDocumentArray = (documents: PartialDocument[]): Document => {
   let document = defu({}, ...documents);
   return document as Document;
 };
