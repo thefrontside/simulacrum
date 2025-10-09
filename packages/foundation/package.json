@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/foundation-simulator",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Base simulator to build simulators for integration testing.",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
@@ -50,8 +50,7 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "vitest": "^1.6.0"
+    "@types/express": "^5.0.3"
   },
   "exports": {
     ".": {
@@ -64,7 +63,8 @@
   "typesVersions": {
     "*": {
       "*": [
-        "dist/esm/index.d.ts"
+        "./dist/*",
+        "./*"
       ]
     }
   },

@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.5.1]
+
+### Bug Fixes
+
+- [`3465b2b`](https://github.com/thefrontside/simulacrum/commit/3465b2be92d47ecc432fe5ecc4a7cc5337c6298c) ([#332](https://github.com/thefrontside/simulacrum/pull/332) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Fix handling of simulation route log for extended routes which changed and broke in the upgrade to express v5. It changed where the nesting of that route information.
+- [`356bfdd`](https://github.com/thefrontside/simulacrum/commit/356bfddfd55203d0f444922e6fcef087ed461252) Fix `typesVersion` pointing to old directories. Update `tsdown`.
+
 ## \[0.5.0]
 
 ### Enhancements
