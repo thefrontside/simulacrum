@@ -77,7 +77,7 @@ const handlers =
           org
         );
         if (!install) return response.status(404).send("Not Found");
-        response.status(200).json(install);
+        return response.status(200).json(install);
         // note that we can't use the return here because the schema has
         // a nullable field that openapi-backend chokes on
         // see https://github.com/typicode/openapi-backend/issues/747
@@ -92,7 +92,7 @@ const handlers =
           repo
         );
         if (!install) return response.status(404).send("Not Found");
-        response.status(200).json(install);
+        return response.status(200).json(install);
         // note that we can't use the return here because the schema has
         // a nullable field that openapi-backend chokes on
         // see https://github.com/typicode/openapi-backend/issues/747
