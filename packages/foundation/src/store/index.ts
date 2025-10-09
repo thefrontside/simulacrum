@@ -2,8 +2,15 @@ import {
   generateSchemaWithInputSlices,
   type ExtendSimulationSchemaInput,
 } from "./schema.ts";
-import type { AnyState, StoreUpdater, Callable } from "starfx";
-import { parallel, take, select, createStore, createSelector } from "starfx";
+import type { AnyState, StoreUpdater, Callable, ApiCtx } from "starfx";
+import {
+  parallel,
+  take,
+  select,
+  createStore,
+  createSelector,
+  createApi,
+} from "starfx";
 import { updateStore, createThunks, mdw } from "starfx";
 
 type StoreThunks = ReturnType<typeof createThunks>;
@@ -13,6 +20,7 @@ type GeneratedSchema<ExtendedSimulationSchema> = ReturnType<
 type GeneratedStore<ExtendedSimulationSchema> = ReturnType<
   typeof createStore<GeneratedSchema<ExtendedSimulationSchema>[1]>
 >;
+
 export type ExtendSimulationActionsInput<Actions, ExtendedSimulationSchema> =
   (arg: {
     thunks: StoreThunks;
@@ -27,16 +35,24 @@ export type ExtendSimulationSelectorsInput<
   schema: GeneratedSchema<ExtendedSimulationSchema>[0];
   createSelector: typeof createSelector;
 }) => Selectors;
+export type ExtendSimulationTaskInput<Actions, ExtendedSimulationSchema> =
+  (arg: {
+    createWebhook: any;
+    store: GeneratedStore<ExtendedSimulationSchema>;
+    schema: GeneratedSchema<ExtendedSimulationSchema>[0];
+  }) => { tasks: Callable<unknown>[]; actions: Actions };
 
 export function createSimulationStore<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,
-  ExtendedSimulationSelectors
+  ExtendedSimulationSelectors,
+  ExtendedSimulationTasks
 >(
   {
     actions: inputActions,
     selectors: inputSelectors,
     schema: inputSchema,
+    tasks: inputTasks,
     logs = false,
   }: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
@@ -46,6 +62,10 @@ export function createSimulationStore<
     >;
     selectors: ExtendSimulationSelectorsInput<
       ExtendedSimulationSelectors,
+      ExtendedSimulationSchema
+    >;
+    tasks: ExtendSimulationTaskInput<
+      ExtendedSimulationTasks,
       ExtendedSimulationSchema
     >;
     logs?: boolean;
@@ -58,6 +78,13 @@ export function createSimulationStore<
     >,
     selectors: (() => ({})) as unknown as ExtendSimulationSelectorsInput<
       ExtendedSimulationSelectors,
+      ExtendedSimulationSchema
+    >,
+    tasks: (() => ({
+      tasks: [],
+      actions: {},
+    })) as unknown as ExtendSimulationTaskInput<
+      ExtendedSimulationTasks,
       ExtendedSimulationSchema
     >,
     logs: false,
@@ -118,14 +145,24 @@ export function createSimulationStore<
     },
   });
 
+  const createWebhook = (postUrl: string) => {
+    const api = createApi();
+    api.use(mdw.api({ schema }));
+    api.use(api.routes());
+    api.use(mdw.fetch({ baseUrl: postUrl }));
+    return { create: api.post, task: api.bootup };
+  };
+  const userTasks = inputTasks({ createWebhook, store, schema });
+
   let inputedActions = inputActions({ thunks, store, schema });
   let actions = {
     simulationLog,
     batchUpdater,
     ...inputedActions,
+    ...userTasks.actions,
   };
 
-  let tsks: Callable<unknown>[] = [...additionalTasks];
+  let tsks: Callable<unknown>[] = [...additionalTasks, ...userTasks.tasks];
   if (logs) {
     // log all actions dispatched
     tsks.push(function* logActions() {
@@ -154,24 +191,26 @@ export function createSimulationStore<
 type CreateSimulationStore<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,
-  ExtendedSimulationSelectors
-  // eslint has a parsing error which means we can't fix this
-  //  it is however valid TypeScript
+  ExtendedSimulationSelectors,
+  ExtendedSimulationTasks
 > = typeof createSimulationStore<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,
-  ExtendedSimulationSelectors
+  ExtendedSimulationSelectors,
+  ExtendedSimulationTasks
 >;
 
 export type SimulationStore<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,
-  ExtendedSimulationSelectors
+  ExtendedSimulationSelectors,
+  ExtendedSimulationTasks
 > = ReturnType<
   CreateSimulationStore<
     ExtendedSimulationSchema,
     ExtendedSimulationActions,
-    ExtendedSimulationSelectors
+    ExtendedSimulationSelectors,
+    ExtendedSimulationTasks
   >
 >;
 
@@ -189,4 +228,14 @@ export type ExtendSimulationSelectors<
   store: GeneratedStore<ReturnType<InputSchema>>;
   schema: GeneratedSchema<ReturnType<InputSchema>>[0];
   createSelector: typeof createSelector;
+};
+
+type CreateApi = ReturnType<typeof createApi>;
+type CreateWebhook = { create: CreateApi["post"]; task: CreateApi["bootup"] };
+export type ExtendSimulationTasks<
+  InputSchema extends ExtendSimulationSchemaInput<any>
+> = {
+  createWebhook: (url: string) => CreateWebhook;
+  store: GeneratedStore<ReturnType<InputSchema>>;
+  schema: GeneratedSchema<ReturnType<InputSchema>>[0];
 };

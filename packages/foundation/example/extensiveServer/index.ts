@@ -2,8 +2,19 @@ import { createFoundationSimulationServer } from "../../src/index.ts";
 import { openapi } from "./openapi.ts";
 import { extendStore } from "./store.ts";
 import { extendRouter } from "./extend-api.ts";
+import type {
+  ExtendedSchema,
+  ExtendActions,
+  ExtendSelectors,
+  ExtendTasks,
+} from "./store.ts";
 
-export const simulation = createFoundationSimulationServer({
+export const simulation = createFoundationSimulationServer<
+  ReturnType<ExtendedSchema>,
+  ReturnType<ExtendActions>,
+  ReturnType<ExtendSelectors>,
+  ExtendTasks
+>({
   port: 9999,
   serveJsonFiles: `${import.meta.dirname}/jsonFiles`,
   openapi,

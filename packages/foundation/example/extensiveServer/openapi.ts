@@ -22,6 +22,17 @@ const openapiSchemaFromRealEndpoint = {
         },
       },
     },
+    "/trigger-webhook": {
+      post: {
+        summary: "Trigger a webhook",
+        operationId: "triggerWebhook",
+        responses: {
+          200: {
+            description: "webhook sent",
+          },
+        },
+      },
+    },
   },
 };
 
@@ -168,6 +179,12 @@ function handlers(
         numbers
       );
       response.status(200).json({ dogs });
+    },
+    triggerWebhook: (c, _request, response) => {
+      simulationStore.store.dispatch(
+        simulationStore.actions.webhooks.onTest(c.request.body)
+      );
+      response.status(200).json({ status: "ok" });
     },
   };
 }

@@ -119,6 +119,10 @@ export const simulation = createFoundationSimulationServer({
       };
       return slices;
     },
+    tasks: ({ createWebhook, store, schema }: any) => ({
+      tasks: [],
+      actions: {},
+    }),
   },
   extendRouter(router, simulationStore) {
     router.get("/extended-route", (req, res) => {

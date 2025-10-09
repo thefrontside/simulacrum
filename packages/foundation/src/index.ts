@@ -27,6 +27,8 @@ import type {
   ExtendSimulationActions,
   ExtendSimulationSelectorsInput,
   ExtendSimulationSelectors,
+  ExtendSimulationTaskInput,
+  ExtendSimulationTasks,
 } from "./store/index.ts";
 import type {
   ExtendSimulationSchemaInput,
@@ -56,6 +58,8 @@ export type {
   ExtendSimulationSelectorsInput,
   ExtendSimulationSchema,
   ExtendSimulationSchemaInput,
+  ExtendSimulationTaskInput,
+  ExtendSimulationTasks,
   SimulationStore,
   Document,
 };
@@ -90,7 +94,8 @@ export type FoundationSimulator<ExtendedSimulationStore> = {
 export function createFoundationSimulationServer<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,
-  ExtendedSimulationSelectors
+  ExtendedSimulationSelectors,
+  ExtendedSimulationTasks
 >({
   port = 9000,
   protocol = "http",
@@ -116,7 +121,8 @@ export function createFoundationSimulationServer<
       simulationStore: SimulationStore<
         ExtendedSimulationSchema,
         ExtendedSimulationActions,
-        ExtendedSimulationSelectors
+        ExtendedSimulationSelectors,
+        ExtendedSimulationTasks
       >
     ) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
@@ -136,6 +142,10 @@ export function createFoundationSimulationServer<
       ExtendedSimulationSelectors,
       ExtendedSimulationSchema
     >;
+    tasks: ExtendSimulationTaskInput<
+      ExtendedSimulationTasks,
+      ExtendedSimulationSchema
+    >;
     logs?: boolean;
   };
   extendRouter?(
@@ -143,7 +153,8 @@ export function createFoundationSimulationServer<
     simulationStore: SimulationStore<
       ExtendedSimulationSchema,
       ExtendedSimulationActions,
-      ExtendedSimulationSelectors
+      ExtendedSimulationSelectors,
+      ExtendedSimulationTasks
     >
   ): void;
 }) {
@@ -461,7 +472,8 @@ const mergeDocumentArray = (
 export async function startFoundationSimulationServer<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,
-  ExtendedSimulationSelectors
+  ExtendedSimulationSelectors,
+  ExtendedSimulationTasks
 >(
   arg: Parameters<
     // eslint has a parsing error which means we can't fix this
@@ -469,7 +481,8 @@ export async function startFoundationSimulationServer<
     typeof createFoundationSimulationServer<
       ExtendedSimulationSchema,
       ExtendedSimulationActions,
-      ExtendedSimulationSelectors
+      ExtendedSimulationSelectors,
+      ExtendedSimulationTasks
     >
   >[0]
 ): Promise<{
@@ -478,7 +491,8 @@ export async function startFoundationSimulationServer<
   simulationStore: SimulationStore<
     ExtendedSimulationSchema,
     ExtendedSimulationActions,
-    ExtendedSimulationSelectors
+    ExtendedSimulationSelectors,
+    ExtendedSimulationTasks
   >;
   ensureClose: () => Promise<void>;
 }> {

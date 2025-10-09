@@ -2,27 +2,34 @@ import type {
   SimulationStore,
   ExtendSimulationActions,
   ExtendSimulationSelectors,
+  ExtendSimulationTasks,
   ExtendSimulationSchema,
   AnyState,
 } from "../../src/index.ts";
 
-export type ExtendedSchema = typeof inputSchema;
-type ExtendActions = typeof inputActions;
-type ExtendSelectors = typeof inputSelectors;
+export type ExtendedSchema = typeof schema;
+export type ExtendActions = typeof actions;
+export type ExtendSelectors = typeof selectors;
+// `tasks` is a function that returns { tasks: Callable[]; actions: Actions }
+// Export the Actions portion as the `ExtendTasks` type so it can be used
+// as the fourth generic parameter to `SimulationStore` (which expects the
+// actions shape, not the whole return type of the tasks function).
+export type ExtendTasks = ReturnType<typeof tasks>["actions"];
 export type ExtendedSimulationStore = SimulationStore<
   ReturnType<ExtendedSchema>,
   ReturnType<ExtendActions>,
-  ReturnType<ExtendSelectors>
+  ReturnType<ExtendSelectors>,
+  ExtendTasks
 >;
 
-const inputSchema = ({ slice }: ExtendSimulationSchema) => {
+const schema = ({ slice }: ExtendSimulationSchema) => {
   let slices = {
     dogs: slice.num(),
   };
   return slices;
 };
 
-const inputActions = ({
+const actions = ({
   thunks,
   schema,
 }: ExtendSimulationActions<ExtendedSchema>) => {
@@ -38,7 +45,7 @@ const inputActions = ({
   return { addLotsOfDogs };
 };
 
-const inputSelectors = ({
+const selectors = ({
   createSelector,
   schema,
 }: ExtendSimulationSelectors<ExtendedSchema>) => {
@@ -53,9 +60,30 @@ const inputSelectors = ({
   return { booleanSpecificNumbers };
 };
 
+const tasks = ({ createWebhook }: ExtendSimulationTasks<ExtendedSchema>) => {
+  const webhook = createWebhook("https://example.com/webhook");
+  const onTest = webhook.create<{ id: string; name: string }>(
+    "webhook:test",
+    function* (ctx, next) {
+      // the following would send off that request
+      //  but we don't want to post in tests
+      ctx.request = ctx.req({
+        body: JSON.stringify(ctx.payload),
+      });
+
+      // calling this will proceed through the middleware chain
+      // and actually send the request
+      yield* next();
+    }
+  );
+
+  return { tasks: [webhook.task], actions: { webhooks: { onTest } } };
+};
+
 export const extendStore = {
   logs: false,
-  actions: inputActions,
-  selectors: inputSelectors,
-  schema: inputSchema,
+  actions,
+  selectors,
+  tasks,
+  schema,
 };
