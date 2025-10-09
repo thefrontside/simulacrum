@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { type IdProp } from "@simulacrum/foundation-simulator";
+import { convertObjToProp } from "@simulacrum/foundation-simulator";
 import { faker } from "@faker-js/faker";
 
 export const githubUserSchema = z
@@ -412,27 +412,17 @@ export const gitubInitialStoreSchema = z
 export type GitHubStore = z.output<typeof gitubInitialStoreSchema>;
 export type GitHubInitialStore = z.input<typeof gitubInitialStoreSchema>;
 
-export const convertToObj = <T extends { [k: string]: any }>(
-  arrayOfObjects: T[],
-  key: IdProp = "id"
-): Record<IdProp, T> =>
-  arrayOfObjects.reduce((final, obj: T) => {
-    final[obj[key].toString()] = obj;
-    return final;
-  }, {} as Record<IdProp, T>);
-
 export const convertInitialStateToStoreState = (
   initialState: GitHubStore | undefined
 ) => {
   if (!initialState) return undefined;
-  // TODO try to make this generic?
   const storeObject = {
-    users: convertToObj(initialState.users, "login"),
-    installations: convertToObj(initialState.installations, "id"),
-    repositories: convertToObj(initialState.repositories, "name"),
-    branches: convertToObj(initialState.branches, "name"),
-    organizations: convertToObj(initialState.organizations, "login"),
-    blobs: convertToObj(initialState.blobs),
+    users: convertObjToProp(initialState.users, "login"),
+    installations: convertObjToProp(initialState.installations, "id"),
+    repositories: convertObjToProp(initialState.repositories, "name"),
+    branches: convertObjToProp(initialState.branches, "name"),
+    organizations: convertObjToProp(initialState.organizations, "login"),
+    blobs: convertObjToProp(initialState.blobs),
   };
 
   return storeObject;
