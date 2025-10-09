@@ -94,8 +94,7 @@ export type FoundationSimulatorListening<ExtendedSimulationStore> = {
 
 export type FoundationSimulator<ExtendedSimulationStore> = {
   listen(
-    portOverride?: number,
-    callback?: (() => void) | undefined
+    ...Parameters: Parameters<Server["listen"]> | undefined[]
   ): Promise<FoundationSimulatorListening<ExtendedSimulationStore>>;
 };
 
@@ -421,13 +420,20 @@ export function createFoundationSimulationServer<
 
     const genericAppServer = createAppServer(app, protocol);
     return {
-      listen: async (portOverride?: number, callback?: () => void) => {
-        const listeningPort = portOverride ?? port;
-        const server = genericAppServer.listen(
-          listeningPort,
-          "localhost",
-          callback
-        );
+      listen: async (
+        ...listenArgs: Parameters<typeof genericAppServer.listen> | undefined[]
+      ) => {
+        // over and above the `net` listen behavior, allow setting:
+        if (listenArgs.length === 0) {
+          // no args, use default port
+          listenArgs = [port];
+        }
+        if (listenArgs[0] === undefined) {
+          // if someone wants to force using the default port
+          // but also set a callback, then they may pass the first arg as undefined
+          listenArgs[0] = port;
+        }
+        const server = genericAppServer.listen(...listenArgs);
 
         if (!server.listening) {
           await new Promise<void>((resolve) => {
@@ -450,7 +456,7 @@ export function createFoundationSimulationServer<
               server.closeAllConnections();
               server.close();
             });
-            // it takes a bit to close the server, but there is not method
+            // it takes a bit to close the server, but there is not a method
             //  that will cleanly await that process
             await new Promise((resolve) => setTimeout(resolve, 20));
           },
@@ -493,5 +499,8 @@ export async function startFoundationSimulationServer<
   ensureClose: () => Promise<void>;
 }> {
   let simulation = createFoundationSimulationServer(arg)();
-  return simulation.listen();
+  return simulation.listen().then((s) => {
+    console.log(`Foundation simulation server started on port ${s.port}`);
+    return s;
+  });
 }
