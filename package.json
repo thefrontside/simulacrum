@@ -34,7 +34,7 @@
   },
   "volta": {
     "node": "20.19.5",
-    "npm": "11.6.0"
+    "npm": "11.6.2"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.2",
