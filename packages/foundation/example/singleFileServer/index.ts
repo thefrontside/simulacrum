@@ -1,5 +1,9 @@
 import { createFoundationSimulationServer } from "../../src/index.ts";
-import type { AnyState, ExtendSimulationSchema } from "../../src/index.ts";
+import type {
+  AnyState,
+  ExtendSimulationSchema,
+  FoundationSimulator,
+} from "../../src/index.ts";
 
 const openapiSchemaFromRealEndpoint = {
   openapi: "3.0.0",
@@ -66,70 +70,72 @@ const openapiSchemaWithModificationsForSimulation = {
   },
 };
 
-export const simulation = createFoundationSimulationServer({
-  port: 9999,
-  serveJsonFiles: `${import.meta.dirname}/jsonFiles`,
-  openapi: [
-    {
-      document: [
-        openapiSchemaFromRealEndpoint,
-        openapiSchemaWithModificationsForSimulation,
-      ],
-      handlers({ store, schema, actions }) {
-        return {
-          getDogs: (c, req, res) => {
-            let dogs = schema.boop.select(store.getState());
-            res.status(200).json({ dogs });
-          },
-          putDogs: (c, req, res) => {
-            store.dispatch(actions.batchUpdater([schema.boop.increment()]));
-            // TODO the looped around TS does not seem to tackle this well
-            // store.dispatch(actions.upsertTest({ ["1"]: { name: "Friend" } }));
-            res.sendStatus(200);
-          },
-        };
+export function simulation(): FoundationSimulator<any> {
+  return createFoundationSimulationServer({
+    port: 9999,
+    serveJsonFiles: `${import.meta.dirname}/jsonFiles`,
+    openapi: [
+      {
+        document: [
+          openapiSchemaFromRealEndpoint,
+          openapiSchemaWithModificationsForSimulation,
+        ],
+        handlers({ store, schema, actions }) {
+          return {
+            getDogs: (c, req, res) => {
+              let dogs = schema.boop.select(store.getState());
+              res.status(200).json({ dogs });
+            },
+            putDogs: (c, req, res) => {
+              store.dispatch(actions.batchUpdater([schema.boop.increment()]));
+              // TODO the looped around TS does not seem to tackle this well
+              // store.dispatch(actions.upsertTest({ ["1"]: { name: "Friend" } }));
+              res.sendStatus(200);
+            },
+          };
+        },
+        apiRoot: "/api",
       },
-      apiRoot: "/api",
-    },
-  ],
-  extendStore: {
-    logs: false,
-    actions: ({ thunks, schema }) => {
-      // TODO attempt to remove this type as a requirement
-      let upsertTest = thunks.create<AnyState>(
-        "user:upsert",
-        function* boop(ctx, next) {
-          yield* schema.update(
-            schema.test.add({ [ctx.payload.id]: ctx.payload })
-          );
+    ],
+    extendStore: {
+      logs: false,
+      actions: ({ thunks, schema }) => {
+        // TODO attempt to remove this type as a requirement
+        let upsertTest = thunks.create<AnyState>(
+          "user:upsert",
+          function* boop(ctx, next) {
+            yield* schema.update(
+              schema.test.add({ [ctx.payload.id]: ctx.payload })
+            );
 
-          yield* next();
-        }
-      );
+            yield* next();
+          }
+        );
 
-      return { upsertTest };
+        return { upsertTest };
+      },
+      selectors: () => ({}),
+      schema: ({ slice }: ExtendSimulationSchema) => {
+        // TODO attempt to remove this type as a requirement
+        let slices = {
+          test: slice.table(),
+          booping: slice.str(),
+          boop: slice.num(),
+        };
+        return slices;
+      },
+      tasks: ({ createWebhook, store, schema }: any) => ({
+        tasks: [],
+        actions: {},
+      }),
     },
-    selectors: () => ({}),
-    schema: ({ slice }: ExtendSimulationSchema) => {
-      // TODO attempt to remove this type as a requirement
-      let slices = {
-        test: slice.table(),
-        booping: slice.str(),
-        boop: slice.num(),
-      };
-      return slices;
+    extendRouter(router, simulationStore) {
+      router.get("/extended-route", (req, res) => {
+        let dogs = simulationStore.schema.boop.select(
+          simulationStore.store.getState()
+        );
+        res.status(200).json({ dogs });
+      });
     },
-    tasks: ({ createWebhook, store, schema }: any) => ({
-      tasks: [],
-      actions: {},
-    }),
-  },
-  extendRouter(router, simulationStore) {
-    router.get("/extended-route", (req, res) => {
-      let dogs = simulationStore.schema.boop.select(
-        simulationStore.store.getState()
-      );
-      res.status(200).json({ dogs });
-    });
-  },
-});
+  })();
+}
