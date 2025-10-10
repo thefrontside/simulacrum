@@ -29,7 +29,7 @@ It is built with the expectation to be extended and meet your needs for any cust
 
 ```
 $ npm install
-$ npm run build
+$ npm run prepack
 $ npm test
 ```
 
