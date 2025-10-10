@@ -22,7 +22,7 @@ type ServiceOptions = {
 };
 
 export function useService(
-  name: string,
+  _name: string,
   cmd: string,
   options: ServiceOptions = {}
 ): Operation<void> {

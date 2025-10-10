@@ -235,7 +235,7 @@ export const createAuth0Handlers = (
     },
 
     ["/userinfo"]: function (req, res) {
-      let token = null;
+      let token: string | null = null;
       if (req.headers.authorization) {
         let authorizationHeader = req.headers.authorization;
         token = authorizationHeader?.split(" ")?.[1];
@@ -272,7 +272,7 @@ export const createAuth0Handlers = (
       logger.log({ "/passwordless/start": { body: req.body } });
 
       try {
-        const { client_id, connection, email, phone_number, send } = req.body;
+        const { client_id, connection, email, phone_number } = req.body;
 
         // Validate required fields
         if (!client_id) {

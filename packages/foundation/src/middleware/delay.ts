@@ -11,8 +11,8 @@ export function delayMiddleware(
     typeof delayResponses === "number" ? undefined : delayResponses?.maximum;
 
   return async function delayHandler(
-    request: Request,
-    response: Response,
+    _request: Request,
+    _response: Response,
     next: NextFunction
   ): Promise<void> {
     if (delayMin || delayMax) {

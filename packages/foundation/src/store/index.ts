@@ -2,7 +2,7 @@ import {
   generateSchemaWithInputSlices,
   type ExtendSimulationSchemaInput,
 } from "./schema.ts";
-import type { AnyState, StoreUpdater, Callable, ApiCtx } from "starfx";
+import type { AnyState, StoreUpdater, Callable } from "starfx";
 import {
   parallel,
   take,
@@ -21,41 +21,103 @@ type GeneratedStore<ExtendedSimulationSchema> = ReturnType<
   typeof createStore<GeneratedSchema<ExtendedSimulationSchema>[1]>
 >;
 
-export type ExtendSimulationActionsInput<Actions, ExtendedSimulationSchema> =
-  (arg: {
-    thunks: StoreThunks;
-    store: GeneratedStore<ExtendedSimulationSchema>;
-    schema: GeneratedSchema<ExtendedSimulationSchema>[0];
-  }) => Actions;
+export type ExtendSimulationActionsInput<
+  Actions = Record<string, unknown>,
+  ExtendedSimulationSchema = unknown
+> = (arg: {
+  thunks: StoreThunks;
+  store: GeneratedStore<ExtendedSimulationSchema>;
+  schema: GeneratedSchema<ExtendedSimulationSchema>[0];
+}) => Actions;
+// A "looser" input type consumers can implement when they only return
+// a partial set of actions (common when extending existing action sets).
+// This is safe to accept because the foundation merges the partial
+// result into the base actions object.
+export type ExtendSimulationActionsInputLoose<
+  Actions = Record<string, unknown>,
+  ExtendedSimulationSchema = unknown
+> = (arg: {
+  thunks: StoreThunks;
+  store: GeneratedStore<ExtendedSimulationSchema>;
+  schema: GeneratedSchema<ExtendedSimulationSchema>[0];
+}) => Partial<Actions> | Actions;
 export type ExtendSimulationSelectorsInput<
-  Selectors,
-  ExtendedSimulationSchema
+  Selectors = Record<string, unknown>,
+  ExtendedSimulationSchema = unknown
 > = (arg: {
   store: GeneratedStore<ExtendedSimulationSchema>;
   schema: GeneratedSchema<ExtendedSimulationSchema>[0];
   createSelector: typeof createSelector;
 }) => Selectors;
-export type ExtendSimulationTaskInput<Actions, ExtendedSimulationSchema> =
-  (arg: {
-    createWebhook: any;
-    store: GeneratedStore<ExtendedSimulationSchema>;
-    schema: GeneratedSchema<ExtendedSimulationSchema>[0];
-  }) => { tasks: Callable<unknown>[]; actions: Actions };
+
+// Loose selectors input that allows returning Partial<Selectors> to make
+// consumer extension functions easier to implement without precise
+// circular types.
+export type ExtendSimulationSelectorsInputLoose<
+  Selectors = Record<string, unknown>,
+  ExtendedSimulationSchema = unknown
+> = (arg: {
+  store: GeneratedStore<ExtendedSimulationSchema>;
+  schema: GeneratedSchema<ExtendedSimulationSchema>[0];
+  createSelector: typeof createSelector;
+}) => Partial<Selectors> | Selectors;
+
+type CreateApi = ReturnType<typeof createApi>;
+type CreateWebhook = { create: CreateApi["post"]; task: CreateApi["bootup"] };
+
+// Minimal base actions that the foundation always provides. We express
+// their payload shapes so downstream packages can call them without
+// extra casts. We use `unknown` for return values since actions are
+// thunks and their exact return types are not important here.
+export type BaseActions = {
+  batchUpdater: (payload: StoreUpdater<AnyState>[]) => unknown;
+  simulationLog: (payload: {
+    method: string;
+    url: string;
+    query: Record<string, unknown>;
+    body: unknown;
+  }) => unknown;
+};
+
+export type ExtendSimulationTaskInput<
+  Actions = Record<string, unknown>,
+  ExtendedSimulationSchema = unknown
+> = (arg: {
+  createWebhook: (url: string) => CreateWebhook;
+  store: GeneratedStore<ExtendedSimulationSchema>;
+  schema: GeneratedSchema<ExtendedSimulationSchema>[0];
+}) => { tasks: Callable<unknown>[]; actions: Actions };
+
+// Public, consumer-friendly extend store config that accepts the looser
+// extension input types so downstream packages can implement small
+// partial extensions without introducing cyclical or incompatible types.
+export type ExtendStoreConfig<
+  Schema,
+  Actions,
+  Selectors,
+  Tasks = Record<string, unknown>
+> = {
+  schema: ExtendSimulationSchemaInput<Schema>;
+  actions?: ExtendSimulationActionsInputLoose<Actions, Schema>;
+  selectors?: ExtendSimulationSelectorsInputLoose<Selectors, Schema>;
+  tasks?: ExtendSimulationTaskInput<Tasks, Schema>;
+  logs?: boolean;
+};
 
 export function createSimulationStore<
-  ExtendedSimulationSchema,
-  ExtendedSimulationActions,
-  ExtendedSimulationSelectors,
-  ExtendedSimulationTasks
+  ExtendedSimulationSchema = unknown,
+  ExtendedSimulationActions = Record<string, unknown>,
+  ExtendedSimulationSelectors = Record<string, unknown>,
+  ExtendedSimulationTasks = Record<string, unknown>
 >(
   {
     actions:
-      inputActions = (() => ({})) as unknown as ExtendSimulationActionsInput<
+      inputActions = (() => ({})) as unknown as ExtendSimulationActionsInputLoose<
         ExtendedSimulationActions,
         ExtendedSimulationSchema
       >,
     selectors:
-      inputSelectors = (() => ({})) as unknown as ExtendSimulationSelectorsInput<
+      inputSelectors = (() => ({})) as unknown as ExtendSimulationSelectorsInputLoose<
         ExtendedSimulationSelectors,
         ExtendedSimulationSchema
       >,
@@ -70,11 +132,11 @@ export function createSimulationStore<
     logs = false,
   }: {
     schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
-    actions?: ExtendSimulationActionsInput<
+    actions?: ExtendSimulationActionsInputLoose<
       ExtendedSimulationActions,
       ExtendedSimulationSchema
     >;
-    selectors?: ExtendSimulationSelectorsInput<
+    selectors?: ExtendSimulationSelectorsInputLoose<
       ExtendedSimulationSelectors,
       ExtendedSimulationSchema
     >;
@@ -86,11 +148,11 @@ export function createSimulationStore<
   } = {
     schema:
       (() => ({})) as unknown as ExtendSimulationSchemaInput<ExtendedSimulationSchema>,
-    actions: (() => ({})) as unknown as ExtendSimulationActionsInput<
+    actions: (() => ({})) as unknown as ExtendSimulationActionsInputLoose<
       ExtendedSimulationActions,
       ExtendedSimulationSchema
     >,
-    selectors: (() => ({})) as unknown as ExtendSimulationSelectorsInput<
+    selectors: (() => ({})) as unknown as ExtendSimulationSelectorsInputLoose<
       ExtendedSimulationSelectors,
       ExtendedSimulationSchema
     >,
@@ -120,8 +182,8 @@ export function createSimulationStore<
   let simulationLog = thunks.create<{
     method: string;
     url: string;
-    query: Record<string, any>;
-    body: any;
+    query: Record<string, unknown>;
+    body: unknown;
   }>("simulationLog", function* (ctx, next) {
     const { method, url, query, body } = ctx.payload;
     const timestamp = Date.now();
@@ -192,21 +254,27 @@ export function createSimulationStore<
     yield* group;
   });
 
-  let inputedSelectors = inputSelectors({ store, schema, createSelector });
+  let selectors = inputSelectors({ store, schema, createSelector });
 
+  type ActionsType = typeof actions;
   return {
     store,
     schema,
     actions,
-    selectors: inputedSelectors,
+    selectors,
+  } as {
+    store: GeneratedStore<ExtendedSimulationSchema>;
+    schema: GeneratedSchema<ExtendedSimulationSchema>[0];
+    actions: ActionsType & ExtendedSimulationActions & Record<string, unknown>;
+    selectors: ExtendedSimulationSelectors;
   };
 }
 
 type CreateSimulationStore<
-  ExtendedSimulationSchema,
-  ExtendedSimulationActions,
-  ExtendedSimulationSelectors,
-  ExtendedSimulationTasks
+  ExtendedSimulationSchema = unknown,
+  ExtendedSimulationActions = Record<string, unknown>,
+  ExtendedSimulationSelectors = Record<string, unknown>,
+  ExtendedSimulationTasks = Record<string, unknown>
 > = typeof createSimulationStore<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,
@@ -215,10 +283,10 @@ type CreateSimulationStore<
 >;
 
 export type SimulationStore<
-  ExtendedSimulationSchema,
-  ExtendedSimulationActions,
-  ExtendedSimulationSelectors,
-  ExtendedSimulationTasks
+  ExtendedSimulationSchema = unknown,
+  ExtendedSimulationActions = Record<string, unknown>,
+  ExtendedSimulationSelectors = Record<string, unknown>,
+  ExtendedSimulationTasks = Record<string, unknown>
 > = ReturnType<
   CreateSimulationStore<
     ExtendedSimulationSchema,
@@ -228,8 +296,21 @@ export type SimulationStore<
   >
 >;
 
+// Backwards-compatible 3-arg alias used by downstream packages that only
+// provide Schema, Actions, and Selectors type parameters.
+export type FoundationSimulationStore<
+  ExtendedSimulationSchema = unknown,
+  ExtendedSimulationActions = Record<string, unknown>,
+  ExtendedSimulationSelectors = Record<string, unknown>
+> = SimulationStore<
+  ExtendedSimulationSchema,
+  ExtendedSimulationActions,
+  ExtendedSimulationSelectors,
+  Record<string, unknown>
+>;
+
 export type ExtendSimulationActions<
-  InputSchema extends ExtendSimulationSchemaInput<any>
+  InputSchema extends ExtendSimulationSchemaInput<unknown> = ExtendSimulationSchemaInput<unknown>
 > = {
   thunks: StoreThunks;
   store: GeneratedStore<ReturnType<InputSchema>>;
@@ -237,17 +318,15 @@ export type ExtendSimulationActions<
 };
 
 export type ExtendSimulationSelectors<
-  InputSchema extends ExtendSimulationSchemaInput<any>
+  InputSchema extends ExtendSimulationSchemaInput<unknown> = ExtendSimulationSchemaInput<unknown>
 > = {
   store: GeneratedStore<ReturnType<InputSchema>>;
   schema: GeneratedSchema<ReturnType<InputSchema>>[0];
   createSelector: typeof createSelector;
 };
 
-type CreateApi = ReturnType<typeof createApi>;
-type CreateWebhook = { create: CreateApi["post"]; task: CreateApi["bootup"] };
 export type ExtendSimulationTasks<
-  InputSchema extends ExtendSimulationSchemaInput<any>
+  InputSchema extends ExtendSimulationSchemaInput<unknown> = ExtendSimulationSchemaInput<unknown>
 > = {
   createWebhook: (url: string) => CreateWebhook;
   store: GeneratedStore<ReturnType<InputSchema>>;

@@ -5,6 +5,7 @@ import type {
   ExtendSimulationTasks,
   ExtendSimulationSchema,
   AnyState,
+  ExtendStoreConfig,
 } from "../../src/index.ts";
 
 export type ExtendedSchema = typeof schema;
@@ -80,7 +81,12 @@ const tasks = ({ createWebhook }: ExtendSimulationTasks<ExtendedSchema>) => {
   return { tasks: [webhook.task], actions: { webhooks: { onTest } } };
 };
 
-export const extendStore = {
+export const extendStore: ExtendStoreConfig<
+  ReturnType<ExtendedSchema>,
+  ReturnType<ExtendActions>,
+  ReturnType<ExtendSelectors>,
+  ReturnType<typeof tasks>["actions"]
+> = {
   logs: false,
   actions,
   selectors,

@@ -7,6 +7,8 @@ import type {
   ExtendSimulationSelectors,
   ExtendSimulationSelectorsInput,
   AnyState,
+  ExtendSimulationActionsInputLoose,
+  ExtendSimulationSelectorsInputLoose,
   ExtendStoreConfig,
 } from "@simulacrum/foundation-simulator";
 import {
@@ -23,18 +25,28 @@ import {
 type ExtendedSchema = ReturnType<typeof inputSchema>;
 type ExtendActions = typeof inputActions;
 type ExtendSelectors = typeof inputSelectors;
+
+// Concrete, exported types for downstream consumers to import and use
+// when they need to reference the GitHub package's store generics.
+export type GitHubSchema = ReturnType<ExtendedSchema>;
+export type GitHubActions = ReturnType<ExtendActions>;
+export type GitHubSelectors = ReturnType<ExtendSelectors>;
+
 export type ExtendedSimulationStore = SimulationStore<
-  ReturnType<ExtendedSchema>,
-  ReturnType<ExtendActions>,
-  ReturnType<ExtendSelectors>
+  GitHubSchema,
+  GitHubActions,
+  GitHubSelectors
 >;
 
 // Public type for consumers of this package to declare the shape of an
-// `extendStore` argument. It mirrors the foundation `ExtendStoreConfig`
-// but wires the schema input type used by this package so callers can
-// provide schema/actions/selectors extensions with correct generic params.
-export type GitHubExtendStoreInput<TSchema, TActions, TSelectors> =
-  ExtendStoreConfig<ExtendSimulationSchemaInput<TSchema>, TActions, TSelectors>;
+// `extendStore` argument. This wires the foundation `ExtendStoreConfig`
+// generics to the concrete GitHub schema/actions/selectors types so callers
+// get accurate typing when they provide schema/actions/selectors extensions.
+export type GitHubExtendStoreInput = ExtendStoreConfig<
+  GitHubSchema,
+  GitHubActions,
+  GitHubSelectors
+>;
 
 const inputSchema =
   <T>(
@@ -75,29 +87,26 @@ const inputSchema =
   };
 
 const inputActions = (
-  args: ExtendSimulationActions<ExtendedSchema>
+  _args: ExtendSimulationActions<ExtendedSchema>
 ): ExtendSimulationActions<ExtendedSchema> => {
   return {} as ExtendSimulationActions<ExtendedSchema>;
 };
 
 const extendActions =
-  <A>(extendedActions?: ExtendSimulationActionsInput<A, ExtendedSchema>) =>
+  (
+    extendedActions?: ExtendSimulationActionsInputLoose<
+      GitHubActions,
+      GitHubSchema
+    >
+  ) =>
   (args: ExtendSimulationActions<ExtendedSchema>) => {
     const base = inputActions(args);
     if (!extendedActions) return base;
-
-    // Call the extension through a narrow bridge type that returns a
-    // Partial of the outward actions shape. We still cast the supplied
-    // extension to the bridge to avoid introducing cyclical public types,
-    // but the result is strongly-typed as a Partial of the expected shape.
-    type BridgeActionFn = (
-      arg: ExtendSimulationActions<ExtendedSchema>
-    ) => Partial<ExtendSimulationActions<ExtendedSchema>>;
-    const extResult = (extendedActions as unknown as BridgeActionFn)(args);
+    const extResult = extendedActions(args);
     return {
       ...(base as object),
       ...(extResult as object),
-    } as ExtendSimulationActions<ExtendedSchema>;
+    } as GitHubActions;
   };
 
 const inputSelectors = ({
@@ -119,8 +128,8 @@ const inputSelectors = ({
     schema.installations.selectTableAsList,
     schema.organizations.selectTableAsList,
     schema.repositories.selectTableAsList,
-    (_: AnyState, org: string, repo?: string) => org,
-    (_: AnyState, org: string, repo?: string) => repo,
+    (_state: AnyState, org: string, _repo?: string) => org,
+    (_state: AnyState, _org: string, repo?: string) => repo,
     (installations, orgs, repos, org, repo) => {
       const appInstall = installations.find(
         (install) => install.account === org
@@ -208,40 +217,32 @@ const inputSelectors = ({
 };
 
 const extendSelectors =
-  <S>(extendedSelectors?: ExtendSimulationSelectorsInput<S, ExtendedSchema>) =>
+  (
+    extendedSelectors?: ExtendSimulationSelectorsInputLoose<
+      GitHubSelectors,
+      GitHubSchema
+    >
+  ) =>
   (args: ExtendSimulationSelectors<ExtendedSchema>) => {
     const base = inputSelectors(args);
     if (!extendedSelectors) return base;
-
-    // Call the extension through a narrow bridge type that returns a
-    // Partial of the outward selectors shape. Casting to this bridge
-    // preserves a nameable external signature while keeping useful types
-    // for the merged result.
-    type BridgeSelectorFn = (
-      arg: ExtendSimulationSelectors<ExtendedSchema>
-    ) => Partial<ExtendSimulationSelectors<ExtendedSchema>>;
-    const extResult = (extendedSelectors as unknown as BridgeSelectorFn)(args);
+    const extResult = extendedSelectors(args);
     return {
       ...(base as object),
       ...(extResult as object),
-    } as ExtendSimulationSelectors<ExtendedSchema>;
+    } as GitHubSelectors;
   };
 
-export const extendStore = <T>(
+export const extendStore = (
   initialState: GitHubStore | undefined,
-  extended?: ExtendStoreConfig<ExtendSimulationSchemaInput<T>, unknown, unknown>
-) => ({
-  actions: extendActions(
-    extended?.actions as unknown as ExtendSimulationActionsInput<
-      unknown,
-      ExtendedSchema
-    >
-  ),
-  selectors: extendSelectors(
-    extended?.selectors as unknown as ExtendSimulationSelectorsInput<
-      unknown,
-      ExtendSimulationSchemaInput<T>
-    >
-  ),
+  extended?: GitHubExtendStoreInput
+): {
+  schema: ExtendSimulationSchemaInput<GitHubSchema>;
+  actions?: ExtendSimulationActionsInput<GitHubActions, GitHubSchema>;
+  selectors?: ExtendSimulationSelectorsInput<GitHubSelectors, GitHubSchema>;
+  logs?: boolean;
+} => ({
+  actions: extendActions(extended?.actions),
+  selectors: extendSelectors(extended?.selectors),
   schema: inputSchema(initialState, extended?.schema),
 });

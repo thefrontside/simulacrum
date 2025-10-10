@@ -10,7 +10,6 @@ export function createResolvers(
 ): Resolvers {
   return {
     Query: {
-      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       viewer() {
         let user = simulationStore.schema.users.selectById(
           simulationStore.store.getState(),
@@ -19,7 +18,6 @@ export function createResolvers(
         assert(!!user, `no logged in user`);
         return toGraphql(simulationStore, "User", user);
       },
-      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       organization(_: unknown, { login }: { login: string }) {
         let orgs = simulationStore.schema.organizations.selectTableAsList(
           simulationStore.store.getState()
@@ -28,7 +26,6 @@ export function createResolvers(
         assert(!!org, `no organization found for ${login}`);
         return toGraphql(simulationStore, "Organization", org);
       },
-      // @ts-expect-error not a fully qualified return per type, TODO fill it out
       organizations(pageArgs: PageArgs) {
         let orgs = simulationStore.schema.organizations.selectTableAsList(
           simulationStore.store.getState()
@@ -37,8 +34,10 @@ export function createResolvers(
           toGraphql(simulationStore, "Organization", org)
         );
       },
-      // @ts-expect-error not a fully qualified return per type, TODO fill it out
-      repository(_, { owner, name }: { owner: string; name: string }) {
+      repository(
+        _root: unknown,
+        { owner, name }: { owner: string; name: string }
+      ) {
         let repo = simulationStore.schema.repositories
           .selectTableAsList(simulationStore.store.getState())
           .find(
@@ -49,10 +48,9 @@ export function createResolvers(
         assert(!!repo, `no repository found for ${name}`);
         return toGraphql(simulationStore, "Repository", repo);
       },
-      // @ts-expect-error not a fully qualified return per type, TODO fill it out
-      repositoryOwner(_, { login }: { login: string }) {
+      repositoryOwner(_root: unknown, { login }: { login: string }) {
         return deriveOwner(simulationStore, login);
       },
     },
-  };
+  } as unknown as Resolvers;
 }

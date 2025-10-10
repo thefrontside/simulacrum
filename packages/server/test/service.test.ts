@@ -4,7 +4,7 @@ import { useService } from "../src/service.ts";
 import { each, Err, Ok, run } from "effection";
 
 // these npm scripts don't work, but this is what we are trying to run
-const scriptDoesNotWork = "npm run test:service-main";
+// const scriptDoesNotWork = "npm run test:service-main";
 const nodeScriptWorks = "node --import tsx ./test/service-main.ts";
 
 it("test service", async () => {

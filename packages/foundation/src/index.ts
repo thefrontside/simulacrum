@@ -29,6 +29,9 @@ import type {
   ExtendSimulationSelectors,
   ExtendSimulationTaskInput,
   ExtendSimulationTasks,
+  ExtendSimulationActionsInputLoose,
+  ExtendSimulationSelectorsInputLoose,
+  ExtendStoreConfig,
 } from "./store/index.ts";
 import type {
   ExtendSimulationSchemaInput,
@@ -57,6 +60,9 @@ export type {
   ExtendSimulationActionsInput,
   ExtendSimulationSelectors,
   ExtendSimulationSelectorsInput,
+  ExtendSimulationActionsInputLoose,
+  ExtendSimulationSelectorsInputLoose,
+  ExtendStoreConfig,
   ExtendSimulationSchema,
   ExtendSimulationSchemaInput,
   ExtendSimulationTaskInput,
@@ -73,15 +79,6 @@ export const convertObjToProp = <T extends { [k: string]: any }>(
     final[obj[key].toString()] = obj;
     return final;
   }, {} as Record<IdProp, T>);
-
-// public, nameable shape for downstream packages that wish to extend the
-// foundation simulation store without importing deep cyclical types.
-export type ExtendStoreConfig<Schema, Actions, Selectors> = {
-  schema?: ExtendSimulationSchemaInput<Schema>;
-  actions?: ExtendSimulationActionsInput<Actions, Schema>;
-  selectors?: ExtendSimulationSelectorsInput<Selectors, Schema>;
-  logs?: boolean;
-};
 
 export type { AnyState, TableOutput, IdProp } from "starfx";
 
@@ -106,7 +103,7 @@ export function createFoundationSimulationServer<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,
   ExtendedSimulationSelectors,
-  ExtendedSimulationTasks
+  ExtendedSimulationTasks = Record<string, unknown>
 >({
   port = 9000,
   protocol = "http",
@@ -143,22 +140,12 @@ export function createFoundationSimulationServer<
       ajvOpts?: AjvOpts;
     };
   }[];
-  extendStore?: {
-    schema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>;
-    actions?: ExtendSimulationActionsInput<
-      ExtendedSimulationActions,
-      ExtendedSimulationSchema
-    >;
-    selectors?: ExtendSimulationSelectorsInput<
-      ExtendedSimulationSelectors,
-      ExtendedSimulationSchema
-    >;
-    tasks?: ExtendSimulationTaskInput<
-      ExtendedSimulationTasks,
-      ExtendedSimulationSchema
-    >;
-    logs?: boolean;
-  };
+  extendStore?: ExtendStoreConfig<
+    ExtendedSimulationSchema,
+    ExtendedSimulationActions,
+    ExtendedSimulationSelectors,
+    ExtendedSimulationTasks
+  >;
   extendRouter?(
     router: express.Router,
     simulationStore: SimulationStore<
@@ -183,7 +170,7 @@ export function createFoundationSimulationServer<
     let simulationStore = createSimulationStore(extendStore);
     app.use(delayMiddleware(delayResponses));
 
-    app.use((req, res, next) => {
+    app.use((req, _res, next) => {
       // add each response to the internal log
       simulationStore.store.dispatch(
         simulationStore.actions.simulationLog({
@@ -305,11 +292,11 @@ export function createFoundationSimulationServer<
         handlerObjectRegistration(handlers(simulationStore));
 
         api.register({
-          validationFail: (c, req, res) =>
+          validationFail: (c, _req, res) =>
             res.status(400).json({ err: c.validation.errors }),
           // if route not in API, continue to next API or `app.all('*')` fallback
-          notFound: (c, req, res, next) => next(),
-          notImplemented: (c, req, res) => {
+          notFound: (_c, _req, _res, next) => next(),
+          notImplemented: (c, _req, res) => {
             let { status, mock } = c.api.mockResponseForOperation(
               // the route validates this exists and throws if it does not
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -398,7 +385,7 @@ export function createFoundationSimulationServer<
     }
 
     // return simulation helper page
-    app.get(simulationContextPage, (req, res) => {
+    app.get(simulationContextPage, (_req, res) => {
       let routes = simulationStore.schema.simulationRoutes.selectTableAsList(
         simulationStore.store.getState()
       );
@@ -425,7 +412,7 @@ export function createFoundationSimulationServer<
       res.redirect(simulationContextPage);
     });
     // if no extendRouter routes or openapi routes handle this, return 404
-    app.all("/{*splat}", (req, res) =>
+    app.all("/{*splat}", (_req, res) =>
       res.status(404).json({ error: "not found" })
     );
 

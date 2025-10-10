@@ -14,7 +14,7 @@ export const extendRouter = (
   router.use("/graphql", createHandler(simulationStore));
 
   router.get(["/login/oauth/authorize"], (request, response) => {
-    const { redirect_uri, state, env, client_id, scope } = request.query as {
+    const { redirect_uri, state, env } = request.query as {
       [k: string]: string;
     };
     const code = "dev_code";

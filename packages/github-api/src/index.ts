@@ -4,6 +4,7 @@ import {
   type FoundationSimulator,
   type SimulationStore as FoundationSimulationStore,
 } from "@simulacrum/foundation-simulator";
+import type { Router } from "express";
 
 import {
   type ExtendedSimulationStore,
@@ -20,54 +21,45 @@ import type { SchemaFile } from "./utils.ts";
 
 export type InitialState = GitHubInitialStore;
 
-// derive the concrete generic parameters from the exported ExtendedSimulationStore
-type _GitHubSchema = ExtendedSimulationStore extends FoundationSimulationStore<
-  infer S,
-  infer A,
-  infer Sel
->
-  ? S
-  : never;
-type _GitHubActions = ExtendedSimulationStore extends FoundationSimulationStore<
-  infer S,
-  infer A,
-  infer Sel
->
-  ? A
-  : never;
-type _GitHubSelectors =
-  ExtendedSimulationStore extends FoundationSimulationStore<
-    infer S,
-    infer A,
-    infer Sel
-  >
-    ? Sel
-    : never;
-
-type SimulationInput = Parameters<
-  typeof createFoundationSimulationServer<
-    _GitHubSchema,
-    _GitHubActions,
-    _GitHubSelectors
-  >
->[0];
-
 export type GitHubSimulatorArgs = {
   initialState?: GitHubInitialStore;
   apiUrl?: string;
   apiSchema?: SchemaFile | string;
   extend?: {
-    extendStore?: GitHubExtendStoreInput<
-      _GitHubSchema,
-      _GitHubActions,
-      _GitHubSelectors
-    >;
+    extendStore?: GitHubExtendStoreInput;
     openapiHandlers?: (
       simulationStore: ExtendedSimulationStore
     ) => SimulationHandlers;
-    extendRouter?: SimulationInput["extendRouter"];
+    extendRouter?: (
+      router: Router,
+      simulationStore: ExtendedSimulationStore
+    ) => void;
   };
 };
+
+// derive the concrete generic parameters from the exported ExtendedSimulationStore
+type _GitHubSchema = ExtendedSimulationStore extends FoundationSimulationStore<
+  infer S,
+  infer _A,
+  infer _Sel
+>
+  ? S
+  : never;
+type _GitHubActions = ExtendedSimulationStore extends FoundationSimulationStore<
+  infer _S,
+  infer A,
+  infer _Sel
+>
+  ? A
+  : never;
+type _GitHubSelectors =
+  ExtendedSimulationStore extends FoundationSimulationStore<
+    infer _S,
+    infer _A,
+    infer Sel
+  >
+    ? Sel
+    : never;
 
 export const simulation = (
   args: GitHubSimulatorArgs = {}
@@ -75,14 +67,10 @@ export const simulation = (
   const parsedInitialState = !args?.initialState
     ? undefined
     : gitubInitialStoreSchema.parse(args?.initialState);
-  const extendStore = mergeStoreConfig<_GitHubSchema>(
+  const extendStoreConfig = mergeStoreConfig(
     parsedInitialState,
-    args?.extend?.extendStore as unknown as GitHubExtendStoreInput<
-      _GitHubSchema,
-      _GitHubActions,
-      _GitHubSelectors
-    >
-  ) as unknown as SimulationInput["extendStore"];
+    args?.extend?.extendStore
+  );
 
   return createFoundationSimulationServer<
     _GitHubSchema,
@@ -91,7 +79,7 @@ export const simulation = (
   >({
     port: 3300, // default port
     simulationContextPage: "/simulation",
-    extendStore,
+    extendStore: extendStoreConfig,
     extendRouter,
     openapi: openapi(
       parsedInitialState,
@@ -99,7 +87,7 @@ export const simulation = (
       args?.apiSchema ?? "api.github.com.json",
       args?.extend?.openapiHandlers
     ),
-  } as unknown as SimulationInput)();
+  })();
 };
 
 export {

@@ -216,7 +216,7 @@ const handlers =
       "orgs/list-memberships-for-authenticated-user": async (
         _context,
         _request,
-        response
+        _response
       ) => {
         const users = simulationStore.schema.users.selectTableAsList(
           simulationStore.store.getState()

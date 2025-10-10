@@ -141,7 +141,7 @@ function handlers(
   simulationStore: ExtendedSimulationStore
 ): SimulationHandlers {
   return {
-    getDogs: (_c, request, response, _next, routeMetadata) => {
+    getDogs: (_c, _request, response, _next, routeMetadata) => {
       let dogs = simulationStore.schema.dogs.select(
         simulationStore.store.getState()
       );
@@ -151,7 +151,7 @@ function handlers(
         response.sendStatus(routeMetadata.defaultCode);
       }
     },
-    putDogs: (c, req, response) => {
+    putDogs: (_c, _req, response) => {
       simulationStore.store.dispatch(
         simulationStore.actions.batchUpdater([
           simulationStore.schema.dogs.increment(),

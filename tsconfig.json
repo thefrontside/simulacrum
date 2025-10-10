@@ -27,12 +27,9 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noImplicitAny": true,
-    "noUncheckedSideEffectImports": true
-    // TODO eventually we should turn this on
-    // "noUnusedLocals": true,
-    // TODO eventually we should turn this on
-    // "noUnusedParameters": true,
-    // TODO eventually we should turn this on
-    // "isolatedDeclarations": true
+    "noUncheckedSideEffectImports": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "isolatedDeclarations": false
   }
 }

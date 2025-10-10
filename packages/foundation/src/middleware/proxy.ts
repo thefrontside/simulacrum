@@ -27,7 +27,7 @@ export function apiProxy(
     selfHandleResponse: true, // res.end() will be called internally by responseInterceptor()
     on: {
       proxyRes: responseInterceptor(
-        async (responseBuffer, proxyRes, req, res) => {
+        async (responseBuffer, _proxyRes, req, _res) => {
           const filename = `./src/serve${req.url ?? "/log"}.json`;
 
           // check response can parse as json
