@@ -82,14 +82,12 @@ export function simulation(): FoundationSimulator<any> {
         ],
         handlers({ store, schema, actions }) {
           return {
-            getDogs: (c, req, res) => {
+            getDogs: (_c, _req, res) => {
               let dogs = schema.boop.select(store.getState());
               res.status(200).json({ dogs });
             },
-            putDogs: (c, req, res) => {
+            putDogs: (_c, _req, res) => {
               store.dispatch(actions.batchUpdater([schema.boop.increment()]));
-              // TODO the looped around TS does not seem to tackle this well
-              // store.dispatch(actions.upsertTest({ ["1"]: { name: "Friend" } }));
               res.sendStatus(200);
             },
           };
@@ -100,7 +98,6 @@ export function simulation(): FoundationSimulator<any> {
     extendStore: {
       logs: false,
       actions: ({ thunks, schema }) => {
-        // TODO attempt to remove this type as a requirement
         let upsertTest = thunks.create<AnyState>(
           "user:upsert",
           function* boop(ctx, next) {
@@ -114,9 +111,7 @@ export function simulation(): FoundationSimulator<any> {
 
         return { upsertTest };
       },
-      selectors: () => ({}),
       schema: ({ slice }: ExtendSimulationSchema) => {
-        // TODO attempt to remove this type as a requirement
         let slices = {
           test: slice.table(),
           booping: slice.str(),
@@ -126,7 +121,7 @@ export function simulation(): FoundationSimulator<any> {
       },
     },
     extendRouter(router, simulationStore) {
-      router.get("/extended-route", (req, res) => {
+      router.get("/extended-route", (_req, res) => {
         let dogs = simulationStore.schema.boop.select(
           simulationStore.store.getState()
         );

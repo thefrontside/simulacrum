@@ -8,6 +8,9 @@ import type {
   ExtendSimulationSelectorsInput,
   TableOutput,
   AnyState,
+  ExtendSimulationActionsInputLoose,
+  ExtendSimulationSelectorsInputLoose,
+  ExtendStoreConfig,
 } from "@simulacrum/foundation-simulator";
 import {
   convertInitialStateToStoreState,
@@ -25,10 +28,14 @@ export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
 };
 type ExtendActions = typeof inputActions;
 type ExtendSelectors = typeof inputSelectors;
+export type Auth0Schema = ReturnType<ExtendedSchema>;
+export type Auth0Actions = ReturnType<ExtendActions>;
+export type Auth0Selectors = ReturnType<ExtendSelectors>;
+
 export type ExtendedSimulationStore = SimulationStore<
-  ReturnType<ExtendedSchema>,
-  ReturnType<ExtendActions>,
-  ReturnType<ExtendSelectors>
+  Auth0Schema,
+  Auth0Actions,
+  Auth0Selectors
 >;
 
 const inputSchema =
@@ -56,49 +63,63 @@ const inputSchema =
     return slices;
   };
 
-const inputActions = (args: ExtendSimulationActions<ExtendedSchema>) => {
-  return {};
+const inputActions = (_args: ExtendSimulationActions<ExtendedSchema>) => {
+  return {} as ExtendSimulationActions<ExtendedSchema>;
 };
 
 const extendActions =
-  (extendedActions?: ExtendSimulationActionsInput<any, ExtendedSchema>) =>
+  (
+    extendedActions?: ExtendSimulationActionsInputLoose<
+      Auth0Actions,
+      Auth0Schema
+    >
+  ) =>
   (args: ExtendSimulationActions<ExtendedSchema>) => {
-    return extendedActions
-      ? // @ts-expect-error schema is cyclical, ignore extension for now
-        { ...inputActions(args), ...extendedActions(args) }
-      : inputActions(args);
+    const base = inputActions(args);
+    if (!extendedActions) return base;
+    const extResult = extendedActions(args);
+    return {
+      ...(base as object),
+      ...(extResult as object),
+    } as Auth0Actions;
   };
 
-const inputSelectors = (args: ExtendSimulationSelectors<ExtendedSchema>) => {
-  const { createSelector, schema } = args;
-  return {};
+const inputSelectors = (_args: ExtendSimulationSelectors<ExtendedSchema>) => {
+  return {} as ExtendSimulationSelectors<ExtendedSchema>;
 };
 
 const extendSelectors =
-  (extendedSelectors?: ExtendSimulationSelectorsInput<any, ExtendedSchema>) =>
+  (
+    extendedSelectors?: ExtendSimulationSelectorsInputLoose<
+      Auth0Selectors,
+      Auth0Schema
+    >
+  ) =>
   (args: ExtendSimulationSelectors<ExtendedSchema>) => {
-    return extendedSelectors
-      ? // @ts-expect-error schema is cyclical, ignore extension for now
-        { ...inputSelectors(args), ...extendedSelectors(args) }
-      : inputSelectors(args);
+    const base = inputSelectors(args);
+    if (!extendedSelectors) return base;
+    const extResult = extendedSelectors(args);
+    return {
+      ...(base as object),
+      ...(extResult as object),
+    } as Auth0Selectors;
   };
 
-export const extendStore = <T>(
+export type Auth0ExtendStoreInput = ExtendStoreConfig<
+  Auth0Schema,
+  Auth0Actions,
+  Auth0Selectors
+>;
+
+export const extendStore = (
   initialState: Auth0InitialStore | undefined,
-  extended:
-    | {
-        actions: ExtendSimulationActionsInput<
-          any,
-          ExtendSimulationSchemaInput<T>
-        >;
-        selectors: ExtendSimulationSelectorsInput<
-          any,
-          ExtendSimulationSchemaInput<T>
-        >;
-        schema?: ExtendSimulationSchemaInput<T>;
-      }
-    | undefined
-) => ({
+  extended?: Auth0ExtendStoreInput
+): {
+  schema: ExtendSimulationSchemaInput<Auth0Schema>;
+  actions?: ExtendSimulationActionsInput<Auth0Actions, Auth0Schema>;
+  selectors?: ExtendSimulationSelectorsInput<Auth0Selectors, Auth0Schema>;
+  logs?: boolean;
+} => ({
   actions: extendActions(extended?.actions),
   selectors: extendSelectors(extended?.selectors),
   schema: inputSchema(initialState, extended?.schema),

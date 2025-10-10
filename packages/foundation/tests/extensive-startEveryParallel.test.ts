@@ -95,4 +95,16 @@ describe("extensive server - startup in every test - parallel", () => {
     let response = await request.json();
     expect(response).toEqual({ dogs: 6 });
   });
+
+  it("sends webhook", async ({ task }) => {
+    let request = await fetch(`${getBaseUrl(task)}/api/trigger-webhook`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: "123", name: "test" }),
+    });
+    let response = await request.json();
+    expect(response).toEqual({ status: "ok" });
+  });
 });

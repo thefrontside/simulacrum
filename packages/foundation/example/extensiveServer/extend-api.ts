@@ -5,7 +5,7 @@ export const extendRouter = (
   router: Router,
   simulationStore: ExtendedSimulationStore
 ) => {
-  router.get("/extended-route", (req, res) => {
+  router.get("/extended-route", (_req, res) => {
     let dogs = simulationStore.schema.dogs.select(
       simulationStore.store.getState()
     );

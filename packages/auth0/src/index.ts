@@ -3,7 +3,10 @@ import {
   type SimulationHandlers,
   type FoundationSimulator,
 } from "@simulacrum/foundation-simulator";
-import { type ExtendedSimulationStore, extendStore } from "./store/index.ts";
+import type { ExtendedSimulationStore } from "./store/index.ts";
+import { extendStore } from "./store/index.ts";
+import type { Router } from "express";
+import type { Auth0ExtendStoreInput } from "./store/index.ts";
 import { extendRouter } from "./handlers/index.ts";
 import {
   type Auth0InitialStore,
@@ -16,16 +19,18 @@ export type Auth0Simulator = (args?: {
   debug?: boolean;
   initialState?: Auth0InitialStore;
   extend?: {
-    extendStore?: SimulationInput["extendStore"];
+    extendStore?: Auth0ExtendStoreInput;
     openapiHandlers?: (
       simulationStore: ExtendedSimulationStore
     ) => SimulationHandlers;
-    extendRouter?: SimulationInput["extendRouter"];
+    extendRouter?: (
+      router: Router,
+      simulationStore: ExtendedSimulationStore
+    ) => void;
   };
   options?: Partial<Auth0Configuration>;
 }) => FoundationSimulator<ExtendedSimulationStore>;
 
-type SimulationInput = Parameters<typeof createFoundationSimulationServer>[0];
 export const simulation: Auth0Simulator = (args = {}) => {
   const config = getConfig(args.options);
   const parsedInitialState = !args?.initialState

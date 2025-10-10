@@ -22,6 +22,17 @@ const openapiSchemaFromRealEndpoint = {
         },
       },
     },
+    "/trigger-webhook": {
+      post: {
+        summary: "Trigger a webhook",
+        operationId: "triggerWebhook",
+        responses: {
+          200: {
+            description: "webhook sent",
+          },
+        },
+      },
+    },
   },
 };
 
@@ -130,7 +141,7 @@ function handlers(
   simulationStore: ExtendedSimulationStore
 ): SimulationHandlers {
   return {
-    getDogs: (_c, request, response, _next, routeMetadata) => {
+    getDogs: (_c, _request, response, _next, routeMetadata) => {
       let dogs = simulationStore.schema.dogs.select(
         simulationStore.store.getState()
       );
@@ -140,7 +151,7 @@ function handlers(
         response.sendStatus(routeMetadata.defaultCode);
       }
     },
-    putDogs: (c, req, response) => {
+    putDogs: (_c, _req, response) => {
       simulationStore.store.dispatch(
         simulationStore.actions.batchUpdater([
           simulationStore.schema.dogs.increment(),
@@ -168,6 +179,12 @@ function handlers(
         numbers
       );
       response.status(200).json({ dogs });
+    },
+    triggerWebhook: (c, _request, response) => {
+      simulationStore.store.dispatch(
+        simulationStore.actions.webhooks.onTest(c.request.body)
+      );
+      response.status(200).json({ status: "ok" });
     },
   };
 }

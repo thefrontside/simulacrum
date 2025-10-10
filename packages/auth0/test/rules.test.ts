@@ -85,7 +85,7 @@ describe("rules", () => {
     let code: string;
     let server: FoundationSimulatorListening<unknown>;
 
-    beforeEach(async ({ task }) => {
+    beforeEach(async ({ task: _task }) => {
       ({ code, server } = await createSimulation(
         "test/fixtures/rules-access-token"
       ));

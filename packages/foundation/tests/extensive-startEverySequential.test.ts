@@ -85,5 +85,17 @@ describe.sequential(
       let response = await request.json();
       expect(response).toEqual({ dogs: 6 });
     });
+
+    it("sends webhook", async () => {
+      let request = await fetch(`${url}/api/trigger-webhook`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: "123", name: "test" }),
+      });
+      let response = await request.json();
+      expect(response).toEqual({ status: "ok" });
+    });
   }
 );
