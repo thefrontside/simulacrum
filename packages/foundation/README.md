@@ -2,6 +2,40 @@
 
 This simulator gives some base level functionality which is likely to be used in every simulator. It is built with the expectation to be extended and meet your needs for any custom simulators as well. If you need assistance in building a simulator for your needs, please reach out to [Frontside for this or any other consulting services](https://frontside.com/).
 
+## Quick Start
+
+Get started with some JSON file, and incrementally build up as needs arise. Start with:
+
+```shell
+npm install -D @simulacrum/foundation-simulator
+```
+
+Then drop this in a file, e.g. `start.js`:
+
+```js
+import { startFoundationSimulationServer } from "@simulacrum/foundation-simulator";
+
+await startFoundationSimulationServer({
+  port: 9090,
+  serveJsonFiles: `${import.meta.dirname}/jsonFiles`,
+});
+```
+
+And then run it with Node, et. al.:
+
+```shell
+node ./start.js
+```
+
+> [!TIP]
+> The `node` CLI now has a `--watch` or `--watch-path` arg. Want your simulator to automatically restart? Run it something like this `node --watch-path=./simulator ./simulator/start.js` (adjust for your folder paths).
+
+Want to write in TypeScript? We recommend using `tsx` and running by:
+
+```shell
+node --import tsx ./start.ts
+```
+
 ## Extending The Simulator Data
 
 This is a base simulator which wires together a few libraries to create a foundation where we may incrementally improve and make the simulating an endpoint more dynamic. It uses the following libraries which you may also refer to their docs as required.
@@ -46,6 +80,8 @@ This API wraps each API and allows configuration to delay a response. The improv
 We have implemented the following in simulators to set a default, but dynamically increase the delay in for testing specific cases.
 
 ```js
+import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
+
 const slowResponse = process.env?.SLOW_RESPONSE
   ? process.env.SLOW_RESPONSE === "true"
     ? 800

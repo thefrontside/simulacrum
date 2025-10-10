@@ -16,7 +16,7 @@ Simulacrum removes these constraints from your process by allowing you to simula
 - [auth0](packages/auth0) - [@simulacrum/auth0-simulator](https://www.npmjs.com/package/@simulacrum/auth0-simulator)
 - [ldap](packages/ldap) - [@simulacrum/ldap-simulator](https://www.npmjs.com/package/@simulacrum/ldap-simulator)
 
-> [!WARNING]  
+> [!WARNING]
 > The LDAP simulator will not be runnable from this branch. It is undergoing a large refactor on top of the Foundation simulator. For the previous iterations, see the `v0` branch which contain the previous functionality.
 
 These simulators are (or will be) built on top of the Foundation simulator. This simulator gives some base level functionality which is likely to be used in every simulator.
@@ -25,6 +25,9 @@ It is built with the expectation to be extended and meet your needs for any cust
 
 - [foundation](packages/foundation) - [@simulacrum/foundation-simulator](https://www.npmjs.com/package/@simulacrum/foundation-simulator)
 
+> [!TIP]
+> Want to get started building your own simulator? Check out the `@simulacrum/foundation-simulator` quick start!
+
 ## Development
 
 ```
@@ -32,16 +35,3 @@ $ npm install
 $ npm run prepack
 $ npm test
 ```
-
-<!--
-## Testing
-
-current problems:
-* massive carve-outs for stubbing
-* static tapes (dead fish)
-* no isolation when running tests against a shared instance
-
-## Application Previews
-
-## Concurrent development across all application teams.
--->
