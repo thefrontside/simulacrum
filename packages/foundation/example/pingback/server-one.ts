@@ -12,12 +12,14 @@ export function simulation(): FoundationSimulator<any> {
       schema: ({ slice }: ExtendSimulationSchema) => {
         let slices = {
           boop: slice.num(),
+          bapped: slice.num(),
         };
         return slices;
       },
       tasks: ({ createWebhook }) => {
-        const webhook = createWebhook("http://localhost:3050");
-        const boopTrigger = webhook.create<null>(
+        const webhook = createWebhook("http://localhost:3051");
+        // use webhook.create<TypeOfPayload> if a payload is expected
+        const boopTrigger = webhook.create(
           "/event/boop",
           function* (ctx, next) {
             console.log("firing webhook from 3050 to 3051");
@@ -29,7 +31,7 @@ export function simulation(): FoundationSimulator<any> {
             yield* next();
 
             // this allows you to inspect after the request
-            console.dir({ ctx });
+            console.log({ ctx });
           }
         );
         return { tasks: [webhook.task], actions: { webhook: { boopTrigger } } };
@@ -40,8 +42,17 @@ export function simulation(): FoundationSimulator<any> {
         console.log("received boop increment request on 3050");
         simulationStore.store.dispatch(
           simulationStore.actions.batchUpdater(
-            // @ts-expect-error TODO check on this type rror
             simulationStore.schema.boop.increment()
+          )
+        );
+        res.status(200).json({ status: "ok" });
+      });
+
+      router.post("/event/bap", (_req, res) => {
+        console.log("received bap increment request on 3050");
+        simulationStore.store.dispatch(
+          simulationStore.actions.batchUpdater(
+            simulationStore.schema.bapped.increment()
           )
         );
         res.status(200).json({ status: "ok" });
@@ -49,7 +60,6 @@ export function simulation(): FoundationSimulator<any> {
 
       router.get("/external/boop", (_req, res) => {
         simulationStore.store.dispatch(
-          // @ts-expect-error TODO check on this type rror
           simulationStore.actions.webhook.boopTrigger()
         );
         res.status(200).json({ status: "ok" });
@@ -57,6 +67,13 @@ export function simulation(): FoundationSimulator<any> {
 
       router.get("/get/boop", (_req, res) => {
         const count = simulationStore.schema.boop.select(
+          simulationStore.store.getState()
+        );
+        res.status(200).json({ count });
+      });
+
+      router.get("/get/bap", (_req, res) => {
+        const count = simulationStore.schema.bapped.select(
           simulationStore.store.getState()
         );
         res.status(200).json({ count });

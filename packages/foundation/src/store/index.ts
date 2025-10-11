@@ -172,13 +172,13 @@ export function createSimulationStore<
   // where all the thunks get called in the middleware stack
   thunks.use(thunks.routes());
 
-  let batchUpdater = thunks.create<StoreUpdater<AnyState>[]>(
-    "update",
-    function* (ctx, next) {
-      yield* updateStore(ctx.payload);
-      yield* next();
-    }
-  );
+  let batchUpdater = thunks.create<
+    StoreUpdater<AnyState> | StoreUpdater<AnyState>[]
+  >("update", function* (ctx, next) {
+    yield* updateStore(ctx.payload);
+    yield* next();
+  });
+
   let simulationLog = thunks.create<{
     method: string;
     url: string;
