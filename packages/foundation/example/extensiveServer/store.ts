@@ -62,9 +62,9 @@ const selectors = ({
 };
 
 const tasks = ({ createWebhook }: ExtendSimulationTasks<ExtendedSchema>) => {
-  const webhook = createWebhook("https://example.com/webhook");
+  const webhook = createWebhook("https://example.com");
   const onTest = webhook.create<{ id: string; name: string }>(
-    "webhook:test",
+    "/webhook-endpoint",
     function* (ctx, next) {
       // the following would send off that request
       //  but we don't want to post in tests

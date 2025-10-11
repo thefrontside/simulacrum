@@ -2,6 +2,8 @@
 
 This simulator gives some base level functionality which is likely to be used in every simulator. It is built with the expectation to be extended and meet your needs for any custom simulators as well. If you need assistance in building a simulator for your needs, please reach out to [Frontside for this or any other consulting services](https://frontside.com/).
 
+Use this base with an OpenAPI specification or other API contract enforcement mechanisms to quickly wire up test data that feels real. Implement APIs that feel real _including_ the handling features such as webhooks, WebSockets, GraphQL, and/or Authentication/Authorization. See the other simulators in these repos as additional examples on how you may implement a simulator.
+
 ## Quick Start
 
 Get started with some JSON file, and incrementally build up as needs arise. Start with:
