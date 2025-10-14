@@ -52,8 +52,8 @@ describe("pingback", () => {
     // check the webhook listener is gets double incremented
     let r7 = await f(`${urlOne}/get/bap`);
     // note that we have two watchers
-    // but only one sends the increment request
-    expect(r7).toEqual({ count: 1 });
+    // and each webhook event triggers both watchers
+    expect(r7).toEqual({ count: 2 });
 
     // trigger via external endpoint on one
     // which will webhook to the other
@@ -68,6 +68,6 @@ describe("pingback", () => {
 
     // our watcher has updated the bapped count though
     let r11 = await f(`${urlOne}/get/bap`);
-    expect(r11).toEqual({ count: 2 }); // ie see r9 vs r11
+    expect(r11).toEqual({ count: 4 }); // ie see r9 vs r11
   });
 });
