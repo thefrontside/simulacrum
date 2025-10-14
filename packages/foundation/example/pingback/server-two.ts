@@ -1,4 +1,4 @@
-import { put, take, takeEvery, type Action } from "starfx";
+import { put, takeEvery, type Action } from "starfx";
 import { createFoundationSimulationServer } from "../../src/index.ts";
 import type {
   ExtendSimulationSchema,
@@ -67,14 +67,14 @@ export function simulation(): FoundationSimulator<any> {
               // );
               // to avoid the double call from the two watchers
               // skip this one
-              // yield* put(bappedTrigger());
+              yield* put(bappedTrigger());
             }
           });
         }
         // using take and your own iteration loop is another method of doing of listening for events
         function* boopWatcherOptionTwo() {
-          while (true) {
-            const action = yield* take("*");
+          // this `*` will match all actions and you can filter inside
+          yield* takeEvery("*", function* (action) {
             if (isBoopEvent(action)) {
               // console.dir(
               //   {
@@ -86,7 +86,7 @@ export function simulation(): FoundationSimulator<any> {
               // );
               yield* put(bappedTrigger());
             }
-          }
+          });
         }
 
         return {
