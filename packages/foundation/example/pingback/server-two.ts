@@ -1,4 +1,4 @@
-import { put, take, takeEvery, type Action } from "starfx";
+import { put, takeEvery, type Action } from "starfx";
 import { createFoundationSimulationServer } from "../../src/index.ts";
 import type {
   ExtendSimulationSchema,
