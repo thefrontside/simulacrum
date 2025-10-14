@@ -80,7 +80,7 @@ export const simulation = (
     port: 3300, // default port
     simulationContextPage: "/simulation",
     extendStore: extendStoreConfig,
-    extendRouter,
+    extendRouter: extendRouter(args?.extend?.extendRouter),
     openapi: openapi(
       parsedInitialState,
       args?.apiUrl ?? "/",
