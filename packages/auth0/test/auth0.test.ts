@@ -43,7 +43,7 @@ describe("Auth0 simulator", () => {
     const app = simulation({
       extend: {
         extendRouter: (router) => {
-          router.get("/hello-world", (req, res) => {
+          router.get("/hello-world", (_req, res) => {
             res.send("Hello World");
           });
         },
