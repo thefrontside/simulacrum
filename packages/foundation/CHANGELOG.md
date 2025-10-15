@@ -1,5 +1,18 @@
 # Changelog
 
+## \[0.6.0]
+
+- [`7dc3615`](https://github.com/thefrontside/simulacrum/commit/7dc36151f5feeb69909800ce5325742541cac642) ([#335](https://github.com/thefrontside/simulacrum/pull/335) by [@cowboyd](https://github.com/thefrontside/simulacrum/../../cowboyd)) Don't explicitly run simulation on "localhost" as the host parameter. This allows responses when addressed via `::1` (ipv6) and `0.0.0.0` in
+  ipv4 for example depending on system configuration. Allow the user to instead pass all properties that the Node `http` and `https` expect, including a port and host for cases where explicit control is required.
+
+### New Features
+
+- [`121b301`](https://github.com/thefrontside/simulacrum/commit/121b3013400cd7387bc62cf122f0ef1ff78b0353) ([#338](https://github.com/thefrontside/simulacrum/pull/338) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Add tasks to handle generic functions that would run in an `effection` scope. This enables the ability to handle webhooks. A webhook is an action that can be triggered directly and makes a `POST` to a specified endpoint, but can also watch and trigger on updates to the store.
+
+### Dependencies
+
+- [`16ceab1`](https://github.com/thefrontside/simulacrum/commit/16ceab115b027bbcffb44b4b7becd3869304e8f5) ([#337](https://github.com/thefrontside/simulacrum/pull/337) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Export helpers from foundation simulator for use in dumping data into the stores, such as in the GitHub API simulator.
+
 ## \[0.5.1]
 
 ### Bug Fixes

@@ -1,5 +1,17 @@
 # Changelog
 
+## \[0.6.2]
+
+### Bug Fixes
+
+- [`a78fa61`](https://github.com/thefrontside/simulacrum/commit/a78fa610a0d3a5f5f3e15dce739b6c4c6174141e) ([#341](https://github.com/thefrontside/simulacrum/pull/341) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Use the `extend` options and properly pass the `extendRouter` that will allow the user to add or change route handling. Closes #317.
+- [`7c120ed`](https://github.com/thefrontside/simulacrum/commit/7c120ed2820b11ce3fa3fba7219c890252687e11) ([#315](https://github.com/thefrontside/simulacrum/pull/315) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Better handle nested owners which previously threw errors, e.g. map() of undefined. Also accept the custom header as used by the `@octokit/graphql` package.
+
+### Dependencies
+
+- Upgraded to `@simulacrum/foundation-simulator@0.6.0`
+- [`16ceab1`](https://github.com/thefrontside/simulacrum/commit/16ceab115b027bbcffb44b4b7becd3869304e8f5) ([#337](https://github.com/thefrontside/simulacrum/pull/337) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Export helpers from foundation simulator for use in dumping data into the stores, such as in the GitHub API simulator.
+
 ## \[0.6.1]
 
 ### Bug Fixes
