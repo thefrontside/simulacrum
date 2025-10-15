@@ -37,10 +37,10 @@ export const simulation: Auth0Simulator = (args = {}) => {
     ? undefined
     : auth0InitialStoreSchema.parse(args?.initialState);
   return createFoundationSimulationServer({
-    port: 4400, // default port
+    port: config.port ?? 4400, // default port
     protocol: "https",
     extendStore: extendStore(parsedInitialState, args?.extend?.extendStore),
-    extendRouter: extendRouter(config, args.debug),
+    extendRouter: extendRouter(config, args.extend?.extendRouter, args.debug),
   })();
 };
 

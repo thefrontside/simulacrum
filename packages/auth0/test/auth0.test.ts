@@ -40,12 +40,25 @@ describe("Auth0 simulator", () => {
   let frontendServer: FoundationSimulatorListening<unknown>;
   beforeAll(async () => {
     frontendServer = await frontendSimulation.listen();
-    const app = simulation();
+    const app = simulation({
+      extend: {
+        extendRouter: (router) => {
+          router.get("/hello-world", (_req, res) => {
+            res.send("Hello World");
+          });
+        },
+      },
+    });
     server = await app.listen(basePort);
   });
   afterAll(async () => {
     await server.ensureClose();
     await frontendServer.ensureClose();
+  });
+
+  it("allows extending the router", async () => {
+    let res: Response = await fetch(`${auth0Url}/hello-world`);
+    expect(res.ok).toBe(true);
   });
 
   describe("/authorize", () => {

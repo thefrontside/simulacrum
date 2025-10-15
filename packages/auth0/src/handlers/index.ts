@@ -1,4 +1,4 @@
-import express, { type Request, type Express } from "express";
+import express, { type Request, type Express, Router } from "express";
 import type { ExtendedSimulationStore } from "../store/index.ts";
 import { createCors } from "../middleware/create-cors.ts";
 import { noCache } from "../middleware/no-cache.ts";
@@ -11,7 +11,13 @@ import { type Auth0Configuration } from "../types.ts";
 
 const publicDir = path.join(import.meta.dirname, "..", "views", "public");
 export const extendRouter =
-  (config: Auth0Configuration, debug = false) =>
+  (
+    config: Auth0Configuration,
+    extend:
+      | ((router: Router, simulationStore: ExtendedSimulationStore) => void)
+      | undefined,
+    debug = false
+  ) =>
   (router: Express, simulationStore: ExtendedSimulationStore) => {
     const serviceURL = (request: Request) =>
       `${request.protocol}://${request.get("Host")}/`;
@@ -27,7 +33,13 @@ export const extendRouter =
       .use(express.static(publicDir))
       .use(createSession())
       .use(createCors())
-      .use(noCache())
+      .use(noCache());
+
+    if (extend) {
+      extend(router, simulationStore);
+    }
+
+    router
       .get("/health", (_, response) => {
         response.send({ status: "ok" });
       })

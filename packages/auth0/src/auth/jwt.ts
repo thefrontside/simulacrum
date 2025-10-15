@@ -1,10 +1,10 @@
 import type { SignOptions } from "jsonwebtoken";
-import { sign } from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 import { JWKS, PRIVATE_KEY } from "./constants.ts";
 
 export const parseKey = (key: string): string => key.split("~~").join("\n");
 
-type SignPayload = Parameters<typeof sign>[0];
+type SignPayload = Parameters<typeof jwt.sign>[0];
 
 export function createJsonWebToken<P extends SignPayload>(
   payload: P,
@@ -14,5 +14,5 @@ export function createJsonWebToken<P extends SignPayload>(
     keyid: JWKS.keys[0].kid,
   }
 ): string {
-  return sign(payload, privateKey, options);
+  return jwt.sign(payload, privateKey, options);
 }
