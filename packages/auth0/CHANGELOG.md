@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.11.2]
+
+### Bug Fixes
+
+- [`a78fa61`](https://github.com/thefrontside/simulacrum/commit/a78fa610a0d3a5f5f3e15dce739b6c4c6174141e) ([#341](https://github.com/thefrontside/simulacrum/pull/341) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Use the `extend` options and properly pass the `extendRouter` that will allow the user to add or change route handling. Closes #317.
+
+### Dependencies
+
+- Upgraded to `@simulacrum/foundation-simulator@0.6.0`
+
 ## \[0.11.1]
 
 ### Bug Fixes
