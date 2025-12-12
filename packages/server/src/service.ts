@@ -21,6 +21,15 @@ type ServiceOptions = {
   processOptions?: ProcessOptions;
 };
 
+/**
+ * Start a process and return an Operation that represents the running service.
+ *
+ * The Operation returned by useService returns when the process has started and,
+ * if a wellnessCheck is provided, once the wellnessCheck passes. When run in an
+ * effection scope, the operation remains active in that scope. When the operation
+ * goes out of scope, effection will automatically shut down the
+ * process and clean up and shut down the process.
+ */
 export function useService(
   _name: string,
   cmd: string,
