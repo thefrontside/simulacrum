@@ -32,7 +32,9 @@
     "build": "tsdown",
     "lint": "echo noop",
     "tsc": "tsc --noEmit",
-    "test:service-main": "node --import tsx ./test/service-main.ts"
+    "example:basic": "node --import tsx ./example/basic-graph.ts",
+    "example:lifecycle": "node --import tsx ./example/lifecycle-hooks.ts",
+    "example:concurrency": "node --import tsx ./example/concurrency-layers.ts"
   },
   "dependencies": {
     "effection": "^3.6.0",
