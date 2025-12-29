@@ -60,12 +60,16 @@ export function useService(
         }
       }
 
-      const waiting = options.wellnessCheck.timeout
-        ? timebox(options.wellnessCheck.timeout, untilWell)
-        : untilWell();
-      const checked = yield* waiting;
-      if (options.wellnessCheck.timeout && checked && checked.timeout) {
+      if (options.wellnessCheck.timeout) {
+        const checked = yield* timebox(
+          options.wellnessCheck.timeout,
+          untilWell
+        );
+        if (checked && checked.timeout) {
         throw new Error("service wellness check timed out");
+        }
+      } else {
+        yield* untilWell();
       }
     }
 
