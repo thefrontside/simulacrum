@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "effection": "^4.0.0",
+    "@effectionx/timebox": "^0.3.1",
     "@effectionx/tinyexec": "^0.3.1",
     "@effectionx/context-api": "^0.2.1"
   },

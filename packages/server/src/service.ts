@@ -8,7 +8,7 @@ import {
   sleep,
   spawn,
 } from "effection";
-import { timebox } from "./timebox.ts";
+import { timebox } from "@effectionx/timebox";
 import { type ProcessOptions, useProcess } from "./process.ts";
 import { stdout } from "./logging.ts";
 
@@ -63,7 +63,10 @@ export function useService(
       const waiting = options.wellnessCheck.timeout
         ? timebox(options.wellnessCheck.timeout, untilWell)
         : untilWell();
-      yield* waiting;
+      const checked = yield* waiting;
+      if (options.wellnessCheck.timeout && checked && checked.timeout) {
+        throw new Error("service wellness check timed out");
+      }
     }
 
     yield* provide();
