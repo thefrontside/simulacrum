@@ -7,7 +7,7 @@ import { each, Err, Ok, run } from "effection";
 // const scriptDoesNotWork = "npm run test:service-main";
 const nodeScriptWorks = "node --import tsx ./test/service-main.ts";
 
-it.skip("test service", async () => {
+it("test service", async () => {
   let assertionCount = 0;
   await run(function* () {
     yield* useService("test-service", nodeScriptWorks);
@@ -17,7 +17,7 @@ it.skip("test service", async () => {
 });
 
 describe("useService with wellness check", () => {
-  it.skip("test with short wellness timeout", async () => {
+  it("test with short wellness timeout", async () => {
     let assertionCount = 0;
     let errored = false;
     await run(function* () {
@@ -46,7 +46,7 @@ describe("useService with wellness check", () => {
     assert(errored);
   });
 
-  it.skip("test with long wellness timeout", async () => {
+  it("test with long wellness timeout", async () => {
     let assertionCount = 0;
     await run(function* () {
       yield* useService("test-service", nodeScriptWorks, {
@@ -74,7 +74,7 @@ describe("useService with wellness check", () => {
     await run(function* () {
       yield* useService("test-service", nodeScriptWorks, {
         wellnessCheck: {
-          timeout: 150,
+          timeout: 500,
           frequency: 100,
           *operation(stdio) {
             console.log("wellness check operation started");
