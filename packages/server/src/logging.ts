@@ -5,6 +5,10 @@ export const stdio = createApi("@simulacrum/logging", {
   *stdout(line: string): Operation<void> {
     console.log(line);
   },
+  *stderr(line: string): Operation<void> {
+    console.log(line);
+  },
 });
 
 export const { stdout } = stdio.operations;
+export const { stderr } = stdio.operations;

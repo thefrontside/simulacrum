@@ -26,7 +26,6 @@ describe("useService with wellness check", () => {
           timeout: 2,
           *operation(stdio) {
             for (let line of yield* each<string>(stdio)) {
-              console.log("wellness check got line:", { line });
               if (line.includes("test service started")) {
                 return Ok<void>(void 0);
               }
@@ -54,7 +53,6 @@ describe("useService with wellness check", () => {
           timeout: 2000,
           *operation(stdio) {
             for (let line of yield* each<string>(stdio)) {
-              console.log("wellness check got line:", { line });
               if (line.includes("test service started")) {
                 return Ok<void>(void 0);
               }
@@ -74,18 +72,15 @@ describe("useService with wellness check", () => {
     await run(function* () {
       yield* useService("test-service", nodeScriptWorks, {
         wellnessCheck: {
-          timeout: 500,
-          frequency: 100,
+          timeout: 300,
+          frequency: 200,
           *operation(stdio) {
-            console.log("wellness check operation started");
             for (let line of yield* each<string>(stdio)) {
-              console.log("wellness check got line:", { line });
               if (line.includes("test service started")) {
                 return Ok<void>(void 0);
               }
               yield* each.next();
             }
-            console.log("wellness check operation returning Err");
             return Err(new Error("got sick of waiting"));
           },
         },

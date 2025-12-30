@@ -3,14 +3,17 @@ import {
   type Result,
   type Stream,
   each,
+  lift,
   resource,
   scoped,
   sleep,
   spawn,
 } from "effection";
 import { timebox } from "@effectionx/timebox";
-import { type ProcessOptions, useProcess } from "./process.ts";
-import { stdout } from "./logging.ts";
+import { exec } from "@effectionx/process";
+import type { ExecOptions as ProcessOptions } from "@effectionx/process";
+import { stderr, stdout } from "./logging.ts";
+import { createReplaySignal } from "./createReplaySignal.ts";
 
 type ServiceOptions = {
   wellnessCheck?: {
@@ -33,35 +36,44 @@ export function useService(
         "scripts run with npm don't respect signals to properly shutdown"
       );
     }
-    const process = yield* useProcess(cmd, options.processOptions);
-    console.log("process yielded");
+    const process = yield* exec(cmd, options.processOptions);
+    const stdio = createReplaySignal<string, void>();
+    const stdioAdd = lift(stdio.send);
 
+    // forward raw stdout for logging in chunk form (no reassembly)
     yield* spawn(function* () {
-      for (let line of yield* each<string>(process.lines)) {
-        yield* stdout(line);
+      for (let line of yield* each(process.stdout)) {
+        const buf = Buffer.from(line);
+        const str = buf.toString();
+        stdout(str);
+        yield* stdioAdd(str);
         yield* each.next();
       }
     });
-    console.log("spawned logger");
+
+    yield* spawn(function* () {
+      for (let line of yield* each(process.stderr)) {
+        const str = Buffer.from(line).toString();
+        stderr(str);
+        yield* stdioAdd(str);
+        yield* each.next();
+      }
+    });
+
+    yield* sleep(0); // allow stdio forwarding to start
 
     // if supplied, wellness check to ensure it is running or timeout with result
     if (options.wellnessCheck) {
-      console.log("running wellnessCheck");
       const { operation } = options.wellnessCheck;
       const frequency = options.wellnessCheck.frequency ?? 100;
       function* untilWell() {
         while (true) {
-          console.log(process.lines);
           try {
-            console.log(`sleeping for ${frequency}ms before wellness check`);
             yield* sleep(frequency);
-            console.log("running wellness check operation");
-            let result = yield* scoped(() => operation(process.lines));
-            console.log({ result, options });
-            if (result.ok) {
+            const result = yield* scoped(() => operation(stdio));
+            if (result && result.ok) {
               break;
             }
-            console.log("wellness check not ok, trying again");
           } catch (error) {
             // noop, try again
           }
@@ -79,9 +91,9 @@ export function useService(
       } else {
         yield* untilWell();
       }
+      yield* lift(stdio.close)();
     }
 
-    console.log("providing");
     yield* provide();
   });
 }
