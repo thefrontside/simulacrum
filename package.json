@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.2",
+    "effection": "^4.0.0",
     "publint": "^0.3.13",
     "tsdown": "^0.15.4",
     "tsx": "^4.20.6",

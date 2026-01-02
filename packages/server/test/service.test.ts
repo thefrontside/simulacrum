@@ -1,4 +1,4 @@
-import { it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import { useService } from "../src/service.ts";
 import { each, Err, Ok, run } from "effection";
@@ -16,24 +16,77 @@ it("test service", async () => {
   assert(assertionCount > 0);
 });
 
-it("test with wellness", async () => {
-  let assertionCount = 0;
-  await run(function* () {
-    yield* useService("test-service", nodeScriptWorks, {
-      wellnessCheck: {
-        timeout: 200,
-        *operation(stdio) {
-          for (let line of yield* each<string>(stdio)) {
-            if (line.includes("test service started")) {
-              return Ok<void>(void 0);
+describe("useService with wellness check", () => {
+  it("test with short wellness timeout", async () => {
+    let assertionCount = 0;
+    let errored = false;
+    await run(function* () {
+      yield* useService("test-service", nodeScriptWorks, {
+        wellnessCheck: {
+          timeout: 2,
+          *operation(stdio) {
+            for (let line of yield* each<string>(stdio)) {
+              if (line.includes("test service started")) {
+                return Ok<void>(void 0);
+              }
+              yield* each.next();
             }
-            yield* each.next();
-          }
-          return Err(new Error("got sick of waiting"));
+            return Err(new Error("got sick of waiting"));
+          },
         },
-      },
+      });
+      assertionCount++;
+    }).catch((error) => {
+      assert.equal(error.message, "service wellness check timed out");
+      errored = true;
+      assertionCount++;
     });
-    assertionCount++;
+    assert(assertionCount > 0);
+    assert(errored);
   });
-  assert(assertionCount > 0);
+
+  it("test with long wellness timeout", async () => {
+    let assertionCount = 0;
+    await run(function* () {
+      yield* useService("test-service", nodeScriptWorks, {
+        wellnessCheck: {
+          timeout: 2000,
+          *operation(stdio) {
+            for (let line of yield* each<string>(stdio)) {
+              if (line.includes("test service started")) {
+                return Ok<void>(void 0);
+              }
+              yield* each.next();
+            }
+            return Err(new Error("got sick of waiting"));
+          },
+        },
+      });
+      assertionCount++;
+    });
+    assert(assertionCount > 0);
+  });
+
+  it("test with mid-frequency wellness timeout", async () => {
+    let assertionCount = 0;
+    await run(function* () {
+      yield* useService("test-service", nodeScriptWorks, {
+        wellnessCheck: {
+          timeout: 300,
+          frequency: 200,
+          *operation(stdio) {
+            for (let line of yield* each<string>(stdio)) {
+              if (line.includes("test service started")) {
+                return Ok<void>(void 0);
+              }
+              yield* each.next();
+            }
+            return Err(new Error("got sick of waiting"));
+          },
+        },
+      });
+      assertionCount++;
+    });
+    assert(assertionCount > 0);
+  });
 });
