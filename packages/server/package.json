@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "clean": "echo skip",
-    "test": "node --import tsx --test test/*.test.ts",
+    "test": "node --test-timeout=60000 --import tsx --test test/*.test.ts",
     "prepack": "npm run build",
     "build": "tsdown",
     "lint": "echo noop",
@@ -37,9 +37,10 @@
     "example:concurrency": "node --import tsx ./example/concurrency-layers.ts"
   },
   "dependencies": {
-    "effection": "^3.6.0",
-    "@effectionx/tinyexec": "^0.2.0",
-    "@effectionx/context-api": "^0.1.0"
+    "effection": "^4.0.0",
+    "@effectionx/context-api": "^0.2.1",
+    "@effectionx/process": "^0.6.2",
+    "@effectionx/timebox": "^0.3.1"
   },
   "devDependencies": {},
   "exports": {

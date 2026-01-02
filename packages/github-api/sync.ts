@@ -1,4 +1,4 @@
-import { main, Operation, until } from "effection";
+import { main, type Operation, until } from "effection";
 import fs from "fs/promises";
 import path from "path";
 

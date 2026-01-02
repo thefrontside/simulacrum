@@ -18,12 +18,10 @@ jobs:
       successfulPublish: ${{ steps.covector.outputs.successfulPublish }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # required for use of git history
-      - uses: actions/setup-node@v4
-        with:
-          registry-url: "https://registry.npmjs.org"
+      - uses: actions/setup-node@v6
       - uses: volta-cli/action@v4
       - name: Install Node.js dependencies
         run: npm ci
@@ -51,9 +49,10 @@ jobs:
 
       - name: Create Pull Request With Versions Bumped
         id: cpr
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         if: steps.covector.outputs.commandRan == 'version'
         with:
+          draft: true
           token: ${{ secrets.FRONTSIDEJACK_GITHUB_TOKEN }}
           title: "Publish New Versions"
           commit-message: "publish new versions"
