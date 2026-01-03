@@ -1,10 +1,10 @@
 import { parseArgs } from "node:util";
 import { suspend, main } from "effection";
-import { useServiceGraph } from "./index.ts";
+import type { ServiceRunner } from "./services.ts";
 
 // Internal generator operation used by both the CLI (via main) and programmatically
-export function* simulationCLIOp(
-  services: Parameters<typeof useServiceGraph>[0]
+export function* simulationCLIOp<S extends Record<string, any>>(
+  runner: ServiceRunner<S>
 ) {
   const { values } = parseArgs({
     options: {
@@ -18,8 +18,11 @@ export function* simulationCLIOp(
   });
 
   function* printUsage() {
+    const available = Object.keys(
+      runner.services as unknown as Record<string, unknown>
+    ).join(", ");
     console.log(`Usage: cli [-s|--services serviceName]
-Available services: ${Object.keys(services).join(", ")}
+Available services: ${available}
 `);
   }
 
@@ -34,11 +37,13 @@ Available services: ${Object.keys(services).join(", ")}
         .filter(Boolean)
     : undefined;
 
-  yield* useServiceGraph(services, subset);
+  yield* runner(subset);
   yield* suspend();
 }
 
 // Public helper: call this from examples or CLI entrypoints — it will invoke effection's main()
-export function simulationCLI(services: Parameters<typeof useServiceGraph>[0]) {
-  return main(() => simulationCLIOp(services));
+export function simulationCLI<S extends Record<string, any>>(
+  runner: ServiceRunner<S>
+) {
+  return main(() => simulationCLIOp(runner));
 }

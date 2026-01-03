@@ -9,7 +9,7 @@ it("starts services in dependency order", async () => {
   try {
     await run(function* () {
       yield* spawn(function* () {
-        yield* useServiceGraph({
+        const run = useServiceGraph({
           A: {
             operation: useService(
               "A",
@@ -44,6 +44,7 @@ it("starts services in dependency order", async () => {
             deps: ["A"],
           },
         });
+        yield* run();
       });
       // The graph is running; sleep a short time to let the services start
       yield* sleep(200);
@@ -62,7 +63,7 @@ it("starts services in dependency order", async () => {
 it("throws on cycles in dependency graph", async () => {
   await assert.rejects(async () => {
     await run(function* () {
-      yield* useServiceGraph({
+      const runGraph = useServiceGraph({
         A: {
           operation: useService(
             "A",
@@ -78,6 +79,7 @@ it("throws on cycles in dependency graph", async () => {
           deps: ["A"],
         },
       });
+      yield* runGraph();
     });
   }, /Cycle detected in services/);
 });
@@ -88,7 +90,7 @@ it("runs beforeStop hooks in reverse order", async () => {
   await run(function* () {
     // spawn and cancel automatically when run returns
     yield* spawn(function* () {
-      yield* useServiceGraph({
+      const run = useServiceGraph({
         A: {
           operation: useService(
             "A",
@@ -133,6 +135,7 @@ it("runs beforeStop hooks in reverse order", async () => {
           },
         },
       });
+      yield* run();
     });
     // let them start
     yield* sleep(200);
@@ -146,7 +149,7 @@ it("starts independent services in parallel", async () => {
   try {
     await run(function* () {
       yield* spawn(function* () {
-        yield* useServiceGraph({
+        const run = useServiceGraph({
           fast: {
             operation: useService(
               "fast",
@@ -180,6 +183,7 @@ it("starts independent services in parallel", async () => {
             ),
           },
         });
+        yield* run();
       });
       yield* sleep(250);
     });
@@ -246,7 +250,8 @@ it("runs subset of services with dependencies", async () => {
       } as any;
 
       // only request dependent; fast and slow should be included as deps
-      yield* useServiceGraph(services, ["dependent"]);
+      const run = useServiceGraph(services);
+      yield* run(["dependent"]);
     });
     yield* sleep(300);
   });

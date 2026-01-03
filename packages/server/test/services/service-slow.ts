@@ -1,4 +1,6 @@
 import { main } from "effection";
 import { httpServer } from "../../example/services/http-server.ts";
 
-main(() => httpServer({ startDelay: 200 }));
+main(function* () {
+  yield* httpServer({ startDelay: 200 });
+});

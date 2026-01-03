@@ -4,7 +4,7 @@ import { useServiceGraph } from "../../src/services.ts";
 import { httpServer } from "../services/http-server.ts";
 import { simulationCLI } from "../../src/cli.ts";
 
-export const services = {
+const servicesMap = {
   provider: {
     operation: httpServer({ startDelay: 10 }),
     afterStart() {
@@ -19,7 +19,7 @@ export const services = {
     },
   },
   consumer: {
-    deps: ["provider"],
+    deps: ["provider"] as const,
     operation: httpServer({ startDelay: 10 }),
     afterStart() {
       return (function* () {
@@ -34,10 +34,13 @@ export const services = {
   },
 };
 
+export const services = useServiceGraph(servicesMap);
+
 export function example(opts: { duration?: number } = {}) {
   return (function* () {
     console.log(`Starting lifecycle hooks example (operation)`);
-    yield* useServiceGraph(services as any);
+    const run = services;
+    yield* run();
     yield* sleep(opts.duration ?? 150);
     console.log(`Lifecycle example (operation) complete`);
   })();
@@ -45,5 +48,5 @@ export function example(opts: { duration?: number } = {}) {
 
 import { fileURLToPath } from "node:url";
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  simulationCLI(services as any);
+  simulationCLI(services);
 }

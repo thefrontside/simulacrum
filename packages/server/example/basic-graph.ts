@@ -4,7 +4,7 @@ import { useService } from "../src/service.ts";
 import { useServiceGraph } from "../src/services.ts";
 import { simulationCLI } from "../src/cli.ts";
 
-const services = {
+const servicesMap = {
   A: {
     operation: useService("A", "node --import tsx ./example/services/a.ts", {
       wellnessCheck: {
@@ -13,10 +13,12 @@ const services = {
           for (let line of yield* each<string>(stdio)) {
             if (line.includes("started")) {
               console.log("A ready (wellnessCheck)");
-              return { ok: true } as any;
+              return { ok: true, value: undefined };
             }
             yield* each.next();
           }
+          // default: return success so the result type is well-formed
+          return { ok: true, value: undefined };
         },
       },
     }),
@@ -29,20 +31,25 @@ const services = {
           for (let line of yield* each<string>(stdio)) {
             if (line.includes("started")) {
               console.log("B ready (wellnessCheck)");
-              return { ok: true } as any;
+              return { ok: true, value: undefined };
             }
             yield* each.next();
           }
+          // default: return success so the result type is well-formed
+          return { ok: true, value: undefined };
         },
       },
     }),
-    deps: ["A"],
+    deps: ["A"] as const,
   },
 };
 
+export const services = useServiceGraph(servicesMap);
+
 export function example(opts: { duration?: number } = {}) {
   return (function* () {
-    yield* useServiceGraph(services as any);
+    const run = services;
+    yield* run();
     yield* sleep(opts.duration ?? 300);
     console.log(`Basic example complete`);
   })();

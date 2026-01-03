@@ -27,7 +27,7 @@
   ],
   "scripts": {
     "clean": "echo skip",
-    "test": "node --test-timeout=60000 --import tsx --test test/*.test.ts",
+    "test": "node --import tsx --test --test-timeout=60000 test/*.test.ts",
     "prepack": "npm run build",
     "build": "tsdown",
     "lint": "echo noop",

@@ -4,7 +4,7 @@ import { useService } from "../src/service.ts";
 import { useServiceGraph } from "../src/services.ts";
 import { simulationCLI } from "../src/cli.ts";
 
-const services = {
+const servicesMap = {
   provider: {
     operation: useService(
       "provider",
@@ -15,10 +15,11 @@ const services = {
           *operation(stdio: Stream<string, void>) {
             for (let line of yield* each<string>(stdio)) {
               if (line.includes("started")) {
-                return { ok: true } as any;
+                return { ok: true, value: undefined };
               }
               yield* each.next();
             }
+            return { ok: true, value: undefined };
           },
         },
       }
@@ -35,7 +36,7 @@ const services = {
     },
   },
   consumer: {
-    deps: ["provider"],
+    deps: ["provider"] as const,
     operation: useService(
       "consumer",
       "node --import tsx ./example/services/a.ts",
@@ -45,10 +46,11 @@ const services = {
           *operation(stdio: Stream<string, void>) {
             for (let line of yield* each<string>(stdio)) {
               if (line.includes("started")) {
-                return { ok: true } as any;
+                return { ok: true, value: undefined };
               }
               yield* each.next();
             }
+            return { ok: true, value: undefined };
           },
         },
       }
@@ -66,6 +68,8 @@ const services = {
   },
 };
 
+export const services = useServiceGraph(servicesMap);
+
 import { fileURLToPath } from "node:url";
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   simulationCLI(services);
@@ -74,7 +78,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 export function example(opts: { duration?: number } = {}) {
   return (function* () {
     console.log(`Starting lifecycle hooks example`);
-    yield* useServiceGraph(services as any);
+    const run = services;
+    yield* run();
     yield* sleep(opts.duration ?? 150);
     console.log(`Lifecycle example complete`);
   })();

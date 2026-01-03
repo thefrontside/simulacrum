@@ -4,7 +4,7 @@ import { useServiceGraph } from "../src/services.ts";
 import { useService } from "../src/service.ts";
 import { simulationCLI } from "../src/cli.ts";
 
-const services = {
+const servicesMap = {
   fast: {
     operation: useService(
       "fast",
@@ -16,10 +16,12 @@ const services = {
             for (let line of yield* each<string>(stdio)) {
               if (line.includes("started")) {
                 console.log("fast ready");
-                return { ok: true } as any;
+                return { ok: true, value: undefined };
               }
               yield* each.next();
             }
+            // default success
+            return { ok: true, value: undefined };
           },
         },
       }
@@ -36,17 +38,19 @@ const services = {
             for (let line of yield* each<string>(stdio)) {
               if (line.includes("started")) {
                 console.log("slow ready");
-                return { ok: true } as any;
+                return { ok: true, value: undefined };
               }
               yield* each.next();
             }
+            // default success
+            return { ok: true, value: undefined };
           },
         },
       }
     ),
   },
   dependent: {
-    deps: ["fast", "slow"],
+    deps: ["fast", "slow"] as const,
     operation: (function* () {
       console.log("dependent: all deps started; running dependent logic");
       yield* sleep(50);
@@ -54,14 +58,22 @@ const services = {
   },
 };
 
+export const services = useServiceGraph(servicesMap);
+
 import { fileURLToPath } from "node:url";
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  simulationCLI(services as any);
+  simulationCLI(services);
 }
 
-export function example(opts: { duration?: number } = {}) {
+export function example(
+  opts: { duration?: number; sequential?: boolean } = {}
+) {
   return (function* () {
-    yield* useServiceGraph(services as any);
+    if (opts.sequential) {
+      console.log("Running concurrency example in sequential mode");
+    }
+    const run = services;
+    yield* run();
     yield* sleep(opts.duration ?? 300);
     console.log(`Concurrency example complete`);
   })();

@@ -13,9 +13,9 @@ https://github.com/thefrontside/simulacrum
 
 Key points:
 
-- `useServiceGraph(services: ServicesMap): Operation<void>` — starts a DAG of services. Each service in the map is declared as a `ServiceDefinition`.
+- `useServiceGraph(services: ServicesMap, options?: { sequential?: boolean }): ServiceRunner<ServicesMap>` — returns a _runner function_ which you call to start the graph: `const run = useServiceGraph(services, options); yield* run(subset?: string[] | string);`. By default services in the same topological layer run concurrently; pass `options.sequential = true` to run services in each layer serially.
 - `ServiceDefinition.operation` (required) — an `Operation<void>` which indicates the service has started. This operation may be long-lived (e.g. `useService`) or may return once the service is ready while a background child keeps the service running. See the example below.
-- `deps` — an optional list of service names this service depends on; services without dependencies in the same layer are started concurrently.
+- `deps` — an optional list of service names this service depends on; services without dependencies in the same layer are started concurrently by default, or serially when `options.sequential` is true.
 - Lifecycle hooks: `beforeStart`, `afterStart`, `beforeStop`, `afterStop` — each is an `Operation<void>` that runs at the appropriate time.
 
 Example:
@@ -30,7 +30,7 @@ main(function* () {
     // process is spawned and, if a wellnessCheck is provided, once the
     // wellnessCheck passes. The service is automatically shut down by
     // effection when the operation goes out of scope.
-    yield* useServiceGraph({
+    const run = useServiceGraph({
       A: {
         operation: useService(
           "A",
@@ -51,7 +51,7 @@ main(function* () {
 
 Notes:
 
-- `useServiceGraph` returns an `Operation<void>` that holds while services run and only cancels on parent scope termination.
+- `useServiceGraph` returns a _runner function_; calling the runner (e.g. `yield* run()`) returns an `Operation<void>` that holds while services run and only cancels on parent scope termination. The returned runner has a `.services` property for introspection and can be passed directly to `simulationCLI`.
 - If you want to start services sequentially or add more advanced concurrency control, compose operations yourself and use `spawn` to control how operations run.
 
 ### Lifecycle hooks
@@ -153,5 +153,5 @@ const services = {
   },
 };
 
-// pass `services` to `useServiceGraph` or `simulationCLI`
+// create a runner via `useServiceGraph(services)` and pass that runner to `simulationCLI` if desired, e.g. `simulationCLI(useServiceGraph(services))`
 ````
