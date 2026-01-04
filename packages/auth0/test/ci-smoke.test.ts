@@ -2,8 +2,7 @@ import { describe, it, expect } from "vitest";
 import { run, until, sleep, useAbortSignal, Err, Ok } from "effection";
 import { execSync } from "child_process";
 import { existsSync } from "fs";
-// @ts-ignore - import helper from sibling package in monorepo
-import { useService } from "../../server/src/service.ts";
+import { useService } from "@simulacrum/server";
 
 const AUTH0_PORT = 4400;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
