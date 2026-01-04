@@ -8,6 +8,7 @@ export default defineConfig({
   dts: {
     sourcemap: true,
   },
+  minify: false,
   // runs with @arethetypeswrong/core which checks types
   attw: false,
   publint: true,
