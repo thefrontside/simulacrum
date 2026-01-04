@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 import { simulationCLI } from "../../src/cli.ts";
 import { useServiceGraph } from "../../src/services.ts";
-import { spawn, suspend, until } from "effection";
+import { until } from "effection";
 import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
 import http from "node:http";
+import { useSimulation } from "../../src/index.ts";
 
-export const createServiceASimulation = (seed: number): any =>
+export const createServiceASimulation = (
+  seed: number
+): ReturnType<typeof createFoundationSimulationServer> =>
   createFoundationSimulationServer({
     port: 0,
     extendRouter(router) {
@@ -13,7 +16,9 @@ export const createServiceASimulation = (seed: number): any =>
     },
   });
 
-export const createServiceBSimulation = (used: number): any =>
+export const createServiceBSimulation = (
+  used: number
+): ReturnType<typeof createFoundationSimulationServer> =>
   createFoundationSimulationServer({
     port: 0,
     extendRouter(router) {
@@ -21,7 +26,9 @@ export const createServiceBSimulation = (used: number): any =>
     },
   });
 
-export const createServiceCSimulation = (message: string): any =>
+export const createServiceCSimulation = (
+  message: string
+): ReturnType<typeof createFoundationSimulationServer> =>
   createFoundationSimulationServer({
     port: 0,
     extendRouter(router) {
@@ -43,15 +50,9 @@ export const services = useServiceGraph({
   serviceA: {
     deps: ["data"],
     *operation({ data }) {
-      const createSim = createServiceASimulation(data.seed)();
-
-      const listening: any = yield* until(createSim.listen());
-
-      // debug log so tests can see the assigned port (left as example output)
-      // eslint-disable-next-line no-console
-      console.log(
-        `[data-sharing] started foundation sim on port ${listening.port}`
-      );
+      const { port: listeningPort } = yield* useSimulation(
+        createServiceASimulation
+      )(data.seed);
 
       // self-check
       try {
@@ -60,7 +61,7 @@ export const services = useServiceGraph({
             const req = http.get(
               {
                 hostname: "127.0.0.1",
-                port: listening.port,
+                port: listeningPort,
                 path: "/info",
                 agent: false,
               },
@@ -80,24 +81,7 @@ export const services = useServiceGraph({
         console.log(`[data-sharing] self-check error:`, err);
       }
 
-      // spawn background keeper which calls ensureClose when finalized
-      yield* spawn(function* () {
-        try {
-          yield* suspend();
-        } finally {
-          // eslint-disable-next-line no-console
-          console.log(
-            `[data-sharing] ensuring close for port ${listening.port}`
-          );
-          yield* until(listening.ensureClose());
-          // eslint-disable-next-line no-console
-          console.log(
-            `[data-sharing] closed foundation sim on port ${listening.port}`
-          );
-        }
-      });
-
-      return { handledWith: data.seed, port: listening.port };
+      return { handledWith: data.seed, port: listeningPort };
     },
   },
 
@@ -105,23 +89,15 @@ export const services = useServiceGraph({
   serviceB: {
     deps: ["serviceA", "data"],
     *operation({ serviceA, data }) {
-      const createSim = createServiceBSimulation(serviceA.handledWith)();
-
-      const listening: any = yield* until(createSim.listen());
-
-      yield* spawn(function* () {
-        try {
-          yield* suspend();
-        } finally {
-          yield* until(listening.ensureClose());
-        }
-      });
+      const { port: listeningPort } = yield* useSimulation(
+        createServiceBSimulation
+      )(serviceA.handledWith);
 
       // include data seed in the export so tests can verify multi-dependency wiring
       return {
         used: serviceA.handledWith,
         dataSeed: data.seed,
-        port: listening.port,
+        port: listeningPort,
       };
     },
   },
@@ -130,19 +106,11 @@ export const services = useServiceGraph({
   serviceC: {
     deps: ["data"],
     *operation({ data }) {
-      const createSim = createServiceCSimulation(data.message)();
+      const { port: listeningPort } = yield* useSimulation(
+        createServiceCSimulation
+      )(data.message);
 
-      const listening: any = yield* until(createSim.listen());
-
-      yield* spawn(function* () {
-        try {
-          yield* suspend();
-        } finally {
-          yield* until(listening.ensureClose());
-        }
-      });
-
-      return { dataMessage: data.message, port: listening.port };
+      return { dataMessage: data.message, port: listeningPort };
     },
   },
 });
