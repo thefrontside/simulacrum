@@ -9,6 +9,8 @@ export default defineConfig({
     sourcemap: true,
   },
   copy: ["src/views/public"],
+  // Disable minification to avoid build-time escaping of closing script tags
+  minify: false,
   // runs with @arethetypeswrong/core which checks types
   attw: false,
   publint: true,
