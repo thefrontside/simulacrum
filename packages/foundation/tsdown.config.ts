@@ -8,7 +8,6 @@ export default defineConfig({
   dts: {
     sourcemap: true,
   },
-  copy: [],
   // runs with @arethetypeswrong/core which checks types
   attw: false,
   publint: true,
