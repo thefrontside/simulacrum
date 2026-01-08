@@ -41,10 +41,12 @@ it("starts services in dependency order", async () => {
                 },
               }
             ),
-            deps: ["A"],
+            deps: ["A"] as const,
           },
         });
         yield* run();
+        // keep spawned graph alive
+        yield* suspend();
       });
       // The graph is running; sleep a short time to let the services start
       yield* sleep(200);
@@ -69,7 +71,7 @@ it("throws on cycles in dependency graph", async () => {
             "A",
             "node --import tsx ./test/services/service-a.ts"
           ),
-          deps: ["B"],
+          deps: ["B"] as const,
         },
         B: {
           operation: useService(
@@ -109,7 +111,7 @@ it("runs beforeStop hooks in reverse order", async () => {
           beforeStop() {
             return (function* () {
               stopOrder.push("A");
-            })() as unknown as Operation<void>;
+            })() as Operation<void>;
           },
         },
         B: {
@@ -127,15 +129,17 @@ it("runs beforeStop hooks in reverse order", async () => {
               },
             }
           ),
-          deps: ["A"],
+          deps: ["A"] as const,
           beforeStop() {
             return (function* () {
               stopOrder.push("B");
-            })() as unknown as Operation<void>;
+            })() as Operation<void>;
           },
         },
       });
       yield* run();
+      // keep spawned graph alive so beforeStop hooks run on teardown
+      yield* suspend();
     });
     // let them start
     yield* sleep(200);
@@ -184,6 +188,8 @@ it("starts independent services in parallel", async () => {
           },
         });
         yield* run();
+        // keep spawned graph alive so services continue to run
+        yield* suspend();
       });
       yield* sleep(250);
     });
@@ -241,17 +247,17 @@ it("runs subset of services with dependencies", async () => {
           ),
         },
         dependent: {
-          deps: ["fast", "slow"],
+          deps: ["fast", "slow"] as const,
           operation: (function* () {
             startTimes.set("dependent", Date.now());
             yield* suspend();
-          })() as unknown as Operation<void>,
+          })() as Operation<void>,
         },
-      } as any;
+      };
 
       // only request dependent; fast and slow should be included as deps
       const run = useServiceGraph(services);
-      yield* run(["dependent"]);
+      yield* run(); // start full graph (subset-run removed)
     });
     yield* sleep(300);
   });

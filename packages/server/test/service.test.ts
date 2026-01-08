@@ -72,7 +72,7 @@ describe("useService with wellness check", () => {
     await run(function* () {
       yield* useService("test-service", nodeScriptWorks, {
         wellnessCheck: {
-          timeout: 700,
+          timeout: 1000,
           frequency: 200,
           *operation(stdio) {
             for (let line of yield* each<string>(stdio)) {

@@ -72,7 +72,7 @@ export const services = useServiceGraph(servicesMap);
 
 import { fileURLToPath } from "node:url";
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  simulationCLI(services);
+  simulationCLI(services());
 }
 
 export function example(opts: { duration?: number } = {}) {

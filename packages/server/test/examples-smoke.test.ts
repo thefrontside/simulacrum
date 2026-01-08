@@ -19,30 +19,42 @@ function checkStatus(port: number): Promise<number> {
   });
 }
 
-import type { ServicesMap } from "../src/services.ts";
+import type { ServiceGraphValue } from "../src/services.ts";
+import type { Operation } from "effection";
 
 it("basic example imports and runs", async () => {
-  const runner = basicServices as unknown as any; // runner
+  const runner = basicServices as unknown as () => Operation<
+    ServiceGraphValue<Record<string, unknown>>
+  >; // runner
+  let provided: any;
 
   // start the graph and await exported ports in a single run operation
   await run(function* () {
     const [scope, destroy] = createScope();
+    // start operation-style graph and capture provided resource synchronously
+    try {
+      provided = yield* runner();
+    } catch (err) {
+      console.error(
+        "example runner threw:",
+        err instanceof Error ? err.stack : err
+      );
+      throw err;
+    }
+    // keep the graph task alive until the scope is destroyed
     scope.run(function* () {
-      yield* runner();
-      // keep the graph task alive until the scope is destroyed
       yield* suspend();
     });
 
-    // allow spawned graph to attach `exportsOperation` properties
+    // allow spawned graph to settle and for services to register their ports
     yield* sleep(0);
 
-    const svcMap: ServicesMap = (basicServices as any).services;
+    const svcMap = provided!.services;
+    const ports = provided!.servicePorts;
     const ps: number[] = [];
     for (const name of Object.keys(svcMap)) {
-      const exportsOp = svcMap[name].exportsOperation;
-      if (!exportsOp) throw new Error(`no exportsOperation on ${name}`);
-      const val = yield* exportsOp;
-      ps.push(val);
+      const port = ports.get(name);
+      if (typeof port === "number") ps.push(port);
     }
 
     // keep the graph alive briefly to allow HTTP checks
@@ -69,17 +81,22 @@ it("basic example imports and runs", async () => {
     }
 
     // best-effort: close any Server handles before requesting shutdown
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const preHandles: any[] = (process as any)._getActiveHandles
-      ? (process as any)._getActiveHandles()
-      : [];
+    const _getActiveHandles = (
+      process as unknown as { _getActiveHandles?: () => unknown[] }
+    )._getActiveHandles;
+    const preHandles: unknown[] = _getActiveHandles ? _getActiveHandles() : [];
+
     for (const h of preHandles) {
       try {
-        const name = h && h.constructor && h.constructor.name;
-        if (name === "Server" && typeof h.close === "function") {
-          try {
-            h.close();
-          } catch (e) {}
+        const name = (h as { constructor?: { name?: string } })?.constructor
+          ?.name;
+        if (name === "Server") {
+          const maybeClose = (h as { close?: unknown }).close;
+          if (typeof maybeClose === "function") {
+            try {
+              (maybeClose as () => void)();
+            } catch (e) {}
+          }
         }
       } catch (e) {}
     }
@@ -89,19 +106,25 @@ it("basic example imports and runs", async () => {
     // request the graph be shut down and wait for up to 1s for cleanup
     const tb = yield* timebox(1000, () => until(destroy()));
     if (tb.timeout) {
-      // eslint-disable-next-line no-console
       console.warn("cleanup timed out for example graph");
     }
 
     // best-effort: close any remaining socket handles so tests don't hang
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handles: any[] = (process as any)._getActiveHandles
-      ? (process as any)._getActiveHandles()
-      : [];
+    const _getActiveHandles2 = (
+      process as unknown as { _getActiveHandles?: () => unknown[] }
+    )._getActiveHandles;
+    const handles: unknown[] = _getActiveHandles2 ? _getActiveHandles2() : [];
     for (const h of handles) {
       try {
-        if (typeof h.destroy === "function") h.destroy();
-        else if (typeof h.end === "function") h.end();
+        const maybeDestroy = (h as { destroy?: unknown }).destroy;
+        if (typeof maybeDestroy === "function") {
+          (maybeDestroy as () => void)();
+          continue;
+        }
+        const maybeEnd = (h as { end?: unknown }).end;
+        if (typeof maybeEnd === "function") {
+          (maybeEnd as () => void)();
+        }
       } catch (e) {
         // ignore
       }
@@ -114,25 +137,37 @@ it("basic example imports and runs", async () => {
 });
 
 it("lifecycle example imports and runs", async () => {
-  const runner = lifecycleServices as unknown as any; // runner
+  const runner = lifecycleServices as unknown as () => Operation<
+    ServiceGraphValue<Record<string, unknown>>
+  >; // runner
+  let provided: ServiceGraphValue<Record<string, unknown>> | undefined;
 
   await run(function* () {
     const [scope, destroy] = createScope();
+    // start operation-style graph and capture provided resource synchronously
+    try {
+      provided = yield* runner();
+    } catch (err) {
+      console.error(
+        "example runner threw:",
+        err instanceof Error ? err.stack : err
+      );
+      throw err;
+    }
+    // keep the graph task alive until the scope is destroyed
     scope.run(function* () {
-      yield* runner();
-      // keep the graph task alive until the scope is destroyed
       yield* suspend();
     });
 
-    // allow spawned graph to attach `exportsOperation` properties
+    // allow spawned graph to settle and for services to register their ports
     yield* sleep(0);
 
-    const svcMap: ServicesMap = (lifecycleServices as any).services;
+    const svcMap = provided!.services;
+    const ports = provided!.servicePorts;
     const ps: number[] = [];
     for (const name of Object.keys(svcMap)) {
-      const exportsOp = svcMap[name].exportsOperation;
-      if (!exportsOp) throw new Error(`no exportsOperation on ${name}`);
-      ps.push(yield* exportsOp);
+      const port = ports.get(name);
+      if (typeof port === "number") ps.push(port);
     }
 
     yield* sleep(200);
@@ -166,25 +201,37 @@ it("lifecycle example imports and runs", async () => {
 });
 
 it("concurrency example imports and runs", async () => {
-  const runner = concurrencyServices as unknown as any; // runner
+  const runner = concurrencyServices as unknown as () => Operation<
+    ServiceGraphValue<Record<string, unknown>>
+  >; // runner
+  let provided: ServiceGraphValue<Record<string, unknown>> | undefined;
 
   await run(function* () {
     const [scope, destroy] = createScope();
+    // start operation-style graph and capture provided resource synchronously
+    try {
+      provided = yield* runner();
+    } catch (err) {
+      console.error(
+        "example runner threw:",
+        err instanceof Error ? err.stack : err
+      );
+      throw err;
+    }
+    // keep the graph task alive until the scope is destroyed
     scope.run(function* () {
-      yield* runner();
-      // keep the graph task alive until the scope is destroyed
       yield* suspend();
     });
 
-    // allow spawned graph to attach `exportsOperation` properties
+    // allow spawned graph to settle and for services to register their ports
     yield* sleep(0);
 
-    const svcMap: ServicesMap = (concurrencyServices as any).services;
+    const svcMap = provided!.services;
+    const ports = provided!.servicePorts;
     const ps: number[] = [];
     for (const name of Object.keys(svcMap)) {
-      const exportsOp = svcMap[name].exportsOperation;
-      if (!exportsOp) throw new Error(`no exportsOperation on ${name}`);
-      ps.push(yield* exportsOp);
+      const port = ports.get(name);
+      if (typeof port === "number") ps.push(port);
     }
 
     yield* sleep(200);

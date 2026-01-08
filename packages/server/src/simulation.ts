@@ -1,38 +1,111 @@
-import { spawn, suspend, until } from "effection";
+import { resource, until, spawn, each, withResolvers, Ok } from "effection";
 import type { Operation } from "effection";
+import { exec } from "@effectionx/process";
+import { stderr, stdout } from "./logging.ts";
 import type {
   FoundationSimulator,
   FoundationSimulatorListening,
 } from "@simulacrum/foundation-simulator";
 
 /**
- * Helper to start a foundation simulation server factory and return the listening
- * information in a typed way.
+ * Helper to start a foundation simulation server factory
+ *
+ * This is implemented as an Effection `resource` so cleanup is handled by the
+ * `provide` finalizer when the operation's scope is closed.
  */
-export function useSimulation<A extends any[], L extends object = any>(
-  createFactory: (...args: A) => () => FoundationSimulator<L>
-): (...args: A) => Operation<FoundationSimulatorListening<L>> {
-  return function* (...args: A) {
-    const createSim = createFactory(...args)();
+export function useSimulation<L extends object = Record<string, unknown>>(
+  name: string,
+  createFactory: () => FoundationSimulator<L>
+): Operation<FoundationSimulatorListening<L>> {
+  return resource(function* (provide) {
+    const createSim = createFactory();
     const listening: FoundationSimulatorListening<L> = yield* until(
       createSim.listen()
     );
 
-    // small debug log to make it visible in tests
-    // eslint-disable-next-line no-console
-    console.log(`simulation started on port ${listening.port}`);
+    console.log(`${name} simulation started on port ${listening.port}`);
 
-    // ensure server is closed when this operation is finalized
+    try {
+      yield* provide(listening);
+    } finally {
+      yield* until(listening.ensureClose());
+      console.log(`${name} simulation closed on port ${listening.port}`);
+    }
+  });
+}
+
+// Spawn a child Node process to run a simulation factory in a fresh module
+// environment. This avoids sharing module cache and allows restarts to pick up
+// new code. The runtime uses `bin/run-simulation-child.ts`.
+export function useChildSimulation<L extends object = Record<string, unknown>>(
+  name: string,
+  modulePath: string,
+  args: unknown[] = []
+): Operation<FoundationSimulatorListening<L>> {
+  return resource(function* (provide) {
+    const cmd = [
+      "node",
+      "--import",
+      "tsx",
+      "./bin/run-simulation-child.ts",
+      modulePath,
+      JSON.stringify(args),
+    ]
+      .map((s) => (s.includes(" ") ? `'${s}'` : s))
+      .join(" ");
+
+    const process = yield* exec(cmd);
+
+    // read the first stdout JSON line to get the listening info
+    let listening: FoundationSimulatorListening<L> | undefined = undefined;
+    let ready = withResolvers(
+      "wait until the port is returned to signal ready"
+    );
+
+    // forward raw stdout for logging in chunk form (no reassembly)
     yield* spawn(function* () {
-      try {
-        yield* suspend();
-      } finally {
-        yield* until(listening.ensureClose());
-        // eslint-disable-next-line no-console
-        console.log(`simulation closed on port ${listening.port}`);
+      for (let line of yield* each(process.stdout)) {
+        const buf = Buffer.from(line);
+        const str = buf.toString();
+        stdout(str);
+
+        if (!listening) {
+          try {
+            const parsed = JSON.parse(str);
+            if (parsed && parsed.ready && typeof parsed.port === "number") {
+              listening = {
+                port: parsed.port,
+              } as FoundationSimulatorListening<L>;
+              ready.resolve(Ok(listening));
+            }
+          } catch (_) {
+            // ignore lines that are not JSON
+          }
+        }
+
+        yield* each.next();
       }
     });
 
-    return listening;
-  };
+    yield* spawn(function* () {
+      for (let line of yield* each(process.stderr)) {
+        const str = Buffer.from(line).toString();
+        stderr(str);
+        yield* each.next();
+      }
+    });
+
+    // wait to get the listening info from stdout
+    yield* ready.operation;
+    // we know listening is defined here
+    listening = listening!;
+
+    console.log(`${name} process simulation started on port ${listening.port}`);
+
+    try {
+      yield* provide(listening);
+    } finally {
+      console.log(`${name} simulation closed on port ${listening.port}`);
+    }
+  });
 }

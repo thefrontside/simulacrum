@@ -58,5 +58,5 @@ export function example(opts: { duration?: number } = {}) {
 import { fileURLToPath } from "node:url";
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // run via CLI when executed directly
-  simulationCLI(services);
+  simulationCLI(services());
 }
