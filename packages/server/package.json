@@ -32,7 +32,8 @@
     "build": "tsdown",
     "lint": "echo noop",
     "tsc": "tsc --noEmit",
-    "example:basic": "node --import tsx ./example/basic-graph.ts",
+    "example:process": "node --import tsx ./example/process-graph.ts",
+    "example:sim": "node --import tsx ./example/simulation-graph.ts",
     "example:lifecycle": "node --import tsx ./example/lifecycle-hooks.ts",
     "example:concurrency": "node --import tsx ./example/concurrency-layers.ts"
   },

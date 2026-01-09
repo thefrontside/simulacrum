@@ -39,8 +39,7 @@ export function useSimulation<L extends object = Record<string, unknown>>(
 // new code. The runtime uses `bin/run-simulation-child.ts`.
 export function useChildSimulation<L extends object = Record<string, unknown>>(
   name: string,
-  modulePath: string,
-  args: unknown[] = []
+  modulePath: string
 ): Operation<FoundationSimulatorListening<L>> {
   return resource(function* (provide) {
     const cmd = [
@@ -49,7 +48,6 @@ export function useChildSimulation<L extends object = Record<string, unknown>>(
       "tsx",
       "./bin/run-simulation-child.ts",
       modulePath,
-      JSON.stringify(args),
     ]
       .map((s) => (s.includes(" ") ? `'${s}'` : s))
       .join(" ");
@@ -67,7 +65,8 @@ export function useChildSimulation<L extends object = Record<string, unknown>>(
       for (let line of yield* each(process.stdout)) {
         const buf = Buffer.from(line);
         const str = buf.toString();
-        stdout(str);
+        console.log(`stdout: ${str}`);
+        yield* stdout(str);
 
         if (!listening) {
           try {
@@ -90,12 +89,27 @@ export function useChildSimulation<L extends object = Record<string, unknown>>(
     yield* spawn(function* () {
       for (let line of yield* each(process.stderr)) {
         const str = Buffer.from(line).toString();
-        stderr(str);
+        yield* stderr(str);
         yield* each.next();
       }
     });
 
-    // wait to get the listening info from stdout
+    // spawn a watcher to detect if the child exits before printing the listening info
+    let status: unknown = undefined;
+    yield* spawn(function* () {
+      status = yield* process.join();
+      if (!listening) {
+        ready.reject(
+          new Error(
+            `child process exited before emitting listening info: ${JSON.stringify(
+              status
+            )}`
+          )
+        );
+      }
+    });
+
+    // wait to get the listening info from stdout (or reject if the process exited)
     yield* ready.operation;
     // we know listening is defined here
     listening = listening!;
@@ -105,7 +119,7 @@ export function useChildSimulation<L extends object = Record<string, unknown>>(
     try {
       yield* provide(listening);
     } finally {
-      console.log(`${name} simulation closed on port ${listening.port}`);
+      console.log(`${name} simulation closed on port ${listening?.port}`);
     }
   });
 }

@@ -128,30 +128,9 @@ npm run example:concurrency
 node --import tsx ./example/basic-graph.ts
 ```
 
-### Typed exports between services 💡
+### Sharing exported values between services (note)
 
-Services may return a value from their `operation`. That value is exposed to dependent services via an `exportsOperation` on the provider.
+Previously services could expose their return value via a public `exportsOperation` that consumers could await. That mechanism has been removed in this branch as we move to a child-process-focused runner model. Provider-returned values are still delivered to dependent service factories internally, but no longer exposed as an operation on the public `services` map.
 
-```ts
-const services = {
-  provider: {
-    // provider operation returns { url: string }
-    operation: useService<{ url: string }>(
-      "provider",
-      "node --import tsx ./example/services/provider.ts"
-    ),
-  },
-  consumer: {
-    deps: ["provider"],
-    operation() {
-      return (function* () {
-        // access provider exports via the `services` variable
-        const providerExports = yield* services.provider.exportsOperation;
-        console.log("provider url:", providerExports.url);
-      })();
-    },
-  },
-};
-
-// create a runner via `useServiceGraph(services)` and pass that runner to `simulationCLI` if desired, e.g. `simulationCLI(useServiceGraph(services))`
+For convenience tests may use the `servicePorts` map exposed by the running graph to discover HTTP ports that services registered when they start.
 ````

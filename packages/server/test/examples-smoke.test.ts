@@ -3,9 +3,9 @@ import http from "node:http";
 import { run, sleep, suspend, createScope, until } from "effection";
 import { timebox } from "@effectionx/timebox";
 
-import { services as basicServices } from "../example/operation/basic-graph.ts";
-import { services as lifecycleServices } from "../example/operation/lifecycle-hooks.ts";
-import { services as concurrencyServices } from "../example/operation/concurrency-layers.ts";
+import { services as basicServices } from "../example/simulation-graph.ts";
+import { services as lifecycleServices } from "../example/lifecycle-hooks.ts";
+import { services as concurrencyServices } from "../example/concurrency-layers.ts";
 
 function checkStatus(port: number): Promise<number> {
   return new Promise((resolve, reject) => {

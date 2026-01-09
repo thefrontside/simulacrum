@@ -6,7 +6,7 @@ There are two sets of examples:
 
 - **use-service** (top-level files like `basic-graph.ts`, `lifecycle-hooks.ts`, `concurrency-layers.ts`) — these spawn separate processes using `useService` (e.g. `node --import tsx ./example/services/*.ts`). Use these to exercise the process-based behavior.
 
-- **operation** (under `operation/`) — these use the `httpServer()` operation directly and run entirely in-process. They are faster and more deterministic for tests and quick iteration.
+- **operation** (under `operation/`) — these demonstrate `useChildSimulation()` which runs each service in a child process using a simulation factory. They show how to isolate simulations and start them as independent processes.
 
 Quick commands:
 

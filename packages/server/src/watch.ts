@@ -4,6 +4,7 @@ import {
   createChannel,
   createSignal,
   each,
+  type Operation,
   race,
   resource,
   sleep,
@@ -36,10 +37,15 @@ export function debounce<T, R>(
   });
 }
 
-export function useWatcher() {
+export type ServiceUpdate = { service: string; path: string };
+
+export function useWatcher(): Operation<{
+  serviceUpdates: Stream<{ service: string; path: string }, void>;
+  add: (service: string, paths: string[]) => void;
+}> {
   return resource(function* (provide) {
     const changes = createSignal<EmitArgs, never>();
-    const serviceUpdates = createChannel<{ service: string; path: string }>();
+    const serviceUpdates = createChannel<ServiceUpdate>();
     const serviceList = new Map<string, Matcher[]>();
 
     const watcher = chokidar.watch([], {

@@ -1,60 +1,29 @@
 #!/usr/bin/env node
-import { sleep, each, type Stream } from "effection";
+import { resource, sleep } from "effection";
 import { useServiceGraph } from "../src/services.ts";
-import { useService } from "../src/service.ts";
+import { useChildSimulation } from "../src/simulation.ts";
 import { simulationCLI } from "../src/cli.ts";
 
 const servicesMap = {
   fast: {
-    operation: useService(
-      "fast",
-      "node --import tsx ./example/services/fast.ts",
-      {
-        wellnessCheck: {
-          frequency: 10,
-          *operation(stdio: Stream<string, void>) {
-            for (let line of yield* each<string>(stdio)) {
-              if (line.includes("started")) {
-                console.log("fast ready");
-                return { ok: true, value: undefined };
-              }
-              yield* each.next();
-            }
-            // default success
-            return { ok: true, value: undefined };
-          },
-        },
-      }
-    ),
+    operation: useChildSimulation("fast", "./example/services/basic-sim-1.ts"),
+    watch: ["./example/services/basic-sim-1.ts"],
   },
   slow: {
-    operation: useService(
-      "slow",
-      "node --import tsx ./example/services/slow.ts",
-      {
-        wellnessCheck: {
-          frequency: 10,
-          *operation(stdio: Stream<string, void>) {
-            for (let line of yield* each<string>(stdio)) {
-              if (line.includes("started")) {
-                console.log("slow ready");
-                return { ok: true, value: undefined };
-              }
-              yield* each.next();
-            }
-            // default success
-            return { ok: true, value: undefined };
-          },
-        },
-      }
-    ),
+    operation: useChildSimulation("slow", "./example/services/basic-sim-2.ts"),
+    watch: ["./example/services/basic-sim-2.ts"],
   },
   dependent: {
-    deps: ["fast", "slow"] as const,
-    operation: (function* () {
-      console.log("dependent: all deps started; running dependent logic");
-      yield* sleep(50);
-    })(),
+    // deps: ["fast", "slow"] as const,
+    operation: resource<void>(function* (provide) {
+      try {
+        console.log("all deps started; running dependent service");
+        yield* provide();
+      } finally {
+        console.log("stopping dependent service");
+      }
+    }),
+    watch: ["./example/services/basic-sim.ts"],
   },
 };
 
@@ -65,16 +34,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   simulationCLI(services);
 }
 
-export function example(
-  opts: { duration?: number; sequential?: boolean } = {}
-) {
+export function example(opts: { duration?: number } = {}) {
   return (function* () {
-    if (opts.sequential) {
-      console.log("Running concurrency example in sequential mode");
-    }
     const run = services;
     yield* run();
     yield* sleep(opts.duration ?? 300);
-    console.log(`Concurrency example complete`);
+    console.log(`Concurrency example (operation) complete`);
   })();
 }

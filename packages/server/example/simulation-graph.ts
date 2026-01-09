@@ -1,16 +1,24 @@
 #!/usr/bin/env node
 import { sleep } from "effection";
-import { useServiceGraph } from "../../src/services.ts";
-import { httpServer } from "../services/http-server.ts";
-import { simulationCLI } from "../../src/cli.ts";
+import { useServiceGraph } from "../src/services.ts";
+import { useChildSimulation } from "../src/simulation.ts";
+import { simulationCLI } from "../src/cli.ts";
 
 const servicesMap = {
   A: {
-    operation: httpServer({ startDelay: 10 }),
+    operation: useChildSimulation(
+      "A",
+      "./example/services/basic-sim.ts",
+      [0, 10]
+    ),
   },
   B: {
     deps: ["A"] as const,
-    operation: httpServer({ startDelay: 20 }),
+    operation: useChildSimulation(
+      "B",
+      "./example/services/basic-sim.ts",
+      [0, 20]
+    ),
   },
 };
 

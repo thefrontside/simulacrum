@@ -1,15 +1,19 @@
 #!/usr/bin/env node
 import { main, suspend, until } from "effection";
 import { pathToFileURL } from "node:url";
+import type {
+  FoundationSimulator,
+  FoundationSimulatorListening,
+} from "@simulacrum/foundation-simulator";
 
 main(function* () {
   const args = process.argv.slice(2);
+  console.dir({ args });
   if (args.length < 1) {
     throw new Error("usage: run-simulation-child.js <modulePath> [jsonArgs]");
   }
 
   const modulePath = args[0];
-  const jsonArgs = args[1] ? JSON.parse(args[1]) : [];
 
   // Resolve and import module inside the operation
   let mod: any;
@@ -38,17 +42,13 @@ main(function* () {
     throw new Error(`no factory function found in module: ${modulePath}`);
   }
 
-  // call factory with provided args
-  let sim = factory(...(Array.isArray(jsonArgs) ? jsonArgs : [jsonArgs]));
-  if (typeof sim === "function") {
-    sim = sim();
-  }
+  let sim = factory() as FoundationSimulator<any>;
 
   if (!sim || typeof sim.listen !== "function") {
     throw new Error("factory did not return a simulator with .listen()");
   }
 
-  let listening: any;
+  let listening: FoundationSimulatorListening<any> | undefined = undefined;
   try {
     listening = yield* until(sim.listen());
     const out = JSON.stringify({
@@ -59,6 +59,7 @@ main(function* () {
     console.log(out);
     yield* suspend();
   } finally {
+    console.log("shutting down gracefully...");
     try {
       if (listening && typeof listening.ensureClose === "function") {
         yield* until(listening.ensureClose());
