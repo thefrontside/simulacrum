@@ -1,19 +1,3 @@
-import {
-  createFoundationSimulationServer,
-  type FoundationSimulator,
-} from "@simulacrum/foundation-simulator";
+import { simulation as genSimulation } from "./gen-sim-factory.ts";
 
-export function simulation(
-  port: number = 3302,
-  startDelay: number = 10
-): FoundationSimulator<any> {
-  const factory = createFoundationSimulationServer({
-    port,
-    extendRouter(router) {
-      router.get("/status", (_req, res) => {
-        res.status(200).send("ok");
-      });
-    },
-  })();
-  return factory;
-}
+export const simulation = genSimulation(3302, 15);

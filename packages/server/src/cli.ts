@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
 import { main, suspend, type Operation } from "effection";
-import type { ServiceGraph } from "./services.ts";
+import type { ServiceGraph, ServiceDefinition } from "./services.ts";
 
 export function* simulationCLIOp<S extends Record<string, any>>(
   serviceGraph: (subset?: string[] | string) => Operation<ServiceGraph<S>>

@@ -6,19 +6,11 @@ import { simulationCLI } from "../src/cli.ts";
 
 const servicesMap = {
   A: {
-    operation: useChildSimulation(
-      "A",
-      "./example/services/basic-sim.ts",
-      [0, 10]
-    ),
+    operation: useChildSimulation("A", "./example/services/basic-sim-1.ts"),
   },
   B: {
-    deps: ["A"] as const,
-    operation: useChildSimulation(
-      "B",
-      "./example/services/basic-sim.ts",
-      [0, 20]
-    ),
+    dependsOn: { startup: ["A"] as const },
+    operation: useChildSimulation("B", "./example/services/basic-sim-2.ts"),
   },
 };
 

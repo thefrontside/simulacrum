@@ -39,7 +39,9 @@ export function debounce<T, R>(
 
 export type ServiceUpdate = { service: string; path: string };
 
-export function useWatcher(): Operation<{
+export function useWatcher(
+  services?: Record<string, { dependsOn?: { restart?: readonly string[] } }>
+): Operation<{
   serviceUpdates: Stream<{ service: string; path: string }, void>;
   add: (service: string, paths: string[]) => void;
 }> {
@@ -66,6 +68,36 @@ export function useWatcher(): Operation<{
       watcher.add(paths);
     }
 
+    // precompute transitive dependents map if services are provided. This allows
+    // the watcher to emit updates not only for the changed service but also for
+    // any services that declare it in dependsOn.restart, transitively.
+    const dependentsMap = new Map<string, string[]>();
+    if (services) {
+      const restartAdj: Record<string, string[]> = {};
+      for (const name of Object.keys(services)) restartAdj[name] = [];
+      for (const name of Object.keys(services)) {
+        const def = services[name];
+        for (const dep of def.dependsOn?.restart ?? []) {
+          if (!(dep in restartAdj)) continue;
+          restartAdj[dep].push(name);
+        }
+      }
+
+      for (const n of Object.keys(services)) {
+        const seen = new Set<string>();
+        const stack = [...(restartAdj[n] ?? [])];
+        while (stack.length) {
+          const cur = stack.pop()!;
+          if (seen.has(cur)) continue;
+          seen.add(cur);
+          for (const next of restartAdj[cur] ?? []) {
+            if (!seen.has(next)) stack.push(next);
+          }
+        }
+        dependentsMap.set(n, Array.from(seen));
+      }
+    }
+
     yield* spawn(function* () {
       for (let args of yield* each(changes)) {
         const [path] = args as EmitArgs;
@@ -74,7 +106,13 @@ export function useWatcher(): Operation<{
             return matcher(path);
           });
           if (isAffected) {
+            // send update for the service itself
             yield* serviceUpdates.send({ service, path });
+            // then also send updates for its transitive dependents (if any)
+            const dependents = dependentsMap.get(service) ?? [];
+            for (const d of dependents) {
+              yield* serviceUpdates.send({ service: d, path });
+            }
           }
         }
         yield* each.next();

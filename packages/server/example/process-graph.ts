@@ -28,7 +28,7 @@ const servicesMap = {
     ),
   },
   B: {
-    deps: ["A"] as const,
+    dependsOn: { startup: ["A"] as const },
     operation: useService(
       "B",
       "node --import tsx ./example/services/basic-sim.ts",

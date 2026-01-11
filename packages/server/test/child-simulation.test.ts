@@ -7,8 +7,7 @@ it("useChildSimulation starts a child and returns port", async () => {
   await run(function* () {
     const listening = yield* useChildSimulation(
       "child-test",
-      "./test/fixtures/simple-sim.ts",
-      [0]
+      "./test/fixtures/simple-sim.ts"
     );
     assert(typeof listening.port === "number");
 

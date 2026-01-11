@@ -1,6 +1,6 @@
 import { it } from "node:test";
 import assert from "node:assert";
-import { run, sleep, spawn, Ok, suspend, type Operation } from "effection";
+import { resource, run, sleep, spawn, suspend } from "effection";
 import { useServiceGraph } from "../src/services.ts";
 import { useService } from "../src/service.ts";
 
@@ -11,37 +11,19 @@ it("starts services in dependency order", async () => {
       yield* spawn(function* () {
         const run = useServiceGraph({
           A: {
-            operation: useService(
-              "A",
-              "node --import tsx ./test/services/service-a.ts",
-              {
-                wellnessCheck: {
-                  frequency: 10,
-                  *operation(_stdio) {
-                    yield* sleep(20);
-                    startTimes.set("A", Date.now());
-                    return Ok<void>(void 0);
-                  },
-                },
-              }
-            ),
+            operation: resource<void>(function* (provide) {
+              yield* sleep(20);
+              startTimes.set("A", Date.now());
+              yield* provide();
+            }),
           },
           B: {
-            operation: useService(
-              "B",
-              "node --import tsx ./test/services/service-b.ts",
-              {
-                wellnessCheck: {
-                  frequency: 10,
-                  *operation(_stdio) {
-                    yield* sleep(40);
-                    startTimes.set("B", Date.now());
-                    return Ok<void>(void 0);
-                  },
-                },
-              }
-            ),
-            deps: ["A"] as const,
+            operation: resource<void>(function* (provide) {
+              yield* sleep(40);
+              startTimes.set("B", Date.now());
+              yield* provide();
+            }),
+            dependsOn: { startup: ["A"] as const },
           },
         });
         yield* run();
@@ -71,14 +53,14 @@ it("throws on cycles in dependency graph", async () => {
             "A",
             "node --import tsx ./test/services/service-a.ts"
           ),
-          deps: ["B"] as const,
+          dependsOn: { startup: ["B"] as const },
         },
         B: {
           operation: useService(
             "B",
             "node --import tsx ./test/services/service-b.ts"
           ),
-          deps: ["A"],
+          dependsOn: { startup: ["A"] as const },
         },
       });
       yield* runGraph();
@@ -94,47 +76,27 @@ it("runs beforeStop hooks in reverse order", async () => {
     yield* spawn(function* () {
       const run = useServiceGraph({
         A: {
-          operation: useService(
-            "A",
-            "node --import tsx ./test/services/service-a.ts",
-            {
-              wellnessCheck: {
-                frequency: 10,
-                *operation(_stdio) {
-                  yield* sleep(20);
-                  startedOrder.push("A");
-                  return Ok<void>(void 0);
-                },
-              },
-            }
-          ),
-          beforeStop() {
-            return (function* () {
+          operation: resource<void>(function* (provide) {
+            try {
+              yield* sleep(20);
+              startedOrder.push("A");
+              yield* provide();
+            } finally {
               stopOrder.push("A");
-            })() as Operation<void>;
-          },
+            }
+          }),
         },
         B: {
-          operation: useService(
-            "B",
-            "node --import tsx ./test/services/service-b.ts",
-            {
-              wellnessCheck: {
-                frequency: 10,
-                *operation(_stdio) {
-                  yield* sleep(40);
-                  startedOrder.push("B");
-                  return Ok<void>(void 0);
-                },
-              },
-            }
-          ),
-          deps: ["A"] as const,
-          beforeStop() {
-            return (function* () {
+          operation: resource<void>(function* (provide) {
+            try {
+              yield* sleep(40);
+              startedOrder.push("B");
+              yield* provide();
+            } finally {
               stopOrder.push("B");
-            })() as Operation<void>;
-          },
+            }
+          }),
+          dependsOn: { startup: ["A"] as const },
         },
       });
       yield* run();
@@ -155,36 +117,18 @@ it("starts independent services in parallel", async () => {
       yield* spawn(function* () {
         const run = useServiceGraph({
           fast: {
-            operation: useService(
-              "fast",
-              "node --import tsx ./test/services/service-fast.ts",
-              {
-                wellnessCheck: {
-                  frequency: 10,
-                  *operation(_stdio) {
-                    yield* sleep(20);
-                    startTimes.set("fast", Date.now());
-                    return Ok<void>(void 0);
-                  },
-                },
-              }
-            ),
+            operation: resource<void>(function* (provide) {
+              yield* sleep(20);
+              startTimes.set("fast", Date.now());
+              yield* provide();
+            }),
           },
           slow: {
-            operation: useService(
-              "slow",
-              "node --import tsx ./test/services/service-slow.ts",
-              {
-                wellnessCheck: {
-                  frequency: 10,
-                  *operation(_stdio) {
-                    yield* sleep(50);
-                    startTimes.set("slow", Date.now());
-                    return Ok<void>(void 0);
-                  },
-                },
-              }
-            ),
+            operation: resource<void>(function* (provide) {
+              yield* sleep(50);
+              startTimes.set("slow", Date.now());
+              yield* provide();
+            }),
           },
         });
         yield* run();
@@ -215,49 +159,43 @@ it("runs subset of services with dependencies", async () => {
     yield* spawn(function* () {
       const services = {
         fast: {
-          operation: useService(
-            "fast",
-            "node --import tsx ./test/services/service-fast.ts",
-            {
-              wellnessCheck: {
-                frequency: 10,
-                *operation(_stdio) {
-                  yield* sleep(20);
-                  startTimes.set("fast", Date.now());
-                  return Ok<void>(void 0);
-                },
-              },
-            }
-          ),
+          operation: resource<void>(function* (provide) {
+            console.log("test: fast operation starting");
+            yield* sleep(20);
+            console.log("test: fast operation setting startTimes");
+            startTimes.set("fast", Date.now());
+            yield* provide();
+          }),
         },
         slow: {
-          operation: useService(
-            "slow",
-            "node --import tsx ./test/services/service-slow.ts",
-            {
-              wellnessCheck: {
-                frequency: 10,
-                *operation(_stdio) {
-                  yield* sleep(50);
-                  startTimes.set("slow", Date.now());
-                  return Ok<void>(void 0);
-                },
-              },
-            }
-          ),
+          operation: resource<void>(function* (provide) {
+            console.log("test: slow operation starting");
+            yield* sleep(50);
+            console.log("test: slow operation setting startTimes");
+            startTimes.set("slow", Date.now());
+            yield* provide();
+          }),
         },
         dependent: {
-          deps: ["fast", "slow"] as const,
-          operation: (function* () {
+          dependsOn: { startup: ["fast", "slow"] as const },
+          operation: resource<void>(function* (provide) {
+            // wait until both dependencies have recorded their start times
+            while (!startTimes.has("fast") || !startTimes.has("slow")) {
+              yield* sleep(5);
+            }
+            console.log("test: dependent operation starting after deps");
             startTimes.set("dependent", Date.now());
-            yield* suspend();
-          })() as Operation<void>,
+            yield* provide();
+          }),
         },
       };
 
       // only request dependent; fast and slow should be included as deps
       const run = useServiceGraph(services);
-      yield* run(); // start full graph (subset-run removed)
+      // request only 'dependent' — this should cause 'fast' and 'slow' to be included as dependencies
+      yield* run(["dependent"]);
+      // keep spawned graph alive so services can start and perform startup work
+      yield* suspend();
     });
     yield* sleep(300);
   });
@@ -270,4 +208,79 @@ it("runs subset of services with dependencies", async () => {
   assert.ok(typeof d === "number", "dependent should start");
   assert(f! <= d!, "fast should start before dependent");
   assert(s! <= d!, "slow should start before dependent");
+});
+
+it("throws when requested subset includes a missing service", async () => {
+  await assert.rejects(async () => {
+    await run(function* () {
+      const services = {
+        a: {
+          operation: resource<void>(function* (provide) {
+            yield* sleep(10);
+            yield* provide();
+          }),
+        },
+      };
+
+      const runGraph = useServiceGraph(services);
+      // request a service that does not exist
+      yield* runGraph(["missing"]);
+    });
+  }, /Requested service 'missing' not found/);
+});
+
+it("runs subset specified as a string", async () => {
+  const startTimes = new Map<string, number>();
+  await run(function* () {
+    yield* spawn(function* () {
+      const services = {
+        a: {
+          operation: resource<void>(function* (provide) {
+            yield* sleep(20);
+            startTimes.set("a", Date.now());
+            yield* provide();
+          }),
+        },
+        b: {
+          operation: resource<void>(function* (provide) {
+            yield* sleep(50);
+            startTimes.set("b", Date.now());
+            yield* provide();
+          }),
+        },
+        r: {
+          dependsOn: { startup: ["a", "b"] as const },
+          operation: resource<void>(function* (provide) {
+            while (!startTimes.has("a") || !startTimes.has("b")) {
+              yield* sleep(5);
+            }
+            startTimes.set("r", Date.now());
+            yield* provide();
+          }),
+        },
+        other: {
+          operation: resource<void>(function* (provide) {
+            yield* sleep(10);
+            startTimes.set("other", Date.now());
+            yield* provide();
+          }),
+        },
+      };
+
+      const run = useServiceGraph(services);
+      // pass a comma-separated string
+      yield* run("r");
+      yield* suspend();
+    });
+    yield* sleep(300);
+  });
+
+  const a = startTimes.get("a");
+  const b = startTimes.get("b");
+  const r = startTimes.get("r");
+  const other = startTimes.get("other");
+  assert.ok(typeof a === "number", "a should start");
+  assert.ok(typeof b === "number", "b should start");
+  assert.ok(typeof r === "number", "r should start");
+  assert.ok(typeof other === "undefined", "other should NOT start");
 });

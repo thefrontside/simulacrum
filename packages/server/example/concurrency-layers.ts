@@ -14,7 +14,7 @@ const servicesMap = {
     watch: ["./example/services/basic-sim-2.ts"],
   },
   dependent: {
-    // deps: ["fast", "slow"] as const,
+    dependsOn: { startup: ["fast", "slow"] as const },
     operation: resource<void>(function* (provide) {
       try {
         console.log("all deps started; running dependent service");

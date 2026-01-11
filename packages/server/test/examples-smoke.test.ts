@@ -4,7 +4,6 @@ import { run, sleep, suspend, createScope, until } from "effection";
 import { timebox } from "@effectionx/timebox";
 
 import { services as basicServices } from "../example/simulation-graph.ts";
-import { services as lifecycleServices } from "../example/lifecycle-hooks.ts";
 import { services as concurrencyServices } from "../example/concurrency-layers.ts";
 
 function checkStatus(port: number): Promise<number> {
@@ -19,12 +18,12 @@ function checkStatus(port: number): Promise<number> {
   });
 }
 
-import type { ServiceGraphValue } from "../src/services.ts";
+import type { ServiceGraph } from "../src/services.ts";
 import type { Operation } from "effection";
 
 it("basic example imports and runs", async () => {
   const runner = basicServices as unknown as () => Operation<
-    ServiceGraphValue<Record<string, unknown>>
+    ServiceGraph<Record<string, unknown>>
   >; // runner
   let provided: any;
 
@@ -50,10 +49,10 @@ it("basic example imports and runs", async () => {
     yield* sleep(0);
 
     const svcMap = provided!.services;
-    const ports = provided!.servicePorts;
+    const ports = provided!.servicePorts!;
     const ps: number[] = [];
     for (const name of Object.keys(svcMap)) {
-      const port = ports.get(name);
+      const port = ports!.get(name);
       if (typeof port === "number") ps.push(port);
     }
 
@@ -136,75 +135,11 @@ it("basic example imports and runs", async () => {
   });
 });
 
-it("lifecycle example imports and runs", async () => {
-  const runner = lifecycleServices as unknown as () => Operation<
-    ServiceGraphValue<Record<string, unknown>>
-  >; // runner
-  let provided: ServiceGraphValue<Record<string, unknown>> | undefined;
-
-  await run(function* () {
-    const [scope, destroy] = createScope();
-    // start operation-style graph and capture provided resource synchronously
-    try {
-      provided = yield* runner();
-    } catch (err) {
-      console.error(
-        "example runner threw:",
-        err instanceof Error ? err.stack : err
-      );
-      throw err;
-    }
-    // keep the graph task alive until the scope is destroyed
-    scope.run(function* () {
-      yield* suspend();
-    });
-
-    // allow spawned graph to settle and for services to register their ports
-    yield* sleep(0);
-
-    const svcMap = provided!.services;
-    const ports = provided!.servicePorts;
-    const ps: number[] = [];
-    for (const name of Object.keys(svcMap)) {
-      const port = ports.get(name);
-      if (typeof port === "number") ps.push(port);
-    }
-
-    yield* sleep(200);
-
-    // check each port while the graph is still running
-    for (const p of ps) {
-      let ok = false;
-      for (let i = 0; i < 100; i++) {
-        try {
-          const status = yield* until(checkStatus(p));
-          if (status === 200) {
-            ok = true;
-            break;
-          }
-        } catch (_) {}
-        yield* sleep(10);
-      }
-      if (!ok) {
-        throw new Error(
-          `(examples-smoke lifecycle) port ${p} did not return 200 while graph was running`
-        );
-      }
-    }
-
-    // shut down the graph to avoid hanging the test process
-    yield* until(destroy());
-    return ps as number[];
-  });
-
-  // nothing to check here; checks already happened while graph was running
-});
-
 it("concurrency example imports and runs", async () => {
   const runner = concurrencyServices as unknown as () => Operation<
-    ServiceGraphValue<Record<string, unknown>>
+    ServiceGraph<Record<string, unknown>>
   >; // runner
-  let provided: ServiceGraphValue<Record<string, unknown>> | undefined;
+  let provided: ServiceGraph<Record<string, unknown>> | undefined;
 
   await run(function* () {
     const [scope, destroy] = createScope();
@@ -227,10 +162,10 @@ it("concurrency example imports and runs", async () => {
     yield* sleep(0);
 
     const svcMap = provided!.services;
-    const ports = provided!.servicePorts;
+    const ports = provided!.servicePorts!;
     const ps: number[] = [];
     for (const name of Object.keys(svcMap)) {
-      const port = ports.get(name);
+      const port = ports!.get(name);
       if (typeof port === "number") ps.push(port);
     }
 

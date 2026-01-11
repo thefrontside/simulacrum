@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 it("example process shuts down cleanly on SIGINT", async () => {
   const exe = process.execPath;
   const script = fileURLToPath(
-    new URL("../example/basic-graph.ts", import.meta.url)
+    new URL("../example/simulation-graph.ts", import.meta.url)
   );
   const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -27,7 +27,12 @@ it("example process shuts down cleanly on SIGINT", async () => {
     const to = setTimeout(() => reject(new Error("start timeout")), 3000);
     child.stdout?.on("data", function ondata(d) {
       const s = String(d);
-      if (s.includes("runner: starting layers")) {
+      // the service runner logs when services start — accept either the old
+      // marker or the current log message used by the service graph implementation
+      if (
+        s.includes("runner: starting layers") ||
+        s.includes("service graph: starting service")
+      ) {
         clearTimeout(to);
         child.stdout?.off("data", ondata);
         resolve();

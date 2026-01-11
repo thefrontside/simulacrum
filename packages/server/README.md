@@ -15,7 +15,11 @@ Key points:
 
 - `useServiceGraph(services: ServicesMap, options?: { sequential?: boolean }): ServiceRunner<ServicesMap>` — returns a _runner function_ which you call to start the graph: `const run = useServiceGraph(services, options); yield* run(subset?: string[] | string);`. By default services in the same topological layer run concurrently; pass `options.sequential = true` to run services in each layer serially.
 - `ServiceDefinition.operation` (required) — an `Operation<void>` which indicates the service has started. This operation may be long-lived (e.g. `useService`) or may return once the service is ready while a background child keeps the service running. See the example below.
-- `deps` — an optional list of service names this service depends on; services without dependencies in the same layer are started concurrently by default, or serially when `options.sequential` is true.
+- `dependsOn` — an optional object `{ startup: string[]; restart?: string[] }` listing service names this service depends on. Use `startup` to list services that must start before this service; use `restart` to list services that should trigger a restart of this service when they are restarted (for example, due to a watched file change). Services without dependencies in the same layer are started concurrently by default, or serially when `options.sequential` is true.
+
+- `subset` (runner argument) — when calling the runner returned by `useServiceGraph` you may pass a subset (e.g. `yield* run(['serviceA'])` or `yield* run('serviceA')`) to start only a subset of services; any startup dependencies required by that subset are automatically included.
+
+- Watching & restart propagation — pass `{ watch: true }` to `useServiceGraph` and define `watch` paths in each `ServiceDefinition` to enable file watching. The watcher will precompute transitive dependents (based on `dependsOn.restart`) and automatically emit restart updates for dependents when a watched path changes, so restarts propagate efficiently and deterministically.
 - Lifecycle hooks: `beforeStart`, `afterStart`, `beforeStop`, `afterStop` — each is an `Operation<void>` that runs at the appropriate time.
 
 Example:
@@ -42,7 +46,7 @@ main(function* () {
           "B",
           "node --import tsx ./test/services/service-b.ts"
         ),
-        deps: ["A"],
+        dependsOn: { startup: ["A"] },
       },
     });
   });
@@ -61,29 +65,28 @@ Each `ServiceDefinition` supports lifecycle hook operations. These hooks run in 
 ```ts
 const services = {
   A: {
-    operation: useService(
-      "A",
-      "node --import tsx ./test/services/service-a.ts"
-    ),
-    afterStart: () =>
-      (function* () {
-        // runs after the operation returns
-        console.log("A has started");
-      })(),
-    beforeStop: () =>
-      (function* () {
-        // runs during shutdown in reverse order
+    operation: (function* () {
+      // start the service via useService or useChildSimulation
+      yield* useService("A", "node --import tsx ./test/services/service-a.ts");
+      // signal that the service is ready
+      console.log("A has started");
+      try {
+        // keep running until cancelled
+        yield* suspend();
+      } finally {
+        // cleanup runs automatically on scope cancellation
         console.log("A is stopping");
-      })(),
+      }
+    })(),
   },
 };
 ```
 
 Notes:
 
-- `afterStart` runs after `operation` returns (service is ready)
-- `beforeStop` runs during cleanup in reverse-order of startup
-- Hooks are optional and can be used together with a passed `operation` or a custom operation
+- Use a try/finally in your `operation` to run cleanup logic when the service is stopped
+- This approach leverages Effection scopes and ensures cleanup runs in reverse dependency order when the graph is shut down
+- Use `useService` or `useChildSimulation` inside your operation as needed to start underlying processes
 
 Try it
 
@@ -132,5 +135,5 @@ node --import tsx ./example/basic-graph.ts
 
 Previously services could expose their return value via a public `exportsOperation` that consumers could await. That mechanism has been removed in this branch as we move to a child-process-focused runner model. Provider-returned values are still delivered to dependent service factories internally, but no longer exposed as an operation on the public `services` map.
 
-For convenience tests may use the `servicePorts` map exposed by the running graph to discover HTTP ports that services registered when they start.
+For convenience tests may use the `servicePorts` map exposed by the running graph to discover HTTP ports that services registered when they start. The `servicePorts` map is available on the object returned by the runner and contains service name => port when a service's `operation` returns an object with a `{ port: number }` property.
 ````

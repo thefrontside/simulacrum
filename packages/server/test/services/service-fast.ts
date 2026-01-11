@@ -1,6 +1,4 @@
-import { main } from "effection";
-import { httpServer } from "../../example/services/http-server.ts";
+import { simulation as genSimulation } from "../../example/services/gen-sim-factory.ts";
+import type { FoundationSimulator } from "@simulacrum/foundation-simulator";
 
-main(function* () {
-  yield* httpServer({ startDelay: 10 });
-});
+export const simulation: FoundationSimulator<any> = genSimulation(4030, 10);

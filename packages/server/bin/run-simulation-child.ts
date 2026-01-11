@@ -10,7 +10,7 @@ main(function* () {
   const args = process.argv.slice(2);
   console.dir({ args });
   if (args.length < 1) {
-    throw new Error("usage: run-simulation-child.js <modulePath> [jsonArgs]");
+    throw new Error("usage: run-simulation-child.js <modulePath>");
   }
 
   const modulePath = args[0];
