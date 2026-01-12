@@ -1,6 +1,5 @@
 import type { ScopeConfig } from "../types.ts";
 import { deriveScope } from "../handlers/utils.ts";
-const html = String.raw;
 
 interface LoginViewProps {
   domain: string;
@@ -19,7 +18,7 @@ export const loginView = ({
   audience,
   loginFailed = false,
 }: LoginViewProps): string => {
-  return html`
+  return /*html*/ `
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
@@ -56,9 +55,9 @@ export const loginView = ({
                     autocomplete="email"
                     required=""
                     value=""
-                    class="${loginFailed
-                      ? "border-red-500"
-                      : ""} appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    class="${
+                      loginFailed ? "border-red-500" : ""
+                    } appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Email address"
                   />
                 </div>
@@ -70,17 +69,17 @@ export const loginView = ({
                     type="password"
                     autocomplete="current-password"
                     required=""
-                    class="my-4 ${loginFailed
-                      ? "border-red-500"
-                      : ""} appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                    class="my-4 ${
+                      loginFailed ? "border-red-500" : ""
+                    } appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Password"
                   />
                 </div>
               </div>
               <div
-                class="error bg-red-500 text-white p-3 ${loginFailed
-                  ? ""
-                  : "hidden"}"
+                class="error bg-red-500 text-white p-3 ${
+                  loginFailed ? "" : "hidden"
+                }"
               >
                 Wrong email or password
               </div>

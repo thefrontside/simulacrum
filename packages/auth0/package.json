@@ -57,13 +57,13 @@
     "@types/jsesc": "^3.0.3",
     "@types/jsonwebtoken": "^9.0.9"
   },
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
     },
     "./package.json": "./package.json"
   },
@@ -78,8 +78,8 @@
   "publishConfig": {
     "exports": {
       ".": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
+        "require": "./dist/index.cjs",
+        "import": "./dist/index.mjs"
       },
       "./package.json": "./package.json"
     }
