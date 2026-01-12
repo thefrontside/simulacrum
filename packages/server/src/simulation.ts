@@ -23,13 +23,13 @@ export function useSimulation<L extends object = Record<string, unknown>>(
       createSim.listen()
     );
 
-    console.log(`${name} simulation started on port ${listening.port}`);
+    yield* stdout(`${name} simulation started on port ${listening.port}`);
 
     try {
       yield* provide(listening);
     } finally {
       yield* until(listening.ensureClose());
-      console.log(`${name} simulation closed on port ${listening.port}`);
+      yield* stdout(`${name} simulation closed on port ${listening.port}`);
     }
   });
 }
@@ -65,8 +65,6 @@ export function useChildSimulation<L extends object = Record<string, unknown>>(
       for (let line of yield* each(process.stdout)) {
         const buf = Buffer.from(line);
         const str = buf.toString();
-        console.log(`stdout: ${str}`);
-        yield* stdout(str);
 
         if (!listening) {
           try {
@@ -76,10 +74,15 @@ export function useChildSimulation<L extends object = Record<string, unknown>>(
                 port: parsed.port,
               } as FoundationSimulatorListening<L>;
               ready.resolve(Ok(listening));
+            } else {
+              yield* stdout(str);
             }
           } catch (_) {
             // ignore lines that are not JSON
+            yield* stdout(str);
           }
+        } else {
+          yield* stdout(str);
         }
 
         yield* each.next();
@@ -114,12 +117,14 @@ export function useChildSimulation<L extends object = Record<string, unknown>>(
     // we know listening is defined here
     listening = listening!;
 
-    console.log(`${name} process simulation started on port ${listening.port}`);
+    yield* stdout(
+      `${name} process simulation started on port ${listening.port}`
+    );
 
     try {
       yield* provide(listening);
     } finally {
-      console.log(`${name} simulation closed on port ${listening?.port}`);
+      yield* stdout(`${name} simulation closed on port ${listening?.port}`);
     }
   });
 }

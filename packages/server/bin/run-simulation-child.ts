@@ -8,7 +8,6 @@ import type {
 
 main(function* () {
   const args = process.argv.slice(2);
-  console.dir({ args });
   if (args.length < 1) {
     throw new Error("usage: run-simulation-child.js <modulePath>");
   }
@@ -59,7 +58,6 @@ main(function* () {
     console.log(out);
     yield* suspend();
   } finally {
-    console.log("shutting down gracefully...");
     try {
       if (listening && typeof listening.ensureClose === "function") {
         yield* until(listening.ensureClose());

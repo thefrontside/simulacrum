@@ -2,8 +2,8 @@ import { parseArgs } from "node:util";
 import { main, suspend, type Operation } from "effection";
 import type { ServiceGraph, ServiceDefinition } from "./services.ts";
 
-export function* simulationCLIOp<S extends Record<string, any>>(
-  serviceGraph: (subset?: string[] | string) => Operation<ServiceGraph<S>>
+export function* simulationCLIOp<S extends Record<string, any>, T = any>(
+  serviceGraph: (subset?: string[] | string) => Operation<ServiceGraph<S, T>>
 ) {
   try {
     const { values } = parseArgs({
@@ -20,7 +20,7 @@ export function* simulationCLIOp<S extends Record<string, any>>(
     });
 
     function* printUsage() {
-      console.log(
+      process.stdout.write(
         `Usage: cli [-s|--services serviceName] [--watch] [--watch-debounce ms]`
       );
     }

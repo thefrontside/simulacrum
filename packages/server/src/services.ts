@@ -9,6 +9,7 @@ import {
 } from "effection";
 
 import { type ServiceUpdate, useWatcher } from "./watch.ts";
+import { stdout } from "./logging.ts";
 
 export type ServiceDefinition<
   S,
@@ -116,7 +117,7 @@ export function useServiceGraph<
         }
         effectiveServices = picked as typeof services;
 
-        console.log(
+        yield* stdout(
           `service graph: starting with services: ${Array.from(included).join(
             ", "
           )}`
@@ -217,7 +218,7 @@ export function useServiceGraph<
       try {
         for (let service of Object.keys(effectiveServices)) {
           yield* spawn(function* () {
-            console.log(`service graph: starting service '${service}'`);
+            yield* stdout(`service graph: starting service '${service}'`);
             yield* withRestarts(service);
           });
         }
@@ -229,7 +230,7 @@ export function useServiceGraph<
           servicePorts,
         });
       } finally {
-        console.log("shutting down service graph");
+        yield* stdout("shutting down service graph");
       }
     });
 }
