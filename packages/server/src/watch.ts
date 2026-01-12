@@ -5,44 +5,25 @@ import {
   createSignal,
   each,
   type Operation,
-  race,
   resource,
-  sleep,
   spawn,
   type Stream,
   until,
 } from "effection";
 import picomatch, { type Matcher } from "picomatch";
-
-export function debounce<T, R>(
-  ms: number
-): (stream: Stream<T, R>) => Stream<T, R> {
-  return (stream) => ({
-    *[Symbol.iterator]() {
-      let subscription = yield* stream;
-      return {
-        *next() {
-          let next = yield* subscription.next();
-          while (true) {
-            let result = yield* race([sleep(ms), subscription.next()]);
-            if (!result) {
-              return next;
-            } else {
-              next = result;
-            }
-          }
-        },
-      };
-    },
-  });
-}
+import { filter } from "@effectionx/stream-helpers";
 
 export type ServiceUpdate = { service: string; path: string };
 
 export function useWatcher(
-  services?: Record<string, { dependsOn?: { restart?: readonly string[] } }>
+  services?: Record<
+    string,
+    { dependsOn?: { restart?: readonly string[] }; watchDebounce?: number }
+  >,
+  options?: { watchDebounce?: number }
 ): Operation<{
   serviceUpdates: Stream<{ service: string; path: string }, void>;
+  serviceChanges: Stream<{ service: string; path: string }, void>;
   add: (service: string, paths: string[]) => void;
 }> {
   return resource(function* (provide) {
@@ -119,8 +100,30 @@ export function useWatcher(
       }
     });
 
+    const debounceMs =
+      options?.watchDebounce !== undefined ? options.watchDebounce : 250;
+    const serviceTimers = {} as Record<string, number>;
+    const debouncedServiceChanges = filter<ServiceUpdate>(function* (
+      updateStream
+    ) {
+      const now = performance.now();
+      if (
+        serviceTimers[updateStream.service] &&
+        now - serviceTimers[updateStream.service] < debounceMs
+      ) {
+        return false;
+      } else {
+        serviceTimers[updateStream.service] = now;
+        return true;
+      }
+    });
+
     try {
-      yield* provide({ serviceUpdates, add });
+      yield* provide({
+        serviceUpdates,
+        add,
+        serviceChanges: debouncedServiceChanges(serviceUpdates),
+      });
     } finally {
       yield* until(watcher.close());
     }

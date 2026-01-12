@@ -40,7 +40,7 @@
     "effection": "^4.0.0",
     "@effectionx/context-api": "^0.2.1",
     "@effectionx/process": "^0.6.2",
-    "@effectionx/stream-helpers": "^0.4.1",
+    "@effectionx/stream-helpers": "^0.5.1",
     "@effectionx/timebox": "^0.3.1",
     "chokidar": "^5.0.0",
     "picomatch": "^4.0.3"

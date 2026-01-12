@@ -1,6 +1,6 @@
 import { it } from "node:test";
 import assert from "node:assert";
-import { run, suspend, sleep, until, spawn, resource } from "effection";
+import { run, suspend, sleep, until, spawn, resource, ensure } from "effection";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
@@ -41,12 +41,12 @@ it("restarts services on watched file change and restarts dependents", async () 
 
       try {
         const services = yield* op();
-        // subscribe to the immediate serviceUpdates stream and wait for the first update
-        if (!services.serviceUpdates)
-          throw new Error("serviceUpdates not available");
-        const subscription = yield* services.serviceUpdates;
+        // subscribe to the immediate raw serviceChanges stream and wait for the first update
+        if (!services.serviceChanges)
+          throw new Error("serviceChanges not available");
+        const subscription = yield* services.serviceChanges;
 
-        // wait for the first update (will occur after the test touches the file)
+        // wait for the first raw update (will occur after the test touches the file)
         const first = yield* subscription.next();
         updates.push(String((first.value as { service: string }).service));
       } catch (e) {
@@ -209,4 +209,85 @@ it("restarts transitive dependents when watched service changes", async () => {
   assert(startCounts.a >= 2, "a should have been restarted");
   assert(startCounts.b >= 2, "b should have been restarted as dependent");
   assert(startCounts.c >= 2, "c should have been restarted as dependent of b");
+});
+
+it("debounces rapid changes per service", async () => {
+  const prefix = path.join(os.tmpdir(), "sim-watch-debounce-");
+  const dir = await fs.mkdtemp(prefix);
+  const trigger = path.join(dir, "trigger.txt");
+  await fs.writeFile(trigger, "initial");
+
+  const updates: string[] = [];
+  let rawCount = 0;
+
+  await run(function* () {
+    yield* spawn(function* () {
+      const op = useServiceGraph(
+        {
+          a: {
+            watch: [dir],
+            operation: resource<void>(function* (provide) {
+              yield* provide();
+            }),
+          },
+        },
+        { watch: true, watchDebounce: 150 }
+      );
+
+      try {
+        const services = yield* op();
+        if (!services.serviceUpdates || !services.serviceChanges)
+          throw new Error("service streams not available");
+        const debSub = yield* services.serviceUpdates;
+        const rawSub = yield* services.serviceChanges;
+
+        // collect debounced updates
+        yield* spawn(function* () {
+          while (true) {
+            const n = yield* debSub.next();
+            if (n.done) break;
+            updates.push((n.value as { service: string }).service);
+          }
+        });
+
+        // count raw updates (should reflect every write)
+        yield* spawn(function* () {
+          while (true) {
+            const n = yield* rawSub.next();
+            if (n.done) break;
+            if ((n.value as { service: string }).service === "a") rawCount++;
+          }
+        });
+      } catch (e) {
+        throw e;
+      }
+
+      yield* suspend();
+    });
+
+    // ensure watcher attached
+    yield* sleep(0);
+
+    // write multiple times rapidly
+    yield* until(fs.writeFile(trigger, "changed-1"));
+    yield* sleep(10);
+    yield* until(fs.writeFile(trigger, "changed-2"));
+    yield* sleep(10);
+    yield* until(fs.writeFile(trigger, "changed-3"));
+
+    yield* ensure(() => until(fs.rm(dir, { recursive: true, force: true })));
+    // wait longer than debounce window
+    yield* sleep(300);
+  });
+
+  // we expect the rapid writes to coalesce: there should be at least one
+  // raw and at least one debounced update, and debounced updates should be
+  // fewer than the number of writes (3)
+  assert(rawCount >= 1, `expected at least 1 raw update, got ${rawCount}`);
+  assert(updates.length >= 1, "expected at least one debounced update");
+  const aCount = updates.filter((u) => u === "a").length;
+  assert(
+    aCount < 3,
+    `expected debounced updates to be fewer than writes (3), got ${aCount}`
+  );
 });

@@ -35,6 +35,7 @@ export type ServiceGraph<
     [service in keyof S]: ServiceDefinition<keyof S, T>;
   };
   serviceUpdates?: Stream<ServiceUpdate, unknown> | undefined;
+  serviceChanges?: Stream<ServiceUpdate, unknown> | undefined;
   // map of service name => listening port (when the service exposes one)
   servicePorts?: Map<string, number> | undefined;
 };
@@ -122,7 +123,12 @@ export function useServiceGraph<
         );
       }
 
-      const watcher = yield* useWatcher(effectiveServices);
+      const watcher = yield* useWatcher(
+        effectiveServices,
+        options?.watchDebounce
+          ? { watchDebounce: options.watchDebounce }
+          : undefined
+      );
 
       const status = new Map<
         string,
@@ -156,7 +162,7 @@ export function useServiceGraph<
 
       yield* spawn(function* () {
         // restart propagation to dependents is handled by useWatcher
-        for (let restartService of yield* each(watcher.serviceUpdates)) {
+        for (let restartService of yield* each(watcher.serviceChanges)) {
           bumpService(restartService.service);
           yield* each.next();
         }
@@ -219,6 +225,7 @@ export function useServiceGraph<
         yield* provide({
           services: services as S,
           serviceUpdates: watcher?.serviceUpdates,
+          serviceChanges: watcher?.serviceChanges,
           servicePorts,
         });
       } finally {
