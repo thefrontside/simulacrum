@@ -23,7 +23,7 @@ import type { Operation } from "effection";
 
 it("basic example imports and runs", async () => {
   const runner = basicServices as unknown as () => Operation<
-    ServiceGraph<Record<string, unknown>>
+    ServiceGraph<any, unknown>
   >; // runner
   let provided: any;
 
@@ -137,9 +137,9 @@ it("basic example imports and runs", async () => {
 
 it("concurrency example imports and runs", async () => {
   const runner = concurrencyServices as unknown as () => Operation<
-    ServiceGraph<Record<string, unknown>>
+    ServiceGraph<any, unknown>
   >; // runner
-  let provided: ServiceGraph<Record<string, unknown>> | undefined;
+  let provided: ServiceGraph<any, unknown> | undefined;
 
   await run(function* () {
     const [scope, destroy] = createScope();
