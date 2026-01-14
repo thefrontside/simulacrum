@@ -1,6 +1,6 @@
 import { resource, until, spawn, each, withResolvers, Ok } from "effection";
 import type { Operation } from "effection";
-import { exec } from "@effectionx/process";
+import { daemon } from "@effectionx/process";
 import { stderr, stdout } from "./logging.ts";
 import type {
   FoundationSimulator,
@@ -58,7 +58,7 @@ export function useChildSimulation<L extends object = Record<string, unknown>>(
     }
     const cmd = parts.map((s) => (s.includes(" ") ? `'${s}'` : s)).join(" ");
 
-    const process = yield* exec(cmd);
+    const process = yield* daemon(cmd);
 
     // read the first stdout JSON line to get the listening info
     let listening: FoundationSimulatorListening<L> | undefined = undefined;

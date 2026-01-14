@@ -4,13 +4,14 @@ import {
   type Stream,
   each,
   lift,
+  race,
   resource,
   scoped,
   sleep,
   spawn,
 } from "effection";
 import { timebox } from "@effectionx/timebox";
-import { exec } from "@effectionx/process";
+import { daemon } from "@effectionx/process";
 import type { ExecOptions as ProcessOptions } from "@effectionx/process";
 import { stderr, stdout } from "./logging.ts";
 import { createReplaySignal } from "./createReplaySignal.ts";
@@ -37,15 +38,15 @@ export function useService(
   _name: string,
   cmd: string,
   options: ServiceOptions = {}
-): Operation<void> {
-  return resource(function* (provide) {
+) {
+  return resource<void>(function* (provide) {
     if (cmd.startsWith("npm")) {
       // see https://github.com/npm/cli/issues/6684
       throw new Error(
         "scripts run with npm don't respect signals to properly shutdown"
       );
     }
-    const process = yield* exec(cmd, options.processOptions);
+    const process = yield* daemon(cmd, options.processOptions);
     const stdio = createReplaySignal<string, void>();
     const stdioAdd = lift(stdio.send);
 

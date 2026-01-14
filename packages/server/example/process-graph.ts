@@ -8,7 +8,7 @@ const servicesMap = {
   A: {
     operation: useService(
       "A",
-      "node --import tsx ./example/services/basic-sim.ts",
+      "node --import tsx ./example/services/basic-start-1.ts",
       {
         wellnessCheck: {
           frequency: 10,
@@ -31,7 +31,7 @@ const servicesMap = {
     dependsOn: { startup: ["A"] as const },
     operation: useService(
       "B",
-      "node --import tsx ./example/services/basic-sim.ts",
+      "node --import tsx ./example/services/basic-start-2.ts",
       {
         wellnessCheck: {
           frequency: 10,
