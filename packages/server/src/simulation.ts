@@ -16,10 +16,27 @@ import { SimulacrumEndpoint } from "./services.ts";
  */
 export function useSimulation<L extends object = Record<string, unknown>>(
   name: string,
-  createFactory: () => FoundationSimulator<L>
+  createFactory: (initData?: unknown) => FoundationSimulator<L>
 ): Operation<FoundationSimulatorListening<L>> {
   return resource(function* (provide) {
-    const createSim = createFactory();
+    // attempt to read the simulacrum port from context; if not present, continue without it
+    const simulacrumPort = yield* SimulacrumEndpoint.get();
+
+    // if present fetch the data chunk and pass it to the factory
+    let initData: unknown | undefined = undefined;
+    if (typeof simulacrumPort === "number" && !Number.isNaN(simulacrumPort)) {
+      try {
+        const res = yield* until(
+          fetch(`http://127.0.0.1:${simulacrumPort}/data`)
+        );
+        initData = yield* until(res.json());
+      } catch (err) {
+        // ignore fetch failures
+        console.error("failed to fetch simulacrum data:", err);
+      }
+    }
+
+    const createSim = createFactory(initData);
     const listening: FoundationSimulatorListening<L> = yield* until(
       createSim.listen()
     );

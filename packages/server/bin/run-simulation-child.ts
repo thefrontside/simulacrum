@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { main, suspend, until, type Operation } from "effection";
+import { main, suspend, until } from "effection";
 import { pathToFileURL } from "node:url";
 import type {
   FoundationSimulator,
