@@ -1,15 +1,19 @@
 import {
   type Operation,
+  type Stream,
+  type WithResolvers,
   resource,
   spawn,
   withResolvers,
   each,
-  type Stream,
-  type WithResolvers,
+  createContext,
 } from "effection";
 
 import { type ServiceUpdate, useWatcher } from "./watch.ts";
 import { stdout } from "./logging.ts";
+import { startDataService } from "./data-service.ts";
+
+export const SimulacrumEndpoint = createContext<number>("SimulacrumEndpoint");
 
 export type ServiceDefinition<
   S,
@@ -64,7 +68,11 @@ export function useServiceGraph<
   T extends MaybeSimulation
 >(
   services: S,
-  options?: { watch?: boolean; watchDebounce?: number }
+  options?: {
+    globalData?: Record<string, unknown>;
+    watch?: boolean;
+    watchDebounce?: number;
+  }
 ): (subset?: string[] | string) => Operation<ServiceGraph<S, T>> {
   return (subset?: string[] | string) =>
     resource(function* (provide) {
@@ -123,6 +131,16 @@ export function useServiceGraph<
           )}`
         );
       }
+      // track service ports (when services expose one)
+      const servicePorts = new Map<string, number>();
+
+      const dataServiceProvided = yield* startDataService(
+        options?.globalData ?? {}
+      );
+      servicePorts.set("simulacrum", dataServiceProvided.port);
+      // set the SimulacrumEndpoint in this operation scope so children started
+      // in this graph can access the port via context
+      yield* SimulacrumEndpoint.set(dataServiceProvided.port);
 
       const watcher = yield* useWatcher(
         effectiveServices,
@@ -146,9 +164,6 @@ export function useServiceGraph<
           watcher.add(name, def.watch);
         }
       }
-
-      // track service ports (when services expose one)
-      const servicePorts = new Map<string, number>();
 
       function bumpService(service: string) {
         const task = status.get(service);

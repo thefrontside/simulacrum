@@ -1,10 +1,48 @@
 #!/usr/bin/env node
-import { main, suspend, until } from "effection";
+import { main, suspend, until, type Operation } from "effection";
 import { pathToFileURL } from "node:url";
 import type {
   FoundationSimulator,
   FoundationSimulatorListening,
 } from "@simulacrum/foundation-simulator";
+
+function guardedFactory(
+  factory: Function
+): (initData?: unknown) => Promise<FoundationSimulator<any>> {
+  return async function startSimulation(initData?: unknown) {
+    const sim = await factory(initData);
+    if ("listen" in sim && typeof sim.listen === "function") {
+      return sim as FoundationSimulator<any>;
+    }
+    throw new Error("factory did not return a simulator instance");
+  };
+}
+
+function* normalizeSimulatorFactory(url: string) {
+  try {
+    const mod: unknown = yield* until(import(url));
+
+    // dynamically import module has to be an object if correctly resolved
+    if (mod && typeof mod === "object") {
+      const m = mod;
+
+      // export default as factory
+      if ("default" in m && typeof m.default === "function") {
+        const factory = m.default;
+        return guardedFactory(factory);
+      }
+
+      // export named 'simulation' as factory
+      if ("simulation" in m && typeof m.simulation === "function") {
+        const factory = m.simulation;
+        return guardedFactory(factory);
+      }
+    }
+  } catch (err) {
+    // no-op - will throw in fall through below
+  }
+  throw new Error("no factory or simulator instance found in module");
+}
 
 main(function* () {
   const args = process.argv.slice(2);
@@ -15,37 +53,37 @@ main(function* () {
   const modulePath = args[0];
 
   // Resolve and import module inside the operation
-  let mod: any;
-  try {
-    const url =
-      modulePath.startsWith("./") || modulePath.startsWith("/")
-        ? pathToFileURL(modulePath).href
-        : modulePath;
-    mod = yield* until(import(url));
-  } catch (err) {
-    throw new Error(`failed to import module: ${String(err)}`);
-  }
+  const url =
+    modulePath.startsWith("./") || modulePath.startsWith("/")
+      ? pathToFileURL(modulePath).href
+      : modulePath;
+  const factory = yield* normalizeSimulatorFactory(url);
 
-  const exportNames = ["default", "simulation"];
-  let factory: Function | undefined = undefined;
-  for (const name of exportNames) {
-    if (name in mod && typeof mod[name] === "function") {
-      factory = mod[name];
-      break;
+  let simulacrumPort: number | undefined = undefined;
+  // parse optional flags after modulePath
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === "--simulacrum-port") {
+      simulacrumPort = Number(args[i + 1]);
+      i++;
     }
   }
-  // fallback: module itself is a function
-  if (!factory && typeof mod === "function") factory = mod;
 
-  if (!factory) {
-    throw new Error(`no factory function found in module: ${modulePath}`);
+  // if present fetch the data chunk and pass it to the factory
+  let initData: JSON | undefined = undefined;
+  if (typeof simulacrumPort === "number" && !Number.isNaN(simulacrumPort)) {
+    try {
+      const res = yield* until(
+        fetch(`http://127.0.0.1:${simulacrumPort}/data`)
+      );
+      initData = yield* until(res.json());
+    } catch (err) {
+      // ignore fetch failures
+      console.error("failed to fetch simulacrum data:", err);
+    }
   }
 
-  let sim = factory() as FoundationSimulator<any>;
-
-  if (!sim || typeof sim.listen !== "function") {
-    throw new Error("factory did not return a simulator with .listen()");
-  }
+  // invoke factory; it may return a simulator instance or a Promise thereof
+  const sim = yield* until(factory(initData));
 
   let listening: FoundationSimulatorListening<any> | undefined = undefined;
   try {

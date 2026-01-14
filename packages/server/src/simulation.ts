@@ -6,6 +6,7 @@ import type {
   FoundationSimulator,
   FoundationSimulatorListening,
 } from "@simulacrum/foundation-simulator";
+import { SimulacrumEndpoint } from "./services.ts";
 
 /**
  * Helper to start a foundation simulation server factory
@@ -42,15 +43,20 @@ export function useChildSimulation<L extends object = Record<string, unknown>>(
   modulePath: string
 ): Operation<FoundationSimulatorListening<L>> {
   return resource(function* (provide) {
-    const cmd = [
+    // attempt to read the simulacrum port from context; if not present, continue without it
+    const port = yield* SimulacrumEndpoint.get();
+
+    const parts = [
       "node",
       "--import",
       "tsx",
       "./bin/run-simulation-child.ts",
       modulePath,
-    ]
-      .map((s) => (s.includes(" ") ? `'${s}'` : s))
-      .join(" ");
+    ];
+    if (typeof port === "number") {
+      parts.push("--simulacrum-port", String(port));
+    }
+    const cmd = parts.map((s) => (s.includes(" ") ? `'${s}'` : s)).join(" ");
 
     const process = yield* exec(cmd);
 

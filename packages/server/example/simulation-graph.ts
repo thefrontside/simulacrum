@@ -14,7 +14,9 @@ const servicesMap = {
   },
 };
 
-export const services = useServiceGraph(servicesMap);
+export const services = useServiceGraph(servicesMap, {
+  globalData: { exampleKey: "exampleValue" },
+});
 
 export function example(opts: { duration?: number } = {}) {
   return (function* () {

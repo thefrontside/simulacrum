@@ -11,25 +11,31 @@ import {
 export function simulation(
   port: number = 3301,
   startDelay: number = 10
-): FoundationSimulator<any> {
-  const factory = createFoundationSimulationServer({
-    port,
-    extendRouter(router) {
-      router.get("/status", (_req, res) => {
-        res.status(200).send("ok");
-      });
-    },
-  })();
+): (initData?: unknown) => FoundationSimulator<any> {
+  return (initData?: unknown) => {
+    if (initData) console.log("simulation received init data:", initData);
+    const factory = createFoundationSimulationServer({
+      port,
+      extendRouter(router) {
+        router.get("/status", (_req, res) => {
+          res.status(200).send("ok");
+        });
+        router.get("/init-data", (_req, res) => {
+          res.status(200).json({ data: initData ?? null });
+        });
+      },
+    })();
 
-  return {
-    async listen(
-      ...args: Parameters<FoundationSimulator<any>["listen"]>
-    ): Promise<any> {
-      if (startDelay > 0) {
-        await new Promise((resolve) => setTimeout(resolve, startDelay));
-      }
-      // delegate to underlying factory listen
-      return factory.listen(...args);
-    },
+    return {
+      async listen(
+        ...args: Parameters<FoundationSimulator<any>["listen"]>
+      ): Promise<any> {
+        if (startDelay > 0) {
+          await new Promise((resolve) => setTimeout(resolve, startDelay));
+        }
+        // delegate to underlying factory listen
+        return factory.listen(...args);
+      },
+    };
   };
 }
