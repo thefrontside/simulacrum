@@ -15,6 +15,20 @@ import { filter } from "@effectionx/stream-helpers";
 
 export type ServiceUpdate = { service: string; path: string };
 
+/**
+ * Start a file watcher for services and provide streams of updates.
+ *
+ * This helper wraps `chokidar` and computes optional transitive dependents
+ * (based on `dependsOn.restart`) so that updates can be propagated to
+ * dependent services. The returned object exposes:
+ *
+ * - `serviceUpdates`: immediate updates for a service (`{service, path}`)
+ * - `serviceChanges`: debounced updates suitable for restart propagation
+ * - `add(service, paths)`: add watch paths for a service
+ *
+ * @param services - optional service map used to compute transitive dependents
+ * @param options - optional `{ watchDebounce?: number }` to configure debounce
+ */
 export function useWatcher(
   services?: Record<
     string,

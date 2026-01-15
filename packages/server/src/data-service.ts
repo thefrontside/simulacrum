@@ -4,6 +4,17 @@ import { stdout } from "./logging.ts";
 
 export type DataServiceOptions = Record<string, unknown> | undefined;
 
+/**
+ * Start a simple local HTTP data service that serves a user-provided object.
+ *
+ * This is intended for local testing and to supply a small amount of
+ * configuration or initialization data to child simulations via the
+ * "simulacrum" gateway. The operation yields an object with `{ port }` once
+ * listening.
+ *
+ * @param data - Arbitrary JSON-serializable data to serve at `/data`
+ * @returns an operation that provides `{ port: number }` when ready
+ */
 export function startDataService(
   data: DataServiceOptions = {}
 ): Operation<{ port: number }> {

@@ -13,8 +13,19 @@ import { SimulacrumEndpoint } from "./services.ts";
  *
  * This is implemented as an Effection `resource` so cleanup is handled by the
  * `provide` finalizer when the operation's scope is closed.
- */
-export function useSimulation<L extends object = Record<string, unknown>>(
+ *//**
+ * Start a simulator provided by a factory and return its listening info.
+ *
+ * The factory may accept initialization data (fetched from the simulacrum
+ * gateway when available) and should return a `FoundationSimulator` instance
+ * (or a Promise resolving to one). This operation yields the simulator's
+ * listening information (`{ port }`) once it starts.
+ *
+ * @param name - human-friendly name used for logging
+ * @param createFactory - factory function that returns a `FoundationSimulator`
+ * @returns an `Operation` that provides `FoundationSimulatorListening` when the
+ * simulator is listening
+ */export function useSimulation<L extends object = Record<string, unknown>>(
   name: string,
   createFactory: (initData?: unknown) => FoundationSimulator<L>
 ): Operation<FoundationSimulatorListening<L>> {
@@ -55,6 +66,18 @@ export function useSimulation<L extends object = Record<string, unknown>>(
 // Spawn a child Node process to run a simulation factory in a fresh module
 // environment. This avoids sharing module cache and allows restarts to pick up
 // new code. The runtime uses `bin/run-simulation-child.ts`.
+/**
+ * Spawn a child Node process to run a simulation factory.
+ *
+ * This runs `bin/run-simulation-child.ts <modulePath>` in a separate Node
+ * process and reads the first JSON line printed to stdout to discover the
+ * child's listening port. Optionally the simulacrum gateway port will be
+ * passed to the child so it can fetch `globalData`.
+ *
+ * @param name - human-friendly name for logging
+ * @param modulePath - path to the module exporting a simulation factory or instance
+ * @returns an `Operation` that provides `FoundationSimulatorListening` from the child
+ */
 export function useChildSimulation<L extends object = Record<string, unknown>>(
   name: string,
   modulePath: string

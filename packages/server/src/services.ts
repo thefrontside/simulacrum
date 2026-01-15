@@ -13,6 +13,14 @@ import { type ServiceUpdate, useWatcher } from "./watch.ts";
 import { stdout } from "./logging.ts";
 import { startDataService } from "./data-service.ts";
 
+/**
+ * Context key for the Simulacrum gateway listening port.
+ *
+ * When `useServiceGraph` starts the optional simulacrum gateway (via the
+ * `globalData` option) it sets this context value to the listening port so
+ * operations in the graph (including `useSimulation` and
+ * `useChildSimulation`) can discover and fetch the `/data` payload.
+ */
 export const SimulacrumEndpoint = createContext<number>("SimulacrumEndpoint");
 
 export type ServiceDefinition<
@@ -46,22 +54,17 @@ export type ServiceGraph<
 };
 
 /**
- * useServiceGraph
+ * Start a graph of services with dependency ordering and optional file
+ * watching/restart behavior.
  *
- * Start a set of services with dependencies (a DAG). Each service must provide an
- * Operation<void> that starts the service and returns once the service is ready.
+ * Each service is defined as a `ServiceDefinition` that includes an
+ * `operation: Operation<T>` which should return once the service is ready. The
+ * returned runner function starts the graph and returns a `ServiceGraph` object
+ * (which includes a `servicePorts` map) that can be inspected by tests.
  *
- * Example usage:
- *
- * yield* useServiceGraph({
- *   A: { operation: useService('A', 'node --import tsx ./test/services/service-a.ts') },
- *   B: { operation: useService('B', 'node --import tsx ./test/services/service-b.ts'), dependsOn: { startup: ['A'] } }
- * });
- *
- * Services within the same topological layer are started concurrently by default.
- * Pass an optional `options` object with `{ sequential: true }` to force services
- * within the same layer to start sequentially. Lifecycle hooks can be used to
- * perform actions before or after each service starts or stops.
+ * @param services - a map of service names to definitions
+ * @param options - optional configuration: `{ globalData?, watch?, watchDebounce? }`
+ * @returns a runner function `(subset?: string[] | string) => Operation<ServiceGraph<S, T>>`
  */
 export function useServiceGraph<
   S extends Record<string, ServiceDefinition<string, T>>,

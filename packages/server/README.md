@@ -13,14 +13,21 @@ https://github.com/thefrontside/simulacrum
 
 Key points:
 
-- `useServiceGraph(services: ServicesMap, options?: { sequential?: boolean }): ServiceRunner<ServicesMap>` — returns a _runner function_ which you call to start the graph: `const run = useServiceGraph(services, options); yield* run(subset?: string[] | string);`. By default services in the same topological layer run concurrently; pass `options.sequential = true` to run services in each layer serially.
+- `useServiceGraph(services: ServicesMap, options?: { globalData?: Record<string, unknown>; watch?: boolean; watchDebounce?: number }): ServiceRunner<ServicesMap>` — returns a _runner function_ which you call to start the graph: `const run = useServiceGraph(services, options); const provided = yield* run(subset?: string[] | string);`. By default services in the same topological layer run concurrently; pass `options.watch = true` and `options.watchDebounce` to enable file watching and restart propagation.
 - `ServiceDefinition.operation` (required) — an `Operation<void>` which indicates the service has started. This operation may be long-lived (e.g. `useService`) or may return once the service is ready while a background child keeps the service running. See the example below.
 - `dependsOn` — an optional object `{ startup: string[]; restart?: string[] }` listing service names this service depends on. Use `startup` to list services that must start before this service; use `restart` to list services that should trigger a restart of this service when they are restarted (for example, due to a watched file change). Services without dependencies in the same layer are started concurrently by default, or serially when `options.sequential` is true.
 
 - `subset` (runner argument) — when calling the runner returned by `useServiceGraph` you may pass a subset (e.g. `yield* run(['serviceA'])` or `yield* run('serviceA')`) to start only a subset of services; any startup dependencies required by that subset are automatically included.
 
 - Watching & restart propagation — pass `{ watch: true }` to `useServiceGraph` and define `watch` paths in each `ServiceDefinition` to enable file watching. The watcher will precompute transitive dependents (based on `dependsOn.restart`) and automatically emit restart updates for dependents when a watched path changes, so restarts propagate efficiently and deterministically.
-- Lifecycle hooks: `beforeStart`, `afterStart`, `beforeStop`, `afterStop` — each is an `Operation<void>` that runs at the appropriate time.
+
+### Global data & the simulacrum gateway 🔁
+
+The graph can optionally start a small local HTTP data service (the _simulacrum gateway_) to expose a `globalData` object to child simulations and tests. The gateway registers its listening port on the returned `servicePorts` map under the key `"simulacrum"`, which tests and examples can use to discover it. See the `test/child-simulation-simulacrum.test.ts` and `example/simulation-graph.ts` for examples and coverage of this flow.
+
+### Lifecycle hooks
+
+- Lifecycle hooks can be implemented by arranging operations and using try/finally within your service `operation` to perform startup and cleanup logic. You can keep the operation alive with `yield* suspend()` and perform cleanup in the `finally` block when the service is stopped.
 
 Example:
 
@@ -100,35 +107,34 @@ npm test
 
 The `example` folder contains runnable examples demonstrating `useServiceGraph` and `useService`.
 
-Run the basic dependency example:
+Run the simulation-based example (starts simulators via child simulations):
 
 ```bash
 cd packages/server
-npm run example:basic
+npm run example:sim
 ```
 
-Run lifecycle hooks example:
+Run the process-based example (spawns processes via `useService`):
 
 ```bash
 cd packages/server
-npm run example:lifecycle
+npm run example:process
 ```
 
-Run concurrency layers example:
-
-````bash
-cd packages/server
-npm run example:concurrency
-
-Run examples directly (each example has its own npm script). You can also run the TypeScript module with `tsx`.
+Run the concurrency example:
 
 ```bash
 cd packages/server
-npm run example:basic
-npm run example:lifecycle
 npm run example:concurrency
-# or run a module directly:
-node --import tsx ./example/basic-graph.ts
+```
+
+Run examples directly (each example module can be executed with `tsx`):
+
+```bash
+cd packages/server
+node --import tsx ./example/simulation-graph.ts
+node --import tsx ./example/process-graph.ts
+node --import tsx ./example/concurrency-layers.ts
 ```
 
 ### Sharing exported values between services (note)
@@ -136,4 +142,7 @@ node --import tsx ./example/basic-graph.ts
 Previously services could expose their return value via a public `exportsOperation` that consumers could await. That mechanism has been removed in this branch as we move to a child-process-focused runner model. Provider-returned values are still delivered to dependent service factories internally, but no longer exposed as an operation on the public `services` map.
 
 For convenience tests may use the `servicePorts` map exposed by the running graph to discover HTTP ports that services registered when they start. The `servicePorts` map is available on the object returned by the runner and contains service name => port when a service's `operation` returns an object with a `{ port: number }` property.
-````
+
+```
+
+```

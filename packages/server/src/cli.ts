@@ -2,6 +2,16 @@ import { parseArgs } from "node:util";
 import { main, suspend, type Operation } from "effection";
 import type { ServiceGraph, ServiceDefinition } from "./services.ts";
 
+/**
+ * CLI operation that parses args and runs a service graph runner.
+ *
+ * This operation accepts the runner returned by `useServiceGraph` and starts
+ * the requested subset of services. It supports `--services` (comma
+ * separated), `--watch` and `--watch-debounce` options for convenience when
+ * iterating on local development.
+ *
+ * @param serviceGraph - runner factory returned by `useServiceGraph`
+ */
 export function* simulationCLIOp<S extends Record<string, any>, T = any>(
   serviceGraph: (subset?: string[] | string) => Operation<ServiceGraph<S, T>>
 ) {
@@ -54,6 +64,13 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
   }
 }
 
+/**
+ * Run a service graph runner inside an effection main loop suitable for use
+ * as a Node CLI. This invokes `simulationCLIOp` under `main` and returns the
+ * resulting promise.
+ *
+ * @param serviceGraph - runner factory returned by `useServiceGraph`
+ */
 export async function simulationCLI<
   S extends Record<string, ServiceDefinition<string, T>>,
   T
