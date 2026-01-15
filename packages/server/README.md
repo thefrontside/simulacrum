@@ -4,8 +4,78 @@ Server capable of running multiple concurrent simulations that can be controlled
 
 https://github.com/thefrontside/simulacrum
 
-> [!WARNING]  
-> The server is undergoing a refactor, and this may not be required for your use case. The refactor includes allow for more simply running single simulators so this package will be primarily useful as a control plane for cases where there are many simulators under test and in use. For the previous iterations, see the `v0` branch which contain the previous functionality.
+## Getting Started
+
+Set up a process or simulators such as this example `service-graph.ts`.
+
+```ts service-graph.ts
+#!/usr/bin/env node
+import { run } from "effection";
+import {
+  useServiceGraph,
+  simulationCLI,
+  useChildSimulation,
+  useSimulation,
+  useService,
+} from "@simulacrum/server";
+import { simulation } from "./sim2.ts";
+
+// define your "graph" that can be used through a CLI or as part of a test rig
+export const services = useServiceGraph(
+  {
+    sim1: {
+      operation: useChildSimulation("sim-run-as-child-process", "./sim1.ts"),
+    },
+    sim2: {
+      operation: useSimulation("sim-run-in-same-process", simulation),
+    },
+    sim3: {
+      operation: useService(
+        "arbitray-child-process",
+        "node --import tsx ./sim3.ts"
+      ),
+    },
+  },
+  { globalData: { hello: "world" } }
+);
+
+// this is a helper function which will give you a CLI around this service graph
+//  if you are calling this file directly
+import { fileURLToPath } from "node:url";
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  simulationCLI(services);
+}
+```
+
+From this, you have two main entry points. One may start it directly from your shell.
+
+```bash
+# start a local service graph defined in ./service-graph.ts
+node --import tsx ./simulators/service-graph.ts
+```
+
+> [!NOTE]
+> We use `--import tsx` here to automatically handle the typescript conversion. This is a separate package that you may be interested in using, but it not a hard requirement necessarily.
+
+Secondly, we can use this in tests. It is convenient to place in an `beforeAll()` or a `beforeEach()`. This is built on `effection`, and should handle all shutdown and clean up of the services when the function passes out of lexical scope.
+
+```ts
+import { run } from "effection";
+import { services } from "./simulators/service-graph.ts";
+
+beforeEach(async () => {
+  await run(function* () {
+    const services = yield* services();
+    // or optionally pass a subset of services to run if not all are required for this test
+    const subsetOfServices = yield* services(["sim1"]);
+    yield* suspend();
+  });
+});
+
+test("things", async () => {
+  // do testing things here
+});
+```
 
 ## Operation-based service orchestration
 
@@ -142,7 +212,3 @@ node --import tsx ./example/concurrency-layers.ts
 Previously services could expose their return value via a public `exportsOperation` that consumers could await. That mechanism has been removed in this branch as we move to a child-process-focused runner model. Provider-returned values are still delivered to dependent service factories internally, but no longer exposed as an operation on the public `services` map.
 
 For convenience tests may use the `servicePorts` map exposed by the running graph to discover HTTP ports that services registered when they start. The `servicePorts` map is available on the object returned by the runner and contains service name => port when a service's `operation` returns an object with a `{ port: number }` property.
-
-```
-
-```
