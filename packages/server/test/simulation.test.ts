@@ -7,7 +7,7 @@ import { createFoundationSimulationServer } from "@simulacrum/foundation-simulat
 
 it("useSimulation returns listening info", async () => {
   const port = await run(function* () {
-    const listening = yield* useSimulation("test", simulation);
+    const listening = yield* useSimulation("test", () => simulation(3000));
     return listening.port;
   });
   assert(typeof port === "number", "port is a number");
