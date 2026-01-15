@@ -71,6 +71,8 @@ export function useService(
 
     yield* sleep(0); // allow stdio forwarding to start
 
+    // TODO if it fails to start up but has a wellness check, it seems to hang
+
     // if supplied, wellness check to ensure it is running or timeout with result
     if (options.wellnessCheck) {
       const { operation } = options.wellnessCheck;

@@ -2,6 +2,7 @@ import { it } from "node:test";
 import http from "node:http";
 import { run, sleep, suspend, createScope, until } from "effection";
 import { timebox } from "@effectionx/timebox";
+import { waitForAsync } from "./utils.ts";
 
 import { services as basicServices } from "../example/simulation-graph.ts";
 import { services as concurrencyServices } from "../example/concurrency-layers.ts";
@@ -61,18 +62,16 @@ it("basic example imports and runs", async () => {
 
     // check each port while the graph is still running
     for (const p of ps) {
-      let ok = false;
-      for (let i = 0; i < 100; i++) {
-        try {
-          const status = yield* until(checkStatus(p));
-          if (status === 200) {
-            ok = true;
-            break;
+      try {
+        yield* waitForAsync(async () => {
+          try {
+            const status = await checkStatus(p);
+            return status === 200;
+          } catch (_) {
+            return false;
           }
-        } catch (_) {}
-        yield* sleep(10);
-      }
-      if (!ok) {
+        }, 2000);
+      } catch (err) {
         throw new Error(
           `(examples-smoke basic) port ${p} did not return 200 while graph was running`
         );

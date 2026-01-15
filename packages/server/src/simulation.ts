@@ -13,7 +13,7 @@ import { SimulacrumEndpoint } from "./services.ts";
  *
  * This is implemented as an Effection `resource` so cleanup is handled by the
  * `provide` finalizer when the operation's scope is closed.
- *//**
+ */ /**
  * Start a simulator provided by a factory and return its listening info.
  *
  * The factory may accept initialization data (fetched from the simulacrum
@@ -25,7 +25,7 @@ import { SimulacrumEndpoint } from "./services.ts";
  * @param createFactory - factory function that returns a `FoundationSimulator`
  * @returns an `Operation` that provides `FoundationSimulatorListening` when the
  * simulator is listening
- */export function useSimulation<L extends object = Record<string, unknown>>(
+ */ export function useSimulation<L extends object = Record<string, unknown>>(
   name: string,
   createFactory: (initData?: unknown) => FoundationSimulator<L>
 ): Operation<FoundationSimulatorListening<L>> {

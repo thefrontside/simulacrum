@@ -47,7 +47,7 @@ export function startDataService(
             return;
           }
 
-          const value = (data as any)?.[key];
+          const value = (data as Record<string, unknown> | undefined)?.[key];
           if (value === undefined) {
             res.writeHead(404, { "content-type": "text/plain" });
             res.end("not found");

@@ -7,13 +7,26 @@ import { each, Err, Ok, run } from "effection";
 // const scriptDoesNotWork = "npm run test:service-main";
 const nodeScriptWorks = "node --import tsx ./test/services/service-main.ts";
 
-it("test service", async () => {
-  let assertionCount = 0;
+it("test service starts and prints expected startup message", async () => {
+  let sawStart = false;
   await run(function* () {
-    yield* useService("test-service", nodeScriptWorks);
-    assertionCount++;
+    yield* useService("test-service", nodeScriptWorks, {
+      wellnessCheck: {
+        timeout: 1000,
+        *operation(stdio) {
+          for (let line of yield* each<string>(stdio)) {
+            if (line.includes("test service started")) {
+              return Ok<void>(void 0);
+            }
+            yield* each.next();
+          }
+          return Err(new Error("did not see startup message"));
+        },
+      },
+    });
+    sawStart = true;
   });
-  assert(assertionCount > 0);
+  assert.ok(sawStart, "service should have started and passed wellness check");
 });
 
 describe("useService with wellness check", () => {

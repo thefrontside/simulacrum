@@ -1,9 +1,10 @@
 import { it } from "node:test";
 import assert from "node:assert";
-import { run, createScope, suspend, until, sleep } from "effection";
+import { run, createScope, suspend, until } from "effection";
 import { useSimulation } from "../src/simulation.ts";
 import { simulation } from "./fixtures/simple-sim.ts";
 import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
+import { waitFor, waitForFetchClosed } from "./utils.ts";
 
 it("useSimulation returns listening info", async () => {
   const port = await run(function* () {
@@ -20,6 +21,7 @@ it("simulation closes when scope is destroyed", async () => {
     let port: number | undefined;
 
     // start the simulation in the scope and keep it alive until destroy()
+    // where we can test it actually shutdown
     scope.run(function* () {
       const listening = yield* useSimulation(
         "inline-test",
@@ -35,10 +37,7 @@ it("simulation closes when scope is destroyed", async () => {
     });
 
     // wait for the scope-run to set the port
-    for (let i = 0; i < 100; i++) {
-      if (typeof port === "number") break;
-      yield* sleep(5);
-    }
+    yield* waitFor(() => typeof port === "number", 2000);
 
     const status = yield* until(
       fetch(new URL(`http://127.0.0.1:${port}/info`))
@@ -51,18 +50,6 @@ it("simulation closes when scope is destroyed", async () => {
     yield* until(destroy());
 
     // server should no longer accept connections
-    let closed = false;
-    for (let i = 0; i < 50; i++) {
-      try {
-        yield* until(fetch(new URL(`http://127.0.0.1:${port}/info`)));
-        // if request succeeded, wait and retry
-      } catch (e) {
-        closed = true;
-        break;
-      }
-      yield* sleep(10);
-    }
-
-    if (!closed) throw new Error("simulation still responds after destroy");
+    yield* waitForFetchClosed(`http://127.0.0.1:${port}/info`, 2000);
   });
 });

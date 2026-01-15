@@ -9,7 +9,7 @@ it("starts services in dependency order", async () => {
   try {
     await run(function* () {
       yield* spawn(function* () {
-        const run = useServiceGraph({
+        const graph = useServiceGraph({
           A: {
             operation: resource<void>(function* (provide) {
               yield* sleep(20);
@@ -26,7 +26,7 @@ it("starts services in dependency order", async () => {
             dependsOn: { startup: ["A"] as const },
           },
         });
-        yield* run();
+        yield* graph();
         // keep spawned graph alive
         yield* suspend();
       });

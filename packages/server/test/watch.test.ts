@@ -7,6 +7,8 @@ import os from "node:os";
 import { useServiceGraph } from "../src/services.ts";
 import { simulation } from "./fixtures/simple-sim.ts";
 import { useSimulation } from "../src/simulation.ts";
+import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
+import { waitFor, waitForAsync } from "./utils.ts";
 
 it("restarts services on watched file change and restarts dependents", async () => {
   const prefix = path.join(os.tmpdir(), "sim-watch-");
@@ -56,15 +58,15 @@ it("restarts services on watched file change and restarts dependents", async () 
       yield* suspend();
     });
 
-    // allow initial startup and wait for bOut to appear
-    for (let i = 0; i < 200; i++) {
+    // ensure initial trigger is readable
+    yield* waitForAsync(async () => {
       try {
-        yield* until(fs.readFile(trigger, "utf8"));
-        break;
-      } catch (err) {
-        yield* sleep(20);
+        await fs.readFile(trigger, "utf8");
+        return true;
+      } catch (_) {
+        return false;
       }
-    }
+    }, 2000);
 
     // give the spawned subscription a moment to attach
     yield* sleep(50);
@@ -121,19 +123,13 @@ it("restarts dependents when watched service changes", async () => {
     });
 
     // wait for initial startup
-    for (let i = 0; i < 200; i++) {
-      if (startCounts.a > 0 && startCounts.b > 0) break;
-      yield* sleep(10);
-    }
+    yield* waitFor(() => startCounts.a > 0 && startCounts.b > 0, 2000);
 
     // trigger a change
     yield* until(fs.writeFile(trigger, "changed"));
 
     // wait for restarts to occur
-    for (let i = 0; i < 200; i++) {
-      if (startCounts.a >= 2 && startCounts.b >= 2) break;
-      yield* sleep(10);
-    }
+    yield* waitFor(() => startCounts.a >= 2 && startCounts.b >= 2, 3000);
   });
 
   await fs.rm(dir, { recursive: true, force: true });
@@ -189,19 +185,19 @@ it("restarts transitive dependents when watched service changes", async () => {
     });
 
     // wait for initial startup
-    for (let i = 0; i < 200; i++) {
-      if (startCounts.a > 0 && startCounts.b > 0 && startCounts.c > 0) break;
-      yield* sleep(10);
-    }
+    yield* waitFor(
+      () => startCounts.a > 0 && startCounts.b > 0 && startCounts.c > 0,
+      2000
+    );
 
     // trigger a change
     yield* until(fs.writeFile(trigger, "changed"));
 
     // wait for restarts to occur
-    for (let i = 0; i < 200; i++) {
-      if (startCounts.a >= 2 && startCounts.b >= 2 && startCounts.c >= 2) break;
-      yield* sleep(10);
-    }
+    yield* waitFor(
+      () => startCounts.a >= 2 && startCounts.b >= 2 && startCounts.c >= 2,
+      3000
+    );
   });
 
   await fs.rm(dir, { recursive: true, force: true });
@@ -209,6 +205,53 @@ it("restarts transitive dependents when watched service changes", async () => {
   assert(startCounts.a >= 2, "a should have been restarted");
   assert(startCounts.b >= 2, "b should have been restarted as dependent");
   assert(startCounts.c >= 2, "c should have been restarted as dependent of b");
+});
+
+it("updates servicePorts when a service restarts", async () => {
+  const prefix = path.join(os.tmpdir(), "sim-port-rt-");
+  const dir = await fs.mkdtemp(prefix);
+  const trigger = path.join(dir, "trigger.txt");
+  await fs.writeFile(trigger, "initial");
+
+  await run(function* () {
+    const op = useServiceGraph(
+      {
+        s: {
+          watch: [dir],
+          operation: useSimulation(
+            "s",
+            createFoundationSimulationServer({ port: 0 })
+          ),
+        },
+      },
+      { watch: true, watchDebounce: 20 }
+    );
+
+    const services = yield* op();
+
+    // wait for initial port to appear
+    yield* waitFor(
+      () => typeof services.servicePorts?.get("s") === "number",
+      2000
+    );
+    const initial = services.servicePorts!.get("s")!;
+
+    // trigger restart by touching the file
+    yield* until(fs.writeFile(trigger, "changed"));
+
+    // wait for new port value to be different from initial
+    yield* waitFor(() => {
+      const p = services.servicePorts?.get("s");
+      return typeof p === "number" && p !== initial;
+    }, 3000);
+    const updated = services.servicePorts!.get("s")!;
+
+    assert.ok(typeof initial === "number", "initial port should be present");
+    assert.ok(typeof updated === "number", "updated port should be present");
+    assert.notStrictEqual(initial, updated, "port should change after restart");
+  });
+
+  await fs.rm(dir, { recursive: true, force: true });
 });
 
 it("debounces rapid changes per service", async () => {
