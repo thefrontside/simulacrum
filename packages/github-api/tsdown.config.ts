@@ -10,6 +10,7 @@ export default defineConfig({
   },
   // handles dirname
   shims: true,
+  minify: false,
   // runs with @arethetypeswrong/core which checks types
   attw: false,
   publint: true,

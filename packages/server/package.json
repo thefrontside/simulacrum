@@ -51,8 +51,8 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
     },
     "./package.json": "./package.json"
   },
@@ -65,13 +65,13 @@
     }
   },
   "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
   "publishConfig": {
     "exports": {
       ".": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
+        "require": "./dist/index.cjs",
+        "import": "./dist/index.mjs"
       },
       "./package.json": "./package.json"
     }
