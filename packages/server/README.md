@@ -60,6 +60,7 @@ node --import tsx ./simulators/service-graph.ts
 Secondly, we can use this in tests. It is convenient to place in an `beforeAll()` or a `beforeEach()`. This is built on `effection`, and should handle all shutdown and clean up of the services when the function passes out of lexical scope.
 
 ```ts
+import { test, beforeEach } from "test-runner";
 import { run } from "effection";
 import { services } from "./simulators/service-graph.ts";
 
@@ -79,136 +80,165 @@ test("things", async () => {
 
 ## Operation-based service orchestration
 
-`@simulacrum/server` provides operations to start and manage services with lifecycle hooks. The recommended pattern is to create `Operation<void>` instances for each service (typically via `useService`) and pass them to `useServiceGraph` which starts the services respecting a dependency DAG and provides lifecycle hooks for startup and shutdown.
+`@simulacrum/server` provides operations to start and manage services with lifecycle hooks. The recommended pattern is to create `Operation<void>` instances for each service (typically via `useService`, `useSimulation`, or `useChildSimulation`) and pass them to `useServiceGraph` which starts the services respecting a dependency DAG and provides lifecycle hooks for startup and shutdown.
 
-Key points:
+See the `@simulacrum/foundation-simulator` for a basis to build simulator(s) for your services.
 
-- `useServiceGraph(services: ServicesMap, options?: { globalData?: Record<string, unknown>; watch?: boolean; watchDebounce?: number }): ServiceRunner<ServicesMap>` — returns a _runner function_ which you call to start the graph: `const run = useServiceGraph(services, options); const provided = yield* run(subset?: string[] | string);`. By default services in the same topological layer run concurrently; pass `options.watch = true` and `options.watchDebounce` to enable file watching and restart propagation.
-- `ServiceDefinition.operation` (required) — an `Operation<void>` which indicates the service has started. This operation may be long-lived (e.g. `useService`) or may return once the service is ready while a background child keeps the service running. See the example below.
-- `dependsOn` — an optional object `{ startup: string[]; restart?: string[] }` listing service names this service depends on. Use `startup` to list services that must start before this service; use `restart` to list services that should trigger a restart of this service when they are restarted (for example, due to a watched file change). Services without dependencies in the same layer are started concurrently by default, or serially when `options.sequential` is true.
+## API reference
 
-- `subset` (runner argument) — when calling the runner returned by `useServiceGraph` you may pass a subset (e.g. `yield* run(['serviceA'])` or `yield* run('serviceA')`) to start only a subset of services; any startup dependencies required by that subset are automatically included.
+### useServiceGraph(services, options?)
 
-- Watching & restart propagation — pass `{ watch: true }` to `useServiceGraph` and define `watch` paths in each `ServiceDefinition` to enable file watching. The watcher will precompute transitive dependents (based on `dependsOn.restart`) and automatically emit restart updates for dependents when a watched path changes, so restarts propagate efficiently and deterministically.
+`useServiceGraph(services: ServicesMap, options?: { globalData?: Record<string, unknown>; watch?: boolean; watchDebounce?: number }): ServiceRunner<ServicesMap>`
 
-### Global data & the simulacrum gateway 🔁
-
-The graph can optionally start a small local HTTP data service (the _simulacrum gateway_) to expose a `globalData` object to child simulations and tests. The gateway registers its listening port on the returned `servicePorts` map under the key `"simulacrum"`, which tests and examples can use to discover it. See the `test/child-simulation-simulacrum.test.ts` and `example/simulation-graph.ts` for examples and coverage of this flow.
-
-### Lifecycle hooks
-
-- Lifecycle hooks can be implemented by arranging operations and using try/finally within your service `operation` to perform startup and cleanup logic. You can keep the operation alive with `yield* suspend()` and perform cleanup in the `finally` block when the service is stopped.
-
-Example:
+Returns a "runner" function. Call the runner inside an Effection scope to start the graph:
 
 ```ts
-import { main, spawn, sleep } from "effection";
-import { useServiceGraph, useService } from "@simulacrum/server";
-
-main(function* () {
-  yield* spawn(function* () {
-    // In many situations, pass `useService` directly: it returns once the
-    // process is spawned and, if a wellnessCheck is provided, once the
-    // wellnessCheck passes. The service is automatically shut down by
-    // effection when the operation goes out of scope.
-    const run = useServiceGraph({
-      A: {
-        operation: useService(
-          "A",
-          "node --import tsx ./test/services/service-a.ts"
-        ),
-      },
-      B: {
-        operation: useService(
-          "B",
-          "node --import tsx ./test/services/service-b.ts"
-        ),
-        dependsOn: { startup: ["A"] },
-      },
-    });
-  });
-});
+const run = useServiceGraph(services, options);
+const services = yield * run(subset); // holds while services run, subset is optional
 ```
 
-Notes:
+File watching: pass `options.watch = true` and `options.watchDebounce` to enable watching and restart propagation across dependents. This is enabled through the CLI helper.
 
-- `useServiceGraph` returns a _runner function_; calling the runner (e.g. `yield* run()`) returns an `Operation<void>` that holds while services run and only cancels on parent scope termination. The returned runner has a `.services` property for introspection and can be passed directly to `simulationCLI`.
-- If you want to start services sequentially or add more advanced concurrency control, compose operations yourself and use `spawn` to control how operations run.
+#### ServiceDefinition
 
-### Lifecycle hooks
-
-Each `ServiceDefinition` supports lifecycle hook operations. These hooks run in the parent scope and are useful for performing orchestration tasks, logging, or writing sentinel files for integration tests. Hooks are `Operation<void>` as well.
+The `ServicesMap` passed as the first argument to `useServiceGraph`.
 
 ```ts
-const services = {
-  A: {
-    operation: (function* () {
-      // start the service via useService or useChildSimulation
-      yield* useService("A", "node --import tsx ./test/services/service-a.ts");
-      // signal that the service is ready
-      console.log("A has started");
-      try {
-        // keep running until cancelled
-        yield* suspend();
-      } finally {
-        // cleanup runs automatically on scope cancellation
-        console.log("A is stopping");
-      }
-    })(),
+const services: ServicesMap = {
+  serviceKey: {
+    operation,
+    dependsOn,
+    watch,
   },
 };
 ```
 
+##### `operation`
+
+- Each service must provide an `operation: Operation<void>` which signals that the service has started.
+- The operation needs to be long-lived or return once a child process is started while it keeps the service running in the background (e.g., `useService` or `useChildSimulation`).
+- If you are defining your own customer operation, use `try { ... yield* suspend(); } finally { ... }` inside an `operation` to run cleanup logic when the service stops. Using `resource()` from `effection` allows the service to stay in scope and continue running. See the `effection` documentation or the helper functions in this library for more information and examples.
+
+##### `dependsOn`
+
+Type: `{ startup?: string[]; restart?: string[] }`
+
+- `startup` lists services that must start before this one.
+- `restart` lists services whose restart should trigger a restart of this service (useful when using the watcher).
+
+##### `watch` Watching & restart propagation
+
+To enable file-watching: pass `{ watch: true }` to `useServiceGraph` options (second argument) and add `watch` paths to `ServiceDefinition` objects. The watcher computes transitive dependents (using `dependsOn.restart`) and emits restart updates so restarts propagate deterministically.
+
+### ServiceRunner & returned values
+
+The runner returned by `useServiceGraph` is itself an operation. This allows it to be portable. Define it in one spot, then import it into any CLI, start scripts or test runners of your choosing at start it there. Optionally, it takes an argument, `subset`, to only start part of the graph.
+
+##### `subset`
+
+When calling the runner you may pass a subset (e.g., `yield* runner(['serviceA'])` or `yield* runner('serviceA')`, the latter being a comma separated list) to start only a subset of services. Any required startup dependencies are included automatically. This is particularly use when focusing on a specific feature / feedback loop, such as in a test. Only start the services you _actually_ need.
+
+##### returns
+
+The "runner" returns and exposes a `services` object when executed. The started graph exposes:
+
+- `servicePorts` — a Map of service name => listening port when a service returns `{ port: number }` from its operation. This is convenient for tests to discover HTTP endpoints. Note that these are only filled in if the `operation` supports this functionality. The `useChildSimulation` and `useSimulation` both support it.
+- `services` - the object initially passed, useful for debugging
+- `serviceUpdates` and `serviceChanges` - both a `Stream` (see `effection`) of updates from the watcher, useful for debugging
+
+### Simulation & process helpers 🔧
+
+This package provides a few helpers to run simulations and external processes in common patterns:
+
+#### useSimulation(name, factory)
+
+`useSimulation(name: string, createFactory: (initData?: unknown) => FoundationSimulator)`
+
+Run a simulator _in-process_ via a factory that returns a `FoundationSimulator` (or a Promise resolving to one). Useful when you want the simulator instance in the same Node process as the runner. This API _will_ allow watching and restarts, but these restarts will not pick up changes in your code, see `useChildSimulation`.
+
+- If `globalData` is set on the runner, `useSimulation` will fetch it from the simulacrum gateway and pass it as the `initData` argument to your factory.
+- The factory should return a `FoundationSimulator` (see below). `useSimulation` calls `await simulator.listen()` to obtain `{ port }` and registers that port on `servicePorts`.
+
+Example:
+
+```ts
+// in a service definition
+operation: useSimulation("app", (initData) => {
+  // do something with initData and/or pass it to your simulator through the closure
+  return createFoundationSimulationServer({ port: 0 });
+});
+```
+
+#### useChildSimulation(name, modulePath)
+
+`useChildSimulation(name: string, modulePath: string)`
+
+Run a simulator in a fresh child Node process (isolates module cache and supports restarts). Otherwise this feels the same as using `useSimulation`.
+
+- The child is started using a wrapper, `./bin/run-simulation-child.ts <modulePath>`, and, when present, the `--simulacrum-port` is passed so the child can fetch `globalData`.
+- The wrapper prints a JSON line to stdout like `{ "ready": true, "port": 12345 }` as its first ready signal. `useChildSimulation` reads that line to discover the port and registers it on `servicePorts`.
+- Non-JSON stdout lines are forwarded to logs; if the child exits before emitting the ready JSON, `useChildSimulation` rejects.
+- If using this with a simulator created from `@simulacrum/foundation-simulator`, all this wiring will be handled for you.
+
+Example:
+
+```ts
+operation: useChildSimulation(
+  "service-key-for-logs",
+  "./simulator/my-simulator.js"
+);
+```
+
+> [!WARNING]
+> This does rely on having `tsx` installed which will handle the TypeScript types when running. It will allow for a simulator defined through a `.js` file or a `.ts`, so your choosing.
+
+#### About `@simulacrum/foundation-simulator`
+
+- A `FoundationSimulator` is a small helper that provides two key primitives you should expect from your factory:
+  - `simulator.listen(): Promise<{ port: number }>` — starts the server and resolves when it is listening (the object is registered in `servicePorts`).
+  - `simulator.ensureClose(): Promise<void>` — used by the runner to cleanly shut down the simulator when its containing scope is cancelled.
+- Use `createFoundationSimulationServer()` to create a server that listens on an ephemeral port and returns an object compatible with `useSimulation` and `useChildSimulation`.
+
+#### useService(name, cmd, options?)
+
+Spawn an external process (via the configured command) and optionally run a wellness check. `useService` forwards stdout/stderr to the package logging and keeps the operation alive until it goes out of scope.
+
+- `options`:
+  - `wellnessCheck.operation(stdio)` — an operation, `Operation<>` that needs to return a `Result` (both from `effection`) to consider the service successfully started. It is passed the stdio from the process. You may use any `effection` semantics, and inspect the stdio or http calls, etc, to decide when your service is "ready".
+  - `wellnessCheck.timeout` and `wellnessCheck.frequency` can be provided to control checking behavior, most useful in repeatedly `fetch`ing a `/status` or `/healthcheck` response.
+
+#### simulationCLI(serviceGraph)
+
+- `simulationCLI` wraps the runner in a small CLI loop and provides convenience flags: `--services`, `--watch`, and `--watch-debounce`.
+- Use the CLI helper for local development workflows where you want to run your graph directly from a file (see `service-graph.ts` examples above).
+
+## Global data & the simulacrum gateway 🔁
+
+When you call `useServiceGraph(...)` you may pass an optional `globalData` object in the options. The runner starts a tiny local HTTP data service (the **simulacrum gateway**) that serves that object so tests and child simulations can discover configuration or shared fixtures.
+
+- Endpoints: `GET /data` (returns the full `globalData` JSON) and `GET /data/<key>` (returns a single key, or a 404/400 as appropriate).
+- Discovery: the gateway registers its listening port on the runner's `servicePorts` map under the key `"simulacrum"`. You can read the port from your test or harness with `const port = services.servicePorts!.get("simulacrum");` and then `fetch` `http://127.0.0.1:${port}/data`.
+- Service integration: when starting child simulations via `useChildSimulation` / `simulationCLI` we pass the gateway port (if present) to the child. The child will fetch `/data` on startup and receive the `globalData` object. The simulator function you define may expect to receive that global object as the first argument to the function. Useful for passing "world-level" data to all of your simulators.
+
+```ts
+const runner = useServiceGraph(
+  {
+    child: { operation: useChildSimulation("child", "./child-main.ts") },
+  },
+  { globalData: { featureFlag: true } }
+);
+
+const services = yield * runner();
+const simulacrumPort = services.servicePorts!.get("simulacrum");
+// fetch global data in a test or helper
+const res = await fetch(`http://127.0.0.1:${simulacrumPort}/data`);
+const data = await res.json();
+```
+
 Notes:
 
-- Use a try/finally in your `operation` to run cleanup logic when the service is stopped
-- This approach leverages Effection scopes and ensures cleanup runs in reverse dependency order when the graph is shut down
-- Use `useService` or `useChildSimulation` inside your operation as needed to start underlying processes
+The gateway is intended for local development and tests only (it is not a production data layer). Future work around this layer may include improved logging and observability. Conceptually, it provides an "orchestration status" service.
 
-Try it
+## Development
 
-```bash
-# Run the server package tests
-cd packages/server
-npm test
-```
-
-## Examples
-
-The `example` folder contains runnable examples demonstrating `useServiceGraph` and `useService`.
-
-Run the simulation-based example (starts simulators via child simulations):
-
-```bash
-cd packages/server
-npm run example:sim
-```
-
-Run the process-based example (spawns processes via `useService`):
-
-```bash
-cd packages/server
-npm run example:process
-```
-
-Run the concurrency example:
-
-```bash
-cd packages/server
-npm run example:concurrency
-```
-
-Run examples directly (each example module can be executed with `tsx`):
-
-```bash
-cd packages/server
-node --import tsx ./example/simulation-graph.ts
-node --import tsx ./example/process-graph.ts
-node --import tsx ./example/concurrency-layers.ts
-```
-
-### Sharing exported values between services (note)
-
-Previously services could expose their return value via a public `exportsOperation` that consumers could await. That mechanism has been removed in this branch as we move to a child-process-focused runner model. Provider-returned values are still delivered to dependent service factories internally, but no longer exposed as an operation on the public `services` map.
-
-For convenience tests may use the `servicePorts` map exposed by the running graph to discover HTTP ports that services registered when they start. The `servicePorts` map is available on the object returned by the runner and contains service name => port when a service's `operation` returns an object with a `{ port: number }` property.
+The `example` folder contains runnable examples demonstrating `useServiceGraph`. The `test` folder includes tests based on the Node test runner which pull from the `example` folder or create their own fixtures to test the APIs.
