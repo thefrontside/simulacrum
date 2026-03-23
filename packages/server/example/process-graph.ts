@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { sleep, each, type Stream } from "effection";
+import { each, type Stream } from "effection";
 import { useService } from "../src/service.ts";
 import { useServiceGraph } from "../src/services.ts";
 import { simulationCLI } from "../src/cli.ts";
@@ -57,15 +57,6 @@ const servicesMap = {
 };
 
 export const services = useServiceGraph(servicesMap);
-
-export function example(opts: { duration?: number } = {}) {
-  return (function* () {
-    const run = services;
-    yield* run();
-    yield* sleep(opts.duration ?? 300);
-    console.log(`Basic example complete`);
-  })();
-}
 
 import { fileURLToPath } from "node:url";
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

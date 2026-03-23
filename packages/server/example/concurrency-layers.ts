@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { resource, sleep } from "effection";
+import { resource } from "effection";
 import { useServiceGraph } from "../src/services.ts";
 import { useChildSimulation } from "../src/simulation.ts";
 import { simulationCLI } from "../src/cli.ts";
@@ -32,13 +32,4 @@ export const services = useServiceGraph(servicesMap);
 import { fileURLToPath } from "node:url";
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   simulationCLI(services);
-}
-
-export function example(opts: { duration?: number } = {}) {
-  return (function* () {
-    const run = services;
-    yield* run();
-    yield* sleep(opts.duration ?? 300);
-    console.log(`Concurrency example (operation) complete`);
-  })();
 }

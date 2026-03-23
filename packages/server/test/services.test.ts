@@ -227,7 +227,7 @@ it("throws when requested subset includes a missing service", async () => {
 
       const runGraph = useServiceGraph(services);
       // request a service that does not exist
-      yield* runGraph(["missing"]);
+      yield* runGraph(["missing"] as any);
     });
   }, /Requested service 'missing' not found/);
 });
@@ -271,8 +271,7 @@ it("runs subset specified as a string", async () => {
       };
 
       const run = useServiceGraph(services);
-      // pass a comma-separated string
-      yield* run("r");
+      yield* run(["r"]);
       yield* suspend();
     });
     yield* waitFor(

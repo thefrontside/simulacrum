@@ -17,7 +17,7 @@ import { useServiceGraph } from "../src/services.ts";
 import { simulation } from "./fixtures/simple-sim.ts";
 import { useSimulation } from "../src/simulation.ts";
 import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
-import { waitFor, waitForAsync } from "./utils.ts";
+import { waitFor, waitForOperation } from "./utils.ts";
 
 it("restarts services on watched file change and restarts dependents", async () => {
   const prefix = path.join(os.tmpdir(), "sim-watch-");
@@ -71,9 +71,9 @@ it("restarts services on watched file change and restarts dependents", async () 
     });
 
     // ensure initial trigger is readable
-    yield* waitForAsync(async () => {
+    yield* waitForOperation(function* () {
       try {
-        await fs.readFile(trigger, "utf8");
+        yield* until(fs.readFile(trigger, "utf8"));
         return true;
       } catch (_) {
         return false;

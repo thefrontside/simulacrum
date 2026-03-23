@@ -15,7 +15,7 @@ import { Debugging, logger } from "./logging.ts";
  * @param serviceGraph - runner factory returned by `useServiceGraph`
  */
 export function* simulationCLIOp<S extends Record<string, any>, T = any>(
-  serviceGraph: (subset?: string[] | string) => Operation<ServiceGraph<S, T>>,
+  serviceGraph: (subset?: Array<keyof S>) => Operation<ServiceGraph<S, T>>,
 ) {
   try {
     const { values } = parseArgs({
@@ -64,7 +64,8 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
     Debugging.set(!!values.debug);
 
     // Start the graph and fetch the provided info
-    yield* serviceGraph(subset);
+    // subset is a string array from CLI; cast to service key array for strict runner
+    yield* serviceGraph(subset as unknown as Array<keyof S>);
 
     yield* suspend();
   } catch (err) {
@@ -87,7 +88,7 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
 export async function simulationCLI<
   S extends Record<string, ServiceDefinition<string, T>>,
   T,
->(serviceGraph: (subset?: string[] | string) => Operation<ServiceGraph<S, T>>) {
+>(serviceGraph: (subset?: Array<keyof S>) => Operation<ServiceGraph<S, T>>) {
   return main(function* () {
     try {
       yield* simulationCLIOp(serviceGraph);

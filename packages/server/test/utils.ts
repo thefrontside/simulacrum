@@ -1,5 +1,5 @@
 import { timebox } from "@effectionx/timebox";
-import { sleep, until } from "effection";
+import { sleep, until, type Operation } from "effection";
 
 /**
  * Wait for `predicate` to become true with a timeboxed timeout.
@@ -7,8 +7,8 @@ import { sleep, until } from "effection";
  */
 export function* waitFor(
   predicate: () => boolean,
-  timeout = 2000
-): Generator<any, void, unknown> {
+  timeout = 2000,
+): Operation<void> {
   const res = yield* timebox(timeout, function* () {
     while (!predicate()) {
       yield* sleep(10);
@@ -40,14 +40,14 @@ export function emitterToEventTarget(emitter: NodeJS.EventEmitter) {
 /**
  * Wait for an async predicate (returns Promise<boolean>) to become true.
  */
-export function* waitForAsync(
-  predicate: () => Promise<boolean>,
-  timeout = 2000
-): Generator<any, void, unknown> {
+export function* waitForOperation(
+  predicate: () => Operation<boolean>,
+  timeout = 2000,
+): Operation<void> {
   const res = yield* timebox(timeout, function* () {
     while (true) {
       try {
-        const ok = yield* until(predicate());
+        const ok = yield* predicate();
         if (ok) return;
       } catch (_) {
         // ignore and retry
@@ -56,7 +56,7 @@ export function* waitForAsync(
     }
   });
 
-  if (res && (res as any).timeout) {
+  if (res && res.timeout) {
     throw new Error("timed out waiting for async condition");
   }
 }

@@ -88,8 +88,8 @@ export function useServiceGraph<
     watch?: boolean;
     watchDebounce?: number;
   },
-): (subset?: string[] | string) => Operation<ServiceGraph<S, T>> {
-  return (subset?: string[] | string) =>
+): (subset?: Array<keyof S>) => Operation<ServiceGraph<S, T>> {
+  return (subset?: Array<keyof S>) =>
     resource(function* (provide) {
       // detect cycles in the dependency graph
       const nodes = Object.keys(services);
@@ -122,9 +122,7 @@ export function useServiceGraph<
       let effectiveServices = services; // {} as typeof services;
       if (subset) {
         const want = new Set<string>(
-          (typeof subset === "string" ? subset.split(",") : subset).map((s) =>
-            s.trim(),
-          ),
+          subset.map((s) => String(s).trim()).filter((s) => s.length > 0),
         );
         const included = new Set<string>();
         function include(name: string) {
