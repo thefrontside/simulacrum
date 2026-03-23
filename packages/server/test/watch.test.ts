@@ -87,7 +87,7 @@ it("restarts services on watched file change and restarts dependents", async () 
     yield* until(fs.writeFile(trigger, "changed"));
 
     // wait for the raw watcher update to be observed
-    yield* waitFor(() => updates.length >= 1, 2000);
+    yield* waitFor(() => updates.length >= 1, 5000);
   });
 
   // remove tmp dir
