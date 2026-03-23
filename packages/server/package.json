@@ -37,12 +37,12 @@
     "example:concurrency": "node --import tsx ./example/concurrency-layers.ts"
   },
   "dependencies": {
-    "effection": "^4.0.0",
-    "@effectionx/context-api": "^0.2.1",
-    "@effectionx/process": "^0.6.2",
-    "@effectionx/stream-helpers": "^0.5.1",
-    "@effectionx/timebox": "^0.3.1",
+    "@effectionx/context-api": "^0.3.2",
+    "@effectionx/process": "^0.7.3",
+    "@effectionx/stream-helpers": "^0.8.1",
+    "@effectionx/timebox": "^0.4.2",
     "chokidar": "^5.0.0",
+    "effection": "4.0.2",
     "picomatch": "^4.0.3"
   },
   "devDependencies": {

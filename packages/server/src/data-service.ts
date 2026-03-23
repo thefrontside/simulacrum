@@ -1,6 +1,7 @@
 import { call, resource, type Operation } from "effection";
+import { useAttributes } from "./logging.ts";
 import { createServer } from "node:http";
-import { stdout } from "./logging.ts";
+import { logger } from "./logging.ts";
 
 export type DataServiceOptions = Record<string, unknown> | undefined;
 
@@ -16,9 +17,13 @@ export type DataServiceOptions = Record<string, unknown> | undefined;
  * @returns an operation that provides `{ port: number }` when ready
  */
 export function startDataService(
-  data: DataServiceOptions = {}
+  data: DataServiceOptions = {},
 ): Operation<{ port: number }> {
   return resource(function* (provide) {
+    yield* useAttributes({
+      name: "dataService",
+      keys: Object.keys(data).join(", "),
+    });
     const server = createServer((req, res) => {
       try {
         const url = new URL(req.url ?? "", `http://127.0.0.1`);
@@ -81,13 +86,14 @@ export function startDataService(
         ? address.port
         : 0;
 
-    yield* stdout(`data service: started on port ${port}`);
+    yield* logger.stdout(`data service started on port ${port}`);
+    yield* useAttributes({ name: "dataService", port });
 
     try {
       yield* provide({ port });
     } finally {
       yield* call(() => server.close());
-      yield* stdout(`data service: stopped on port ${port}`);
+      yield* logger.debug(`data service stopped on port ${port}`);
     }
   });
 }

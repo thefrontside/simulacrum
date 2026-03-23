@@ -10,10 +10,9 @@ import {
 */
 export function simulation(
   port: number = 3301,
-  startDelay: number = 10
+  startDelay: number = 10,
 ): (initData?: unknown) => FoundationSimulator<any> {
   return (initData?: unknown) => {
-    if (initData) console.log("simulation received init data:", initData);
     const factory = createFoundationSimulationServer({
       port,
       extendRouter(router) {

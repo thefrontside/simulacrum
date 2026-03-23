@@ -1,6 +1,8 @@
 import { parseArgs } from "node:util";
 import { main, suspend, type Operation } from "effection";
+import { useAttributes } from "./logging.ts";
 import type { ServiceGraph, ServiceDefinition } from "./services.ts";
+import { Debugging, logger } from "./logging.ts";
 
 /**
  * CLI operation that parses args and runs a service graph runner.
@@ -13,13 +15,13 @@ import type { ServiceGraph, ServiceDefinition } from "./services.ts";
  * @param serviceGraph - runner factory returned by `useServiceGraph`
  */
 export function* simulationCLIOp<S extends Record<string, any>, T = any>(
-  serviceGraph: (subset?: string[] | string) => Operation<ServiceGraph<S, T>>
+  serviceGraph: (subset?: string[] | string) => Operation<ServiceGraph<S, T>>,
 ) {
   try {
     const { values } = parseArgs({
       options: {
         services: { type: "string", short: "s" },
-        debug: { type: "boolean", short: "d" },
+        debug: { type: "boolean", short: "d", default: false },
         help: { type: "boolean", short: "h" },
         watch: { type: "boolean" },
         "watch-debounce": { type: "string" },
@@ -31,7 +33,7 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
 
     function* printUsage() {
       process.stdout.write(
-        `Usage: cli [-s|--services serviceName] [--watch] [--watch-debounce ms]`
+        `Usage: cli [-s|--services serviceName] [--watch] [--watch-debounce ms]`,
       );
     }
 
@@ -45,6 +47,13 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
           .map((s) => s.trim())
           .filter(Boolean)
       : undefined;
+    yield* useAttributes({
+      name: "cli",
+      subset: subset ? subset.join(", ") : "",
+      watch: String(!!values.watch),
+      watchDebounce: String(values["watch-debounce"] ?? ""),
+      debug: String(!!values.debug),
+    });
 
     const runOptions: { watch?: boolean; watchDebounce?: number } = {
       watch: !!values.watch,
@@ -52,15 +61,19 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
     if (values["watch-debounce"])
       runOptions.watchDebounce = Number(values["watch-debounce"]);
 
+    Debugging.set(!!values.debug);
+
     // Start the graph and fetch the provided info
     yield* serviceGraph(subset);
 
     yield* suspend();
   } catch (err) {
-    console.error(
-      "simulationCLI error:",
-      err instanceof Error ? err.stack : err
+    yield* logger.stderr(
+      `simulationCLI error:`,
+      err instanceof Error ? err.stack : err,
     );
+  } finally {
+    yield* logger.debug("simulationCLI finally");
   }
 }
 
@@ -73,7 +86,13 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
  */
 export async function simulationCLI<
   S extends Record<string, ServiceDefinition<string, T>>,
-  T
+  T,
 >(serviceGraph: (subset?: string[] | string) => Operation<ServiceGraph<S, T>>) {
-  return main(() => simulationCLIOp(serviceGraph));
+  return main(function* () {
+    try {
+      yield* simulationCLIOp(serviceGraph);
+    } finally {
+      yield* logger.debug("simulationCLI main finally");
+    }
+  });
 }

@@ -9,8 +9,9 @@ import {
   createContext,
 } from "effection";
 
+import { useAttributes } from "./logging.ts";
 import { type ServiceUpdate, useWatcher } from "./watch.ts";
-import { stdout } from "./logging.ts";
+import { logger } from "./logging.ts";
 import { startDataService } from "./data-service.ts";
 
 /**
@@ -25,7 +26,7 @@ export const SimulacrumEndpoint = createContext<number>("SimulacrumEndpoint");
 
 export type ServiceDefinition<
   S,
-  T extends void | { port?: number } | unknown
+  T extends void | { port?: number } | unknown,
 > = {
   operation: Operation<T>;
   // folders/files to watch for changes which should cause a restart
@@ -42,15 +43,26 @@ type MaybeSimulation = void | { port?: number } | unknown;
 
 export type ServiceGraph<
   S extends Record<string, ServiceDefinition<string, T>>,
-  T extends MaybeSimulation
+  T extends MaybeSimulation,
 > = {
   services: {
     [service in keyof S]: ServiceDefinition<keyof S, T>;
   };
   serviceUpdates?: Stream<ServiceUpdate, unknown> | undefined;
   serviceChanges?: Stream<ServiceUpdate, unknown> | undefined;
-  // map of service name => listening port (when the service exposes one)
-  servicePorts?: Map<string, number> | undefined;
+  status?: Map<string, ServiceStatus>;
+};
+
+export type ServiceInfo = {
+  port?: number | undefined;
+  pid?: number | undefined;
+};
+
+export type ServiceStatus = {
+  startup: WithResolvers<void>;
+  running: WithResolvers<void>;
+  port?: number | undefined;
+  pid?: number | undefined;
 };
 
 /**
@@ -68,19 +80,24 @@ export type ServiceGraph<
  */
 export function useServiceGraph<
   S extends Record<string, ServiceDefinition<string, T>>,
-  T extends MaybeSimulation
+  T extends MaybeSimulation,
 >(
   services: S,
   options?: {
     globalData?: Record<string, unknown>;
     watch?: boolean;
     watchDebounce?: number;
-  }
+  },
 ): (subset?: string[] | string) => Operation<ServiceGraph<S, T>> {
   return (subset?: string[] | string) =>
     resource(function* (provide) {
       // detect cycles in the dependency graph
       const nodes = Object.keys(services);
+      // label the root of the service graph operation
+      yield* useAttributes({
+        name: "serviceGraph",
+        totalServices: String(nodes.length),
+      });
       const temp = new Set<string>();
       const perm = new Set<string>();
 
@@ -106,8 +123,8 @@ export function useServiceGraph<
       if (subset) {
         const want = new Set<string>(
           (typeof subset === "string" ? subset.split(",") : subset).map((s) =>
-            s.trim()
-          )
+            s.trim(),
+          ),
         );
         const included = new Set<string>();
         function include(name: string) {
@@ -128,115 +145,188 @@ export function useServiceGraph<
         }
         effectiveServices = picked as typeof services;
 
-        yield* stdout(
-          `service graph: starting with services: ${Array.from(included).join(
-            ", "
-          )}`
+        // annotate subset details AFTER calculations to avoid overwriting
+        yield* useAttributes({
+          name: "serviceGraph",
+          requestedServices: Array.from(want).join(", "),
+          includedServices: Array.from(included).join(", "),
+        });
+        yield* logger.stdout(
+          `simulation starting with subset of services: ${Array.from(
+            included,
+          ).join(", ")}`,
         );
       }
-      // track service ports (when services expose one)
-      const servicePorts = new Map<string, number>();
+
+      const status = new Map<string, ServiceStatus>();
 
       const dataServiceProvided = yield* startDataService(
-        options?.globalData ?? {}
+        options?.globalData ?? {},
       );
-      servicePorts.set("simulacrum", dataServiceProvided.port);
+      yield* useAttributes({
+        name: "serviceGraph",
+        dataServicePort: String(dataServiceProvided.port),
+      });
+
+      status.set("simulacrum", {
+        startup: withResolvers<void>(),
+        running: withResolvers<void>(),
+        port: dataServiceProvided.port,
+      });
+
       // set the SimulacrumEndpoint in this operation scope so children started
       // in this graph can access the port via context
       yield* SimulacrumEndpoint.set(dataServiceProvided.port);
 
-      const watcher = yield* useWatcher(
-        effectiveServices,
-        options?.watchDebounce
-          ? { watchDebounce: options.watchDebounce }
-          : undefined
-      );
+      // start up a watcher only when the CLI or caller explicitly asks for it
+      // or when at least one of the services has a `watch` configuration. by
+      // default we avoid spinning up chokidar when not needed since it holds an
+      // active file descriptor and has been observed to keep the process alive
+      // even after the root scope has been cancelled.
+      const shouldWatch =
+        options?.watch === true ||
+        Object.values(effectiveServices).some((d) => Array.isArray(d.watch));
 
-      const status = new Map<
-        string,
-        { startup: WithResolvers<void>; running: WithResolvers<void> }
-      >();
-      // establish watching and ready status
+      const watcher = shouldWatch
+        ? yield* useWatcher(
+            effectiveServices,
+            options?.watchDebounce
+              ? { watchDebounce: options.watchDebounce }
+              : undefined,
+          )
+        : undefined;
+
       for (const name of Object.keys(effectiveServices)) {
         const def = effectiveServices[name];
         status.set(name, {
           startup: withResolvers<void>(),
           running: withResolvers<void>(),
         });
-        if (def.watch) {
+        if (def.watch && watcher) {
           watcher.add(name, def.watch);
         }
       }
 
-      function bumpService(service: string) {
+      function* bumpService(service: string) {
+        yield* useAttributes({
+          name: "watcher",
+          reason: `restarting service ${service}`,
+        });
         const task = status.get(service);
-        if (!task) throw new Error(`missing status for service '${service}'`);
+        if (!task) throw new Error(`missing status for service ${service}`);
+        // log so it is clear in the inspector output when a restart is triggered
+        yield* logger.stdout(`restarting service ${service}`);
         // refresh the startup resolver
         task.startup = withResolvers<void>();
-        // this allows the service to continue and halt itself
-        // remove any recorded port for the service; it will be re-registered when it starts again
-        servicePorts.delete(service);
+
+        // remove any recorded port/pid for the service; it will be re-registered when it starts again
+        delete task.port;
+        delete task.pid;
+
+        // signal the running operation to stop so it can clean up
         task.running.resolve();
       }
 
-      yield* spawn(function* () {
-        // restart propagation to dependents is handled by useWatcher
-        for (let restartService of yield* each(watcher.serviceChanges)) {
-          bumpService(restartService.service);
-          yield* each.next();
-        }
-      });
+      if (watcher) {
+        yield* spawn(function* () {
+          yield* useAttributes({
+            name: "watcher",
+            reason: "startup",
+          });
+          // restart propagation to dependents is handled by useWatcher
+          for (let restartService of yield* each(watcher.serviceChanges)) {
+            yield* bumpService(restartService.service);
+            yield* each.next();
+          }
+        });
+      }
 
       // small helper to await a service's dependencies
-      function* waitDeps(name: string, startup: boolean): Operation<void> {
-        const def = effectiveServices[name];
-        const deps = startup
-          ? def.dependsOn?.startup ?? []
-          : def.dependsOn?.restart ?? [];
+      function* waitDeps(name: string, restartCount: number): Operation<void> {
+        const deps =
+          restartCount === 0
+            ? (effectiveServices[name].dependsOn?.startup ?? [])
+            : (effectiveServices[name].dependsOn?.restart ?? []);
+        yield* useAttributes({
+          name: `service ${name}`,
+          depCount: String(deps.length),
+        });
         for (const dep of deps) {
           const r = status.get(dep);
           if (!r)
             throw new Error(
-              `missing readiness resolver for dependency '${dep}'`
+              `missing readiness resolver for dependency '${dep}'`,
             );
           yield* r.startup.operation;
         }
       }
 
       function* withRestarts(service: string) {
-        let startup = true;
+        // start at -1 so the first run is "restarted 0 times"
+        let restartCount = -1;
+        yield* useAttributes({
+          name: `service ${service}`,
+          dependencies: JSON.stringify(
+            effectiveServices[service].dependsOn ?? {},
+          ),
+        });
         while (true) {
-          const start = yield* spawn(function* () {
-            yield* waitDeps(service, startup);
-            const def = effectiveServices[service];
-            const task = status.get(service);
-            if (!task)
-              throw new Error(`missing status for service '${service}'`);
-            task.running = withResolvers<void>();
+          yield* useAttributes({
+            name: `service ${service}`,
+            status: `restarted ${++restartCount} times`,
+          });
+          yield* waitDeps(service, restartCount);
 
+          const def = effectiveServices[service];
+          const task = status.get(service);
+          if (!task) throw new Error(`missing status for service '${service}'`);
+
+          // each run gets its own running resolver so we can cancel it on demand
+          task.running = withResolvers<void>();
+
+          // run the service in a scoped child operation so it can be cleanly
+          // cancelled when a file change triggers a restart
+          const serviceTask = yield* spawn(function* () {
             // capture any returned listening info (e.g., from useChildSimulation)
             const maybeProvided = yield* def.operation;
-            if (
-              maybeProvided &&
-              typeof maybeProvided === "object" &&
-              "port" in maybeProvided &&
-              typeof maybeProvided.port === "number"
-            ) {
-              servicePorts.set(service, maybeProvided.port);
+            if (maybeProvided && typeof maybeProvided === "object") {
+              if (
+                "port" in maybeProvided &&
+                typeof maybeProvided.port === "number"
+              ) {
+                yield* useAttributes({
+                  name: `service ${service}`,
+                  port: String(maybeProvided.port),
+                });
+                task.port = maybeProvided.port;
+              }
+              if (
+                "pid" in maybeProvided &&
+                typeof maybeProvided.pid === "number"
+              ) {
+                task.pid = maybeProvided.pid;
+                yield* useAttributes({
+                  name: `service ${service}`,
+                  pid: String(maybeProvided.pid),
+                });
+              }
             }
 
             task.startup.resolve();
+            // wait until the watcher asks for this service to be restarted
             yield* task.running.operation;
           });
-          yield* start;
-          startup = false;
+          yield* serviceTask;
         }
       }
 
       try {
         for (let service of Object.keys(effectiveServices)) {
           yield* spawn(function* () {
-            yield* stdout(`service graph: starting service '${service}'`);
+            yield* useAttributes({
+              name: `service ${service}`,
+            });
+            yield* logger.debug(`service graph: spawning service ${service}`);
             yield* withRestarts(service);
           });
         }
@@ -245,10 +335,10 @@ export function useServiceGraph<
           services: services as S,
           serviceUpdates: watcher?.serviceUpdates,
           serviceChanges: watcher?.serviceChanges,
-          servicePorts,
+          status,
         });
       } finally {
-        yield* stdout("shutting down service graph");
+        yield* logger.debug("shutting down service graph");
       }
     });
 }

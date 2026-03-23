@@ -5,14 +5,6 @@ import { useChildSimulation } from "../src/simulation.ts";
 import { simulationCLI } from "../src/cli.ts";
 
 const servicesMap = {
-  fast: {
-    operation: useChildSimulation("fast", "./example/services/basic-sim-1.ts"),
-    watch: ["./example/services/basic-sim-1.ts"],
-  },
-  slow: {
-    operation: useChildSimulation("slow", "./example/services/basic-sim-2.ts"),
-    watch: ["./example/services/basic-sim-2.ts"],
-  },
   dependent: {
     dependsOn: { startup: ["fast", "slow"] as const },
     operation: resource<void>(function* (provide) {
@@ -24,6 +16,14 @@ const servicesMap = {
       }
     }),
     watch: ["./example/services/basic-sim.ts"],
+  },
+  fast: {
+    operation: useChildSimulation("fast", "./example/services/basic-sim-1.ts"),
+    watch: ["./example/services/basic-sim-1.ts"],
+  },
+  slow: {
+    operation: useChildSimulation("slow", "./example/services/basic-sim-2.ts"),
+    watch: ["./example/services/basic-sim-2.ts"],
   },
 };
 

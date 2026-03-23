@@ -1,6 +1,15 @@
 import { it } from "node:test";
 import assert from "node:assert";
-import { run, suspend, sleep, until, spawn, resource, ensure } from "effection";
+import {
+  run,
+  suspend,
+  sleep,
+  until,
+  spawn,
+  resource,
+  ensure,
+  withResolvers,
+} from "effection";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
@@ -20,6 +29,8 @@ it("restarts services on watched file change and restarts dependents", async () 
   await fs.writeFile(trigger, "initial");
 
   const updates: string[] = [];
+  const subscriptionReady = withResolvers<void>();
+
   await run(function* () {
     yield* spawn(function* () {
       // start the graph and enable watch mode
@@ -28,17 +39,17 @@ it("restarts services on watched file change and restarts dependents", async () 
           a: {
             watch: [dir],
             operation: useSimulation("test-simulation-a", () =>
-              simulation(5500)
+              simulation(5500),
             ),
           },
           b: {
             dependsOn: { startup: ["a"] as const },
             operation: useSimulation("test-simulation-a", () =>
-              simulation(5501)
+              simulation(5501),
             ),
           },
         },
-        { watch: true, watchDebounce: 20 }
+        { watch: true, watchDebounce: 20 },
       );
 
       try {
@@ -47,6 +58,7 @@ it("restarts services on watched file change and restarts dependents", async () 
         if (!services.serviceChanges)
           throw new Error("serviceChanges not available");
         const subscription = yield* services.serviceChanges;
+        subscriptionReady.resolve();
 
         // wait for the first raw update (will occur after the test touches the file)
         const first = yield* subscription.next();
@@ -68,12 +80,14 @@ it("restarts services on watched file change and restarts dependents", async () 
       }
     }, 2000);
 
-    // give the spawned subscription a moment to attach
-    yield* sleep(50);
+    // wait for the subscription to be ready before touching the file
+    yield* subscriptionReady.operation;
+
     // touch the trigger file to cause a restart
     yield* until(fs.writeFile(trigger, "changed"));
-    // give watcher/poller a moment
-    yield* sleep(100);
+
+    // wait for the raw watcher update to be observed
+    yield* waitFor(() => updates.length >= 1, 2000);
   });
 
   // remove tmp dir
@@ -110,7 +124,7 @@ it("restarts dependents when watched service changes", async () => {
             }),
           },
         },
-        { watch: true, watchDebounce: 20 }
+        { watch: true, watchDebounce: 20 },
       );
 
       try {
@@ -172,7 +186,7 @@ it("restarts transitive dependents when watched service changes", async () => {
             }),
           },
         },
-        { watch: true, watchDebounce: 20 }
+        { watch: true, watchDebounce: 20 },
       );
 
       try {
@@ -187,7 +201,7 @@ it("restarts transitive dependents when watched service changes", async () => {
     // wait for initial startup
     yield* waitFor(
       () => startCounts.a > 0 && startCounts.b > 0 && startCounts.c > 0,
-      2000
+      2000,
     );
 
     // trigger a change
@@ -196,7 +210,7 @@ it("restarts transitive dependents when watched service changes", async () => {
     // wait for restarts to occur
     yield* waitFor(
       () => startCounts.a >= 2 && startCounts.b >= 2 && startCounts.c >= 2,
-      3000
+      3000,
     );
   });
 
@@ -220,31 +234,34 @@ it("updates servicePorts when a service restarts", async () => {
           watch: [dir],
           operation: useSimulation(
             "s",
-            createFoundationSimulationServer({ port: 0 })
+            createFoundationSimulationServer({ port: 0 }),
           ),
         },
       },
-      { watch: true, watchDebounce: 20 }
+      {
+        watch: true,
+        watchDebounce: 20,
+      },
     );
 
     const services = yield* op();
 
     // wait for initial port to appear
     yield* waitFor(
-      () => typeof services.servicePorts?.get("s") === "number",
-      2000
+      () => typeof services.status?.get("s")?.port === "number",
+      2000,
     );
-    const initial = services.servicePorts!.get("s")!;
+    const initial = services.status!.get("s")!.port!;
 
     // trigger restart by touching the file
     yield* until(fs.writeFile(trigger, "changed"));
 
     // wait for new port value to be different from initial
     yield* waitFor(() => {
-      const p = services.servicePorts?.get("s");
+      const p = services.status?.get("s")?.port;
       return typeof p === "number" && p !== initial;
     }, 3000);
-    const updated = services.servicePorts!.get("s")!;
+    const updated = services.status!.get("s")!.port!;
 
     assert.ok(typeof initial === "number", "initial port should be present");
     assert.ok(typeof updated === "number", "updated port should be present");
@@ -262,6 +279,7 @@ it("debounces rapid changes per service", async () => {
 
   const updates: string[] = [];
   let rawCount = 0;
+  const watcherReady = withResolvers<void>();
 
   await run(function* () {
     yield* spawn(function* () {
@@ -274,7 +292,7 @@ it("debounces rapid changes per service", async () => {
             }),
           },
         },
-        { watch: true, watchDebounce: 150 }
+        { watch: true, watchDebounce: 150 },
       );
 
       try {
@@ -283,6 +301,8 @@ it("debounces rapid changes per service", async () => {
           throw new Error("service streams not available");
         const debSub = yield* services.serviceUpdates;
         const rawSub = yield* services.serviceChanges;
+
+        watcherReady.resolve();
 
         // collect debounced updates
         yield* spawn(function* () {
@@ -308,8 +328,8 @@ it("debounces rapid changes per service", async () => {
       yield* suspend();
     });
 
-    // ensure watcher attached
-    yield* sleep(0);
+    // ensure watcher subscribed before triggering writes
+    yield* watcherReady.operation;
 
     // write multiple times rapidly
     yield* until(fs.writeFile(trigger, "changed-1"));
@@ -319,8 +339,8 @@ it("debounces rapid changes per service", async () => {
     yield* until(fs.writeFile(trigger, "changed-3"));
 
     yield* ensure(() => until(fs.rm(dir, { recursive: true, force: true })));
-    // wait longer than debounce window
-    yield* sleep(300);
+    // wait until some raw/etc updates are observed
+    yield* waitFor(() => rawCount > 0 && updates.length > 0, 2000);
   });
 
   // we expect the rapid writes to coalesce: there should be at least one
@@ -331,6 +351,6 @@ it("debounces rapid changes per service", async () => {
   const aCount = updates.filter((u) => u === "a").length;
   assert(
     aCount < 3,
-    `expected debounced updates to be fewer than writes (3), got ${aCount}`
+    `expected debounced updates to be fewer than writes (3), got ${aCount}`,
   );
 });

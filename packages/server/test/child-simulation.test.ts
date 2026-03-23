@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
-import { run, sleep, until } from "effection";
+import { run, until } from "effection";
 import { useServiceGraph } from "../src/services.ts";
 import { useChildSimulation } from "../src/simulation.ts";
 import { waitFor } from "./utils.ts";
@@ -10,15 +10,12 @@ describe("useChildSimulation", () => {
     await run(function* () {
       const listening = yield* useChildSimulation(
         "child-test",
-        "./test/fixtures/simple-sim.ts"
+        "./test/fixtures/simple-sim.ts",
       );
       assert(typeof listening.port === "number");
 
       // Verify we received a port and the child reported ready.
       assert(typeof listening.port === "number", "port should be a number");
-
-      // allow a moment before teardown
-      yield* sleep(20);
     });
   });
 
@@ -26,7 +23,7 @@ describe("useChildSimulation", () => {
     await run(function* () {
       const listening = yield* useChildSimulation(
         "non-json",
-        "./test/fixtures/non-json-child.ts"
+        "./test/fixtures/non-json-child.ts",
       );
       assert(typeof listening.port === "number");
     });
@@ -36,7 +33,7 @@ describe("useChildSimulation", () => {
     await run(function* () {
       const listening = yield* useChildSimulation(
         "json-before-ready",
-        "./test/fixtures/json-before-ready.ts"
+        "./test/fixtures/json-before-ready.ts",
       );
       assert(typeof listening.port === "number");
     });
@@ -52,19 +49,19 @@ describe("useChildSimulation", () => {
             child: {
               operation: useChildSimulation(
                 "child",
-                "./test/fixtures/init-data-sim.ts"
+                "./test/fixtures/init-data-sim.ts",
               ),
             },
           },
-          { globalData: data }
+          { globalData: data },
         );
 
         const runGraph = yield* op();
         yield* waitFor(
-          () => typeof runGraph.servicePorts?.get("child") === "number",
-          2000
+          () => typeof runGraph.status?.get("child")?.port === "number",
+          2000,
         );
-        const childPort = runGraph.servicePorts!.get("child")!;
+        const childPort = runGraph.status!.get("child")!.port!;
 
         const res = yield* until(fetch(`http://127.0.0.1:${childPort}/init`));
         const json = (yield* until(res.json())) as { initData: typeof data };
@@ -81,19 +78,19 @@ describe("useChildSimulation", () => {
             child: {
               operation: useChildSimulation(
                 "child",
-                "./test/fixtures/init-data-sim.ts"
+                "./test/fixtures/init-data-sim.ts",
               ),
             },
           },
-          { globalData: data }
+          { globalData: data },
         );
 
         const runGraph = yield* op();
         yield* waitFor(
-          () => typeof runGraph.servicePorts?.get("child") === "number",
-          2000
+          () => typeof runGraph.status?.get("child")?.port === "number",
+          2000,
         );
-        const childPort = runGraph.servicePorts!.get("child")!;
+        const childPort = runGraph.status!.get("child")!.port!;
 
         const res = yield* until(fetch(`http://127.0.0.1:${childPort}/init`));
         const json = (yield* until(res.json())) as { initData: typeof data };
@@ -125,19 +122,19 @@ describe("useChildSimulation", () => {
             child: {
               operation: useChildSimulation(
                 "child",
-                "./test/fixtures/init-data-sim.ts"
+                "./test/fixtures/init-data-sim.ts",
               ),
             },
           },
-          { globalData: data }
+          { globalData: data },
         );
 
         const runGraph = yield* op();
         yield* waitFor(
-          () => typeof runGraph.servicePorts?.get("child") === "number",
-          3000
+          () => typeof runGraph.status?.get("child")?.port === "number",
+          3000,
         );
-        const childPort = runGraph.servicePorts!.get("child")!;
+        const childPort = runGraph.status!.get("child")!.port!;
 
         const res = yield* until(fetch(`http://127.0.0.1:${childPort}/init`));
         const json = (yield* until(res.json())) as { initData: typeof data };
@@ -153,21 +150,21 @@ describe("useChildSimulation", () => {
           child: {
             operation: useChildSimulation(
               "child",
-              "./test/fixtures/init-data-sim.ts"
+              "./test/fixtures/init-data-sim.ts",
             ),
           },
         },
-        { globalData: { hello: "world" } }
+        { globalData: { hello: "world" } },
       );
 
       const runGraph = yield* op();
 
       // wait deterministically for the child port to be registered
       yield* waitFor(
-        () => typeof runGraph.servicePorts?.get("child") === "number",
-        3000
+        () => typeof runGraph.status?.get("child")?.port === "number",
+        3000,
       );
-      const childPort = runGraph.servicePorts!.get("child")!;
+      const childPort = runGraph.status!.get("child")!.port!;
 
       const res = yield* until(fetch(`http://127.0.0.1:${childPort}/init`));
       const json = (yield* until(res.json())) as {

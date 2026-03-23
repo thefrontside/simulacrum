@@ -13,7 +13,7 @@ function checkStatus(port: number): Promise<number> {
       { hostname: "127.0.0.1", port, path: "/status", agent: false },
       (res) => {
         resolve(res.statusCode ?? 0);
-      }
+      },
     );
     req.on("error", reject);
   });
@@ -37,7 +37,7 @@ it("basic example imports and runs", async () => {
     } catch (err) {
       console.error(
         "example runner threw:",
-        err instanceof Error ? err.stack : err
+        err instanceof Error ? err.stack : err,
       );
       throw err;
     }
@@ -50,10 +50,9 @@ it("basic example imports and runs", async () => {
     yield* sleep(0);
 
     const svcMap = provided!.services;
-    const ports = provided!.servicePorts!;
     const ps: number[] = [];
     for (const name of Object.keys(svcMap)) {
-      const port = ports!.get(name);
+      const port = provided!.serviceStatus?.get(name)?.port;
       if (typeof port === "number") ps.push(port);
     }
 
@@ -73,7 +72,7 @@ it("basic example imports and runs", async () => {
         }, 2000);
       } catch (err) {
         throw new Error(
-          `(examples-smoke basic) port ${p} did not return 200 while graph was running`
+          `(examples-smoke basic) port ${p} did not return 200 while graph was running`,
         );
       }
     }
@@ -148,7 +147,7 @@ it("concurrency example imports and runs", async () => {
     } catch (err) {
       console.error(
         "example runner threw:",
-        err instanceof Error ? err.stack : err
+        err instanceof Error ? err.stack : err,
       );
       throw err;
     }
@@ -161,10 +160,9 @@ it("concurrency example imports and runs", async () => {
     yield* sleep(0);
 
     const svcMap = provided!.services;
-    const ports = provided!.servicePorts!;
     const ps: number[] = [];
     for (const name of Object.keys(svcMap)) {
-      const port = ports!.get(name);
+      const port = provided!.status?.get(name)?.port;
       if (typeof port === "number") ps.push(port);
     }
 
@@ -188,7 +186,7 @@ it("concurrency example imports and runs", async () => {
       }
       if (!ok) {
         throw new Error(
-          `(examples-smoke concurrency) port ${p} did not return 200 while graph was running`
+          `(examples-smoke concurrency) port ${p} did not return 200 while graph was running`,
         );
       }
     }

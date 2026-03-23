@@ -32,11 +32,11 @@ export const services = useServiceGraph(
     sim3: {
       operation: useService(
         "arbitray-child-process",
-        "node --import tsx ./sim3.ts"
+        "node --import tsx ./sim3.ts",
       ),
     },
   },
-  { globalData: { hello: "world" } }
+  { globalData: { hello: "world" } },
 );
 
 // this is a helper function which will give you a CLI around this service graph
@@ -128,7 +128,7 @@ Type: `{ startup?: string[]; restart?: string[] }`
 
 ##### `watch` Watching & restart propagation
 
-To enable file-watching: pass `{ watch: true }` to `useServiceGraph` options (second argument) and add `watch` paths to `ServiceDefinition` objects. The watcher computes transitive dependents (using `dependsOn.restart`) and emits restart updates so restarts propagate deterministically.
+To enable file‑watching: pass `{ watch: true }` to the `useServiceGraph` options (second argument) and add `watch` paths to your `ServiceDefinition` objects. The watcher is only started when you explicitly request it (and when at least one service includes `watch` paths); by default no file descriptor is opened, allowing the process to exit cleanly on SIGINT. The watcher computes transitive dependents (using `dependsOn.restart`) and emits restart updates so restarts propagate deterministically.
 
 ### ServiceRunner & returned values
 
@@ -185,7 +185,7 @@ Example:
 ```ts
 operation: useChildSimulation(
   "service-key-for-logs",
-  "./simulator/my-simulator.js"
+  "./simulator/my-simulator.js",
 );
 ```
 
@@ -225,7 +225,7 @@ const runner = useServiceGraph(
   {
     child: { operation: useChildSimulation("child", "./child-main.ts") },
   },
-  { globalData: { featureFlag: true } }
+  { globalData: { featureFlag: true } },
 );
 
 const services = yield * runner();

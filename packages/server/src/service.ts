@@ -9,10 +9,11 @@ import {
   sleep,
   spawn,
 } from "effection";
+import { useAttributes } from "./logging.ts";
 import { timebox } from "@effectionx/timebox";
 import { daemon } from "@effectionx/process";
 import type { ExecOptions as ProcessOptions } from "@effectionx/process";
-import { stderr, stdout } from "./logging.ts";
+import { logger } from "./logging.ts";
 import { createReplaySignal } from "./createReplaySignal.ts";
 
 type ServiceOptions = {
@@ -34,15 +35,16 @@ type ServiceOptions = {
  * process and clean up and shut down the process.
  */
 export function useService(
-  _name: string,
+  name: string,
   cmd: string,
-  options: ServiceOptions = {}
+  options: ServiceOptions = {},
 ) {
   return resource<void>(function* (provide) {
+    yield* useAttributes({ name: `useService ${name}`, cmd: String(cmd) });
     if (cmd.startsWith("npm")) {
       // see https://github.com/npm/cli/issues/6684
       throw new Error(
-        "scripts run with npm don't respect signals to properly shutdown"
+        "scripts run with npm don't respect signals to properly shutdown",
       );
     }
     const process = yield* daemon(cmd, options.processOptions);
@@ -51,19 +53,21 @@ export function useService(
 
     // forward raw stdout for logging in chunk form (no reassembly)
     yield* spawn(function* () {
+      yield* useAttributes({ name: "stdoutForward" });
       for (let line of yield* each(process.stdout)) {
         const buf = Buffer.from(line);
         const str = buf.toString();
-        stdout(str);
+        yield* logger.stdout(str);
         yield* stdioAdd(str);
         yield* each.next();
       }
     });
 
     yield* spawn(function* () {
+      yield* useAttributes({ name: "stderrForward" });
       for (let line of yield* each(process.stderr)) {
         const str = Buffer.from(line).toString();
-        stderr(str);
+        yield* logger.stderr(str);
         yield* stdioAdd(str);
         yield* each.next();
       }
@@ -71,13 +75,17 @@ export function useService(
 
     yield* sleep(0); // allow stdio forwarding to start
 
-    // TODO if it fails to start up but has a wellness check, it seems to hang
-
     // if supplied, wellness check to ensure it is running or timeout with result
     if (options.wellnessCheck) {
+      yield* useAttributes({
+        name: `useService ${name}`,
+        wellnessCheck: String(true),
+        frequency: String(options.wellnessCheck.frequency ?? ""),
+      });
       const { operation } = options.wellnessCheck;
       const frequency = options.wellnessCheck.frequency ?? 100;
       function* untilWell() {
+        yield* useAttributes({ name: `wellnessCheck` });
         while (true) {
           try {
             yield* sleep(frequency);
@@ -92,9 +100,13 @@ export function useService(
       }
 
       if (options.wellnessCheck.timeout) {
+        yield* useAttributes({
+          name: `useService ${name}`,
+          timeout: String(options.wellnessCheck.timeout),
+        });
         const checked = yield* timebox(
           options.wellnessCheck.timeout,
-          untilWell
+          untilWell,
         );
         if (checked && checked.timeout) {
           throw new Error("service wellness check timed out");

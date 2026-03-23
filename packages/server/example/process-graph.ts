@@ -12,10 +12,12 @@ const servicesMap = {
       {
         wellnessCheck: {
           frequency: 10,
+          timeout: 15000,
           *operation(stdio: Stream<string, void>) {
             for (let line of yield* each<string>(stdio)) {
               if (line.includes("started")) {
                 console.log("A ready (wellnessCheck)");
+
                 return { ok: true, value: undefined };
               }
               yield* each.next();
@@ -24,7 +26,7 @@ const servicesMap = {
             return { ok: true, value: undefined };
           },
         },
-      }
+      },
     ),
   },
   B: {
@@ -35,10 +37,12 @@ const servicesMap = {
       {
         wellnessCheck: {
           frequency: 10,
+          timeout: 15000,
           *operation(stdio: Stream<string, void>) {
             for (let line of yield* each<string>(stdio)) {
               if (line.includes("started")) {
                 console.log("B ready (wellnessCheck)");
+
                 return { ok: true, value: undefined };
               }
               yield* each.next();
@@ -47,7 +51,7 @@ const servicesMap = {
             return { ok: true, value: undefined };
           },
         },
-      }
+      },
     ),
   },
 };

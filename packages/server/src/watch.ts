@@ -10,6 +10,7 @@ import {
   type Stream,
   until,
 } from "effection";
+import { useAttributes } from "./logging.ts";
 import picomatch, { type Matcher } from "picomatch";
 import { filter } from "@effectionx/stream-helpers";
 
@@ -34,13 +35,18 @@ export function useWatcher(
     string,
     { dependsOn?: { restart?: readonly string[] }; watchDebounce?: number }
   >,
-  options?: { watchDebounce?: number }
+  options?: { watchDebounce?: number },
 ): Operation<{
   serviceUpdates: Stream<{ service: string; path: string }, void>;
   serviceChanges: Stream<{ service: string; path: string }, void>;
   add: (service: string, paths: string[]) => void;
 }> {
   return resource(function* (provide) {
+    yield* useAttributes({
+      name: "watcher",
+      serviceCount: String(services ? Object.keys(services).length : 0),
+      debounce: String(options?.watchDebounce ?? ""),
+    });
     const changes = createSignal<EmitArgs, never>();
     const serviceUpdates = createChannel<ServiceUpdate>();
     const serviceList = new Map<string, Matcher[]>();
@@ -94,6 +100,7 @@ export function useWatcher(
     }
 
     yield* spawn(function* () {
+      yield* useAttributes({ name: "handleChange" });
       for (let args of yield* each(changes)) {
         const [path] = args as EmitArgs;
         for (let [service, matchers] of serviceList.entries()) {
@@ -117,20 +124,24 @@ export function useWatcher(
     const debounceMs =
       options?.watchDebounce !== undefined ? options.watchDebounce : 250;
     const serviceTimers = {} as Record<string, number>;
-    const debouncedServiceChanges = filter<ServiceUpdate>(function* (
-      updateStream
-    ) {
-      const now = performance.now();
-      if (
-        serviceTimers[updateStream.service] &&
-        now - serviceTimers[updateStream.service] < debounceMs
-      ) {
-        return false;
-      } else {
-        serviceTimers[updateStream.service] = now;
-        return true;
-      }
-    });
+    const debouncedServiceChanges = filter<ServiceUpdate>(
+      function* (updateStream) {
+        yield* useAttributes({
+          name: "debounceCheck",
+          service: updateStream.service,
+        });
+        const now = performance.now();
+        if (
+          serviceTimers[updateStream.service] &&
+          now - serviceTimers[updateStream.service] < debounceMs
+        ) {
+          return false;
+        } else {
+          serviceTimers[updateStream.service] = now;
+          return true;
+        }
+      },
+    );
 
     try {
       yield* provide({

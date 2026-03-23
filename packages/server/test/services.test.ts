@@ -2,6 +2,7 @@ import { it } from "node:test";
 import assert from "node:assert";
 import { resource, run, sleep, spawn, suspend } from "effection";
 import { useServiceGraph } from "../src/services.ts";
+import { waitFor } from "./utils.ts";
 import { useService } from "../src/service.ts";
 
 it("starts services in dependency order", async () => {
@@ -30,8 +31,7 @@ it("starts services in dependency order", async () => {
         // keep spawned graph alive
         yield* suspend();
       });
-      // The graph is running; sleep a short time to let the services start
-      yield* sleep(200);
+      yield* waitFor(() => startTimes.has("A") && startTimes.has("B"), 2000);
     });
   } catch (err) {
     console.log("run error:", err instanceof Error ? err.stack : err);
@@ -51,14 +51,14 @@ it("throws on cycles in dependency graph", async () => {
         A: {
           operation: useService(
             "A",
-            "node --import tsx ./test/services/service-a.ts"
+            "node --import tsx ./test/services/service-a.ts",
           ),
           dependsOn: { startup: ["B"] as const },
         },
         B: {
           operation: useService(
             "B",
-            "node --import tsx ./test/services/service-b.ts"
+            "node --import tsx ./test/services/service-b.ts",
           ),
           dependsOn: { startup: ["A"] as const },
         },
@@ -104,7 +104,7 @@ it("runs beforeStop hooks in reverse order", async () => {
       yield* suspend();
     });
     // let them start
-    yield* sleep(200);
+    yield* waitFor(() => startedOrder.length === 2, 2000);
   });
   assert.strictEqual(startedOrder.join(""), "AB");
   assert.strictEqual(stopOrder.join(""), "BA");
@@ -141,11 +141,11 @@ it("starts independent services in parallel", async () => {
     const slowStarted = startTimes.get("slow");
     assert.ok(
       typeof fastStarted === "number",
-      "fast started should be recorded"
+      "fast started should be recorded",
     );
     assert.ok(
       typeof slowStarted === "number",
-      "slow started should be recorded"
+      "slow started should be recorded",
     );
     assert(fastStarted! <= slowStarted!, "fast should start before slow");
   } finally {
@@ -197,7 +197,10 @@ it("runs subset of services with dependencies", async () => {
       // keep spawned graph alive so services can start and perform startup work
       yield* suspend();
     });
-    yield* sleep(300);
+    yield* waitFor(
+      () => startTimes.has("fast") && startTimes.has("slow"),
+      2000,
+    );
   });
 
   const f = startTimes.get("fast");
@@ -272,7 +275,10 @@ it("runs subset specified as a string", async () => {
       yield* run("r");
       yield* suspend();
     });
-    yield* sleep(300);
+    yield* waitFor(
+      () => startTimes.has("a") && startTimes.has("b") && startTimes.has("r"),
+      2000,
+    );
   });
 
   const a = startTimes.get("a");

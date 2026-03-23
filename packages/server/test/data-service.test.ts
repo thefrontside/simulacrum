@@ -8,19 +8,21 @@ it("starts data service and serves configured data", async () => {
   await run(function* () {
     const runGraph = yield* useServiceGraph(
       {},
-      { globalData: { a: 1, nested: { b: 2 } } }
+      {
+        globalData: { a: 1, nested: { b: 2 } },
+      },
     )();
 
     // wait deterministically for the simulacrum port to be registered
     yield* waitFor(
-      () => Boolean(runGraph?.servicePorts?.get("simulacrum")),
-      2000
+      () => typeof runGraph.status?.get("simulacrum")?.port === "number",
+      2000,
     );
-    const port = runGraph!.servicePorts!.get("simulacrum")!;
+    const port = runGraph.status!.get("simulacrum")!.port!;
 
     assert.ok(
       typeof port === "number",
-      "data service port should be registered on servicePorts"
+      "data service port should be registered on serviceStatus",
     );
 
     const res = yield* until(fetch(`http://127.0.0.1:${port}/data`));
@@ -33,15 +35,16 @@ it("serves individual keys and appropriate status codes", async () => {
   await run(function* () {
     const runGraph = yield* useServiceGraph(
       {},
-      { globalData: { a: 1, nested: { b: 2 } } }
+      {
+        globalData: { a: 1, nested: { b: 2 } },
+      },
     )();
 
-    // wait deterministically for the simulacrum port
     yield* waitFor(
-      () => Boolean(runGraph?.servicePorts?.get("simulacrum")),
-      2000
+      () => typeof runGraph.status?.get("simulacrum")?.port === "number",
+      2000,
     );
-    const port = runGraph!.servicePorts!.get("simulacrum")!;
+    const port = runGraph.status!.get("simulacrum")!.port!;
 
     assert.ok(typeof port === "number");
 
@@ -53,19 +56,19 @@ it("serves individual keys and appropriate status codes", async () => {
 
     // nested key returns object
     const nestedRes = yield* until(
-      fetch(`http://127.0.0.1:${port}/data/nested`)
+      fetch(`http://127.0.0.1:${port}/data/nested`),
     );
     assert.strictEqual(nestedRes.status, 200);
     const nestedJson = yield* until(nestedRes.json());
     assert.deepStrictEqual(nestedJson, { b: 2 });
 
-    // missing key -> 404
+    // missing key returns 404
     const missRes = yield* until(
-      fetch(`http://127.0.0.1:${port}/data/does-not-exist`)
+      fetch(`http://127.0.0.1:${port}/data/does-not-exist`),
     );
     assert.strictEqual(missRes.status, 404);
 
-    // empty key -> 400
+    // empty key returns 400
     const emptyRes = yield* until(fetch(`http://127.0.0.1:${port}/data/`));
     assert.strictEqual(emptyRes.status, 400);
   });
