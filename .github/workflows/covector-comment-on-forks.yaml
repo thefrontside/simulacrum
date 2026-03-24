@@ -2,7 +2,7 @@ name: covector comment
 
 on:
   workflow_run:
-    workflows: [covector status]
+    workflows: ["Covector Status"]
     types:
       - completed
 
