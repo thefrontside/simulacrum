@@ -4,7 +4,7 @@ import { faker } from "@faker-js/faker";
 
 export const auth0UserSchema = z
   .object({
-    id: z.string().default(""),
+    id: z.string().optional(),
     name: z.string(),
     password: z.string().optional().default("12345"),
     email: z.string().email().optional(),
@@ -13,7 +13,7 @@ export const auth0UserSchema = z
   .transform((user) => {
     if (!user.email)
       user.email = faker.internet.email({ firstName: user.name });
-    user.id = faker.database.mongodbObjectId();
+    if (user.id === undefined) user.id = faker.database.mongodbObjectId();
     if (!user.picture) user.picture = faker.image.avatar();
     return user;
   });
