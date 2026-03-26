@@ -252,7 +252,7 @@ export function createSimulationStore<
     });
   }
 
-  store.initialize(function* () {
+  store.run(function* () {
     let group = yield* parallel(tsks);
     yield* group;
   });
