@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.6.4]
+
+- [`86957dd`](https://github.com/thefrontside/simulacrum/commit/86957dd0e8ecd8a6bc536fd289df5e393c1774e3) ([#352](https://github.com/thefrontside/simulacrum/pull/352) by [@a-kriya](https://github.com/thefrontside/simulacrum/../../a-kriya)) preserve user-provided id in initialState instead of overwriting
+
 ## \[0.6.3]
 
 - [`d4f2be5`](https://github.com/thefrontside/simulacrum/commit/d4f2be576503e2fd374b996c26e33682d592e5ac) ([#349](https://github.com/thefrontside/simulacrum/pull/349) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Skip simulator asset minification. Also remove usage of `String.raw`. This was breaking the `/login` view in the Auth0 simulator with the way `tsdown` was escaping the strings.
