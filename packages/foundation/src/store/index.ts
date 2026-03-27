@@ -2,7 +2,7 @@ import {
   generateSchemaWithInputSlices,
   type ExtendSimulationSchemaInput,
 } from "./schema.ts";
-import type { AnyState, StoreUpdater, Callable } from "starfx";
+import type { AnyState, StoreUpdater, Operation } from "starfx";
 import {
   parallel,
   take,
@@ -63,7 +63,7 @@ export type ExtendSimulationSelectorsInputLoose<
 }) => Partial<Selectors> | Selectors;
 
 type CreateApi = ReturnType<typeof createApi>;
-type CreateWebhook = { create: CreateApi["post"]; task: CreateApi["bootup"] };
+type CreateWebhook = { create: CreateApi["post"]; task: CreateApi["register"] };
 
 // Minimal base actions that the foundation always provides. We express
 // their payload shapes so downstream packages can call them without
@@ -86,7 +86,7 @@ export type ExtendSimulationTaskInput<
   createWebhook: (url: string) => CreateWebhook;
   store: GeneratedStore<ExtendedSimulationSchema>;
   schema: GeneratedSchema<ExtendedSimulationSchema>[0];
-}) => { tasks: Callable<unknown>[]; actions: Actions };
+}) => { tasks: (() => Operation<unknown>)[]; actions: Actions };
 
 // Public, consumer-friendly extend store config that accepts the looser
 // extension input types so downstream packages can implement small
@@ -212,7 +212,7 @@ export function createSimulationStore<
     yield* next();
   });
 
-  let additionalTasks = [thunks.bootup];
+  let additionalTasks = [thunks.register];
 
   let [schema, schemaInitialState] = generateSchemaWithInputSlices(inputSchema);
   let store = createStore({
@@ -226,7 +226,7 @@ export function createSimulationStore<
     api.use(mdw.api({ schema }));
     api.use(api.routes());
     api.use(mdw.fetch({ baseUrl: postUrl }));
-    return { create: api.post, task: api.bootup };
+    return { create: api.post, task: api.register };
   };
   const userTasks = inputTasks({ createWebhook, store, schema });
 
@@ -238,10 +238,13 @@ export function createSimulationStore<
     ...userTasks.actions,
   };
 
-  let tsks: Callable<unknown>[] = [...additionalTasks, ...userTasks.tasks];
+  let tsks: (() => Operation<unknown>)[] = [
+    ...additionalTasks,
+    ...userTasks.tasks,
+  ];
   if (logs) {
     // log all actions dispatched
-    tsks.push(function* logActions() {
+    tsks.push(function* logActions(): Operation<void> {
       while (true) {
         let action = yield* take("*");
         console.dir(action, { depth: 5 });
