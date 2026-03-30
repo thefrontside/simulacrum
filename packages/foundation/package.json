@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/foundation-simulator",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Base simulator to build simulators for integration testing.",
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
@@ -42,14 +42,14 @@
   },
   "dependencies": {
     "ajv-formats": "^3.0.1",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "defu": "^6.1.4",
-    "express": "^5.1.0",
-    "fdir": "^6.2.0",
+    "express": "^5.2.1",
+    "fdir": "^6.5.0",
     "http-proxy-middleware": "^3.0.5",
-    "lodash": "^4.17.21",
-    "openapi-backend": "^5.15.0",
-    "starfx": "^0.15.0"
+    "lodash": "^4.17.23",
+    "openapi-backend": "^5.16.1",
+    "starfx": "0.16.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

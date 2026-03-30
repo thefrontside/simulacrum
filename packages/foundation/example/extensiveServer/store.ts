@@ -11,7 +11,7 @@ import type {
 export type ExtendedSchema = typeof schema;
 export type ExtendActions = typeof actions;
 export type ExtendSelectors = typeof selectors;
-// `tasks` is a function that returns { tasks: Callable[]; actions: Actions }
+// `tasks` is a function that returns { tasks: (() => Operation<unknown>)[]; actions: Actions }
 // Export the Actions portion as the `ExtendTasks` type so it can be used
 // as the fourth generic parameter to `SimulationStore` (which expects the
 // actions shape, not the whole return type of the tasks function).

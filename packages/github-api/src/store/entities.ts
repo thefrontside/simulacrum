@@ -4,7 +4,7 @@ import { faker } from "@faker-js/faker";
 
 export const githubUserSchema = z
   .object({
-    id: z.number().default(1000),
+    id: z.number().default(() => faker.number.int({ min: 1000 })),
     login: z.string(),
     name: z.string().optional(),
     bio: z.string().default(""),
@@ -21,7 +21,6 @@ export const githubUserSchema = z
       .optional(),
   })
   .transform((user) => {
-    user.id = faker.number.int({ min: 1000 });
     if (!user.name) user.name = user.login;
     if (!user.email)
       user.email = faker.internet.email({ firstName: user.name });
