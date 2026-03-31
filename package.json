@@ -30,14 +30,13 @@
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "packageManager": "pnpm@10.17.1",
   "engines": {
-    "node": ">=20",
+    "node": ">=24",
     "pnpm": ">=10"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.2",
     "publint": "^0.3.18",
-    "tsdown": "^0.21.5",
-    "tsx": "^4.21.0",
+    "tsdown": "^0.21.7",
     "typescript": "5.8.3",
     "vitest": "^3.2.4"
   }
