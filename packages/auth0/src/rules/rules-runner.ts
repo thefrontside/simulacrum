@@ -19,6 +19,7 @@ async function runRule<A, I>(
     let sandbox = {
       process,
       Buffer,
+      fetch,
       clearImmediate,
       clearInterval,
       clearTimeout,

@@ -11,7 +11,7 @@
     "prepack": "pnpm -r --if-present run prepack",
     "lint": "pnpm -r --if-present run lint -- --fix",
     "tsc": "pnpm -r --if-present run tsc",
-    "covector": "pnpm exec covector"
+    "covector": "pnpm dlx covector"
   },
   "repository": {
     "type": "git",
