@@ -48,6 +48,25 @@ export type GitHubExtendStoreInput = ExtendStoreConfig<
   GitHubSelectors
 >;
 
+export type GitHubOrganizationWithRepositories = GitHubOrganization & {
+  repositories: GitHubRepository[];
+};
+
+export type GitHubAppInstallationWithAccount = Omit<GitHubAppInstallation, "account"> & {
+  account: GitHubOrganization;
+  target_id?: GitHubOrganization["id"];
+  target_type?: GitHubOrganization["type"];
+};
+
+export type GitHubRepoOwner = Omit<GitHubOrganization, "name" | "email"> & {
+  id: number;
+};
+
+export type GitHubRepositoryWithOrganizationOwner = Omit<GitHubRepository, "id" | "owner"> & {
+  id: number;
+  owner: GitHubRepoOwner;
+};
+
 const inputSchema =
   <T>(
     initialState?: GitHubStore,
@@ -109,14 +128,14 @@ const extendActions =
     } as GitHubActions;
   };
 
-const inputSelectors: ExtendSimulationSelectorsInput<
-  Record<string, unknown>,
-  GitHubSchema
-> = ({
+const inputSelectors = ({
   createSelector,
   schema,
 }: ExtendSimulationSelectors<ExtendedSchema>) => {
-  const allGithubOrganizations = createSelector(
+  const allGithubOrganizations: (
+    state: AnyState
+  ) => GitHubOrganizationWithRepositories[] =
+    createSelector(
     schema.organizations.selectTableAsList,
     schema.repositories.selectTableAsList,
     (ghOrgs, repos) => {
@@ -127,7 +146,11 @@ const inputSelectors: ExtendSimulationSelectorsInput<
     }
   );
 
-  const getAppInstallation = createSelector(
+  const getAppInstallation: (
+    state: AnyState,
+    org: string,
+    repo?: string
+  ) => GitHubAppInstallationWithAccount | undefined = createSelector(
     schema.installations.selectTableAsList,
     schema.organizations.selectTableAsList,
     schema.repositories.selectTableAsList,
@@ -157,7 +180,10 @@ const inputSelectors: ExtendSimulationSelectorsInput<
     }
   );
 
-  const allReposWithOrgs = createSelector(
+  const allReposWithOrgs: (
+    state: AnyState,
+    org?: string
+  ) => GitHubRepositoryWithOrganizationOwner[] | undefined = createSelector(
     schema.repositories.selectTableAsList,
     schema.organizations.selectTable,
     (_: AnyState, org?: string) => org,
@@ -178,7 +204,12 @@ const inputSelectors: ExtendSimulationSelectorsInput<
     }
   );
 
-  const getBlob = createSelector(
+  const getBlob: (
+    state: AnyState,
+    owner: string,
+    repo: string,
+    sha_or_path: string
+  ) => GitHubBlob | undefined = createSelector(
     schema.blobs.selectTableAsList,
     (_state: AnyState, owner: string, repo: string, sha_or_path: string) => ({
       owner,
@@ -196,7 +227,11 @@ const inputSelectors: ExtendSimulationSelectorsInput<
     }
   );
 
-  const getBlobAtOwnerRepo = createSelector(
+  const getBlobAtOwnerRepo: (
+    state: AnyState,
+    owner: string,
+    repo: string
+  ) => GitHubBlob[] = createSelector(
     schema.blobs.selectTableAsList,
     (_state: AnyState, owner: string, repo: string) => ({
       owner,
