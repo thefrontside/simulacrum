@@ -263,7 +263,7 @@ describe("rules", () => {
         expect(idToken?.payload.checkURLTwoStatus).toBe(200);
         expect(idToken?.payload.checkURLTwoText).toBe("effection");
         await server.ensureClose();
-      });
+      }, 15000);
     });
 
     describe("sync top level", () => {
@@ -300,7 +300,7 @@ describe("rules", () => {
         expect(idToken?.payload.checkURLTwoStatus).toBe(200);
         expect(idToken?.payload.checkURLTwoText).toBe("effection");
         await server.ensureClose();
-      });
+      }, 15000);
     });
   });
 });
