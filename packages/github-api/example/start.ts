@@ -1,4 +1,4 @@
-import { InitialState, simulation } from "../src/index.ts";
+import { type InitialState, simulation } from "../src/index.ts";
 
 const initialState: InitialState = {
   users: [{ login: "test", organizations: ["frontside"] }],

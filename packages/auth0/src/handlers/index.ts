@@ -1,4 +1,4 @@
-import express, { type Request, type Express, Router } from "express";
+import express, { type Request, type Express, type Router } from "express";
 import type { ExtendedSimulationStore } from "../store/index.ts";
 import { createCors } from "../middleware/create-cors.ts";
 import { noCache } from "../middleware/no-cache.ts";

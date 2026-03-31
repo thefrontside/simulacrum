@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { type Router } from "express";
 import type { ExtendedSimulationStore } from "./store.ts";
 
 export const extendRouter = (

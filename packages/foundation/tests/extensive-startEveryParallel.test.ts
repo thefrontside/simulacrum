@@ -4,8 +4,8 @@ import {
   expect,
   beforeEach,
   afterEach,
-  Custom,
-  Test,
+  type Custom,
+  type Test,
 } from "vitest";
 import { simulation } from "../example/extensiveServer/index.ts";
 import type { FoundationSimulatorListening } from "../src/index.ts";

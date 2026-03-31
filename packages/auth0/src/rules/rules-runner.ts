@@ -31,12 +31,10 @@ async function runRule<A, I>(
       module,
       resolve,
       reject,
-      __simulator: {
-        ...{
-          user,
-          context: { ...context },
-        },
-      },
+      __simulator: ({
+	user,
+	context: { ...context }
+}),
     };
 
     let vmContext = vm.createContext(sandbox);

@@ -34,7 +34,7 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "bench": "vitest bench",
-    "lint": "echo noop",
+    "lint": "oxlint",
     "tsc": "tsc --noEmit",
     "prepack": "pnpm run generate && pnpm run build",
     "build": "tsdown",

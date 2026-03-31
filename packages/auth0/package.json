@@ -11,7 +11,7 @@
     "test:watch": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest watch --fileParallelism=false",
     "prepack": "pnpm run build",
     "build": "tsdown",
-    "lint": "echo noop",
+    "lint": "oxlint",
     "tsc": "tsc --noEmit"
   },
   "repository": {

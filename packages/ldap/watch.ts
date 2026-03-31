@@ -1,5 +1,5 @@
-import { Operation, Task, main, on, sleep, spawn } from 'effection';
-import { exec, daemon, Process, StdIO } from '@effection/process';
+import { type Operation, type Task, main, on, sleep, spawn } from 'effection';
+import { exec, daemon, type Process, type StdIO } from '@effection/process';
 import { watch } from 'chokidar';
 
 main(function* (scope: Task) {

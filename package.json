@@ -9,7 +9,10 @@
     "clean": "pnpm -r --if-present run clean",
     "test": "pnpm -r --if-present run test",
     "prepack": "pnpm -r --if-present run prepack",
-    "lint": "pnpm -r --if-present run lint -- --fix",
+    "lint": "pnpm -r --if-present run lint",
+    "lint:fix": "pnpm -r exec oxlint --fix",
+    "fmt": "oxfmt --write .",
+    "fmt:check": "oxfmt --check .",
     "tsc": "pnpm -r --if-present run tsc",
     "covector": "pnpm dlx covector"
   },
@@ -35,6 +38,8 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "oxfmt": "^0.43.0",
+    "oxlint": "^1.58.0",
     "tsdown": "^0.21.7",
     "typescript": "5.8.3",
     "vitest": "^3.2.4"

@@ -49,15 +49,13 @@ const inputSchema =
     const extended = extendedSchema ? extendedSchema({ slice }) : {};
     let slices = {
       sessions: slice.table<AuthSession>(),
-      users: slice.table<Auth0User>({
-        ...(!storeInitialState
+      users: slice.table<Auth0User>((!storeInitialState
           ? {
               initialState: {
                 [defaultUser.id]: defaultUser,
               },
             }
-          : { initialState: storeInitialState.users }),
-      }),
+          : { initialState: storeInitialState.users })),
       ...extended,
     };
     return slices;
