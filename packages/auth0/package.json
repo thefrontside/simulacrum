@@ -5,7 +5,7 @@
   "main": "./dist/index.cjs",
   "bin": "bin/start.cjs",
   "scripts": {
-    "start": "node --import=tsx ./example/index.mts",
+    "start": "node --experimental-strip-types ./example/index.mts",
     "start:bin": "node ./bin/start.cjs",
     "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest run --fileParallelism=false",
     "test:watch": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest watch --fileParallelism=false",

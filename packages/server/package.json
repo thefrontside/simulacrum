@@ -27,12 +27,12 @@
   ],
   "scripts": {
     "clean": "echo skip",
-    "test": "node --test-timeout=60000 --import tsx --test test/*.test.ts",
+    "test": "node --test-timeout=60000 --experimental-strip-types --test test/*.test.ts",
     "prepack": "pnpm run build",
     "build": "tsdown",
     "lint": "echo noop",
     "tsc": "tsc --noEmit",
-    "test:service-main": "node --import tsx ./test/service-main.ts"
+    "test:service-main": "node --experimental-strip-types ./test/service-main.ts"
   },
   "dependencies": {
     "effection": "^4.0.0",

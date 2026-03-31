@@ -26,12 +26,12 @@
     "src"
   ],
   "scripts": {
-    "start": "node --import=tsx ./example/singleFileServer/start.ts",
-    "start:simple": "node --import=tsx ./example/simpleStart/index.ts",
-    "start:singlefile": "node --import=tsx ./example/singleFileServer/start.ts",
-    "start:extensive": "node --import=tsx ./example/extensiveServer/start.ts",
-    "start:pingback": "node --import=tsx ./example/pingback/start.ts",
-    "start:pingback:watch": "node --import=tsx --watch-path=./example/pingback ./example/pingback/start.ts",
+    "start": "node --experimental-strip-types ./example/singleFileServer/start.ts",
+    "start:simple": "node --experimental-strip-types ./example/simpleStart/index.ts",
+    "start:singlefile": "node --experimental-strip-types ./example/singleFileServer/start.ts",
+    "start:extensive": "node --experimental-strip-types ./example/extensiveServer/start.ts",
+    "start:pingback": "node --experimental-strip-types ./example/pingback/start.ts",
+    "start:pingback:watch": "node --experimental-strip-types --watch-path=./example/pingback ./example/pingback/start.ts",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "bench": "vitest bench",
