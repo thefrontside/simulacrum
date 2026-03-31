@@ -21,6 +21,7 @@
     "./packages/*"
   ],
   "scripts": {
+    "check": "pnpm run \"/(tsc$)|(lint$)|(fmt$)/\"",
     "clean": "pnpm -r --if-present run clean",
     "covector": "pnpm dlx covector",
     "fmt": "oxfmt --write .",
