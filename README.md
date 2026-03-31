@@ -31,7 +31,7 @@ It is built with the expectation to be extended and meet your needs for any cust
 ## Development
 
 ```
-$ npm install
-$ npm run prepack
-$ npm test
+$ pnpm install
+$ pnpm run prepack
+$ pnpm test
 ```

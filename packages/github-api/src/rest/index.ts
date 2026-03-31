@@ -177,7 +177,12 @@ const handlers =
       },
       // GET /repos/{owner}/{repo}/git/trees/{tree_sha}
       "git/get-tree": async (_context, request, response) => {
-        const { owner, repo, ref } = request.params;
+        const ownerParam = request.params.owner;
+        const repoParam = request.params.repo;
+        const refParam = request.params.ref;
+        const owner = Array.isArray(ownerParam) ? ownerParam[0] : ownerParam;
+        const repo = Array.isArray(repoParam) ? repoParam[0] : repoParam;
+        const ref = Array.isArray(refParam) ? refParam[0] : refParam;
         const blobs = simulationStore.selectors.getBlobAtOwnerRepo(
           simulationStore.store.getState(),
           owner,

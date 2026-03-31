@@ -2,6 +2,7 @@ import type {
   SimulationStore,
   ExtendSimulationActions,
   ExtendSimulationSelectors,
+  ExtendSimulationSelectorsInput,
   ExtendSimulationTasks,
   ExtendSimulationSchema,
   AnyState,
@@ -11,6 +12,9 @@ import type {
 export type ExtendedSchema = typeof schema;
 export type ExtendActions = typeof actions;
 export type ExtendSelectors = typeof selectors;
+type ExampleSelectors = {
+  booleanSpecificNumbers: (state: AnyState, input: number[]) => boolean;
+};
 // `tasks` is a function that returns { tasks: (() => Operation<unknown>)[]; actions: Actions }
 // Export the Actions portion as the `ExtendTasks` type so it can be used
 // as the fourth generic parameter to `SimulationStore` (which expects the
@@ -46,7 +50,10 @@ const actions = ({
   return { addLotsOfDogs };
 };
 
-const selectors = ({
+const selectors: ExtendSimulationSelectorsInput<
+  ExampleSelectors,
+  ReturnType<ExtendedSchema>
+> = ({
   createSelector,
   schema,
 }: ExtendSimulationSelectors<ExtendedSchema>) => {

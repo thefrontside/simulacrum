@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepack": "echo \"tsc --build\"",
-    "build": "npm run prepack",
+    "build": "pnpm run prepack",
     "test": "echo client is used to test server"
   },
   "dependencies": {},
@@ -24,8 +24,5 @@
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme",
-  "volta": {
-    "extends": "../../package.json"
-  }
+  "homepage": "https://github.com/thefrontside/simulacrum#readme"
 }

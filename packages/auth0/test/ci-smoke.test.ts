@@ -10,8 +10,8 @@ const AUTH0_URL = `https://localhost:${AUTH0_PORT}`;
 
 // Ensure built distribution is present; if not, build it so the smoke test can run locally
 if (!existsSync("./dist/index.cjs")) {
-  console.log("ci-smoke: dist not found, running `npm run build`...");
-  execSync("npm run prepack", { stdio: "inherit" });
+  console.log("ci-smoke: dist not found, running `pnpm run build`...");
+  execSync("pnpm run prepack", { stdio: "inherit" });
 }
 
 // Helper to start the built auth0 service with a wellness check (reused by tests)
@@ -31,7 +31,7 @@ function startAuth0() {
               }).then((r) => {
                 if (!r.ok) throw new Error(`not ready: ${r.status}`);
                 return true;
-              })
+              }),
             );
             return Ok<void>(void 0);
           } catch (err) {
@@ -56,7 +56,7 @@ describe("CI smoke: built dist server", () => {
         fetch(`${AUTH0_URL}/login`, { signal }).then((r) => {
           if (!r.ok) throw new Error(`fetch failed: ${r.status}`);
           return r.text();
-        })
+        }),
       );
 
       expect(text).toMatch(/<\/script>/);
@@ -75,8 +75,8 @@ describe("CI smoke: built dist server", () => {
           (r) => {
             if (!r.ok) throw new Error(`fetch failed: ${r.status}`);
             return r.text();
-          }
-        )
+          },
+        ),
       );
 
       expect(text).toMatch(/<\/script>/);

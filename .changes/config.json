@@ -1,5 +1,6 @@
 {
   "gitSiteUrl": "https://github.com/thefrontside/simulacrum/",
+  "additionalBumpTypes": ["housekeeping"],
   "pkgManagers": {
     "javascript": {
       "version": true,
@@ -9,7 +10,7 @@
           "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
         }
       },
-      "publish": "npm publish --provenance --access public${ pkg.tag ? ' --tag preview' : '' }",
+      "publish": "pnpm publish --provenance --access public${ pkg.tag ? ' --tag preview' : '' }",
       "postpublish": {
         "use": "fetch:check",
         "options": {

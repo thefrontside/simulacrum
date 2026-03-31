@@ -5,11 +5,11 @@
   "main": "./dist/index.cjs",
   "bin": "bin/start.cjs",
   "scripts": {
-    "start": "node --import=tsx ./example/index.mts",
+    "start": "node --experimental-transform-types ./example/index.mts",
     "start:bin": "node ./bin/start.cjs",
     "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest run --fileParallelism=false",
     "test:watch": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest watch --fileParallelism=false",
-    "prepack": "npm run build",
+    "prepack": "pnpm run build",
     "build": "tsdown",
     "lint": "echo noop",
     "tsc": "tsc --noEmit"
@@ -40,12 +40,15 @@
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "dependencies": {
-    "@simulacrum/foundation-simulator": "0.6.1",
+    "@simulacrum/server": "workspace:^",
+    "@simulacrum/foundation-simulator": "workspace:^",
     "@faker-js/faker": "^9.3.0",
     "assert-ts": "^0.3.4",
     "base64-url": "^2.3.3",
+    "cors": "^2.8.6",
     "cookie-session": "^2.1.0",
     "cosmiconfig": "^9.0.0",
+    "express": "^5.2.1",
     "html-entities": "^2.5.2",
     "jsesc": "^3.1.0",
     "jsonwebtoken": "^9.0.2",
@@ -53,17 +56,22 @@
   },
   "devDependencies": {
     "@types/base64-url": "^2.2.2",
+    "@types/cors": "^2.8.19",
     "@types/cookie-session": "^2.0.49",
+    "@types/express": "^5.0.3",
     "@types/jsesc": "^3.0.3",
-    "@types/jsonwebtoken": "^9.0.9"
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/keygrip": "^1.0.4",
+    "effection": "^4.0.0",
+    "keygrip": "^1.1.0"
   },
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -78,13 +86,10 @@
   "publishConfig": {
     "exports": {
       ".": {
-        "require": "./dist/index.cjs",
-        "import": "./dist/index.mjs"
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
       },
       "./package.json": "./package.json"
     }
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }

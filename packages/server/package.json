@@ -27,12 +27,12 @@
   ],
   "scripts": {
     "clean": "echo skip",
-    "test": "node --test-timeout=60000 --import tsx --test test/*.test.ts",
-    "prepack": "npm run build",
+    "test": "node --test-timeout=60000 --experimental-transform-types --test test/*.test.ts",
+    "prepack": "pnpm run build",
     "build": "tsdown",
     "lint": "echo noop",
     "tsc": "tsc --noEmit",
-    "test:service-main": "node --import tsx ./test/service-main.ts"
+    "test:service-main": "node --experimental-transform-types ./test/service-main.ts"
   },
   "dependencies": {
     "effection": "^4.0.0",
@@ -44,8 +44,8 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -63,13 +63,10 @@
   "publishConfig": {
     "exports": {
       ".": {
-        "require": "./dist/index.cjs",
-        "import": "./dist/index.mjs"
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
       },
       "./package.json": "./package.json"
     }
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }

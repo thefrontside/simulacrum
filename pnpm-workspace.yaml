@@ -1,0 +1,4 @@
+packages:
+  - packages/*
+blockExoticSubdeps: true
+trustPolicy: no-downgrade

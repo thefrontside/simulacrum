@@ -4,7 +4,6 @@ import {
   type FoundationSimulator,
   type SimulationStore as FoundationSimulationStore,
 } from "@simulacrum/foundation-simulator";
-import type { Router } from "express";
 
 import {
   type ExtendedSimulationStore,
@@ -21,6 +20,10 @@ import type { SchemaFile } from "./utils.ts";
 
 export type InitialState = GitHubInitialStore;
 
+type FoundationRouter = Parameters<
+  NonNullable<Parameters<typeof createFoundationSimulationServer>[0]["extendRouter"]>
+>[0];
+
 export type GitHubSimulatorArgs = {
   initialState?: GitHubInitialStore;
   apiUrl?: string;
@@ -31,7 +34,7 @@ export type GitHubSimulatorArgs = {
       simulationStore: ExtendedSimulationStore
     ) => SimulationHandlers;
     extendRouter?: (
-      router: Router,
+      router: FoundationRouter,
       simulationStore: ExtendedSimulationStore
     ) => void;
   };
