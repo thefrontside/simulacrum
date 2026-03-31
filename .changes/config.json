@@ -1,5 +1,6 @@
 {
   "gitSiteUrl": "https://github.com/thefrontside/simulacrum/",
+  "additionalBumpTypes": ["housekeeping"],
   "pkgManagers": {
     "javascript": {
       "version": true,
