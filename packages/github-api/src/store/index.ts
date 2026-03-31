@@ -32,11 +32,7 @@ export type GitHubSchema = ReturnType<ExtendedSchema>;
 export type GitHubActions = ReturnType<ExtendActions>;
 export type GitHubSelectors = ReturnType<ExtendSelectors>;
 
-export type ExtendedSimulationStore = SimulationStore<
-  GitHubSchema,
-  GitHubActions,
-  GitHubSelectors
->;
+export type ExtendedSimulationStore = SimulationStore<GitHubSchema, GitHubActions, GitHubSelectors>;
 
 // Public type for consumers of this package to declare the shape of an
 // `extendStore` argument. This wires the foundation `ExtendStoreConfig`
@@ -68,37 +64,28 @@ export type GitHubRepositoryWithOrganizationOwner = Omit<GitHubRepository, "id" 
 };
 
 const inputSchema =
-  <T>(
-    initialState?: GitHubStore,
-    extendedSchema?: ExtendSimulationSchemaInput<T>
-  ) =>
+  <T>(initialState?: GitHubStore, extendedSchema?: ExtendSimulationSchemaInput<T>) =>
   ({ slice }: ExtendSimulationSchema) => {
     const storeInitialState = convertInitialStateToStoreState(initialState);
     const extended = extendedSchema ? extendedSchema({ slice }) : {};
     let slices = {
       users: slice.table<GitHubUser>(
-        !storeInitialState ? {} : { initialState: storeInitialState.users }
+        !storeInitialState ? {} : { initialState: storeInitialState.users },
       ),
       installations: slice.table<GitHubAppInstallation>(
-        !storeInitialState
-          ? {}
-          : { initialState: storeInitialState.installations }
+        !storeInitialState ? {} : { initialState: storeInitialState.installations },
       ),
       repositories: slice.table<GitHubRepository>(
-        !storeInitialState
-          ? {}
-          : { initialState: storeInitialState.repositories }
+        !storeInitialState ? {} : { initialState: storeInitialState.repositories },
       ),
       branches: slice.table<GitHubBranch>(
-        !storeInitialState ? {} : { initialState: storeInitialState.branches }
+        !storeInitialState ? {} : { initialState: storeInitialState.branches },
       ),
       organizations: slice.table<GitHubOrganization>(
-        !storeInitialState
-          ? {}
-          : { initialState: storeInitialState.organizations }
+        !storeInitialState ? {} : { initialState: storeInitialState.organizations },
       ),
       blobs: slice.table<GitHubBlob>(
-        !storeInitialState ? {} : { initialState: storeInitialState.blobs }
+        !storeInitialState ? {} : { initialState: storeInitialState.blobs },
       ),
       ...extended,
     };
@@ -106,18 +93,13 @@ const inputSchema =
   };
 
 const inputActions = (
-  _args: ExtendSimulationActions<ExtendedSchema>
+  _args: ExtendSimulationActions<ExtendedSchema>,
 ): ExtendSimulationActions<ExtendedSchema> => {
   return {} as ExtendSimulationActions<ExtendedSchema>;
 };
 
 const extendActions =
-  (
-    extendedActions?: ExtendSimulationActionsInputLoose<
-      GitHubActions,
-      GitHubSchema
-    >
-  ) =>
+  (extendedActions?: ExtendSimulationActionsInputLoose<GitHubActions, GitHubSchema>) =>
   (args: ExtendSimulationActions<ExtendedSchema>) => {
     const base = inputActions(args);
     if (!extendedActions) return base;
@@ -128,28 +110,23 @@ const extendActions =
     } as GitHubActions;
   };
 
-const inputSelectors = ({
-  createSelector,
-  schema,
-}: ExtendSimulationSelectors<ExtendedSchema>) => {
-  const allGithubOrganizations: (
-    state: AnyState
-  ) => GitHubOrganizationWithRepositories[] =
+const inputSelectors = ({ createSelector, schema }: ExtendSimulationSelectors<ExtendedSchema>) => {
+  const allGithubOrganizations: (state: AnyState) => GitHubOrganizationWithRepositories[] =
     createSelector(
-    schema.organizations.selectTableAsList,
-    schema.repositories.selectTableAsList,
-    (ghOrgs, repos) => {
-      return ghOrgs.map((ghOrg) => {
-        const repositories = repos.filter((r) => r.owner === ghOrg.login);
-        return { ...ghOrg, repositories };
-      });
-    }
-  );
+      schema.organizations.selectTableAsList,
+      schema.repositories.selectTableAsList,
+      (ghOrgs, repos) => {
+        return ghOrgs.map((ghOrg) => {
+          const repositories = repos.filter((r) => r.owner === ghOrg.login);
+          return { ...ghOrg, repositories };
+        });
+      },
+    );
 
   const getAppInstallation: (
     state: AnyState,
     org: string,
-    repo?: string
+    repo?: string,
   ) => GitHubAppInstallationWithAccount | undefined = createSelector(
     schema.installations.selectTableAsList,
     schema.organizations.selectTableAsList,
@@ -157,15 +134,11 @@ const inputSelectors = ({
     (_state: AnyState, org: string, _repo?: string) => org,
     (_state: AnyState, _org: string, repo?: string) => repo,
     (installations, orgs, repos, org, repo) => {
-      const appInstall = installations.find(
-        (install) => install.account === org
-      );
+      const appInstall = installations.find((install) => install.account === org);
       if (!appInstall) return undefined;
       let account = undefined;
       if (repo) {
-        const repoData = repos.find(
-          (r) => r.owner === appInstall?.account && r.name === repo
-        );
+        const repoData = repos.find((r) => r.owner === appInstall?.account && r.name === repo);
         if (repoData) account = orgs.find((o) => o.login === repoData.owner);
       } else {
         account = orgs.find((o) => o.login === appInstall?.account);
@@ -177,12 +150,12 @@ const inputSelectors = ({
         target_id: account?.id,
         target_type: account?.type,
       };
-    }
+    },
   );
 
   const allReposWithOrgs: (
     state: AnyState,
-    org?: string
+    org?: string,
   ) => GitHubRepositoryWithOrganizationOwner[] | undefined = createSelector(
     schema.repositories.selectTableAsList,
     schema.organizations.selectTable,
@@ -201,14 +174,14 @@ const inputSelectors = ({
         delete linkedRepo.owner.email;
         return linkedRepo;
       });
-    }
+    },
   );
 
   const getBlob: (
     state: AnyState,
     owner: string,
     repo: string,
-    sha_or_path: string
+    sha_or_path: string,
   ) => GitHubBlob | undefined = createSelector(
     schema.blobs.selectTableAsList,
     (_state: AnyState, owner: string, repo: string, sha_or_path: string) => ({
@@ -221,29 +194,24 @@ const inputSelectors = ({
         (blob) =>
           blob.owner === owner &&
           blob.repo === repo &&
-          (blob.path === sha_or_path || blob.sha === sha_or_path)
+          (blob.path === sha_or_path || blob.sha === sha_or_path),
       );
       return blob;
-    }
+    },
   );
 
-  const getBlobAtOwnerRepo: (
-    state: AnyState,
-    owner: string,
-    repo: string
-  ) => GitHubBlob[] = createSelector(
-    schema.blobs.selectTableAsList,
-    (_state: AnyState, owner: string, repo: string) => ({
-      owner,
-      repo,
-    }),
-    (blobs, { owner, repo }) => {
-      const blob = blobs.filter(
-        (blob) => blob.owner === owner && blob.repo === repo
-      );
-      return blob;
-    }
-  );
+  const getBlobAtOwnerRepo: (state: AnyState, owner: string, repo: string) => GitHubBlob[] =
+    createSelector(
+      schema.blobs.selectTableAsList,
+      (_state: AnyState, owner: string, repo: string) => ({
+        owner,
+        repo,
+      }),
+      (blobs, { owner, repo }) => {
+        const blob = blobs.filter((blob) => blob.owner === owner && blob.repo === repo);
+        return blob;
+      },
+    );
 
   return {
     allGithubOrganizations,
@@ -255,12 +223,7 @@ const inputSelectors = ({
 };
 
 const extendSelectors =
-  (
-    extendedSelectors?: ExtendSimulationSelectorsInputLoose<
-      GitHubSelectors,
-      GitHubSchema
-    >
-  ) =>
+  (extendedSelectors?: ExtendSimulationSelectorsInputLoose<GitHubSelectors, GitHubSchema>) =>
   (args: ExtendSimulationSelectors<ExtendedSchema>) => {
     const base = inputSelectors(args);
     if (!extendedSelectors) return base;
@@ -273,7 +236,7 @@ const extendSelectors =
 
 export const extendStore = (
   initialState: GitHubStore | undefined,
-  extended?: GitHubExtendStoreInput
+  extended?: GitHubExtendStoreInput,
 ): {
   schema: ExtendSimulationSchemaInput<GitHubSchema>;
   actions?: ExtendSimulationActionsInput<GitHubActions, GitHubSchema>;

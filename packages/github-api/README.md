@@ -45,7 +45,7 @@ import { simulation } from "@simulacrum/github-api-simulator";
 
 let app = simulation();
 app.listen(3300, () =>
-  console.log(`github-api simulation server started at http://localhost:3300`)
+  console.log(`github-api simulation server started at http://localhost:3300`),
 );
 ```
 

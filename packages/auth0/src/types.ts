@@ -2,10 +2,7 @@ import { z } from "zod";
 
 export const configurationSchema = z.object({
   port: z.optional(
-    z
-      .number()
-      .gt(2999, "port must be greater than 2999")
-      .lt(10000, "must be less than 10000")
+    z.number().gt(2999, "port must be greater than 2999").lt(10000, "must be less than 10000"),
   ),
   domain: z.optional(z.string().min(1, "domain is required")),
   audience: z.optional(z.string().min(1, "audience is required")),
@@ -17,7 +14,7 @@ export const configurationSchema = z.object({
         clientID: z.string().max(32, "must be 32 characters long"),
         audience: z.optional(z.string().min(1, "audience is required")),
         scope: z.string().min(1, "scope is required"),
-      })
+      }),
     ),
   ]),
   clientSecret: z.optional(z.string()),

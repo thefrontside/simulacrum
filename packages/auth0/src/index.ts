@@ -8,10 +8,7 @@ import { extendStore } from "./store/index.ts";
 import type { Router } from "express";
 import type { Auth0ExtendStoreInput } from "./store/index.ts";
 import { extendRouter } from "./handlers/index.ts";
-import {
-  type Auth0InitialStore,
-  auth0InitialStoreSchema,
-} from "./store/entities.ts";
+import { type Auth0InitialStore, auth0InitialStoreSchema } from "./store/entities.ts";
 import { getConfig } from "./config/get-config.ts";
 import { type Auth0Configuration } from "./types.ts";
 
@@ -20,13 +17,8 @@ export type Auth0Simulator = (args?: {
   initialState?: Auth0InitialStore;
   extend?: {
     extendStore?: Auth0ExtendStoreInput;
-    openapiHandlers?: (
-      simulationStore: ExtendedSimulationStore
-    ) => SimulationHandlers;
-    extendRouter?: (
-      router: Router,
-      simulationStore: ExtendedSimulationStore
-    ) => void;
+    openapiHandlers?: (simulationStore: ExtendedSimulationStore) => SimulationHandlers;
+    extendRouter?: (router: Router, simulationStore: ExtendedSimulationStore) => void;
   };
   options?: Partial<Auth0Configuration>;
 }) => FoundationSimulator<ExtendedSimulationStore>;

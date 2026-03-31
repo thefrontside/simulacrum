@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  auth0InitialStoreSchema,
-  convertInitialStateToStoreState,
-} from "../src/store/entities.ts";
+import { auth0InitialStoreSchema, convertInitialStateToStoreState } from "../src/store/entities.ts";
 
 describe("initialState user fields", () => {
   it("preserves all provided fields through to store state", () => {

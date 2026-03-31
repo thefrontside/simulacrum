@@ -15,7 +15,7 @@ export interface OpenIdConfiguration {
 }
 
 export const createOpenIdHandlers = (
-  serviceURL: (request: Request) => string
+  serviceURL: (request: Request) => string,
 ): Record<OpenIdRoutes, RequestHandler> => {
   return {
     ["/.well-known/jwks.json"]: function (_, res) {

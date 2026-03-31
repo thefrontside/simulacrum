@@ -37,8 +37,7 @@ function startAuth0() {
           } catch (err) {
             // ignore and retry
           }
-          if (Date.now() - start > 30000)
-            return Err(new Error("service did not start"));
+          if (Date.now() - start > 30000) return Err(new Error("service did not start"));
           yield* sleep(200);
         }
       },
@@ -71,12 +70,10 @@ describe("CI smoke: built dist server", () => {
       const url = `${AUTH0_URL}/authorize?response_mode=web_message&redirect_uri=http://localhost:3000&currentUser=default`;
       const signal2 = yield* useAbortSignal();
       const text = yield* until(
-        fetch(url, { headers: { accept: "text/html" }, signal: signal2 }).then(
-          (r) => {
-            if (!r.ok) throw new Error(`fetch failed: ${r.status}`);
-            return r.text();
-          },
-        ),
+        fetch(url, { headers: { accept: "text/html" }, signal: signal2 }).then((r) => {
+          if (!r.ok) throw new Error(`fetch failed: ${r.status}`);
+          return r.text();
+        }),
       );
 
       expect(text).toMatch(/<\/script>/);

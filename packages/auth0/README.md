@@ -56,9 +56,7 @@ You may import and run the simulation server in a script.
 import { simulation } from "@simulacrum/auth0-simulator";
 
 const app = simulation();
-app.listen(4400, () =>
-  console.log(`auth0 simulation server started at https://localhost:4400`)
-);
+app.listen(4400, () => console.log(`auth0 simulation server started at https://localhost:4400`));
 ```
 
 By passing an `initialState`, you may control the initial users in the store.

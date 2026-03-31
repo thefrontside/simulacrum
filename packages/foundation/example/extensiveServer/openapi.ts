@@ -103,8 +103,7 @@ const openapiSchemaWithModificationsForSimulation = {
               type: "string",
             },
             required: true,
-            description:
-              "The list of numbers that which we use to determine the perfect quantity",
+            description: "The list of numbers that which we use to determine the perfect quantity",
           },
         ],
         responses: {
@@ -132,19 +131,12 @@ const openapiSchemaWithModificationsForSimulation = {
   },
 };
 
-let document = [
-  openapiSchemaFromRealEndpoint,
-  openapiSchemaWithModificationsForSimulation,
-];
+let document = [openapiSchemaFromRealEndpoint, openapiSchemaWithModificationsForSimulation];
 
-function handlers(
-  simulationStore: ExtendedSimulationStore
-): SimulationHandlers {
+function handlers(simulationStore: ExtendedSimulationStore): SimulationHandlers {
   return {
     getDogs: (_c, _request, response, _next, routeMetadata) => {
-      let dogs = simulationStore.schema.dogs.select(
-        simulationStore.store.getState()
-      );
+      let dogs = simulationStore.schema.dogs.select(simulationStore.store.getState());
       if (routeMetadata.defaultCode === 200) {
         response.status(200).json({ dogs });
       } else {
@@ -153,9 +145,7 @@ function handlers(
     },
     putDogs: (_c, _req, response) => {
       simulationStore.store.dispatch(
-        simulationStore.actions.batchUpdater([
-          simulationStore.schema.dogs.increment(),
-        ])
+        simulationStore.actions.batchUpdater([simulationStore.schema.dogs.increment()]),
       );
       response.status(200).send(`added 1 dog`);
     },
@@ -163,27 +153,21 @@ function handlers(
       let rawQuantity = request.query.quantity as string;
       let quantity = parseInt(rawQuantity, 10);
       console.dir({ quantity });
-      simulationStore.store.dispatch(
-        simulationStore.actions.addLotsOfDogs({ quantity })
-      );
-      response
-        .status(200)
-        .send(`added ${quantity} ${quantity === 1 ? "dog" : "dogs"}`);
+      simulationStore.store.dispatch(simulationStore.actions.addLotsOfDogs({ quantity }));
+      response.status(200).send(`added ${quantity} ${quantity === 1 ? "dog" : "dogs"}`);
     },
     perfectDogQuantity: (_c, request, response) => {
-      let numbers = (
-        ((request?.query?.numbers as string) ?? "").split(",") ?? []
-      ).map((n) => parseInt(n, 10));
+      let numbers = (((request?.query?.numbers as string) ?? "").split(",") ?? []).map((n) =>
+        parseInt(n, 10),
+      );
       let dogs = simulationStore.selectors.booleanSpecificNumbers(
         simulationStore.store.getState(),
-        numbers
+        numbers,
       );
       response.status(200).json({ dogs });
     },
     triggerWebhook: (c, _request, response) => {
-      simulationStore.store.dispatch(
-        simulationStore.actions.webhooks.onTest(c.request.body)
-      );
+      simulationStore.store.dispatch(simulationStore.actions.webhooks.onTest(c.request.body));
       response.status(200).json({ status: "ok" });
     },
   };

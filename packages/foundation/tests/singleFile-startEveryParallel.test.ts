@@ -1,12 +1,4 @@
-import {
-  describe,
-  it,
-  expect,
-  beforeEach,
-  afterEach,
-  type Custom,
-  type Test,
-} from "vitest";
+import { describe, it, expect, beforeEach, afterEach, type Custom, type Test } from "vitest";
 import { simulation } from "../example/singleFileServer/index.ts";
 import type { FoundationSimulatorListening } from "../src/index.ts";
 
@@ -22,9 +14,7 @@ let getPort = (task: Readonly<Test<{}> | Custom<{}>>) => {
   let taskID = task.id;
   let endNumberAsString = taskID.split("_").at(-1);
   if (!endNumberAsString)
-    throw new Error(
-      `taskID ${taskID} of ${task.name} does not end with an integer`
-    );
+    throw new Error(`taskID ${taskID} of ${task.name} does not end with an integer`);
   let endNumber = parseInt(endNumberAsString, 10);
   return basePort + endNumber;
 };

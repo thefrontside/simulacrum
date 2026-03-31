@@ -4,7 +4,7 @@ export function defaultErrorHandler(
   error: Error,
   _req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   if (res.headersSent) {
     return next(error);

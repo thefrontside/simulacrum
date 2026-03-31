@@ -3,12 +3,8 @@ import { assert } from "assert-ts";
 import fs from "fs";
 import path from "path";
 
-export function parseRulesFiles(
-  rulesPath: string
-): { code: string; filename: string }[] {
-  let ruleFiles = fs
-    .readdirSync(rulesPath)
-    .filter((f) => path.extname(f) === ".js");
+export function parseRulesFiles(rulesPath: string): { code: string; filename: string }[] {
+  let ruleFiles = fs.readdirSync(rulesPath).filter((f) => path.extname(f) === ".js");
 
   return (
     ruleFiles
@@ -21,11 +17,7 @@ export function parseRulesFiles(
 
         let rawRule = fs.readFileSync(jsonFile, "utf8");
 
-        let {
-          enabled,
-          order = 0,
-          stage = "login_success",
-        } = JSON.parse(rawRule);
+        let { enabled, order = 0, stage = "login_success" } = JSON.parse(rawRule);
 
         if (!enabled) {
           return undefined;

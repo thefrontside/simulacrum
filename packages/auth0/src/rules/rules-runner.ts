@@ -5,16 +5,9 @@ import { assert } from "assert-ts";
 import { parseRulesFiles } from "./parse-rules-files.ts";
 import type { Rule, RuleContext, RuleUser } from "./types.ts";
 
-export type RulesRunner = <A, I>(
-  user: RuleUser,
-  context: RuleContext<A, I>
-) => void;
+export type RulesRunner = <A, I>(user: RuleUser, context: RuleContext<A, I>) => void;
 
-async function runRule<A, I>(
-  user: RuleUser,
-  context: RuleContext<A, I>,
-  rule: Rule
-) {
+async function runRule<A, I>(user: RuleUser, context: RuleContext<A, I>, rule: Rule) {
   await new Promise((resolve, reject) => {
     let sandbox = {
       process,
@@ -31,10 +24,10 @@ async function runRule<A, I>(
       module,
       resolve,
       reject,
-      __simulator: ({
-	user,
-	context: { ...context }
-}),
+      __simulator: {
+        user,
+        context: { ...context },
+      },
     };
 
     let vmContext = vm.createContext(sandbox);
@@ -65,10 +58,7 @@ async function runRule<A, I>(
 
 export function createRulesRunner(rulesPath?: string): RulesRunner {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let callback = (
-    _user: RuleUser,
-    _context: RuleContext<unknown, unknown>
-  ) => {};
+  let callback = (_user: RuleUser, _context: RuleContext<unknown, unknown>) => {};
 
   if (typeof rulesPath === "undefined") {
     return callback;

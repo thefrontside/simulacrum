@@ -1,11 +1,7 @@
 import type { PageArgs } from "./relay.ts";
 import { applyRelayPagination } from "./relay.ts";
 import type { ExtendedSimulationStore } from "../store/index.ts";
-import type {
-  GitHubUser,
-  GitHubRepository,
-  GitHubOrganization,
-} from "../store/entities.ts";
+import type { GitHubUser, GitHubRepository, GitHubOrganization } from "../store/entities.ts";
 import {
   type User,
   type Repository,
@@ -27,19 +23,11 @@ interface DataSchemas {
   Organization: GitHubOrganization;
 }
 
-export function deriveOwner(
-  simulationStore: ExtendedSimulationStore,
-  login: string
-) {
+export function deriveOwner(simulationStore: ExtendedSimulationStore, login: string) {
   let [org] = simulationStore.schema.organizations
     .selectTableAsList(simulationStore.store.getState())
     .filter((o) => o.login === login);
-  if (org)
-    return toGraphql(
-      simulationStore,
-      "Organization",
-      org
-    ) as GraphQLData["Organization"];
+  if (org) return toGraphql(simulationStore, "Organization", org) as GraphQLData["Organization"];
 
   let [userAccount] = simulationStore.schema.users
     .selectTableAsList(simulationStore.store.getState())
@@ -52,11 +40,8 @@ export function deriveOwner(
 export function toGraphql<T extends keyof (DataSchemas | GraphQLData)>(
   simulationStore: ExtendedSimulationStore,
   __typename: T,
-  entity: DataSchemas[T]
-):
-  | GraphQLData["User"]
-  | GraphQLData["Repository"]
-  | GraphQLData["Organization"] {
+  entity: DataSchemas[T],
+): GraphQLData["User"] | GraphQLData["Repository"] | GraphQLData["Organization"] {
   switch (__typename) {
     case "User":
       const user = entity as DataSchemas["User"];
@@ -70,14 +55,11 @@ export function toGraphql<T extends keyof (DataSchemas | GraphQLData)>(
         // @ts-expect-error type mismatch as it doesn't perfectly align with *Connection
         organizations(pageArgs: PageArgs) {
           return applyRelayPagination(
-            simulationStore.schema.organizations.selectByIds(
-              simulationStore.store.getState(),
-              {
-                ids: user.organizations,
-              }
-            ),
+            simulationStore.schema.organizations.selectByIds(simulationStore.store.getState(), {
+              ids: user.organizations,
+            }),
             pageArgs,
-            (org) => toGraphql(simulationStore, "Organization", org)
+            (org) => toGraphql(simulationStore, "Organization", org),
           );
         },
       };
@@ -129,7 +111,7 @@ export function toGraphql<T extends keyof (DataSchemas | GraphQLData)>(
         languages(pageArgs: PageArgs) {
           return applyRelayPagination(
             repo.language ? [{ id: repo.language, name: repo.language }] : [],
-            pageArgs
+            pageArgs,
           );
         },
         // @ts-expect-error type mismatch as it doesn't perfectly align with *Connection
@@ -139,9 +121,7 @@ export function toGraphql<T extends keyof (DataSchemas | GraphQLData)>(
           }));
         },
         visibility:
-          repo.visibility === "public"
-            ? RepositoryVisibility.Public
-            : RepositoryVisibility.Private,
+          repo.visibility === "public" ? RepositoryVisibility.Public : RepositoryVisibility.Private,
         isArchived: repo.archived,
         isFork: repo.fork,
       };
@@ -160,7 +140,7 @@ export function toGraphql<T extends keyof (DataSchemas | GraphQLData)>(
 function toGithubRepositoryOwner(
   simulationStore: ExtendedSimulationStore,
   __typename: string,
-  entity: DataSchemas["User"] | DataSchemas["Organization"]
+  entity: DataSchemas["User"] | DataSchemas["Organization"],
 ) {
   return {
     avatarUrl: entity.avatar_url,
@@ -172,7 +152,7 @@ function toGithubRepositoryOwner(
           .filter((repo) => repo.owner === entity.login),
         pageArgs,
         (repository: DataSchemas["Repository"]) =>
-          toGraphql(simulationStore, "Repository", repository)
+          toGraphql(simulationStore, "Repository", repository),
       );
     },
     // @ts-expect-error TODO fill in data properly

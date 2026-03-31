@@ -12,90 +12,87 @@ let basePort = 9049;
 let host = "http://localhost";
 let url = `${host}:${basePort}`;
 
-describe.sequential(
-  "extensive server - startup in every test - sequential",
-  () => {
-    let server: FoundationSimulatorListening<ExtendedSimulationStore>;
-    beforeEach(async () => {
-      let app = simulation();
-      server = await app.listen(basePort);
+describe.sequential("extensive server - startup in every test - sequential", () => {
+  let server: FoundationSimulatorListening<ExtendedSimulationStore>;
+  beforeEach(async () => {
+    let app = simulation();
+    server = await app.listen(basePort);
+  });
+  afterEach(async () => {
+    await server.ensureClose();
+  });
+
+  it("returns", async () => {
+    let request = await fetch(`${url}/api/pets`);
+    let response = await request.json();
+    expect(response).toEqual([
+      { id: 1, name: "Garfield" },
+      { id: 2, name: "Odie" },
+    ]);
+  });
+
+  it("returns again", async () => {
+    let request = await fetch(`${url}/api/pets`);
+    let response = await request.json();
+    expect(response).toEqual([
+      { id: 1, name: "Garfield" },
+      { id: 2, name: "Odie" },
+    ]);
+  });
+
+  it("adds one dog", async () => {
+    // note calling this endpoint increments the number of dogs expected
+    await fetch(`${url}/api/more-dogs`);
+
+    let request = await fetch(`${url}/api/dogs`);
+    let response = await request.json();
+    expect(response).toEqual({ dogs: 1 });
+  });
+
+  it("adds five dogs", async () => {
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+
+    let request = await fetch(`${url}/api/dogs`);
+    let response = await request.json();
+    expect(response).toEqual({ dogs: 5 });
+  });
+
+  it("adds three dogs", async () => {
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+
+    let request = await fetch(`${url}/api/dogs`);
+    let response = await request.json();
+    expect(response).toEqual({ dogs: 3 });
+  });
+
+  it("adds six dogs", async () => {
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+    await fetch(`${url}/api/more-dogs`);
+
+    let request = await fetch(`${url}/api/dogs`);
+    let response = await request.json();
+    expect(response).toEqual({ dogs: 6 });
+  });
+
+  it("sends webhook", async () => {
+    let request = await fetch(`${url}/api/trigger-webhook`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: "123", name: "test" }),
     });
-    afterEach(async () => {
-      await server.ensureClose();
-    });
-
-    it("returns", async () => {
-      let request = await fetch(`${url}/api/pets`);
-      let response = await request.json();
-      expect(response).toEqual([
-        { id: 1, name: "Garfield" },
-        { id: 2, name: "Odie" },
-      ]);
-    });
-
-    it("returns again", async () => {
-      let request = await fetch(`${url}/api/pets`);
-      let response = await request.json();
-      expect(response).toEqual([
-        { id: 1, name: "Garfield" },
-        { id: 2, name: "Odie" },
-      ]);
-    });
-
-    it("adds one dog", async () => {
-      // note calling this endpoint increments the number of dogs expected
-      await fetch(`${url}/api/more-dogs`);
-
-      let request = await fetch(`${url}/api/dogs`);
-      let response = await request.json();
-      expect(response).toEqual({ dogs: 1 });
-    });
-
-    it("adds five dogs", async () => {
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-
-      let request = await fetch(`${url}/api/dogs`);
-      let response = await request.json();
-      expect(response).toEqual({ dogs: 5 });
-    });
-
-    it("adds three dogs", async () => {
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-
-      let request = await fetch(`${url}/api/dogs`);
-      let response = await request.json();
-      expect(response).toEqual({ dogs: 3 });
-    });
-
-    it("adds six dogs", async () => {
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-      await fetch(`${url}/api/more-dogs`);
-
-      let request = await fetch(`${url}/api/dogs`);
-      let response = await request.json();
-      expect(response).toEqual({ dogs: 6 });
-    });
-
-    it("sends webhook", async () => {
-      let request = await fetch(`${url}/api/trigger-webhook`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: "123", name: "test" }),
-      });
-      let response = await request.json();
-      expect(response).toEqual({ status: "ok" });
-    });
-  }
-);
+    let response = await request.json();
+    expect(response).toEqual({ status: "ok" });
+  });
+});

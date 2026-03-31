@@ -1,29 +1,38 @@
-import type { SearchRequest, Server, SearchResponse, CompareRequest, CompareResponse, BindResponse, BindRequest } from 'ldapjs';
-import type { Operation } from 'effection';
-import { run } from 'effection';
-import { createServer, InvalidCredentialsError, NoSuchObjectError, OperationsError } from 'ldapjs';
-import type { LDAPOptions, LDAPStoreOptions, Port, UserData } from './types';
-import type { SimulationState, Simulator } from '@simulacrum/server';
-import type { ResourceServiceCreator } from '@simulacrum/server';
-import dedent from 'dedent';
-import { person } from '@simulacrum/server';
-import { spawn } from 'effection';
-import getPort from 'get-port';
-import type { Slice } from '@effection/atom';
+import type {
+  SearchRequest,
+  Server,
+  SearchResponse,
+  CompareRequest,
+  CompareResponse,
+  BindResponse,
+  BindRequest,
+} from "ldapjs";
+import type { Operation } from "effection";
+import { run } from "effection";
+import { createServer, InvalidCredentialsError, NoSuchObjectError, OperationsError } from "ldapjs";
+import type { LDAPOptions, LDAPStoreOptions, Port, UserData } from "./types";
+import type { SimulationState, Simulator } from "@simulacrum/server";
+import type { ResourceServiceCreator } from "@simulacrum/server";
+import dedent from "dedent";
+import { person } from "@simulacrum/server";
+import { spawn } from "effection";
+import getPort from "get-port";
+import type { Slice } from "@effection/atom";
 
 const DefaultOptions: Partial<LDAPOptions> = {
-  port: 389
+  port: 389,
 };
 
 export interface NextFunction {
   <E>(err?: E): void;
 }
 
-export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAPStoreOptions<T>): Operation<Server & Port> {
+export function createLDAPServer<T extends UserData>(
+  options: LDAPOptions & LDAPStoreOptions<T>,
+): Operation<Server & Port> {
   return {
-    name: 'LDAPServer',
+    name: "LDAPServer",
     *init() {
-
       let port = options.port ?? (yield getPort());
       let baseDN = options.baseDN;
       let bindDn = options.bindDn;
@@ -37,11 +46,13 @@ export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAP
         error: () => undefined,
       };
 
-      let logger = options.log || options.log == null ? console : {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        log: (..._: unknown[]) => {}
-      };
-
+      let logger =
+        options.log || options.log == null
+          ? console
+          : {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              log: (..._: unknown[]) => {},
+            };
 
       let server = createServer({ log: silence });
 
@@ -52,7 +63,7 @@ export function createLDAPServer<T extends UserData>(options: LDAPOptions & LDAP
         res.send({
           dn: "",
           attributes: {
-            "vendorName": "Frontside, Inc."
+            vendorName: "Frontside, Inc.",
           },
         });
         res.end();
@@ -78,7 +89,7 @@ filter: ${req.filter.toString()}
             attributes: {
               entryUUID: entry.uuid,
               entryDN: dn,
-              objectclass: ['user'],
+              objectclass: ["user"],
               ...entry,
               memberof: groups,
             },
@@ -96,7 +107,7 @@ filter: ${req.filter.toString()}
       });
 
       server.compare(groupDN, (req: CompareRequest, res: CompareResponse) => {
-        logger.log('--- Compare ---');
+        logger.log("--- Compare ---");
         logger.log(`DN: ${req.dn.toString()}`);
         logger.log(`attribute name: ${req.attribute}`);
         logger.log(`attribute value: ${req.value}`);
@@ -105,7 +116,7 @@ filter: ${req.filter.toString()}
       });
 
       server.bind(baseDN, function (req: BindRequest, res: BindResponse, next: NextFunction) {
-        logger.log('--- Bind ---');
+        logger.log("--- Bind ---");
         logger.log(`bind DN: ${req.dn.toString()}`);
         logger.log(`bind PW: ${req.credentials}`);
 
@@ -115,14 +126,14 @@ filter: ${req.filter.toString()}
         }
 
         let password = req.credentials;
-        logger.log('verify:', commonName, password);
+        logger.log("verify:", commonName, password);
 
         let users = [...options.users];
 
-        let user = users.filter(u => u.cn === commonName)?.[0];
+        let user = users.filter((u) => u.cn === commonName)?.[0];
 
-        if (typeof user === 'undefined') {
-          logger.log('could not find user');
+        if (typeof user === "undefined") {
+          logger.log("could not find user");
           return next(new NoSuchObjectError(req.dn.toString()));
         }
 
@@ -135,7 +146,7 @@ filter: ${req.filter.toString()}
           logger.log(`bind succeeded for ${bindDn}`);
           res.end();
         } else {
-          return next(new OperationsError('could not find user'));
+          return next(new OperationsError("could not find user"));
         }
       });
 
@@ -161,9 +172,9 @@ UserBaseDN:    ${bindDn}
         try {
           yield;
         } finally {
-          yield new Promise<void>(resolve => {
+          yield new Promise<void>((resolve) => {
             server?.close(() => {
-              logger.log('ldap server closed');
+              logger.log("ldap server closed");
               resolve();
             });
           });
@@ -171,7 +182,7 @@ UserBaseDN:    ${bindDn}
       });
 
       return { ...server, port };
-    }
+    },
   };
 }
 
@@ -182,38 +193,42 @@ export interface Close {
 /**
  * Wraps an LDAP server resource into an Promise based API
  */
-export async function runLDAPServer<T extends UserData>(options: LDAPOptions & LDAPStoreOptions<T>): Promise<Server & Port & Close> {
+export async function runLDAPServer<T extends UserData>(
+  options: LDAPOptions & LDAPStoreOptions<T>,
+): Promise<Server & Port & Close> {
   let task = run(createLDAPServer(options));
   let server = await task;
   return Object.create(server, {
-    close: { value: () => task.halt() }
+    close: { value: () => task.halt() },
   });
-
 }
 
-export function createLdapService<T extends UserData>(options: LDAPOptions, state: Slice<SimulationState>): ResourceServiceCreator {
+export function createLdapService<T extends UserData>(
+  options: LDAPOptions,
+  state: Slice<SimulationState>,
+): ResourceServiceCreator {
   return () => {
     let users = {
       *[Symbol.iterator]() {
-        let entries = state.slice('store', 'people').get() ?? [];
+        let entries = state.slice("store", "people").get() ?? [];
         for (let user of Object.values(entries)) {
           yield { ...user, uuid: user.id, cn: user.email };
         }
-      }
+      },
     } as Iterable<T>;
 
     return {
-      name: 'LDAPService',
+      name: "LDAPService",
       *init() {
         let server = yield createLDAPServer({
           ...options,
-          users
+          users,
         });
         return {
           port: server.port,
-          protocol: 'ldap',
+          protocol: "ldap",
         };
-      }
+      },
     };
   };
 }
@@ -226,7 +241,7 @@ export const ldap: Simulator<LDAPOptions> = (slice, options) => {
       ldap: createLdapService(ldapOptions, slice),
     },
     scenarios: {
-      person
-    }
+      person,
+    },
   };
 };

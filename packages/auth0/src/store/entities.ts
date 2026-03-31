@@ -11,8 +11,7 @@ export const auth0UserSchema = z
     picture: z.string().url().optional(),
   })
   .transform((user) => {
-    if (!user.email)
-      user.email = faker.internet.email({ firstName: user.name });
+    if (!user.email) user.email = faker.internet.email({ firstName: user.name });
     if (!user.picture) user.picture = faker.image.avatar();
     return user;
   });
@@ -33,16 +32,17 @@ export type Auth0InitialStore = z.input<typeof auth0InitialStoreSchema>;
 
 export const convertToObj = <T extends { [k: string]: any }>(
   arrayOfObjects: T[],
-  key: IdProp = "id"
+  key: IdProp = "id",
 ): Record<IdProp, T> =>
-  arrayOfObjects.reduce((final, obj: T) => {
-    final[obj[key]] = obj;
-    return final;
-  }, {} as Record<IdProp, T>);
+  arrayOfObjects.reduce(
+    (final, obj: T) => {
+      final[obj[key]] = obj;
+      return final;
+    },
+    {} as Record<IdProp, T>,
+  );
 
-export const convertInitialStateToStoreState = (
-  initialState: Auth0InitialStore | undefined
-) => {
+export const convertInitialStateToStoreState = (initialState: Auth0InitialStore | undefined) => {
   if (!initialState) return undefined;
   const storeObject = {
     users: convertToObj(initialState.users as Auth0Store["users"], "id"),

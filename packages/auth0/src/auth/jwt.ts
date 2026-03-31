@@ -12,7 +12,7 @@ export function createJsonWebToken<P extends SignPayload>(
   options: SignOptions = {
     algorithm: "RS256",
     keyid: JWKS.keys[0].kid,
-  }
+  },
 ): string {
   return jwt.sign(payload, privateKey, options);
 }

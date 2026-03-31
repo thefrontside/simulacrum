@@ -1,9 +1,6 @@
 import { put, takeEvery, type Action } from "starfx";
 import { createFoundationSimulationServer } from "../../src/index.ts";
-import type {
-  ExtendSimulationSchema,
-  FoundationSimulator,
-} from "../../src/index.ts";
+import type { ExtendSimulationSchema, FoundationSimulator } from "../../src/index.ts";
 
 export function simulation(): FoundationSimulator<any> {
   return createFoundationSimulationServer({
@@ -19,36 +16,30 @@ export function simulation(): FoundationSimulator<any> {
       tasks: ({ createWebhook }) => {
         const webhook = createWebhook("http://localhost:3050");
         // use webhook.create<TypeOfPayload> if a payload is expected
-        const boopTrigger = webhook.create(
-          "/event/boop",
-          function* (ctx, next) {
-            console.log("firing webhook from 3051 to 3050");
-            ctx.request = ctx.req({
-              body: JSON.stringify(ctx.payload),
-            });
+        const boopTrigger = webhook.create("/event/boop", function* (ctx, next) {
+          console.log("firing webhook from 3051 to 3050");
+          ctx.request = ctx.req({
+            body: JSON.stringify(ctx.payload),
+          });
 
-            // this fires off the actual request
-            yield* next();
+          // this fires off the actual request
+          yield* next();
 
-            // this allows you to inspect after the request
-            // console.log({ ctx });
-          }
-        );
-        const bappedTrigger = webhook.create(
-          "/event/bap",
-          function* (ctx, next) {
-            console.log("firing bapped webhook from 3051 to 3050");
-            ctx.request = ctx.req({
-              body: JSON.stringify(ctx.payload),
-            });
+          // this allows you to inspect after the request
+          // console.log({ ctx });
+        });
+        const bappedTrigger = webhook.create("/event/bap", function* (ctx, next) {
+          console.log("firing bapped webhook from 3051 to 3050");
+          ctx.request = ctx.req({
+            body: JSON.stringify(ctx.payload),
+          });
 
-            // this fires off the actual request
-            yield* next();
+          // this fires off the actual request
+          yield* next();
 
-            // this allows you to inspect after the request
-            // console.dir({ ctx });
-          }
-        );
+          // this allows you to inspect after the request
+          // console.dir({ ctx });
+        });
         const isBoopEvent = (action: Action) =>
           action.type === "store" &&
           !!action?.payload?.patches.find((p: any) => p.path.includes("boop"));
@@ -99,24 +90,18 @@ export function simulation(): FoundationSimulator<any> {
       router.post("/event/boop", (_req, res) => {
         console.log("received boop increment request on 3051");
         simulationStore.store.dispatch(
-          simulationStore.actions.batchUpdater(
-            simulationStore.schema.boop.increment()
-          )
+          simulationStore.actions.batchUpdater(simulationStore.schema.boop.increment()),
         );
         res.status(200).json({ status: "ok" });
       });
 
       router.get("/external/boop", (_req, res) => {
-        simulationStore.store.dispatch(
-          simulationStore.actions.webhook.boopTrigger()
-        );
+        simulationStore.store.dispatch(simulationStore.actions.webhook.boopTrigger());
         res.status(200).json({ status: "ok" });
       });
 
       router.get("/get/boop", (_req, res) => {
-        const count = simulationStore.schema.boop.select(
-          simulationStore.store.getState()
-        );
+        const count = simulationStore.schema.boop.select(simulationStore.store.getState());
         res.status(200).json({ count });
       });
     },

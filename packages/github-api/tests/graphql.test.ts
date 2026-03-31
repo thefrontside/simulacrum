@@ -300,11 +300,7 @@ describe.sequential("graphql queries", () => {
 
   describe("getOrganizationRepositories", () => {
     const query = gql`
-      query repositories(
-        $org: String!
-        $catalogPathRef: String!
-        $cursor: String
-      ) {
+      query repositories($org: String!, $catalogPathRef: String!, $cursor: String) {
         repositoryOwner(login: $org) {
           login
           repositories(first: 50, after: $cursor) {
@@ -362,9 +358,7 @@ describe.sequential("graphql queries", () => {
       expect(response.data.repositoryOwner.login).toBe("lovely-org");
       expect(response.data.repositoryOwner.repositories.nodes.length).toBe(1);
       expect(response.data.repositoryOwner.repositories.pageInfo).toBeDefined();
-      expect(
-        response.data.repositoryOwner.repositories.pageInfo.hasNextPage
-      ).toBe(false);
+      expect(response.data.repositoryOwner.repositories.pageInfo.hasNextPage).toBe(false);
     });
     it("responds successfully to graphql client", async () => {
       let request = await client(query, variables);
@@ -374,11 +368,7 @@ describe.sequential("graphql queries", () => {
 
   describe("getOrganizationRepository", () => {
     const query = gql`
-      query repository(
-        $org: String!
-        $repoName: String!
-        $catalogPathRef: String!
-      ) {
+      query repository($org: String!, $repoName: String!, $catalogPathRef: String!) {
         repositoryOwner(login: $org) {
           repository(name: $repoName) {
             name

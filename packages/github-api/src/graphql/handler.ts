@@ -11,10 +11,7 @@ import { type Plugin } from "graphql-yoga";
 const customMediaTypeParser: Plugin = {
   onResultProcess({ request, result, setResultProcessor }) {
     const acceptHeader = request.headers.get("accept");
-    if (
-      acceptHeader?.includes("application/vnd.github.v3+json") &&
-      !isAsyncIterable(result)
-    ) {
+    if (acceptHeader?.includes("application/vnd.github.v3+json") && !isAsyncIterable(result)) {
       setResultProcessor(processRegularResult, "application/json");
     }
   },

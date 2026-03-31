@@ -8,6 +8,6 @@ app.listen(4400, () =>
       `Visit the root route to view all available routes.\n\n` +
       `Point your configuration at this simulation server and use the default user below.\n` +
       `Email: ${auth0APIsimulator.defaultUser.email}\nPassword: ${auth0APIsimulator.defaultUser.password}\n` +
-      `\nPress Ctrl+C to stop the server`
-  )
+      `\nPress Ctrl+C to stop the server`,
+  ),
 );

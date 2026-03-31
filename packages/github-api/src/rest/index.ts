@@ -8,7 +8,7 @@ const handlers =
     initialState: Record<string, any> | undefined,
     extendedHandlers:
       | ((simulationStore: ExtendedSimulationStore) => SimulationHandlers)
-      | undefined
+      | undefined,
   ) =>
   (simulationStore: ExtendedSimulationStore): SimulationHandlers => {
     if (!initialState) return {};
@@ -18,7 +18,7 @@ const handlers =
       // GET /user/installations
       "apps/list-installations": async (_context, _request, response) => {
         const ghOrgs = simulationStore.selectors.allGithubOrganizations(
-          simulationStore.store.getState()
+          simulationStore.store.getState(),
         );
         const data = ghOrgs.map((org, index) => ({
           id: index,
@@ -27,15 +27,9 @@ const handlers =
         response.status(200).json(data);
       },
       // POST /app/installations/{installation_id}/access_tokens
-      "apps/create-installation-access-token": async (
-        _context,
-        _request,
-        _response
-      ) => {
+      "apps/create-installation-access-token": async (_context, _request, _response) => {
         const repositories =
-          simulationStore.selectors.allReposWithOrgs(
-            simulationStore.store.getState()
-          ) ?? [];
+          simulationStore.selectors.allReposWithOrgs(simulationStore.store.getState()) ?? [];
         const token = "ghs_16C7e42F292c6912E7710c838347Ae178B4a";
         return {
           status: 201,
@@ -52,15 +46,9 @@ const handlers =
         };
       },
       // L#4134 /installation/repositories
-      "apps/list-repos-accessible-to-installation": async (
-        _context,
-        _request,
-        _response
-      ) => {
+      "apps/list-repos-accessible-to-installation": async (_context, _request, _response) => {
         const repos =
-          simulationStore.selectors.allReposWithOrgs(
-            simulationStore.store.getState()
-          ) ?? [];
+          simulationStore.selectors.allReposWithOrgs(simulationStore.store.getState()) ?? [];
         return {
           status: 200,
           json: {
@@ -74,7 +62,7 @@ const handlers =
         const { org } = context.request.params;
         const install = simulationStore.selectors.getAppInstallation(
           simulationStore.store.getState(),
-          org
+          org,
         );
         if (!install) return response.status(404).send("Not Found");
         return response.status(200).json(install);
@@ -89,7 +77,7 @@ const handlers =
         const install = simulationStore.selectors.getAppInstallation(
           simulationStore.store.getState(),
           owner,
-          repo
+          repo,
         );
         if (!install) return response.status(404).send("Not Found");
         return response.status(200).json(install);
@@ -104,7 +92,7 @@ const handlers =
         const { org } = context.request.params;
         const repos = simulationStore.selectors.allReposWithOrgs(
           simulationStore.store.getState(),
-          org
+          org,
         );
         if (!repos) return response.status(404).send("Not Found");
         return { status: 200, json: repos };
@@ -112,16 +100,12 @@ const handlers =
       // L#29067 /repos/{owner}/{repo}/branches
       "repos/list-branches": async (_context, _request, _response) => {
         const branches = simulationStore.schema.branches.selectTableAsList(
-          simulationStore.store.getState()
+          simulationStore.store.getState(),
         );
         return { status: 200, json: branches };
       },
       // GET /repos/{owner}/{repo}/commits/{ref}/status
-      "repos/get-combined-status-for-ref": async (
-        context,
-        request,
-        response
-      ) => {
+      "repos/get-combined-status-for-ref": async (context, request, response) => {
         const { owner, repo, ref } = context.request.params;
         const commitStatus = commitStatusResponse({
           host: `${request.protocol}://${request.headers.host}`,
@@ -138,7 +122,7 @@ const handlers =
           simulationStore.store.getState(),
           owner,
           repo,
-          path
+          path,
         );
         if (!blob) {
           response.status(404).send("fixture does not exist");
@@ -160,7 +144,7 @@ const handlers =
           simulationStore.store.getState(),
           owner,
           repo,
-          file_sha
+          file_sha,
         );
         if (!blob) {
           response.status(404).send("fixture does not exist");
@@ -186,7 +170,7 @@ const handlers =
         const blobs = simulationStore.selectors.getBlobAtOwnerRepo(
           simulationStore.store.getState(),
           owner,
-          repo
+          repo,
         );
         if (!blobs || !owner || !repo || !ref) {
           response.status(404).send("fixture does not exist");
@@ -205,7 +189,7 @@ const handlers =
       // GET /user
       "users/get-authenticated": async (_context, _request, response) => {
         const users = simulationStore.schema.users.selectTableAsList(
-          simulationStore.store.getState()
+          simulationStore.store.getState(),
         );
         const user = users[0];
         const data = {
@@ -218,17 +202,13 @@ const handlers =
       },
 
       // GET /user/memberships/orgs
-      "orgs/list-memberships-for-authenticated-user": async (
-        _context,
-        _request,
-        _response
-      ) => {
+      "orgs/list-memberships-for-authenticated-user": async (_context, _request, _response) => {
         const users = simulationStore.schema.users.selectTableAsList(
-          simulationStore.store.getState()
+          simulationStore.store.getState(),
         );
         const user = users[0];
         const organizations = simulationStore.selectors.allGithubOrganizations(
-          simulationStore.store.getState()
+          simulationStore.store.getState(),
         );
         return {
           status: 200,
@@ -250,9 +230,7 @@ export const openapi = (
   initialState: Record<string, any> | undefined,
   apiRoot: string,
   apiSchema: SchemaFile | string,
-  openapiHandlers:
-    | ((simulationStore: ExtendedSimulationStore) => SimulationHandlers)
-    | undefined
+  openapiHandlers: ((simulationStore: ExtendedSimulationStore) => SimulationHandlers) | undefined,
 ) => [
   {
     document: getSchema(apiSchema),

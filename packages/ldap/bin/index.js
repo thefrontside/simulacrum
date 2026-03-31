@@ -1,2 +1,2 @@
 #! /usr/bin/env node
-require('@simulacrum/ldap-simulator/dist/start');
+require("@simulacrum/ldap-simulator/dist/start");

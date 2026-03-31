@@ -3,10 +3,7 @@ import { epochTime } from "./date.ts";
 import { encode } from "base64-url";
 import { assert } from "assert-ts";
 
-export function issueRefreshToken(
-  scope: string,
-  grantType: GrantType
-): boolean {
+export function issueRefreshToken(scope: string, grantType: GrantType): boolean {
   return grantType === "refresh_token" || scope.includes("offline_access");
 }
 
@@ -27,6 +24,6 @@ export function createRefreshToken({
       scope,
       user: { id: user.id },
       nonce,
-    })
+    }),
   );
 }

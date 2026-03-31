@@ -34,26 +34,20 @@ const schema = ({ slice }: ExtendSimulationSchema) => {
   return slices;
 };
 
-const actions = ({
-  thunks,
-  schema,
-}: ExtendSimulationActions<ExtendedSchema>) => {
+const actions = ({ thunks, schema }: ExtendSimulationActions<ExtendedSchema>) => {
   let addLotsOfDogs = thunks.create<{ quantity: number }>(
     "dogs:add-lots",
     function* boop(ctx, next) {
       yield* schema.update(schema.dogs.increment(ctx.payload.quantity));
 
       yield* next();
-    }
+    },
   );
 
   return { addLotsOfDogs };
 };
 
-const selectors: ExtendSimulationSelectorsInput<
-  ExampleSelectors,
-  ReturnType<ExtendedSchema>
-> = ({
+const selectors: ExtendSimulationSelectorsInput<ExampleSelectors, ReturnType<ExtendedSchema>> = ({
   createSelector,
   schema,
 }: ExtendSimulationSelectors<ExtendedSchema>) => {
@@ -62,7 +56,7 @@ const selectors: ExtendSimulationSelectorsInput<
     (_: AnyState, input: number[]) => input,
     (boop, numbers) => {
       return numbers.includes(boop);
-    }
+    },
   );
 
   return { booleanSpecificNumbers };
@@ -82,7 +76,7 @@ const tasks = ({ createWebhook }: ExtendSimulationTasks<ExtendedSchema>) => {
       // calling this will proceed through the middleware chain
       // and actually send the request
       yield* next();
-    }
+    },
   );
 
   return { tasks: [webhook.task], actions: { webhooks: { onTest } } };

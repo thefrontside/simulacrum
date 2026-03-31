@@ -3,19 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "description": "Composable simulations for testing, development, and application previews",
-  "author": "Frontside Engineering <engineering@frontside.com>",
-  "license": "MIT",
-  "scripts": {
-    "clean": "pnpm -r --if-present run clean",
-    "test": "pnpm -r --if-present run test",
-    "prepack": "pnpm -r --if-present run prepack",
-    "lint": "pnpm -r --if-present run lint",
-    "lint:fix": "pnpm -r exec oxlint --fix",
-    "fmt": "oxfmt --write .",
-    "fmt:check": "oxfmt --check .",
-    "tsc": "pnpm -r --if-present run tsc",
-    "covector": "pnpm dlx covector"
+  "keywords": [
+    "emulation",
+    "simulation"
+  ],
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
   },
+  "license": "MIT",
+  "author": "Frontside Engineering <engineering@frontside.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
@@ -23,18 +20,16 @@
   "workspaces": [
     "./packages/*"
   ],
-  "keywords": [
-    "simulation",
-    "emulation"
-  ],
-  "bugs": {
-    "url": "https://github.com/thefrontside/simulacrum/issues"
-  },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme",
-  "packageManager": "pnpm@10.17.1",
-  "engines": {
-    "node": ">=24",
-    "pnpm": ">=10"
+  "scripts": {
+    "clean": "pnpm -r --if-present run clean",
+    "covector": "pnpm dlx covector",
+    "fmt": "oxfmt --write .",
+    "fmt:check": "oxfmt --check .",
+    "lint": "pnpm -r --if-present run lint",
+    "lint:fix": "pnpm -r exec oxlint --fix",
+    "prepack": "pnpm -r --if-present run prepack",
+    "test": "pnpm -r --if-present run test",
+    "tsc": "pnpm -r --if-present run tsc"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
@@ -43,5 +38,10 @@
     "tsdown": "^0.21.7",
     "typescript": "5.8.3",
     "vitest": "^3.2.4"
-  }
+  },
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@10.17.1"
 }

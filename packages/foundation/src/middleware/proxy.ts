@@ -9,12 +9,8 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 
 export function apiProxy(
-  proxyAndSave: string
-): RequestHandler<
-  IncomingMessage,
-  ServerResponse<IncomingMessage>,
-  (err?: any) => void
-> {
+  proxyAndSave: string,
+): RequestHandler<IncomingMessage, ServerResponse<IncomingMessage>, (err?: any) => void> {
   const options: ProxyOptions = {
     logger: console,
     // secure: false,
@@ -26,42 +22,35 @@ export function apiProxy(
      **/
     selfHandleResponse: true, // res.end() will be called internally by responseInterceptor()
     on: {
-      proxyRes: responseInterceptor(
-        async (responseBuffer, _proxyRes, req, _res) => {
-          const filename = `./src/serve${req.url ?? "/log"}.json`;
+      proxyRes: responseInterceptor(async (responseBuffer, _proxyRes, req, _res) => {
+        const filename = `./src/serve${req.url ?? "/log"}.json`;
 
-          // check response can parse as json
-          let jsonResponse;
-          try {
-            jsonResponse = JSON.parse(responseBuffer.toString("utf8"));
-          } catch (error) {
-            console.error(`failed to parse return as JSON from ${req.url}`);
-            return responseBuffer;
-          }
-
-          // create folder for said response
-          try {
-            await fsPromise.mkdir(path.dirname(filename), {
-              recursive: true,
-            });
-          } catch (error) {
-            console.error(
-              `unable to create folders: ${path.dirname(filename)}`
-            );
-            return responseBuffer;
-          }
-
-          try {
-            await fsPromise.writeFile(
-              filename,
-              JSON.stringify(jsonResponse, null, 2)
-            );
-          } catch (error) {
-            console.error(error);
-          }
+        // check response can parse as json
+        let jsonResponse;
+        try {
+          jsonResponse = JSON.parse(responseBuffer.toString("utf8"));
+        } catch (error) {
+          console.error(`failed to parse return as JSON from ${req.url}`);
           return responseBuffer;
         }
-      ),
+
+        // create folder for said response
+        try {
+          await fsPromise.mkdir(path.dirname(filename), {
+            recursive: true,
+          });
+        } catch (error) {
+          console.error(`unable to create folders: ${path.dirname(filename)}`);
+          return responseBuffer;
+        }
+
+        try {
+          await fsPromise.writeFile(filename, JSON.stringify(jsonResponse, null, 2));
+        } catch (error) {
+          console.error(error);
+        }
+        return responseBuffer;
+      }),
     },
   };
   return createProxyMiddleware(options);

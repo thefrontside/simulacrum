@@ -1,7 +1,4 @@
-import {
-  createFoundationSimulationServer,
-  type FoundationSimulator,
-} from "../../src/index.ts";
+import { createFoundationSimulationServer, type FoundationSimulator } from "../../src/index.ts";
 import { openapi } from "./openapi.ts";
 import { extendStore, type ExtendedSimulationStore } from "./store.ts";
 import { extendRouter } from "./extend-api.ts";

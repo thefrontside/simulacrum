@@ -34,7 +34,7 @@ const identity = <A>(a: A): A => a;
 export function applyRelayPagination<T, R>(
   nodes: T[],
   args: PageArgs,
-  mapper: (a: T) => R = identity as (a: T) => R
+  mapper: (a: T) => R = identity as (a: T) => R,
 ): Page<R> {
   let range = applyCursorsToEdges(nodes, args.before, args.after);
 

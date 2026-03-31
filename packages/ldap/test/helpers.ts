@@ -1,12 +1,12 @@
-import type { Task, Stream, Operation } from 'effection';
-import { createStream, ensure, on, once, spawn } from 'effection';
-import type { Client } from '@simulacrum/client';
-import { createClient } from '@simulacrum/client';
-import type { Server, ServerOptions } from '@simulacrum/server';
-import { createSimulationServer } from '@simulacrum/server';
-export type { Client, Simulation } from '@simulacrum/client';
-import type { SearchEntryObject, SearchOptions } from 'ldapjs';
-import { createClient as createLDAPJSClient } from 'ldapjs';
+import type { Task, Stream, Operation } from "effection";
+import { createStream, ensure, on, once, spawn } from "effection";
+import type { Client } from "@simulacrum/client";
+import { createClient } from "@simulacrum/client";
+import type { Server, ServerOptions } from "@simulacrum/server";
+import { createSimulationServer } from "@simulacrum/server";
+export type { Client, Simulation } from "@simulacrum/client";
+import type { SearchEntryObject, SearchOptions } from "ldapjs";
+import { createClient as createLDAPJSClient } from "ldapjs";
 
 export function createTestServer(options: ServerOptions): Operation<Client> {
   return {
@@ -14,7 +14,7 @@ export function createTestServer(options: ServerOptions): Operation<Client> {
       let server: Server = yield createSimulationServer(options);
       let { port } = server.address;
       let client = createClient(`http://localhost:${port}`);
-      yield scope.spawn(function*() {
+      yield scope.spawn(function* () {
         try {
           yield;
         } finally {
@@ -22,7 +22,7 @@ export function createTestServer(options: ServerOptions): Operation<Client> {
         }
       });
       return client;
-    }
+    },
   };
 }
 
@@ -32,29 +32,35 @@ export interface LDAP {
 
 export interface LDAPCommands {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  search(base: string, options?: SearchOptions): Stream<SearchEntryObject & Record<string, any>, void>;
+  search(
+    base: string,
+    options?: SearchOptions,
+  ): Stream<SearchEntryObject & Record<string, any>, void>;
 }
 
 export function createLDAPClient(url: string): LDAP {
   return {
     bind(dn, secret) {
       return {
-        name: 'LDAPCommands',
+        name: "LDAPCommands",
         *init() {
           let client = createLDAPJSClient({ url });
 
           // The mere attempt to `bind()` requires an `unbind()`,
           // so we have to put our ensure block first because
           // it must be called even in the event that `bind()` fails.
-          yield ensure(() => new Promise<void>((resolve, reject) => {
-            client.unbind(err => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve();
-              }
-            });
-          }));
+          yield ensure(
+            () =>
+              new Promise<void>((resolve, reject) => {
+                client.unbind((err) => {
+                  if (err) {
+                    reject(err);
+                  } else {
+                    resolve();
+                  }
+                });
+              }),
+          );
 
           yield new Promise((resolve, reject) => {
             client.bind(dn, secret, (err, value) => {
@@ -66,10 +72,9 @@ export function createLDAPClient(url: string): LDAP {
             });
           });
 
-
           return {
             search(base, options = {}) {
-              return createStream(function*(publish) {
+              return createStream(function* (publish) {
                 let response = yield new Promise((resolve, reject) => {
                   client.search(base, options, (err, res) => {
                     if (err) {
@@ -80,18 +85,18 @@ export function createLDAPClient(url: string): LDAP {
                   });
                 });
 
-                yield spawn(function*() {
-                  throw yield once(response, 'error');
+                yield spawn(function* () {
+                  throw yield once(response, "error");
                 });
 
-                yield spawn(on<SearchEntryObject>(response, 'searchEntry').forEach(publish));
+                yield spawn(on<SearchEntryObject>(response, "searchEntry").forEach(publish));
 
-                yield once(response, 'end');
+                yield once(response, "end");
               });
-            }
+            },
           };
         },
       };
-    }
+    },
   };
 }
