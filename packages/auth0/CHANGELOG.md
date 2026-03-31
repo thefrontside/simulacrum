@@ -229,7 +229,7 @@
   - [0430761](https://github.com/thefrontside/simulacrum/commit/0430761982c8819b3eb4fe7335c2b2f0505b9a92) add logout route on 2021-07-14
   - [089d67f](https://github.com/thefrontside/simulacrum/commit/089d67f270fa3f9706ed69099631a19fffc822c3) rename @simualcrum/auth0 to @simualcrum/auth0-simulator on 2021-07-27
 - Add openid endpoints `/.well-known/jwks.json` and `/.well-known/openid-configuration`.
-  - [1e15e42](https://github.com/thefrontside/simulacrum/commit/1e15e42c57bb4208d30f12afe14d000c47e400b9) Add openid endpoints  and . on 2021-07-09
+  - [1e15e42](https://github.com/thefrontside/simulacrum/commit/1e15e42c57bb4208d30f12afe14d000c47e400b9) Add openid endpoints and . on 2021-07-09
   - [b36ca42](https://github.com/thefrontside/simulacrum/commit/b36ca42a0fd0c77c16a6139b0ac3a1303f40ebd9) fix ./well-known/openid-configuration typo on 2021-07-14
   - [089d67f](https://github.com/thefrontside/simulacrum/commit/089d67f270fa3f9706ed69099631a19fffc822c3) rename @simualcrum/auth0 to @simualcrum/auth0-simulator on 2021-07-27
 - Add the initial rules-runner code

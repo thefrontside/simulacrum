@@ -4,9 +4,7 @@ type SimulationSlice = typeof immerSlice;
 export type ExtendSimulationSchema = {
   slice: SimulationSlice;
 };
-export type ExtendSimulationSchemaInput<T> = ({
-  slice,
-}: ExtendSimulationSchema) => T;
+export type ExtendSimulationSchemaInput<T> = ({ slice }: ExtendSimulationSchema) => T;
 
 export interface SimulationLog {
   timestamp: number;
@@ -25,7 +23,7 @@ export interface SimulationRoute {
 }
 
 export function generateSchemaWithInputSlices<ExtendedSimulationSchema>(
-  inputSchema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>
+  inputSchema: ExtendSimulationSchemaInput<ExtendedSimulationSchema>,
 ) {
   let slices = inputSchema({ slice: immerSlice });
 

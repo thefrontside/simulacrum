@@ -2,27 +2,27 @@
   "name": "@simulacrum/client",
   "version": "0.5.4",
   "description": "connect to simulacrum servers and manipulate them via the control API",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "prepack": "echo \"tsc --build\"",
-    "build": "pnpm run prepack",
-    "test": "echo client is used to test server"
+  "keywords": [
+    "emulation",
+    "simulation"
+  ],
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
   },
-  "dependencies": {},
-  "devDependencies": {},
+  "license": "MIT",
+  "author": "Frontside Engineering <cowboyd@frontside.io>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
-  "keywords": [
-    "simulation",
-    "emulation"
-  ],
-  "author": "Frontside Engineering <cowboyd@frontside.io>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/thefrontside/simulacrum/issues"
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "pnpm run prepack",
+    "prepack": "echo \"tsc --build\"",
+    "test": "echo client is used to test server"
   },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme"
+  "dependencies": {},
+  "devDependencies": {}
 }

@@ -77,9 +77,7 @@ export const loginView = ({
                 </div>
               </div>
               <div
-                class="error bg-red-500 text-white p-3 ${
-                  loginFailed ? "" : "hidden"
-                }"
+                class="error bg-red-500 text-white p-3 ${loginFailed ? "" : "hidden"}"
               >
                 Wrong email or password
               </div>

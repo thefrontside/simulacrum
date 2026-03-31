@@ -29,9 +29,7 @@ describe.sequential("GET repo endpoints", () => {
       let response = await request.json();
       expect(response.err).toBe(undefined);
       expect(request.status).toEqual(200);
-      expect(response.repositories).toEqual([
-        expect.objectContaining({ name: "awesome-repo" }),
-      ]);
+      expect(response.repositories).toEqual([expect.objectContaining({ name: "awesome-repo" })]);
     });
   });
 
@@ -44,7 +42,7 @@ describe.sequential("GET repo endpoints", () => {
       expect(response).toEqual(
         expect.objectContaining({
           account: expect.objectContaining({ login: "lovely-org" }),
-        })
+        }),
       );
     });
 
@@ -56,37 +54,29 @@ describe.sequential("GET repo endpoints", () => {
 
   describe("/repos/{owner}/{repo}/installation", () => {
     it("validates with 200 response", async () => {
-      let request = await fetch(
-        `${url}/repos/lovely-org/awesome-repo/installation`
-      );
+      let request = await fetch(`${url}/repos/lovely-org/awesome-repo/installation`);
       let response = await request.json();
       expect(response.err).toBe(undefined);
       expect(request.status).toEqual(200);
       expect(response).toEqual(
         expect.objectContaining({
           account: expect.objectContaining({ login: "lovely-org" }),
-        })
+        }),
       );
     });
 
     it("handles non-existant org", async () => {
-      let request = await fetch(
-        `${url}/repos/an-org/awesome-repo/installation`
-      );
+      let request = await fetch(`${url}/repos/an-org/awesome-repo/installation`);
       expect(request.status).toEqual(404);
     });
 
     it("handles non-existant repo", async () => {
-      let request = await fetch(
-        `${url}/repos/lovely-org/not-awesome-repo/installation`
-      );
+      let request = await fetch(`${url}/repos/lovely-org/not-awesome-repo/installation`);
       expect(request.status).toEqual(404);
     });
 
     it("handles non-existant org and repo", async () => {
-      let request = await fetch(
-        `${url}/repos/lovely-but-not/awesome/installation`
-      );
+      let request = await fetch(`${url}/repos/lovely-but-not/awesome/installation`);
       expect(request.status).toEqual(404);
     });
   });

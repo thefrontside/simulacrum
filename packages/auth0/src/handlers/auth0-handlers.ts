@@ -1,10 +1,6 @@
 import type { ExtendedSimulationStore } from "../store/index.ts";
 import type { Request, RequestHandler } from "express";
-import type {
-  Auth0Configuration,
-  QueryParams,
-  ResponseModes,
-} from "../types.ts";
+import type { Auth0Configuration, QueryParams, ResponseModes } from "../types.ts";
 import { createLoginRedirectHandler } from "./login-redirect.ts";
 import { createWebMessageHandler } from "./web-message.ts";
 import { loginView } from "../views/login.ts";
@@ -45,7 +41,7 @@ export const createAuth0Handlers = (
   simulationStore: ExtendedSimulationStore,
   serviceURL: (request: Request) => string,
   options: Auth0Configuration,
-  debug: boolean
+  debug: boolean,
 ): Record<Routes, RequestHandler> => {
   let { audience, scope, clientID, rulesDirectory } = options;
   let personQuery = createPersonQuery(simulationStore);
@@ -85,7 +81,7 @@ export const createAuth0Handlers = (
 
       assert(
         ["query", "web_message"].includes(responseMode),
-        `unknown response_mode ${responseMode}`
+        `unknown response_mode ${responseMode}`,
       );
 
       let handler = authorizeHandlers[responseMode];
@@ -126,8 +122,7 @@ export const createAuth0Handlers = (
 
       let user = personQuery(
         (person) =>
-          person.email?.toLowerCase() === username.toLowerCase() &&
-          person.password === password
+          person.email?.toLowerCase() === username.toLowerCase() && person.password === password,
       );
 
       if (!user) {
@@ -159,7 +154,7 @@ export const createAuth0Handlers = (
           simulationStore.schema.sessions.patch({
             [nonce]: { username, nonce },
           }),
-        ])
+        ]),
       );
 
       res.status(200).send(userNamePasswordForm(req.body));
@@ -173,10 +168,9 @@ export const createAuth0Handlers = (
 
       let { redirect_uri, nonce } = wctx;
 
-      const session = simulationStore.schema.sessions.selectById(
-        simulationStore.store.getState(),
-        { id: nonce }
-      );
+      const session = simulationStore.schema.sessions.selectById(simulationStore.store.getState(), {
+        id: nonce,
+      });
 
       const { username } = session ?? {};
 
@@ -194,15 +188,10 @@ export const createAuth0Handlers = (
       try {
         let iss = serviceURL(req);
 
-        let responseClientId: string =
-          (req?.body?.client_id as string) ?? clientID;
-        let responseAudience: string =
-          (req?.body?.audience as string) ?? audience;
+        let responseClientId: string = (req?.body?.client_id as string) ?? clientID;
+        let responseAudience: string = (req?.body?.audience as string) ?? audience;
 
-        assert(
-          !!responseClientId,
-          "500::no clientID in options or request body"
-        );
+        assert(!!responseClientId, "500::no clientID in options or request body");
 
         let tokens = await createTokens({
           simulationStore,

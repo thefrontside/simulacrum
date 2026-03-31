@@ -1,9 +1,5 @@
 import { createFoundationSimulationServer } from "../../src/index.ts";
-import type {
-  AnyState,
-  ExtendSimulationSchema,
-  FoundationSimulator,
-} from "../../src/index.ts";
+import type { AnyState, ExtendSimulationSchema, FoundationSimulator } from "../../src/index.ts";
 
 const openapiSchemaFromRealEndpoint = {
   openapi: "3.0.0",
@@ -76,10 +72,7 @@ export function simulation(): FoundationSimulator<any> {
     serveJsonFiles: `${import.meta.dirname}/jsonFiles`,
     openapi: [
       {
-        document: [
-          openapiSchemaFromRealEndpoint,
-          openapiSchemaWithModificationsForSimulation,
-        ],
+        document: [openapiSchemaFromRealEndpoint, openapiSchemaWithModificationsForSimulation],
         handlers({ store, schema, actions }) {
           return {
             getDogs: (_c, _req, res) => {
@@ -98,16 +91,11 @@ export function simulation(): FoundationSimulator<any> {
     extendStore: {
       logs: false,
       actions: ({ thunks, schema }) => {
-        let upsertTest = thunks.create<AnyState>(
-          "user:upsert",
-          function* boop(ctx, next) {
-            yield* schema.update(
-              schema.test.add({ [ctx.payload.id]: ctx.payload })
-            );
+        let upsertTest = thunks.create<AnyState>("user:upsert", function* boop(ctx, next) {
+          yield* schema.update(schema.test.add({ [ctx.payload.id]: ctx.payload }));
 
-            yield* next();
-          }
-        );
+          yield* next();
+        });
 
         return { upsertTest };
       },
@@ -122,9 +110,7 @@ export function simulation(): FoundationSimulator<any> {
     },
     extendRouter(router, simulationStore) {
       router.get("/extended-route", (_req, res) => {
-        let dogs = simulationStore.schema.boop.select(
-          simulationStore.store.getState()
-        );
+        let dogs = simulationStore.schema.boop.select(simulationStore.store.getState());
         res.status(200).json({ dogs });
       });
     },

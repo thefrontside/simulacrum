@@ -11,7 +11,7 @@ export const webMessage = ({
     {
       redirect_uri,
     },
-    { json: true, isScriptContext: true }
+    { json: true, isScriptContext: true },
   );
 
   return /*html*/ `

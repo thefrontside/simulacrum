@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  convertInitialStateToStoreState,
-  gitubInitialStoreSchema,
-} from "../src/store/entities.ts";
+import { convertInitialStateToStoreState, gitubInitialStoreSchema } from "../src/store/entities.ts";
 
 const minimalInitialState = (userOverrides = {}) =>
   gitubInitialStoreSchema.parse({

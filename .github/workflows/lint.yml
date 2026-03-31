@@ -16,6 +16,9 @@ jobs:
       - name: Run linters
         run: pnpm run lint
 
+      - name: Run linters
+        run: pnpm run fmt:check
+
       # note this is required for type checking
       # in part due to graphql codegen
       - name: Build All

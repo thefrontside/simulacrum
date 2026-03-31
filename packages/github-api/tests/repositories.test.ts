@@ -28,9 +28,7 @@ describe.sequential("GET repo endpoints", () => {
       let request = await fetch(`${url}/orgs/lovely-org/repos`);
       let response = await request.json();
       expect(request.status).toEqual(200);
-      expect(response).toEqual([
-        expect.objectContaining({ name: "awesome-repo" }),
-      ]);
+      expect(response).toEqual([expect.objectContaining({ name: "awesome-repo" })]);
     });
 
     it("handles org with no repos", async () => {
@@ -48,9 +46,7 @@ describe.sequential("GET repo endpoints", () => {
 
   describe("/repos/{org}/{repo}/branches", () => {
     it("validates with 200 response", async () => {
-      let request = await fetch(
-        `${url}/repos/lovely-org/awesome-repo/branches`
-      );
+      let request = await fetch(`${url}/repos/lovely-org/awesome-repo/branches`);
       let response = await request.json();
       expect(request.status).toEqual(200);
       expect(response).toEqual([expect.objectContaining({ name: "main" })]);

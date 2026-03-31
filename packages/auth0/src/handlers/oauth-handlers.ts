@@ -14,10 +14,7 @@ import type {
   IdTokenData,
   RefreshToken,
 } from "../types.ts";
-import {
-  createRefreshToken,
-  issueRefreshToken,
-} from "../auth/refresh-token.ts";
+import { createRefreshToken, issueRefreshToken } from "../auth/refresh-token.ts";
 import { type ExtendedSimulationStore } from "../store/index.ts";
 import { type Auth0User } from "../store/entities.ts";
 

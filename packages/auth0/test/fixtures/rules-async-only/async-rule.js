@@ -31,8 +31,6 @@ async function asyncRule(user, context, callback) {
   user.checkURLTwoStatus = checkTwo.checkURLStatus;
   user.checkURLTwoText = checkTwo.checkURLText.toLowerCase();
 
-  console.log(
-    `added checkURL, ${user.checkURLOne} and ${user.checkURLTwo}, to user, ${user.name}`
-  );
+  console.log(`added checkURL, ${user.checkURLOne} and ${user.checkURLTwo}, to user, ${user.name}`);
   callback(null, user, context);
 }

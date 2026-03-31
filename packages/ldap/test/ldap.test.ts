@@ -1,17 +1,17 @@
-import { describe, it, beforeEach } from '@effection/mocha';
-import expect from 'expect';
-import type { Client, LDAP, LDAPCommands, Simulation } from './helpers';
-import { createLDAPClient } from './helpers';
-import { createTestServer } from './helpers';
-import { ldap } from '../src';
-import { NoSuchObjectError } from 'ldapjs';
-import { person } from '@simulacrum/server';
+import { describe, it, beforeEach } from "@effection/mocha";
+import expect from "expect";
+import type { Client, LDAP, LDAPCommands, Simulation } from "./helpers";
+import { createLDAPClient } from "./helpers";
+import { createTestServer } from "./helpers";
+import { ldap } from "../src";
+import { NoSuchObjectError } from "ldapjs";
+import { person } from "@simulacrum/server";
 
-describe('LDAP simulator', () => {
+describe("LDAP simulator", () => {
   let client: Client;
   let simulation: Simulation;
 
-  beforeEach(function*() {
+  beforeEach(function* () {
     client = yield createTestServer({
       simulators: {
         ldap: (slice, options) => {
@@ -19,10 +19,10 @@ describe('LDAP simulator', () => {
 
           return {
             services,
-            scenarios: { person }
+            scenarios: { person },
           };
-        }
-      }
+        },
+      },
     });
   });
 
@@ -33,34 +33,34 @@ describe('LDAP simulator', () => {
 
   describe("Creating a simulation with an ldap simulator", () => {
     let ldap: LDAP;
-    beforeEach(function*() {
+    beforeEach(function* () {
       simulation = yield client.createSimulation("ldap", {
         options: {
           log: false,
           baseDN: "ou=users,dc=org.com",
           bindDn: "admin@org.com",
           bindPassword: "password",
-          groupDN:"ou=groups,dc=org.com"
+          groupDN: "ou=groups,dc=org.com",
         },
         services: {
           ldap: {
-            port: 389
+            port: 389,
           },
         },
-        debug: true
+        debug: true,
       });
       ldap = createLDAPClient(simulation.services[0].url);
     });
 
-    it('starts the ldap simulation', function*() {
-      expect(simulation.status).toEqual('running');
+    it("starts the ldap simulation", function* () {
+      expect(simulation.status).toEqual("running");
     });
 
-    describe('bind', () => {
-      it('should bind to bindDn', function* () {
+    describe("bind", () => {
+      it("should bind to bindDn", function* () {
         yield client.given(simulation, "person", {
           email: "admin@org.com",
-          password: "password"
+          password: "password",
         });
 
         let result = yield ldap.bind("cn=admin@org.com,ou=users,dc=org.com", "password");
@@ -68,53 +68,55 @@ describe('LDAP simulator', () => {
         expect(result).toBeTruthy();
       });
 
-      it('should not bind with invalid credentials', function* () {
+      it("should not bind with invalid credentials", function* () {
         yield client.given(simulation, "person", {
           cn: "admin@org.com",
-          password: "password"
+          password: "password",
         });
 
         try {
           yield ldap.bind("cn=bad@evilcorp.com,ou=users,dc=org.com", "password");
-        } catch(err) {
+        } catch (err) {
           expect(err).toBeInstanceOf(NoSuchObjectError);
         }
       });
 
-      it('should not bind with no scenario', function * () {
+      it("should not bind with no scenario", function* () {
         yield client.given(simulation, "person");
 
         try {
           yield ldap.bind("cn=admin@org.com,ou=users,dc=org.com", "password");
-        } catch(err) {
+        } catch (err) {
           expect(err).toBeInstanceOf(NoSuchObjectError);
           return;
         }
 
-        throw new Error('should not get here');
+        throw new Error("should not get here");
       });
     });
 
-    describe('search', () => {
+    describe("search", () => {
       let commands: LDAPCommands;
 
-      beforeEach(function * () {
+      beforeEach(function* () {
         yield client.given(simulation, "person", {
           email: "admin@org.com",
-          password: "password"
+          password: "password",
         });
 
         commands = yield ldap.bind("cn=admin@org.com,ou=users,dc=org.com", "password");
       });
 
       function search(email: string) {
-        return commands.search(`cn=${email},ou=users,dc=org.com`).filter((entry) => entry.object.email === email);
+        return commands
+          .search(`cn=${email},ou=users,dc=org.com`)
+          .filter((entry) => entry.object.email === email);
       }
 
-      it('should find created user', function* () {
+      it("should find created user", function* () {
         yield client.given(simulation, "person", {
           email: "a.user@org.com",
-          password: "password"
+          password: "password",
         });
 
         let result = yield search("a.user@org.com").first();
@@ -122,7 +124,7 @@ describe('LDAP simulator', () => {
         expect(result).toBeDefined();
       });
 
-      it('should not find user with no scenario', function * () {
+      it("should not find user with no scenario", function* () {
         yield client.given(simulation, "person");
 
         let result = yield search("joe.bloggs@org.com").first();
@@ -130,12 +132,14 @@ describe('LDAP simulator', () => {
         expect(result).toBeUndefined();
       });
 
-      it('has a root DSE', function*() {
+      it("has a root DSE", function* () {
         let result = yield commands.search("").first();
         expect(result).toMatchObject({
-          attributes: [{
-            type: "vendorName",
-          }]
+          attributes: [
+            {
+              type: "vendorName",
+            },
+          ],
         });
       });
     });

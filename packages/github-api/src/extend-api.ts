@@ -12,14 +12,11 @@ export const extendRouter =
     extend:
       | ((
           router: Parameters<FoundationExtendRouter>[0],
-          simulationStore: ExtendedSimulationStore
+          simulationStore: ExtendedSimulationStore,
         ) => void)
-      | undefined
+      | undefined,
   ) =>
-  (
-    router: Parameters<FoundationExtendRouter>[0],
-    simulationStore: ExtendedSimulationStore
-  ) => {
+  (router: Parameters<FoundationExtendRouter>[0], simulationStore: ExtendedSimulationStore) => {
     if (extend) {
       extend(router, simulationStore);
     }
@@ -46,10 +43,7 @@ export const extendRouter =
     });
 
     router.post(
-      [
-        "/login/oauth/access_token",
-        "/api/v3/app/installations/:id/access_tokens",
-      ],
+      ["/login/oauth/access_token", "/api/v3/app/installations/:id/access_tokens"],
       (_request, response) => {
         // for /login/oauth/access_token
         const access_token = "dev_access_token";
@@ -65,6 +59,6 @@ export const extendRouter =
         });
         response.status(200);
         response.end();
-      }
+      },
     );
   };

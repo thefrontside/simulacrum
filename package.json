@@ -3,16 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "description": "Composable simulations for testing, development, and application previews",
-  "author": "Frontside Engineering <engineering@frontside.com>",
-  "license": "MIT",
-  "scripts": {
-    "clean": "pnpm -r --if-present run clean",
-    "test": "pnpm -r --if-present run test",
-    "prepack": "pnpm -r --if-present run prepack",
-    "lint": "pnpm -r --if-present run lint -- --fix",
-    "tsc": "pnpm -r --if-present run tsc",
-    "covector": "pnpm dlx covector"
+  "keywords": [
+    "emulation",
+    "simulation"
+  ],
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
   },
+  "license": "MIT",
+  "author": "Frontside Engineering <engineering@frontside.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
@@ -20,23 +20,29 @@
   "workspaces": [
     "./packages/*"
   ],
-  "keywords": [
-    "simulation",
-    "emulation"
-  ],
-  "bugs": {
-    "url": "https://github.com/thefrontside/simulacrum/issues"
+  "scripts": {
+    "check": "pnpm run \"/(tsc$)|(lint$)|(fmt$)/\"",
+    "clean": "pnpm -r --if-present run clean",
+    "covector": "pnpm dlx covector",
+    "fmt": "oxfmt --write .",
+    "fmt:check": "oxfmt --check .",
+    "lint": "pnpm -r --if-present run lint",
+    "lint:fix": "pnpm -r exec oxlint --fix",
+    "prepack": "pnpm -r --if-present run prepack",
+    "test": "pnpm -r --if-present run test",
+    "tsc": "pnpm -r --if-present run tsc"
   },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme",
-  "packageManager": "pnpm@10.17.1",
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "oxfmt": "^0.43.0",
+    "oxlint": "^1.58.0",
+    "tsdown": "^0.21.7",
+    "typescript": "5.8.3",
+    "vitest": "^3.2.4"
+  },
   "engines": {
     "node": ">=24",
     "pnpm": ">=10"
   },
-  "devDependencies": {
-    "@types/node": "^24.0.0",
-    "tsdown": "^0.21.7",
-    "typescript": "5.8.3",
-    "vitest": "^3.2.4"
-  }
+  "packageManager": "pnpm@10.17.1"
 }

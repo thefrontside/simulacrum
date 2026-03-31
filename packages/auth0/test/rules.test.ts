@@ -34,10 +34,7 @@ let person = {
 let basePort = 4420;
 let host = "https://localhost";
 let auth0Url = `${host}:${basePort}`;
-async function createSimulation(
-  rulesDirectory: Fixtures,
-  initialPerson?: Partial<typeof person>
-) {
+async function createSimulation(rulesDirectory: Fixtures, initialPerson?: Partial<typeof person>) {
   const frontendServer = await frontendSimulation.listen();
 
   const simulationPerson = { ...person, ...initialPerson };
@@ -70,7 +67,7 @@ async function createSimulation(
     body: `wctx=${encodeURIComponent(
       JSON.stringify({
         ...Fields,
-      })
+      }),
     )}`,
   });
 
@@ -86,9 +83,7 @@ describe("rules", () => {
     let server: FoundationSimulatorListening<unknown>;
 
     beforeEach(async ({ task: _task }) => {
-      ({ code, server } = await createSimulation(
-        "test/fixtures/rules-access-token"
-      ));
+      ({ code, server } = await createSimulation("test/fixtures/rules-access-token"));
     });
     afterEach(async () => {
       await server.ensureClose();
@@ -115,13 +110,9 @@ describe("rules", () => {
 
       assert(!!accessToken);
 
-      expect(accessToken.payload["https://example.nl/roles"]).toEqual([
-        "example",
-      ]);
+      expect(accessToken.payload["https://example.nl/roles"]).toEqual(["example"]);
 
-      expect(accessToken.payload["https://example.nl/email"]).toEqual(
-        "paulwaters.white@yahoo.com"
-      );
+      expect(accessToken.payload["https://example.nl/email"]).toEqual("paulwaters.white@yahoo.com");
     });
   });
 
@@ -169,7 +160,7 @@ describe("rules", () => {
 
       let { code, server } = await createSimulation(
         "test/fixtures/rules-user-dependent",
-        otherPerson
+        otherPerson,
       );
 
       let res: Response = await fetch(`${auth0Url}/oauth/token`, {
@@ -201,7 +192,7 @@ describe("rules", () => {
       };
       let { code, server } = await createSimulation(
         "test/fixtures/rules-user-dependent",
-        otherPerson
+        otherPerson,
       );
 
       let res: Response = await fetch(`${auth0Url}/oauth/token`, {
@@ -231,10 +222,7 @@ describe("rules", () => {
     // nested describe give it an extra task for time to actually release the port
     describe("async top level", () => {
       it("should resolve async top level", async () => {
-        let { code, server } = await createSimulation(
-          "test/fixtures/rules-async-only",
-          person
-        );
+        let { code, server } = await createSimulation("test/fixtures/rules-async-only", person);
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
           method: "POST",
           headers: {
@@ -257,9 +245,7 @@ describe("rules", () => {
         expect(idToken?.payload.checkURLOne).toBe("https://frontside.com");
         expect(idToken?.payload.checkURLOneStatus).toBe(200);
         expect(idToken?.payload.checkURLOneText).toBe("frontside");
-        expect(idToken?.payload.checkURLTwo).toBe(
-          "https://frontside.com/effection"
-        );
+        expect(idToken?.payload.checkURLTwo).toBe("https://frontside.com/effection");
         expect(idToken?.payload.checkURLTwoStatus).toBe(200);
         expect(idToken?.payload.checkURLTwoText).toBe("effection");
         await server.ensureClose();
@@ -269,7 +255,7 @@ describe("rules", () => {
     describe("sync top level", () => {
       it("should resolve async nested in sync wrapper", async () => {
         let { code, server } = await createSimulation(
-          "test/fixtures/rules-sync-wrapper-with-async"
+          "test/fixtures/rules-sync-wrapper-with-async",
         );
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
           method: "POST",
@@ -294,9 +280,7 @@ describe("rules", () => {
         expect(idToken?.payload.checkURLOneStatus).toBe(200);
         expect(idToken?.payload.checkURLOneText).toBe("frontside");
 
-        expect(idToken?.payload.checkURLTwo).toBe(
-          "https://frontside.com/effection"
-        );
+        expect(idToken?.payload.checkURLTwo).toBe("https://frontside.com/effection");
         expect(idToken?.payload.checkURLTwoStatus).toBe(200);
         expect(idToken?.payload.checkURLTwoText).toBe("effection");
         await server.ensureClose();

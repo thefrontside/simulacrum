@@ -50,7 +50,7 @@ type SimulationHandlerFunctions = (
   request: ExpressRequest,
   response: ExpressResponse,
   next: ExpressNextFunction,
-  routeMetadata: SimulationRoute
+  routeMetadata: SimulationRoute,
 ) => void;
 export type SimulationHandlers = Record<string, SimulationHandlerFunctions>;
 
@@ -72,12 +72,15 @@ export type {
 
 export const convertObjToProp = <T extends { [k: string]: any }>(
   arrayOfObjects: T[],
-  key: IdProp = "id"
+  key: IdProp = "id",
 ): Record<IdProp, T> =>
-  arrayOfObjects.reduce((final, obj: T) => {
-    final[obj[key].toString()] = obj;
-    return final;
-  }, {} as Record<IdProp, T>);
+  arrayOfObjects.reduce(
+    (final, obj: T) => {
+      final[obj[key].toString()] = obj;
+      return final;
+    },
+    {} as Record<IdProp, T>,
+  );
 
 export type { AnyState, TableOutput, IdProp } from "starfx";
 
@@ -102,7 +105,7 @@ export function createFoundationSimulationServer<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,
   ExtendedSimulationSelectors,
-  ExtendedSimulationTasks = Record<string, unknown>
+  ExtendedSimulationTasks = Record<string, unknown>,
 >({
   port = 9000,
   protocol = "http",
@@ -130,7 +133,7 @@ export function createFoundationSimulationServer<
         ExtendedSimulationActions,
         ExtendedSimulationSelectors,
         ExtendedSimulationTasks
-      >
+      >,
     ) => Record<string, Handler | Record<string, Handler>>;
     apiRoot?: string;
     additionalOptions?: {
@@ -152,7 +155,7 @@ export function createFoundationSimulationServer<
       ExtendedSimulationActions,
       ExtendedSimulationSelectors,
       ExtendedSimulationTasks
-    >
+    >,
   ): void;
 }) {
   return () => {
@@ -177,7 +180,7 @@ export function createFoundationSimulationServer<
           url: req.url,
           query: req.query,
           body: req.body,
-        })
+        }),
       );
       next();
     });
@@ -203,14 +206,12 @@ export function createFoundationSimulationServer<
                   defaultCode: 200,
                   responses: [200],
                 },
-              })
+              }),
             );
           }
         }
 
-        simulationStore.store.dispatch(
-          simulationStore.actions.batchUpdater(simulationRoutes)
-        );
+        simulationStore.store.dispatch(simulationStore.actions.batchUpdater(simulationRoutes));
       }
     }
 
@@ -242,22 +243,18 @@ export function createFoundationSimulationServer<
                 defaultCode: 200,
                 responses: [200],
               },
-            })
+            }),
           );
         }
 
-        simulationStore.store.dispatch(
-          simulationStore.actions.batchUpdater(simulationRoutes)
-        );
+        simulationStore.store.dispatch(simulationStore.actions.batchUpdater(simulationRoutes));
       }
     }
 
     if (openapi) {
       for (let spec of openapi) {
         let { document, handlers, apiRoot, additionalOptions } = spec;
-        let mergedOAS = Array.isArray(document)
-          ? mergeDocumentArray(document)
-          : document;
+        let mergedOAS = Array.isArray(document) ? mergeDocumentArray(document) : document;
 
         let api = new OpenAPIBackend({
           definition: mergedOAS,
@@ -278,7 +275,7 @@ export function createFoundationSimulationServer<
         // register your framework specific request handlers here
         let handlerObjectRegistration = (
           handlerEntries: Record<string, Handler | Record<string, Handler>>,
-          prefix?: string
+          prefix?: string,
         ) => {
           for (let [key, handler] of Object.entries(handlerEntries)) {
             if (typeof handler === "object") {
@@ -291,35 +288,27 @@ export function createFoundationSimulationServer<
         handlerObjectRegistration(handlers(simulationStore));
 
         api.register({
-          validationFail: (c, _req, res) =>
-            res.status(400).json({ err: c.validation.errors }),
+          validationFail: (c, _req, res) => res.status(400).json({ err: c.validation.errors }),
           // if route not in API, continue to next API or `app.all('*')` fallback
           notFound: (_c, _req, _res, next) => next(),
           notImplemented: (c, _req, res) => {
             let { status, mock } = c.api.mockResponseForOperation(
               // the route validates this exists and throws if it does not
               // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              c.operation.operationId!
+              c.operation.operationId!,
             );
             return res.status(status).json(mock);
           },
           postResponseHandler: (
             c: OpenAPIBackendContext,
             _req: ExpressRequest,
-            res: ExpressResponse
+            res: ExpressResponse,
           ) => {
             if (c?.response?.json) {
-              const valid = c.api.validateResponse(
-                c.response.json,
-                c.operation,
-                c.response.status
-              );
+              const valid = c.api.validateResponse(c.response.json, c.operation, c.response.status);
               if (valid.errors) {
                 if (verbose)
-                  console.dir(
-                    { errors: valid.errors, operation: c.operation },
-                    { depth: 10 }
-                  );
+                  console.dir({ errors: valid.errors, operation: c.operation }, { depth: 10 });
 
                 if (!res.headersSent)
                   res.status(502).json({
@@ -329,8 +318,7 @@ export function createFoundationSimulationServer<
                     operation: c.operation,
                   });
               } else {
-                if (!res.headersSent)
-                  res.status(c.response.status).json(c.response.json);
+                if (!res.headersSent) res.status(c.response.status).json(c.response.json);
               }
             }
           },
@@ -340,45 +328,37 @@ export function createFoundationSimulationServer<
         api.init().then((init) => {
           const router = init.router;
           const operations = router.getOperations();
-          const simulationRoutes = operations.reduce((routes, operation) => {
-            const url = `${router.apiRoot === "/" ? "" : router.apiRoot}${
-              operation.path
-            }`;
-            routes[`${operation.method}:${url}`] = {
-              type: "OpenAPI",
-              url,
-              method: operation.method as SimulationRoute["method"],
-              calls: 0,
-              defaultCode: 200,
-              responses: Object.keys(operation.responses ?? {}).map((key) =>
-                parseInt(key)
-              ),
-            };
-            return routes;
-          }, {} as Record<string, SimulationRoute>);
+          const simulationRoutes = operations.reduce(
+            (routes, operation) => {
+              const url = `${router.apiRoot === "/" ? "" : router.apiRoot}${operation.path}`;
+              routes[`${operation.method}:${url}`] = {
+                type: "OpenAPI",
+                url,
+                method: operation.method as SimulationRoute["method"],
+                calls: 0,
+                defaultCode: 200,
+                responses: Object.keys(operation.responses ?? {}).map((key) => parseInt(key)),
+              };
+              return routes;
+            },
+            {} as Record<string, SimulationRoute>,
+          );
           simulationStore.store.dispatch(
             simulationStore.actions.batchUpdater([
               simulationStore.schema.simulationRoutes.add(simulationRoutes),
-            ])
+            ]),
           );
           return init;
         });
         app.use((req, res, next) => {
           const routeId = `${req.method.toLowerCase()}:${req.path}`;
-          const routeMetadata =
-            simulationStore.schema.simulationRoutes.selectById(
-              simulationStore.store.getState(),
-              {
-                id: routeId,
-              }
-            );
-          return api.handleRequest(
-            req as Request,
-            req,
-            res,
-            next,
-            routeMetadata
+          const routeMetadata = simulationStore.schema.simulationRoutes.selectById(
+            simulationStore.store.getState(),
+            {
+              id: routeId,
+            },
           );
+          return api.handleRequest(req as Request, req, res, next, routeMetadata);
         });
       }
     }
@@ -386,10 +366,10 @@ export function createFoundationSimulationServer<
     // return simulation helper page
     app.get(simulationContextPage, (_req, res) => {
       let routes = simulationStore.schema.simulationRoutes.selectTableAsList(
-        simulationStore.store.getState()
+        simulationStore.store.getState(),
       );
       let logs = simulationStore.schema.simulationLogs.selectTableAsList(
-        simulationStore.store.getState()
+        simulationStore.store.getState(),
       );
       if (routes.length === 0) {
         res.sendStatus(404);
@@ -406,20 +386,16 @@ export function createFoundationSimulationServer<
       simulationStore.store.dispatch(
         simulationStore.actions.batchUpdater([
           simulationStore.schema.simulationRoutes.patch(entries),
-        ])
+        ]),
       );
       res.redirect(simulationContextPage);
     });
     // if no extendRouter routes or openapi routes handle this, return 404
-    app.all("/{*splat}", (_req, res) =>
-      res.status(404).json({ error: "not found" })
-    );
+    app.all("/{*splat}", (_req, res) => res.status(404).json({ error: "not found" }));
 
     const genericAppServer = createAppServer(app, protocol);
     return {
-      listen: async (
-        ...listenArgs: Parameters<typeof genericAppServer.listen> | undefined[]
-      ) => {
+      listen: async (...listenArgs: Parameters<typeof genericAppServer.listen> | undefined[]) => {
         // over and above the `net` listen behavior, allow setting:
         if (listenArgs.length === 0) {
           // no args, use default port
@@ -442,9 +418,7 @@ export function createFoundationSimulationServer<
         return {
           server,
           port:
-            address && typeof address !== "string" && "port" in address
-              ? address.port
-              : undefined,
+            address && typeof address !== "string" && "port" in address ? address.port : undefined,
           simulationStore,
           ensureClose: async () => {
             await new Promise<void>((resolve) => {
@@ -475,7 +449,7 @@ export async function startFoundationSimulationServer<
   ExtendedSimulationSchema,
   ExtendedSimulationActions,
   ExtendedSimulationSelectors,
-  ExtendedSimulationTasks
+  ExtendedSimulationTasks,
 >(
   arg: Parameters<
     // eslint has a parsing error which means we can't fix this
@@ -486,7 +460,7 @@ export async function startFoundationSimulationServer<
       ExtendedSimulationSelectors,
       ExtendedSimulationTasks
     >
-  >[0]
+  >[0],
 ): Promise<{
   server: Server<typeof IncomingMessage, typeof ServerResponse>;
   port?: number | undefined;

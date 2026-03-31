@@ -12,7 +12,7 @@ const urlTwo = `${host}:${appPortTwo}`;
 const f = (url: string) => fetch(url).then((r) => r.json());
 const p = (url: string) => fetch(url, { method: "POST" }).then((r) => r.json());
 
-console.log = (...args: any) => {
+console.log = (..._args: any) => {
   // comment out in test to reduce noise
 };
 

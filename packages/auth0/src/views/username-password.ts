@@ -34,7 +34,7 @@ export const userNamePasswordForm = ({
       nonce,
       audience,
       realm: connection,
-    })
+    }),
   );
 
   return /*html*/ `

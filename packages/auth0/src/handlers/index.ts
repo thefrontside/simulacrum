@@ -1,4 +1,4 @@
-import express, { type Request, type Express, Router } from "express";
+import express, { type Request, type Express, type Router } from "express";
 import type { ExtendedSimulationStore } from "../store/index.ts";
 import { createCors } from "../middleware/create-cors.ts";
 import { noCache } from "../middleware/no-cache.ts";
@@ -13,27 +13,15 @@ const publicDir = path.join(import.meta.dirname, "..", "views", "public");
 export const extendRouter =
   (
     config: Auth0Configuration,
-    extend:
-      | ((router: Router, simulationStore: ExtendedSimulationStore) => void)
-      | undefined,
-    debug = false
+    extend: ((router: Router, simulationStore: ExtendedSimulationStore) => void) | undefined,
+    debug = false,
   ) =>
   (router: Express, simulationStore: ExtendedSimulationStore) => {
-    const serviceURL = (request: Request) =>
-      `${request.protocol}://${request.get("Host")}/`;
-    const auth0 = createAuth0Handlers(
-      simulationStore,
-      serviceURL,
-      config,
-      debug
-    );
+    const serviceURL = (request: Request) => `${request.protocol}://${request.get("Host")}/`;
+    const auth0 = createAuth0Handlers(simulationStore, serviceURL, config, debug);
     const openid = createOpenIdHandlers(serviceURL);
 
-    router
-      .use(express.static(publicDir))
-      .use(createSession())
-      .use(createCors())
-      .use(noCache());
+    router.use(express.static(publicDir)).use(createSession()).use(createCors()).use(noCache());
 
     if (extend) {
       extend(router, simulationStore);
@@ -54,10 +42,7 @@ export const extendRouter =
       .get("/userinfo", auth0["/userinfo"])
       .get("/v2/logout", auth0["/v2/logout"])
       .get("/.well-known/jwks.json", openid["/.well-known/jwks.json"])
-      .get(
-        "/.well-known/openid-configuration",
-        openid["/.well-known/openid-configuration"]
-      );
+      .get("/.well-known/openid-configuration", openid["/.well-known/openid-configuration"]);
 
     // needs to be the last middleware added
     router.use(defaultErrorHandler);

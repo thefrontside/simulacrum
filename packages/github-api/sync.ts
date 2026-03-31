@@ -14,9 +14,7 @@ function* syncSchemaRest(): Operation<void> {
 
   const res = yield* until(fetch(url));
   if (!res.ok) {
-    throw new Error(
-      `[syncSchemaRest] failed to fetch schema: ${res.status} ${res.statusText}`
-    );
+    throw new Error(`[syncSchemaRest] failed to fetch schema: ${res.status} ${res.statusText}`);
   }
 
   const schema = yield* until(res.json());

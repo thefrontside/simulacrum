@@ -19,9 +19,7 @@ describe.sequential("GET user endpoints", () => {
       extend: {
         extendRouter: (router, _simulationStore) => {
           router.get("/hello-world", (_req, res) => {
-            res
-              .status(200)
-              .json({ message: "Hello from GitHub API simulator!" });
+            res.status(200).json({ message: "Hello from GitHub API simulator!" });
           });
         },
       },

@@ -2,53 +2,32 @@
   "name": "@simulacrum/server",
   "version": "0.8.0",
   "description": "Helpers and control plane to handle simulators and observability",
-  "author": "Frontside Engineering <engineering@frontside.com>",
-  "license": "MIT",
+  "keywords": [
+    "emulation",
+    "integration testing",
+    "mock",
+    "mocking",
+    "simulation"
+  ],
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
+  "license": "MIT",
+  "author": "Frontside Engineering <engineering@frontside.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git",
     "directory": "packages/server"
   },
-  "keywords": [
-    "simulation",
-    "emulation",
-    "mock",
-    "mocking",
-    "integration testing"
-  ],
-  "type": "module",
   "files": [
     "README.md",
     "dist",
     "src"
   ],
-  "scripts": {
-    "clean": "echo skip",
-    "test": "node --test-timeout=60000 --experimental-transform-types --test test/*.test.ts",
-    "prepack": "pnpm run build",
-    "build": "tsdown",
-    "lint": "echo noop",
-    "tsc": "tsc --noEmit",
-    "test:service-main": "node --experimental-transform-types ./test/service-main.ts"
-  },
-  "dependencies": {
-    "effection": "^4.0.0",
-    "@effectionx/context-api": "^0.2.1",
-    "@effectionx/process": "^0.6.2",
-    "@effectionx/timebox": "^0.3.1"
-  },
-  "devDependencies": {},
-  "exports": {
-    ".": {
-      "development": "./src/index.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    },
-    "./package.json": "./package.json"
-  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
   "typesVersions": {
     "*": {
       "*": [
@@ -57,9 +36,14 @@
       ]
     }
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
   "publishConfig": {
     "exports": {
       ".": {
@@ -68,5 +52,21 @@
       },
       "./package.json": "./package.json"
     }
-  }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "clean": "echo skip",
+    "lint": "oxlint",
+    "prepack": "pnpm run build",
+    "test": "node --test-timeout=60000 --experimental-transform-types --test test/*.test.ts",
+    "test:service-main": "node --experimental-transform-types ./test/service-main.ts",
+    "tsc": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@effectionx/context-api": "^0.2.1",
+    "@effectionx/process": "^0.6.2",
+    "@effectionx/timebox": "^0.3.1",
+    "effection": "^4.0.0"
+  },
+  "devDependencies": {}
 }

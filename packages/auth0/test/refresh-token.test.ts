@@ -49,7 +49,7 @@ async function createSimulation() {
     body: `wctx=${encodeURIComponent(
       JSON.stringify({
         ...Fields,
-      })
+      }),
     )}`,
   });
 
@@ -61,9 +61,7 @@ async function createSimulation() {
 describe("refresh token", () => {
   describe("issueRefreshToken", () => {
     it("should issue with grant_type refresh_token", () => {
-      expect(issueRefreshToken("offline_access", "authorization_code")).toBe(
-        true
-      );
+      expect(issueRefreshToken("offline_access", "authorization_code")).toBe(true);
     });
 
     it("should not issue with no refresh_token grant_type", () => {

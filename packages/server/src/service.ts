@@ -27,14 +27,12 @@ type ServiceOptions = {
 export function useService(
   _name: string,
   cmd: string,
-  options: ServiceOptions = {}
+  options: ServiceOptions = {},
 ): Operation<void> {
   return resource(function* (provide) {
     if (cmd.startsWith("npm")) {
       // see https://github.com/npm/cli/issues/6684
-      throw new Error(
-        "scripts run with npm don't respect signals to properly shutdown"
-      );
+      throw new Error("scripts run with npm don't respect signals to properly shutdown");
     }
     const process = yield* exec(cmd, options.processOptions);
     const stdio = createReplaySignal<string, void>();
@@ -74,17 +72,14 @@ export function useService(
             if (result && result.ok) {
               break;
             }
-          } catch (error) {
+          } catch (ignore) {
             // noop, try again
           }
         }
       }
 
       if (options.wellnessCheck.timeout) {
-        const checked = yield* timebox(
-          options.wellnessCheck.timeout,
-          untilWell
-        );
+        const checked = yield* timebox(options.wellnessCheck.timeout, untilWell);
         if (checked && checked.timeout) {
           throw new Error("service wellness check timed out");
         }

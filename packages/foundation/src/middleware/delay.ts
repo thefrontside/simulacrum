@@ -1,19 +1,13 @@
 import type { Request, Response, NextFunction } from "express";
 
-export function delayMiddleware(
-  delayResponses?: number | { minimum: number; maximum: number }
-) {
-  const delayMin =
-    typeof delayResponses === "number"
-      ? delayResponses
-      : delayResponses?.minimum;
-  const delayMax =
-    typeof delayResponses === "number" ? undefined : delayResponses?.maximum;
+export function delayMiddleware(delayResponses?: number | { minimum: number; maximum: number }) {
+  const delayMin = typeof delayResponses === "number" ? delayResponses : delayResponses?.minimum;
+  const delayMax = typeof delayResponses === "number" ? undefined : delayResponses?.maximum;
 
   return async function delayHandler(
     _request: Request,
     _response: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<void> {
     if (delayMin || delayMax) {
       let timeoutDuration = calculateTimeoutDuration(delayMin, delayMax);
@@ -34,10 +28,7 @@ export function delayMiddleware(
   };
 }
 
-function calculateTimeoutDuration(
-  min: number | undefined,
-  max: number | undefined
-): number {
+function calculateTimeoutDuration(min: number | undefined, max: number | undefined): number {
   if (max && !min) {
     // sets the timeout at +/- 20% of configured max
     return max * 0.8 + max * 0.4 * Math.random();

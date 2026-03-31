@@ -8,10 +8,7 @@ const responseSubmit = (routeId: string, response: number) => /* HTML */ `<form
 </form>`;
 const routeToId = (route: SimulationRoute) => `${route.method}:${route.url}`;
 
-export const generateRoutesHTML = (
-  routes: SimulationRoute[],
-  logs: SimulationLog[]
-) => {
+export const generateRoutesHTML = (routes: SimulationRoute[], logs: SimulationLog[]) => {
   return /* HTML */ `<!DOCTYPE html>
     <html>
       <head>
@@ -76,15 +73,11 @@ export const generateRoutesHTML = (
                 (route) =>
                   `<span>${route.method.toUpperCase()}</span><a href=${
                     route.url
-                  }>${route.url}</a><span>code ${
-                    route.defaultCode
-                  }</span><span>${
+                  }>${route.url}</a><span>code ${route.defaultCode}</span><span>${
                     route.calls
                   } calls</span><div class="route-actions">${route.responses
-                    .map((response) =>
-                      responseSubmit(routeToId(route), response)
-                    )
-                    .join("")}</div>`
+                    .map((response) => responseSubmit(routeToId(route), response))
+                    .join("")}</div>`,
               )
               .join("\n")}
           </div>
