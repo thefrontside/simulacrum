@@ -29,7 +29,7 @@
   ],
   "bin": "bin/start.cjs",
   "scripts": {
-    "start": "node --experimental-strip-types --watch ./example/start.ts",
+    "start": "node --experimental-transform-types --watch ./example/start.ts",
     "start:bin": "node ./bin/start.js",
     "test": "vitest run",
     "test:watch": "vitest watch",
@@ -39,7 +39,7 @@
     "prepack": "pnpm run generate && pnpm run build",
     "build": "tsdown",
     "generate": "graphql-codegen",
-    "sync:schema:rest": "node --experimental-strip-types ./sync.ts"
+    "sync:schema:rest": "node --experimental-transform-types ./sync.ts"
   },
   "dependencies": {
     "@graphql-tools/utils": "^10.9.1",
