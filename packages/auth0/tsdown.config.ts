@@ -16,6 +16,6 @@ export default defineConfig({
   // if we unbundle, we want to skip this as well
   skipNodeModulesBundle: true,
   // runs with @arethetypeswrong/core which checks types
-  attw: false,
+  attw: true,
   publint: true,
 });
