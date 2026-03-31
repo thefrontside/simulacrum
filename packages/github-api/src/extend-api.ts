@@ -1,15 +1,25 @@
-import { type Express } from "express";
+import { type createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
 import { stringify } from "querystring";
 import { createHandler } from "./graphql/handler.ts";
 import type { ExtendedSimulationStore } from "./store/index.ts";
 
+type FoundationExtendRouter = NonNullable<
+  Parameters<typeof createFoundationSimulationServer>[0]["extendRouter"]
+>;
+
 export const extendRouter =
   (
     extend:
-      | ((router: Express, simulationStore: ExtendedSimulationStore) => void)
+      | ((
+          router: Parameters<FoundationExtendRouter>[0],
+          simulationStore: ExtendedSimulationStore
+        ) => void)
       | undefined
   ) =>
-  (router: Express, simulationStore: ExtendedSimulationStore) => {
+  (
+    router: Parameters<FoundationExtendRouter>[0],
+    simulationStore: ExtendedSimulationStore
+  ) => {
     if (extend) {
       extend(router, simulationStore);
     }

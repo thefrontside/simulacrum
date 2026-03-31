@@ -109,7 +109,10 @@ const extendActions =
     } as GitHubActions;
   };
 
-const inputSelectors = ({
+const inputSelectors: ExtendSimulationSelectorsInput<
+  Record<string, unknown>,
+  GitHubSchema
+> = ({
   createSelector,
   schema,
 }: ExtendSimulationSelectors<ExtendedSchema>) => {

@@ -82,8 +82,5 @@
       },
       "./package.json": "./package.json"
     }
-  },
-  "inlinedDependencies": {
-    "ajv": "8.17.1"
   }
 }

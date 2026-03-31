@@ -42,14 +42,17 @@
     "sync:schema:rest": "node --import=tsx ./sync.ts"
   },
   "dependencies": {
+    "@graphql-tools/utils": "^10.9.1",
     "@faker-js/faker": "^9.3.0",
-    "@simulacrum/foundation-simulator": "0.6.1",
+    "@simulacrum/foundation-simulator": "workspace:^",
     "assert-ts": "^0.3.4",
+    "express": "^5.2.1",
     "graphql": "^16.9.0",
     "graphql-yoga": "^5.15.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@graphql-codegen/cli": "^5.0.7",
     "@graphql-codegen/typescript": "^4.1.6",
     "@graphql-codegen/typescript-resolvers": "^4.5.1",
@@ -58,8 +61,8 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -77,8 +80,8 @@
   "publishConfig": {
     "exports": {
       ".": {
-        "require": "./dist/index.cjs",
-        "import": "./dist/index.mjs"
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
       },
       "./package.json": "./package.json"
     }

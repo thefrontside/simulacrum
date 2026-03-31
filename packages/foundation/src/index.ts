@@ -5,7 +5,6 @@ import type {
   Response as ExpressResponse,
   NextFunction as ExpressNextFunction,
 } from "express";
-import type { ILayer, IRoute } from "express-serve-static-core";
 import type { Server, IncomingMessage, ServerResponse } from "node:http";
 import { fdir } from "fdir";
 import fs from "node:fs";
@@ -17,8 +16,8 @@ import type {
   Request,
   Document,
   Context as OpenAPIBackendContext,
+  Options as OpenAPIBackendOptions,
 } from "openapi-backend";
-import type { Options as AjvOpts } from "ajv";
 import * as addFormats from "ajv-formats";
 import { createSimulationStore } from "./store/index.ts";
 import type {
@@ -137,7 +136,7 @@ export function createFoundationSimulationServer<
     additionalOptions?: {
       validate?: boolean;
       quick?: boolean;
-      ajvOpts?: AjvOpts;
+      ajvOpts?: OpenAPIBackendOptions["ajvOpts"];
     };
   }[];
   extendStore?: ExtendStoreConfig<
@@ -187,9 +186,9 @@ export function createFoundationSimulationServer<
       extendRouter(app, simulationStore);
 
       if (app?.router?.stack) {
-        const layers: IRoute[] = app.router
-          .stack!.map((stack: ILayer) => stack.route)
-          .filter((r): r is IRoute => Boolean(r));
+        const layers = app.router.stack
+          .map((stack) => stack.route)
+          .filter((route): route is NonNullable<typeof route> => Boolean(route));
 
         const simulationRoutes = [];
         for (let layer of layers) {
