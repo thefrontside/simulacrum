@@ -29,7 +29,7 @@ export function apiProxy(
         let jsonResponse;
         try {
           jsonResponse = JSON.parse(responseBuffer.toString("utf8"));
-        } catch (error) {
+        } catch (ignore) {
           console.error(`failed to parse return as JSON from ${req.url}`);
           return responseBuffer;
         }
@@ -39,7 +39,7 @@ export function apiProxy(
           await fsPromise.mkdir(path.dirname(filename), {
             recursive: true,
           });
-        } catch (error) {
+        } catch (ignore) {
           console.error(`unable to create folders: ${path.dirname(filename)}`);
           return responseBuffer;
         }

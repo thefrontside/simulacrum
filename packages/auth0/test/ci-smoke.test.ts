@@ -34,7 +34,7 @@ function startAuth0() {
               }),
             );
             return Ok<void>(void 0);
-          } catch (err) {
+          } catch (ignore) {
             // ignore and retry
           }
           if (Date.now() - start > 30000) return Err(new Error("service did not start"));

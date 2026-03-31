@@ -13,7 +13,7 @@ export function parseRulesFiles(rulesPath: string): { code: string; filename: st
 
         let jsonFile = `${extensionlessFileName(filename)}.json`;
 
-        assert(!!jsonFile, `no corresponding rule file for ${r}`);
+        assert(jsonFile, `no corresponding rule file for ${r}`);
 
         let rawRule = fs.readFileSync(jsonFile, "utf8");
 
@@ -29,7 +29,7 @@ export function parseRulesFiles(rulesPath: string): { code: string; filename: st
 
         return { code, filename, order, stage };
       })
-      .flatMap((x) => (!!x ? x : []))
+      .flatMap((x) => (x ? [x] : []))
       .sort((left, right) => left.order - right.order) ?? []
   );
 }

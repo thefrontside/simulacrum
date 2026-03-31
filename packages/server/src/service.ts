@@ -72,7 +72,7 @@ export function useService(
             if (result && result.ok) {
               break;
             }
-          } catch (error) {
+          } catch (ignore) {
             // noop, try again
           }
         }
