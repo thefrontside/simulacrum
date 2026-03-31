@@ -37,7 +37,7 @@
     "bench": "vitest bench",
     "lint": "echo \"eventually run \"eslint src example\" but it currently fails to parse\"",
     "tsc": "tsc --noEmit",
-    "prepack": "npm run build",
+    "prepack": "pnpm run build",
     "build": "tsdown"
   },
   "dependencies": {
@@ -82,8 +82,5 @@
       },
       "./package.json": "./package.json"
     }
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }

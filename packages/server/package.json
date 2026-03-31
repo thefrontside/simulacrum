@@ -28,7 +28,7 @@
   "scripts": {
     "clean": "echo skip",
     "test": "node --test-timeout=60000 --import tsx --test test/*.test.ts",
-    "prepack": "npm run build",
+    "prepack": "pnpm run build",
     "build": "tsdown",
     "lint": "echo noop",
     "tsc": "tsc --noEmit",
@@ -68,8 +68,5 @@
       },
       "./package.json": "./package.json"
     }
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }

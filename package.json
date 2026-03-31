@@ -6,12 +6,12 @@
   "author": "Frontside Engineering <engineering@frontside.com>",
   "license": "MIT",
   "scripts": {
-    "clean": "npm run clean --workspaces",
-    "test": "npm run test --workspaces",
-    "prepack": "npm run prepack --workspaces",
-    "lint": "npm run lint --workspaces --if-present -- --fix",
-    "tsc": "npm run tsc --workspaces --if-present",
-    "covector": "npx covector"
+    "clean": "pnpm -r --if-present run clean",
+    "test": "pnpm -r --if-present run test",
+    "prepack": "pnpm -r --if-present run prepack",
+    "lint": "pnpm -r --if-present run lint -- --fix",
+    "tsc": "pnpm -r --if-present run tsc",
+    "covector": "pnpm exec covector"
   },
   "repository": {
     "type": "git",
@@ -28,13 +28,10 @@
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
   "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "packageManager": "pnpm@10.17.1",
   "engines": {
     "node": ">=20",
-    "npm": ">=11"
-  },
-  "volta": {
-    "node": "20.19.6",
-    "npm": "11.7.0"
+    "pnpm": ">=10"
   },
   "devDependencies": {
     "@arethetypeswrong/core": "^0.18.2",

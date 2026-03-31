@@ -9,7 +9,7 @@
     "start:bin": "node ./bin/start.cjs",
     "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest run --fileParallelism=false",
     "test:watch": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest watch --fileParallelism=false",
-    "prepack": "npm run build",
+    "prepack": "pnpm run build",
     "build": "tsdown",
     "lint": "echo noop",
     "tsc": "tsc --noEmit"
@@ -83,8 +83,5 @@
       },
       "./package.json": "./package.json"
     }
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }

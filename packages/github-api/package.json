@@ -36,7 +36,7 @@
     "bench": "vitest bench",
     "lint": "echo noop",
     "tsc": "tsc --noEmit",
-    "prepack": "npm run generate && npm run build",
+    "prepack": "pnpm run generate && pnpm run build",
     "build": "tsdown",
     "generate": "graphql-codegen",
     "sync:schema:rest": "node --import=tsx ./sync.ts"
@@ -82,8 +82,5 @@
       },
       "./package.json": "./package.json"
     }
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }
