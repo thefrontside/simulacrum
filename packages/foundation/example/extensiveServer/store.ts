@@ -2,6 +2,7 @@ import type {
   SimulationStore,
   ExtendSimulationActions,
   ExtendSimulationSelectors,
+  ExtendSimulationSelectorsInput,
   ExtendSimulationTasks,
   ExtendSimulationSchema,
   AnyState,
@@ -11,6 +12,9 @@ import type {
 export type ExtendedSchema = typeof schema;
 export type ExtendActions = typeof actions;
 export type ExtendSelectors = typeof selectors;
+type ExampleSelectors = {
+  booleanSpecificNumbers: (state: AnyState, input: number[]) => boolean;
+};
 // `tasks` is a function that returns { tasks: (() => Operation<unknown>)[]; actions: Actions }
 // Export the Actions portion as the `ExtendTasks` type so it can be used
 // as the fourth generic parameter to `SimulationStore` (which expects the
@@ -30,23 +34,20 @@ const schema = ({ slice }: ExtendSimulationSchema) => {
   return slices;
 };
 
-const actions = ({
-  thunks,
-  schema,
-}: ExtendSimulationActions<ExtendedSchema>) => {
+const actions = ({ thunks, schema }: ExtendSimulationActions<ExtendedSchema>) => {
   let addLotsOfDogs = thunks.create<{ quantity: number }>(
     "dogs:add-lots",
     function* boop(ctx, next) {
       yield* schema.update(schema.dogs.increment(ctx.payload.quantity));
 
       yield* next();
-    }
+    },
   );
 
   return { addLotsOfDogs };
 };
 
-const selectors = ({
+const selectors: ExtendSimulationSelectorsInput<ExampleSelectors, ReturnType<ExtendedSchema>> = ({
   createSelector,
   schema,
 }: ExtendSimulationSelectors<ExtendedSchema>) => {
@@ -55,7 +56,7 @@ const selectors = ({
     (_: AnyState, input: number[]) => input,
     (boop, numbers) => {
       return numbers.includes(boop);
-    }
+    },
   );
 
   return { booleanSpecificNumbers };
@@ -75,7 +76,7 @@ const tasks = ({ createWebhook }: ExtendSimulationTasks<ExtendedSchema>) => {
       // calling this will proceed through the middleware chain
       // and actually send the request
       yield* next();
-    }
+    },
   );
 
   return { tasks: [webhook.task], actions: { webhooks: { onTest } } };

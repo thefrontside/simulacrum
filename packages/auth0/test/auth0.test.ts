@@ -1,12 +1,4 @@
-import {
-  describe,
-  it,
-  beforeEach,
-  afterEach,
-  beforeAll,
-  afterAll,
-  expect,
-} from "vitest";
+import { describe, it, beforeEach, afterEach, beforeAll, afterAll, expect } from "vitest";
 import { defaultUser, simulation } from "../src/index.ts";
 import type { FoundationSimulatorListening } from "@simulacrum/foundation-simulator";
 
@@ -75,15 +67,12 @@ describe("Auth0 simulator", () => {
             redirect_uri: frontendUrl,
             response_type: "code",
             response_mode: "query",
-            state:
-              "MVpFN0JXWGNFUVNVQnJjNGlXZWFNbGd2V3M2MC5VRkwyV1VKNW9wRTZVVw==",
-            nonce:
-              "dDJ6NX5aUFU3SlM4TEozQThyR0V0fjdjRlJDZ0YzfjNDcEV3OWIzWWVYbQ==",
+            state: "MVpFN0JXWGNFUVNVQnJjNGlXZWFNbGd2V3M2MC5VRkwyV1VKNW9wRTZVVw==",
+            nonce: "dDJ6NX5aUFU3SlM4TEozQThyR0V0fjdjRlJDZ0YzfjNDcEV3OWIzWWVYbQ==",
             code_challenge: "2Arx2VYcTp6YDa5r-exGr99upqSIqYZQ_vBbI_7taQ0",
             code_challenge_method: "S256",
-            auth0Client:
-              "eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xLjAifQ==",
-          })}`
+            auth0Client: "eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xLjAifQ==",
+          })}`,
         );
 
         expect(res.redirected).toBe(true);
@@ -100,25 +89,20 @@ describe("Auth0 simulator", () => {
           `${auth0Url}/authorize?${stringify({
             redirect_uri: frontendUrl,
             response_mode: "web_message",
-            state:
-              "MVpFN0JXWGNFUVNVQnJjNGlXZWFNbGd2V3M2MC5VRkwyV1VKNW9wRTZVVw==",
-            nonce:
-              "dDJ6NX5aUFU3SlM4TEozQThyR0V0fjdjRlJDZ0YzfjNDcEV3OWIzWWVYbQ==",
-            auth0Client:
-              "eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xLjAifQ==",
+            state: "MVpFN0JXWGNFUVNVQnJjNGlXZWFNbGd2V3M2MC5VRkwyV1VKNW9wRTZVVw==",
+            nonce: "dDJ6NX5aUFU3SlM4TEozQThyR0V0fjdjRlJDZ0YzfjNDcEV3OWIzWWVYbQ==",
+            auth0Client: "eyJuYW1lIjoiYXV0aDAtcmVhY3QiLCJ2ZXJzaW9uIjoiMS4xLjAifQ==",
           })}`,
           {
             credentials: "same-origin",
             headers: {
               cookie,
             },
-          }
+          },
         );
 
         expect(res.ok).toBe(true);
-        expect(res.headers.get("content-type")).toBe(
-          "text/html; charset=utf-8"
-        );
+        expect(res.headers.get("content-type")).toBe("text/html; charset=utf-8");
       });
     });
   });
@@ -189,7 +173,7 @@ describe("Auth0 simulator", () => {
       let fields = encodeURIComponent(
         JSON.stringify({
           ...Fields,
-        })
+        }),
       );
 
       let res: Response = await fetch(`${auth0Url}/login/callback`, {
@@ -208,7 +192,7 @@ describe("Auth0 simulator", () => {
       let fields = encodeURIComponent(
         JSON.stringify({
           ...Fields,
-        })
+        }),
       );
 
       let res: Response = await fetch(`${auth0Url}/login/callback`, {
@@ -219,13 +203,9 @@ describe("Auth0 simulator", () => {
         body: `wctx=${fields}`,
       });
 
-      expect(res.url.slice(0, Fields.redirect_uri.length)).toBe(
-        Fields.redirect_uri
-      );
+      expect(res.url.slice(0, Fields.redirect_uri.length)).toBe(Fields.redirect_uri);
       expect(res.url).toContain(`client_id=${Fields.client_id}`);
-      expect(res.url).toContain(
-        `audience=${encodeURIComponent(Fields.audience)}`
-      );
+      expect(res.url).toContain(`audience=${encodeURIComponent(Fields.audience)}`);
     });
   });
 
@@ -254,7 +234,7 @@ describe("Auth0 simulator", () => {
         body: `wctx=${encodeURIComponent(
           JSON.stringify({
             ...Fields,
-          })
+          }),
         )}`,
       });
 
@@ -302,8 +282,8 @@ describe("Auth0 simulator", () => {
       it("sets the access token and id token iat fields in the past", () => {
         expect(
           [accessToken.payload.iat, idToken.payload.iat].every(
-            (d) => epochTimeToLocalDate(d) < new Date()
-          )
+            (d) => epochTimeToLocalDate(d) < new Date(),
+          ),
         ).toBe(true);
       });
     });
@@ -369,9 +349,7 @@ describe("Auth0 simulator", () => {
       });
 
       it("access_token should contain audience as aud", () => {
-        expect(accessToken.payload.aud).toBe(
-          "https://thefrontside.auth0.com/api/v0/"
-        );
+        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
       });
     });
 
@@ -406,9 +384,7 @@ describe("Auth0 simulator", () => {
       });
 
       it("access_token should contain audience as aud", () => {
-        expect(accessToken.payload.aud).toBe(
-          "https://thefrontside.auth0.com/api/v0/"
-        );
+        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
       });
     });
 
@@ -452,9 +428,7 @@ describe("Auth0 simulator", () => {
       });
 
       it("access_token should contain audience as aud", () => {
-        expect(accessToken.payload.aud).toBe(
-          "https://thefrontside.auth0.com/api/v0/"
-        );
+        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
       });
     });
 
@@ -506,9 +480,7 @@ describe("Auth0 simulator", () => {
       });
 
       it("access_token should contain audience as aud", () => {
-        expect(accessToken.payload.aud).toBe(
-          "https://thefrontside.auth0.com/api/v0/"
-        );
+        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
       });
 
       it("should fail with invalid username", async () => {
@@ -678,9 +650,7 @@ describe("Auth0 simulator", () => {
           complete: true,
         }) as unknown as AccessToken;
 
-        expect(accessToken.payload.scope).toBe(
-          "openid profile email offline_access"
-        );
+        expect(accessToken.payload.scope).toBe("openid profile email offline_access");
       });
     });
 
@@ -726,9 +696,7 @@ describe("Auth0 simulator", () => {
 
         let text = await res.text();
 
-        expect(text).toBe(
-          "Could not find application with clientID: non-existent-client"
-        );
+        expect(text).toBe("Could not find application with clientID: non-existent-client");
       });
 
       it("on missing scope based on audience", async () => {
@@ -750,7 +718,7 @@ describe("Auth0 simulator", () => {
         let text = await res.text();
 
         expect(text).toBe(
-          "Found application matching clientID, client-three, but incorrect audience, configured: https://vip :: passed: https://bad-audience"
+          "Found application matching clientID, client-three, but incorrect audience, configured: https://vip :: passed: https://bad-audience",
         );
       });
     });
@@ -761,13 +729,11 @@ describe("Auth0 simulator", () => {
       let res: Response = await fetch(
         `${auth0Url}/v2/logout?${stringify({
           returnTo: frontendUrl,
-        })}`
+        })}`,
       );
 
       expect(res.redirected).toBe(true);
-      expect(removeTrailingSlash(res.url)).toBe(
-        removeTrailingSlash(frontendUrl)
-      );
+      expect(removeTrailingSlash(res.url)).toBe(removeTrailingSlash(frontendUrl));
     });
   });
 
@@ -805,14 +771,11 @@ describe("Auth0 simulator", () => {
       });
 
       it("should retrieve userinfo from access_token", async () => {
-        let res: Response = await fetch(
-          `${auth0Url}/userinfo?access_token=${token.access_token}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        let res: Response = await fetch(`${auth0Url}/userinfo?access_token=${token.access_token}`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
         let user = (await res.json()) as { name: string };
 
@@ -852,8 +815,8 @@ describe("Auth0 simulator", () => {
 
         expect(
           responseText.startsWith(
-            "Assert condition failed: no authorization header or access_token"
-          )
+            "Assert condition failed: no authorization header or access_token",
+          ),
         ).toBe(true);
         expect(res.status).toBe(500);
       });

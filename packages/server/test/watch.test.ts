@@ -1,15 +1,6 @@
 import { it } from "node:test";
 import assert from "node:assert";
-import {
-  run,
-  suspend,
-  sleep,
-  until,
-  spawn,
-  resource,
-  ensure,
-  withResolvers,
-} from "effection";
+import { run, suspend, sleep, until, spawn, resource, ensure, withResolvers } from "effection";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
@@ -38,15 +29,11 @@ it("restarts services on watched file change and restarts dependents", async () 
         {
           a: {
             watch: [dir],
-            operation: useSimulation("test-simulation-a", () =>
-              simulation(5500),
-            ),
+            operation: useSimulation("test-simulation-a", () => simulation(5500)),
           },
           b: {
             dependsOn: { startup: ["a"] as const },
-            operation: useSimulation("test-simulation-a", () =>
-              simulation(5501),
-            ),
+            operation: useSimulation("test-simulation-a", () => simulation(5501)),
           },
         },
         { watch: true, watchDebounce: 20 },
@@ -55,8 +42,7 @@ it("restarts services on watched file change and restarts dependents", async () 
       try {
         const services = yield* op();
         // subscribe to the immediate raw serviceChanges stream and wait for the first update
-        if (!services.serviceChanges)
-          throw new Error("serviceChanges not available");
+        if (!services.serviceChanges) throw new Error("serviceChanges not available");
         const subscription = yield* services.serviceChanges;
         subscriptionReady.resolve();
 
@@ -199,19 +185,13 @@ it("restarts transitive dependents when watched service changes", async () => {
     });
 
     // wait for initial startup
-    yield* waitFor(
-      () => startCounts.a > 0 && startCounts.b > 0 && startCounts.c > 0,
-      2000,
-    );
+    yield* waitFor(() => startCounts.a > 0 && startCounts.b > 0 && startCounts.c > 0, 2000);
 
     // trigger a change
     yield* until(fs.writeFile(trigger, "changed"));
 
     // wait for restarts to occur
-    yield* waitFor(
-      () => startCounts.a >= 2 && startCounts.b >= 2 && startCounts.c >= 2,
-      3000,
-    );
+    yield* waitFor(() => startCounts.a >= 2 && startCounts.b >= 2 && startCounts.c >= 2, 3000);
   });
 
   await fs.rm(dir, { recursive: true, force: true });
@@ -232,10 +212,7 @@ it("updates servicePorts when a service restarts", async () => {
       {
         s: {
           watch: [dir],
-          operation: useSimulation(
-            "s",
-            createFoundationSimulationServer({ port: 0 }),
-          ),
+          operation: useSimulation("s", createFoundationSimulationServer({ port: 0 })),
         },
       },
       {
@@ -247,10 +224,7 @@ it("updates servicePorts when a service restarts", async () => {
     const services = yield* op();
 
     // wait for initial port to appear
-    yield* waitFor(
-      () => typeof services.status?.get("s")?.port === "number",
-      2000,
-    );
+    yield* waitFor(() => typeof services.status?.get("s")?.port === "number", 2000);
     const initial = services.status!.get("s")!.port!;
 
     // trigger restart by touching the file
@@ -349,8 +323,5 @@ it("debounces rapid changes per service", async () => {
   assert(rawCount >= 1, `expected at least 1 raw update, got ${rawCount}`);
   assert(updates.length >= 1, "expected at least one debounced update");
   const aCount = updates.filter((u) => u === "a").length;
-  assert(
-    aCount < 3,
-    `expected debounced updates to be fewer than writes (3), got ${aCount}`,
-  );
+  assert(aCount < 3, `expected debounced updates to be fewer than writes (3), got ${aCount}`);
 });

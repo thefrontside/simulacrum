@@ -5,10 +5,7 @@ import { sleep, until, type Operation } from "effection";
  * Wait for `predicate` to become true with a timeboxed timeout.
  * Throws on timeout.
  */
-export function* waitFor(
-  predicate: () => boolean,
-  timeout = 2000,
-): Operation<void> {
+export function* waitFor(predicate: () => boolean, timeout = 2000): Operation<void> {
   const res = yield* timebox(timeout, function* () {
     while (!predicate()) {
       yield* sleep(10);

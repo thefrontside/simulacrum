@@ -16,9 +16,7 @@ export type DataServiceOptions = Record<string, unknown> | undefined;
  * @param data - Arbitrary JSON-serializable data to serve at `/data`
  * @returns an operation that provides `{ port: number }` when ready
  */
-export function startDataService(
-  data: DataServiceOptions = {},
-): Operation<{ port: number }> {
+export function startDataService(data: DataServiceOptions = {}): Operation<{ port: number }> {
   return resource(function* (provide) {
     yield* useAttributes({
       name: "dataService",
@@ -30,10 +28,7 @@ export function startDataService(
         const pathname = url.pathname;
 
         // GET /data -> whole object
-        if (
-          req.method === "GET" &&
-          (pathname === "/data" || pathname === "/")
-        ) {
+        if (req.method === "GET" && (pathname === "/data" || pathname === "/")) {
           const body = JSON.stringify(data || {});
           res.writeHead(200, {
             "content-type": "application/json",
@@ -82,9 +77,7 @@ export function startDataService(
 
     const address = server.address();
     const port =
-      typeof address === "object" && address !== null && "port" in address
-        ? address.port
-        : 0;
+      typeof address === "object" && address !== null && "port" in address ? address.port : 0;
 
     yield* logger.stdout(`data service started on port ${port}`);
     yield* useAttributes({ name: "dataService", port });

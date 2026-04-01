@@ -7,10 +7,7 @@ import {
   type Server as ServerHTTPS,
   type ServerOptions as SSLOptions,
 } from "https";
-import {
-  createServer as createHttpServer,
-  type Server as ServerHTTP,
-} from "http";
+import { createServer as createHttpServer, type Server as ServerHTTP } from "http";
 
 const rootDir = path.join(homedir(), ".simulacrum");
 const certificatesDir = path.join(rootDir, "certs");
@@ -56,15 +53,13 @@ type Servers = {
 
 export const createAppServer = <P extends keyof Servers>(
   app: Application,
-  protocol: P
+  protocol: P,
 ): Servers[P] => {
   switch (protocol) {
     case "http":
       return createHttpServer(app) as Servers[P];
     case "https":
-      if (
-        [paths.ssl.keyFile, paths.ssl.pemFile].some((f) => !fs.existsSync(f))
-      ) {
+      if ([paths.ssl.keyFile, paths.ssl.pemFile].some((f) => !fs.existsSync(f))) {
         console.warn(mkcertText);
 
         throw new NoSSLError("no self signed certificate.");

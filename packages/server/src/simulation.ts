@@ -39,9 +39,7 @@ import { SimulacrumEndpoint } from "./services.ts";
     let initData: unknown | undefined = undefined;
     if (typeof simulacrumPort === "number" && !Number.isNaN(simulacrumPort)) {
       try {
-        const res = yield* until(
-          fetch(`http://127.0.0.1:${simulacrumPort}/data`),
-        );
+        const res = yield* until(fetch(`http://127.0.0.1:${simulacrumPort}/data`));
         initData = yield* until(res.json());
       } catch (err) {
         // ignore fetch failures
@@ -50,9 +48,7 @@ import { SimulacrumEndpoint } from "./services.ts";
     }
 
     const createSim = createFactory(initData);
-    const listening: FoundationSimulatorListening<L> = yield* until(
-      createSim.listen(),
-    );
+    const listening: FoundationSimulatorListening<L> = yield* until(createSim.listen());
 
     yield* logger.stdout(`${name} simulation: port ${listening.port}`);
     yield* useAttributes({
@@ -93,13 +89,7 @@ export function useChildSimulation(name: string, modulePath: string) {
     // attempt to read the simulacrum port from context; if not present, continue without it
     const contextPort = yield* SimulacrumEndpoint.get();
 
-    const parts = [
-      "node",
-      "--import",
-      "tsx",
-      "./bin/run-simulation-child.ts",
-      modulePath,
-    ];
+    const parts = ["node", "--import", "tsx", "./bin/run-simulation-child.ts", modulePath];
     if (typeof contextPort === "number") {
       parts.push("--simulacrum-port", String(contextPort));
     }
@@ -115,9 +105,7 @@ export function useChildSimulation(name: string, modulePath: string) {
 
     // read the first stdout JSON line to get the listening info
     let port = undefined as number | undefined;
-    let ready = withResolvers<void>(
-      "wait until the port is returned to signal ready",
-    );
+    let ready = withResolvers<void>("wait until the port is returned to signal ready");
 
     // forward raw stdout for logging in chunk form (no reassembly)
     yield* spawn(function* () {
@@ -170,9 +158,7 @@ export function useChildSimulation(name: string, modulePath: string) {
       if (!port) {
         ready.reject(
           new Error(
-            `child process exited before emitting listening info: ${JSON.stringify(
-              status,
-            )}`,
+            `child process exited before emitting listening info: ${JSON.stringify(status)}`,
           ),
         );
       }

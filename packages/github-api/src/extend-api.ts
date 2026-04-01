@@ -1,15 +1,22 @@
-import { type Express } from "express";
+import { type createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
 import { stringify } from "querystring";
 import { createHandler } from "./graphql/handler.ts";
 import type { ExtendedSimulationStore } from "./store/index.ts";
 
+type FoundationExtendRouter = NonNullable<
+  Parameters<typeof createFoundationSimulationServer>[0]["extendRouter"]
+>;
+
 export const extendRouter =
   (
     extend:
-      | ((router: Express, simulationStore: ExtendedSimulationStore) => void)
-      | undefined
+      | ((
+          router: Parameters<FoundationExtendRouter>[0],
+          simulationStore: ExtendedSimulationStore,
+        ) => void)
+      | undefined,
   ) =>
-  (router: Express, simulationStore: ExtendedSimulationStore) => {
+  (router: Parameters<FoundationExtendRouter>[0], simulationStore: ExtendedSimulationStore) => {
     if (extend) {
       extend(router, simulationStore);
     }
@@ -36,10 +43,7 @@ export const extendRouter =
     });
 
     router.post(
-      [
-        "/login/oauth/access_token",
-        "/api/v3/app/installations/:id/access_tokens",
-      ],
+      ["/login/oauth/access_token", "/api/v3/app/installations/:id/access_tokens"],
       (_request, response) => {
         // for /login/oauth/access_token
         const access_token = "dev_access_token";
@@ -55,6 +59,6 @@ export const extendRouter =
         });
         response.status(200);
         response.end();
-      }
+      },
     );
   };

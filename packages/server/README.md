@@ -30,10 +30,7 @@ export const services = useServiceGraph(
       operation: useSimulation("sim-run-in-same-process", simulation),
     },
     sim3: {
-      operation: useService(
-        "arbitray-child-process",
-        "node --import tsx ./sim3.ts",
-      ),
+      operation: useService("arbitray-child-process", "node --import tsx ./sim3.ts"),
     },
   },
   { globalData: { hello: "world" } },
@@ -183,10 +180,7 @@ Run a simulator in a fresh child Node process (isolates module cache and support
 Example:
 
 ```ts
-operation: useChildSimulation(
-  "service-key-for-logs",
-  "./simulator/my-simulator.js",
-);
+operation: useChildSimulation("service-key-for-logs", "./simulator/my-simulator.js");
 ```
 
 > [!WARNING]

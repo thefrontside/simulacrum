@@ -3,16 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "description": "Composable simulations for testing, development, and application previews",
-  "author": "Frontside Engineering <engineering@frontside.com>",
-  "license": "MIT",
-  "scripts": {
-    "clean": "npm run clean --workspaces",
-    "test": "npm run test --workspaces",
-    "prepack": "npm run prepack --workspaces",
-    "lint": "npm run lint --workspaces --if-present -- --fix",
-    "tsc": "npm run tsc --workspaces --if-present",
-    "covector": "npx covector"
+  "keywords": [
+    "emulation",
+    "simulation"
+  ],
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
   },
+  "license": "MIT",
+  "author": "Frontside Engineering <engineering@frontside.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
@@ -20,28 +20,29 @@
   "workspaces": [
     "./packages/*"
   ],
-  "keywords": [
-    "simulation",
-    "emulation"
-  ],
-  "bugs": {
-    "url": "https://github.com/thefrontside/simulacrum/issues"
-  },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme",
-  "engines": {
-    "node": ">=20",
-    "npm": ">=11"
-  },
-  "volta": {
-    "node": "20.20.1",
-    "npm": "11.7.0"
+  "scripts": {
+    "check": "pnpm run \"/(tsc$)|(lint$)|(fmt$)/\"",
+    "clean": "pnpm -r --if-present run clean",
+    "covector": "pnpm dlx covector",
+    "fmt": "oxfmt --write .",
+    "fmt:check": "oxfmt --check .",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "prepack": "pnpm -r --if-present run prepack",
+    "test": "pnpm -r --if-present run test",
+    "tsc": "pnpm -r --if-present run tsc"
   },
   "devDependencies": {
-    "@arethetypeswrong/core": "^0.18.2",
-    "publint": "^0.3.18",
-    "tsdown": "^0.21.5",
-    "tsx": "^4.21.0",
+    "@types/node": "^24.0.0",
+    "oxfmt": "^0.43.0",
+    "oxlint": "^1.58.0",
+    "tsdown": "^0.21.7",
     "typescript": "5.8.3",
     "vitest": "^3.2.4"
-  }
+  },
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@10.17.1"
 }

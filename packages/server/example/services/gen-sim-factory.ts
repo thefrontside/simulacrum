@@ -26,9 +26,7 @@ export function simulation(
     })();
 
     return {
-      async listen(
-        ...args: Parameters<FoundationSimulator<any>["listen"]>
-      ): Promise<any> {
+      async listen(...args: Parameters<FoundationSimulator<any>["listen"]>): Promise<any> {
         if (startDelay > 0) {
           await new Promise((resolve) => setTimeout(resolve, startDelay));
         }

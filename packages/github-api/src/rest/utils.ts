@@ -13,10 +13,7 @@ export const blobAsBase64 = ({
   repo: string;
   ref: string;
 }) => ({
-  content:
-    blob.encoding === "base64"
-      ? blob.content
-      : Buffer.from(blob.content).toString("base64"),
+  content: blob.encoding === "base64" ? blob.content : Buffer.from(blob.content).toString("base64"),
   encoding: "base64",
   url: `${host}/repos/${owner}/${repo}/contents/${ref}`,
   sha: "-------",

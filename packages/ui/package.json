@@ -2,35 +2,35 @@
   "name": "@simulacrum/ui",
   "version": "0.3.2",
   "description": "A web UI to work with a Simulacrum Server",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo skip",
-    "prepack": "echo \"parcel build\"",
-    "start": "parcel serve",
-    "watch": "parcel watch",
-    "build": "npm run prepack"
+  "keywords": [
+    "simulation"
+  ],
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
   },
+  "license": "ISC",
+  "author": "Frontside Engineering <engineering@frontside.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
-  "keywords": [
-    "simulation"
-  ],
-  "author": "Frontside Engineering <engineering@frontside.com>",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/thefrontside/simulacrum/issues"
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run prepack",
+    "prepack": "echo \"parcel build\"",
+    "start": "parcel serve",
+    "test": "echo skip",
+    "watch": "parcel watch"
   },
-  "homepage": "https://github.com/thefrontside/simulacrum#readme",
   "devDependencies": {},
+  "volta": {
+    "extends": "../../package.json"
+  },
   "targets": {
     "app": {
       "source": "app/index.html",
       "distDir": "./dist"
     }
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }

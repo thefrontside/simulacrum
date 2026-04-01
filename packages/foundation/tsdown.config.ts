@@ -10,6 +10,6 @@ export default defineConfig({
   },
   minify: false,
   // runs with @arethetypeswrong/core which checks types
-  attw: false,
+  attw: true,
   publint: true,
 });

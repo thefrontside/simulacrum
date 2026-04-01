@@ -38,14 +38,12 @@ export function useService(
   name: string,
   cmd: string,
   options: ServiceOptions = {},
-) {
+): Operation<void> {
   return resource<void>(function* (provide) {
     yield* useAttributes({ name: `useService ${name}`, cmd: String(cmd) });
     if (cmd.startsWith("npm")) {
       // see https://github.com/npm/cli/issues/6684
-      throw new Error(
-        "scripts run with npm don't respect signals to properly shutdown",
-      );
+      throw new Error("scripts run with npm don't respect signals to properly shutdown");
     }
     const process = yield* daemon(cmd, options.processOptions);
     const stdio = createReplaySignal<string, void>();
@@ -93,7 +91,7 @@ export function useService(
             if (result && result.ok) {
               break;
             }
-          } catch (error) {
+          } catch (ignore) {
             // noop, try again
           }
         }
@@ -104,10 +102,7 @@ export function useService(
           name: `useService ${name}`,
           timeout: String(options.wellnessCheck.timeout),
         });
-        const checked = yield* timebox(
-          options.wellnessCheck.timeout,
-          untilWell,
-        );
+        const checked = yield* timebox(options.wellnessCheck.timeout, untilWell);
         if (checked && checked.timeout) {
           throw new Error("service wellness check timed out");
         }

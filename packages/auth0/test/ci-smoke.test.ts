@@ -10,8 +10,8 @@ const AUTH0_URL = `https://localhost:${AUTH0_PORT}`;
 
 // Ensure built distribution is present; if not, build it so the smoke test can run locally
 if (!existsSync("./dist/index.cjs")) {
-  console.log("ci-smoke: dist not found, running `npm run build`...");
-  execSync("npm run prepack", { stdio: "inherit" });
+  console.log("ci-smoke: dist not found, running `pnpm run build`...");
+  execSync("pnpm run prepack", { stdio: "inherit" });
 }
 
 // Helper to start the built auth0 service with a wellness check (reused by tests)
@@ -31,14 +31,13 @@ function startAuth0() {
               }).then((r) => {
                 if (!r.ok) throw new Error(`not ready: ${r.status}`);
                 return true;
-              })
+              }),
             );
             return Ok<void>(void 0);
-          } catch (err) {
+          } catch (ignore) {
             // ignore and retry
           }
-          if (Date.now() - start > 30000)
-            return Err(new Error("service did not start"));
+          if (Date.now() - start > 30000) return Err(new Error("service did not start"));
           yield* sleep(200);
         }
       },
@@ -56,7 +55,7 @@ describe("CI smoke: built dist server", () => {
         fetch(`${AUTH0_URL}/login`, { signal }).then((r) => {
           if (!r.ok) throw new Error(`fetch failed: ${r.status}`);
           return r.text();
-        })
+        }),
       );
 
       expect(text).toMatch(/<\/script>/);
@@ -71,12 +70,10 @@ describe("CI smoke: built dist server", () => {
       const url = `${AUTH0_URL}/authorize?response_mode=web_message&redirect_uri=http://localhost:3000&currentUser=default`;
       const signal2 = yield* useAbortSignal();
       const text = yield* until(
-        fetch(url, { headers: { accept: "text/html" }, signal: signal2 }).then(
-          (r) => {
-            if (!r.ok) throw new Error(`fetch failed: ${r.status}`);
-            return r.text();
-          }
-        )
+        fetch(url, { headers: { accept: "text/html" }, signal: signal2 }).then((r) => {
+          if (!r.ok) throw new Error(`fetch failed: ${r.status}`);
+          return r.text();
+        }),
       );
 
       expect(text).toMatch(/<\/script>/);

@@ -58,8 +58,7 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
     const runOptions: { watch?: boolean; watchDebounce?: number } = {
       watch: !!values.watch,
     };
-    if (values["watch-debounce"])
-      runOptions.watchDebounce = Number(values["watch-debounce"]);
+    if (values["watch-debounce"]) runOptions.watchDebounce = Number(values["watch-debounce"]);
 
     Debugging.set(!!values.debug);
 
@@ -69,10 +68,7 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
 
     yield* suspend();
   } catch (err) {
-    yield* logger.stderr(
-      `simulationCLI error:`,
-      err instanceof Error ? err.stack : err,
-    );
+    yield* logger.stderr(`simulationCLI error:`, err instanceof Error ? err.stack : err);
   } finally {
     yield* logger.debug("simulationCLI finally");
   }
@@ -85,10 +81,9 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
  *
  * @param serviceGraph - runner factory returned by `useServiceGraph`
  */
-export async function simulationCLI<
-  S extends Record<string, ServiceDefinition<string, T>>,
-  T,
->(serviceGraph: (subset?: Array<keyof S>) => Operation<ServiceGraph<S, T>>) {
+export async function simulationCLI<S extends Record<string, ServiceDefinition<string, T>>, T>(
+  serviceGraph: (subset?: Array<keyof S>) => Operation<ServiceGraph<S, T>>,
+) {
   return main(function* () {
     try {
       yield* simulationCLIOp(serviceGraph);

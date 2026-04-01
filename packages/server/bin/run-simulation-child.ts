@@ -7,7 +7,7 @@ import type {
 } from "@simulacrum/foundation-simulator";
 
 function guardedFactory(
-  factory: Function
+  factory: Function,
 ): (initData?: unknown) => Promise<FoundationSimulator<any>> {
   return async function startSimulation(initData?: unknown) {
     const sim = await factory(initData);
@@ -72,9 +72,7 @@ main(function* () {
   let initData: JSON | undefined = undefined;
   if (typeof simulacrumPort === "number" && !Number.isNaN(simulacrumPort)) {
     try {
-      const res = yield* until(
-        fetch(`http://127.0.0.1:${simulacrumPort}/data`)
-      );
+      const res = yield* until(fetch(`http://127.0.0.1:${simulacrumPort}/data`));
       initData = yield* until(res.json());
     } catch (err) {
       // ignore fetch failures

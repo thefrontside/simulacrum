@@ -6,7 +6,7 @@ A Web application to manage a simulacrum server
 
 To start the web application in development mode, first start your `@simulacrum/server`. For example to start the dev server on port 5000, run from the server directory:
 
-``` shell
+```shell
 > PORT=5000 npm start
 Simulation server running on http://localhost:5000
 ```
@@ -45,7 +45,7 @@ To uninstall the certificates
 ```bash
 cd ~/.simulacrum/certs
 mkcert -uninstall localhost
-mkcert -uninstall 
+mkcert -uninstall
 rm -rf "$(mkcert -CAROOT)/*"
 mkcert localhost
 ```

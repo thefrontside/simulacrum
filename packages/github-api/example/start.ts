@@ -1,4 +1,4 @@
-import { InitialState, simulation } from "../src/index.ts";
+import { type InitialState, simulation } from "../src/index.ts";
 
 const initialState: InitialState = {
   users: [{ login: "test", organizations: ["frontside"] }],
@@ -11,6 +11,6 @@ const initialState: InitialState = {
 let app = simulation({ initialState });
 app.listen(3300, () =>
   console.log(
-    `GitHub API Simulation server started at http://localhost:3300\nVisit http://localhost:3300/simulation to view all available routes.`
-  )
+    `GitHub API Simulation server started at http://localhost:3300\nVisit http://localhost:3300/simulation to view all available routes.`,
+  ),
 );

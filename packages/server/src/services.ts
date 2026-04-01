@@ -24,10 +24,7 @@ import { startDataService } from "./data-service.ts";
  */
 export const SimulacrumEndpoint = createContext<number>("SimulacrumEndpoint");
 
-export type ServiceDefinition<
-  S,
-  T extends void | { port?: number } | unknown,
-> = {
+export type ServiceDefinition<S, T extends void | { port?: number } | unknown> = {
   operation: Operation<T>;
   // folders/files to watch for changes which should cause a restart
   watch?: string[];
@@ -127,8 +124,7 @@ export function useServiceGraph<
         const included = new Set<string>();
         function include(name: string) {
           if (included.has(name)) return;
-          if (!(name in services))
-            throw new Error(`Requested service '${name}' not found`);
+          if (!(name in services)) throw new Error(`Requested service '${name}' not found`);
           included.add(name);
           for (const dep of services[name].dependsOn?.startup ?? []) {
             include(String(dep));
@@ -138,8 +134,7 @@ export function useServiceGraph<
 
         const picked: Partial<typeof services> = {};
         for (const name of included) {
-          picked[name as keyof typeof services] =
-            services[name as keyof typeof services];
+          picked[name as keyof typeof services] = services[name as keyof typeof services];
         }
         effectiveServices = picked as typeof services;
 
@@ -150,17 +145,13 @@ export function useServiceGraph<
           includedServices: Array.from(included).join(", "),
         });
         yield* logger.stdout(
-          `simulation starting with subset of services: ${Array.from(
-            included,
-          ).join(", ")}`,
+          `simulation starting with subset of services: ${Array.from(included).join(", ")}`,
         );
       }
 
       const status = new Map<string, ServiceStatus>();
 
-      const dataServiceProvided = yield* startDataService(
-        options?.globalData ?? {},
-      );
+      const dataServiceProvided = yield* startDataService(options?.globalData ?? {});
       yield* useAttributes({
         name: "serviceGraph",
         dataServicePort: String(dataServiceProvided.port),
@@ -188,9 +179,7 @@ export function useServiceGraph<
       const watcher = shouldWatch
         ? yield* useWatcher(
             effectiveServices,
-            options?.watchDebounce
-              ? { watchDebounce: options.watchDebounce }
-              : undefined,
+            options?.watchDebounce ? { watchDebounce: options.watchDebounce } : undefined,
           )
         : undefined;
 
@@ -251,10 +240,7 @@ export function useServiceGraph<
         });
         for (const dep of deps) {
           const r = status.get(dep);
-          if (!r)
-            throw new Error(
-              `missing readiness resolver for dependency '${dep}'`,
-            );
+          if (!r) throw new Error(`missing readiness resolver for dependency '${dep}'`);
           yield* r.startup.operation;
         }
       }
@@ -264,9 +250,7 @@ export function useServiceGraph<
         let restartCount = -1;
         yield* useAttributes({
           name: `service ${service}`,
-          dependencies: JSON.stringify(
-            effectiveServices[service].dependsOn ?? {},
-          ),
+          dependencies: JSON.stringify(effectiveServices[service].dependsOn ?? {}),
         });
         while (true) {
           yield* useAttributes({
@@ -288,20 +272,14 @@ export function useServiceGraph<
             // capture any returned listening info (e.g., from useChildSimulation)
             const maybeProvided = yield* def.operation;
             if (maybeProvided && typeof maybeProvided === "object") {
-              if (
-                "port" in maybeProvided &&
-                typeof maybeProvided.port === "number"
-              ) {
+              if ("port" in maybeProvided && typeof maybeProvided.port === "number") {
                 yield* useAttributes({
                   name: `service ${service}`,
                   port: String(maybeProvided.port),
                 });
                 task.port = maybeProvided.port;
               }
-              if (
-                "pid" in maybeProvided &&
-                typeof maybeProvided.pid === "number"
-              ) {
+              if ("pid" in maybeProvided && typeof maybeProvided.pid === "number") {
                 task.pid = maybeProvided.pid;
                 yield* useAttributes({
                   name: `service ${service}`,

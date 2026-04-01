@@ -30,13 +30,10 @@ function getPort({ domain, port }: Auth0Configuration): number {
 // This higher order function would only be used for testing and
 // allows different cosmiconfig instances to be used for testing
 export function getConfigCreator(explorer: Explorer) {
-  return function getConfig(
-    options?: Partial<Auth0Configuration>
-  ): Auth0Configuration {
+  return function getConfig(options?: Partial<Auth0Configuration>): Auth0Configuration {
     let searchResult = explorer.search();
 
-    let config: ConfigSchema =
-      searchResult === null ? DefaultArgs : searchResult.config;
+    let config: ConfigSchema = searchResult === null ? DefaultArgs : searchResult.config;
 
     let strippedOptions = options ?? {};
 

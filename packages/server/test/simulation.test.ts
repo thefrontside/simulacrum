@@ -30,7 +30,7 @@ it("simulation closes when scope is destroyed", async () => {
           extendRouter(router) {
             router.get("/info", (_req, res) => res.json({ ok: true }));
           },
-        })
+        }),
       );
       port = listening.port;
       yield* suspend();
@@ -39,9 +39,7 @@ it("simulation closes when scope is destroyed", async () => {
     // wait for the scope-run to set the port
     yield* waitFor(() => typeof port === "number", 2000);
 
-    const status = yield* until(
-      fetch(new URL(`http://127.0.0.1:${port}/info`))
-    );
+    const status = yield* until(fetch(new URL(`http://127.0.0.1:${port}/info`)));
     if (!status.ok) {
       throw new Error(`expected 200 OK from simulation, got ${status.status}`);
     }

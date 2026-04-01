@@ -121,27 +121,24 @@ export function useWatcher(
       }
     });
 
-    const debounceMs =
-      options?.watchDebounce !== undefined ? options.watchDebounce : 250;
+    const debounceMs = options?.watchDebounce !== undefined ? options.watchDebounce : 250;
     const serviceTimers = {} as Record<string, number>;
-    const debouncedServiceChanges = filter<ServiceUpdate>(
-      function* (updateStream) {
-        yield* useAttributes({
-          name: "debounceCheck",
-          service: updateStream.service,
-        });
-        const now = performance.now();
-        if (
-          serviceTimers[updateStream.service] &&
-          now - serviceTimers[updateStream.service] < debounceMs
-        ) {
-          return false;
-        } else {
-          serviceTimers[updateStream.service] = now;
-          return true;
-        }
-      },
-    );
+    const debouncedServiceChanges = filter<ServiceUpdate>(function* (updateStream) {
+      yield* useAttributes({
+        name: "debounceCheck",
+        service: updateStream.service,
+      });
+      const now = performance.now();
+      if (
+        serviceTimers[updateStream.service] &&
+        now - serviceTimers[updateStream.service] < debounceMs
+      ) {
+        return false;
+      } else {
+        serviceTimers[updateStream.service] = now;
+        return true;
+      }
+    });
 
     try {
       yield* provide({

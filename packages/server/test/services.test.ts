@@ -49,17 +49,11 @@ it("throws on cycles in dependency graph", async () => {
     await run(function* () {
       const runGraph = useServiceGraph({
         A: {
-          operation: useService(
-            "A",
-            "node --import tsx ./test/services/service-a.ts",
-          ),
+          operation: useService("A", "node --import tsx ./test/services/service-a.ts"),
           dependsOn: { startup: ["B"] as const },
         },
         B: {
-          operation: useService(
-            "B",
-            "node --import tsx ./test/services/service-b.ts",
-          ),
+          operation: useService("B", "node --import tsx ./test/services/service-b.ts"),
           dependsOn: { startup: ["A"] as const },
         },
       });
@@ -139,14 +133,8 @@ it("starts independent services in parallel", async () => {
     });
     const fastStarted = startTimes.get("fast");
     const slowStarted = startTimes.get("slow");
-    assert.ok(
-      typeof fastStarted === "number",
-      "fast started should be recorded",
-    );
-    assert.ok(
-      typeof slowStarted === "number",
-      "slow started should be recorded",
-    );
+    assert.ok(typeof fastStarted === "number", "fast started should be recorded");
+    assert.ok(typeof slowStarted === "number", "slow started should be recorded");
     assert(fastStarted! <= slowStarted!, "fast should start before slow");
   } finally {
     // cleanup
@@ -197,10 +185,7 @@ it("runs subset of services with dependencies", async () => {
       // keep spawned graph alive so services can start and perform startup work
       yield* suspend();
     });
-    yield* waitFor(
-      () => startTimes.has("fast") && startTimes.has("slow"),
-      2000,
-    );
+    yield* waitFor(() => startTimes.has("fast") && startTimes.has("slow"), 2000);
   });
 
   const f = startTimes.get("fast");
@@ -274,10 +259,7 @@ it("runs subset specified as a string", async () => {
       yield* run(["r"]);
       yield* suspend();
     });
-    yield* waitFor(
-      () => startTimes.has("a") && startTimes.has("b") && startTimes.has("r"),
-      2000,
-    );
+    yield* waitFor(() => startTimes.has("a") && startTimes.has("b") && startTimes.has("r"), 2000);
   });
 
   const a = startTimes.get("a");

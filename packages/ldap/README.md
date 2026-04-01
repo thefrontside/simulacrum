@@ -21,16 +21,17 @@ async function run() {
     baseDN: "ou=users,dc=org.com",
     bindDn: "admin@org.com",
     bindPassword: "password",
-    groupDN:"ou=groups,dc=org.com",
-    users: [{
-      //required
-      cn: 'Charles Lowell',
-      //optional to bind using this user
-      password: "super-secret-but-not-really",
-      //optional:
-      uid: 'cowboyd',
-
-    }]
+    groupDN: "ou=groups,dc=org.com",
+    users: [
+      {
+        //required
+        cn: "Charles Lowell",
+        //optional to bind using this user
+        password: "super-secret-but-not-really",
+        //optional:
+        uid: "cowboyd",
+      },
+    ],
   });
   console.log(`LDAP server running on ${server.port}`);
   try {
@@ -57,16 +58,17 @@ function* run() {
     baseDN: "ou=users,dc=org.com",
     bindDn: "admin@org.com",
     bindPassword: "password",
-    groupDN:"ou=groups,dc=org.com",
-    users: [{
-      //required
-      cn: 'Charles Lowell',
-      //optional to bind using this user
-      password: "super-secret-but-not-really",
-      //optional:
-      uid: 'cowboyd',
-
-    }]
+    groupDN: "ou=groups,dc=org.com",
+    users: [
+      {
+        //required
+        cn: "Charles Lowell",
+        //optional to bind using this user
+        password: "super-secret-but-not-really",
+        //optional:
+        uid: "cowboyd",
+      },
+    ],
   });
 
   //... do some stuff

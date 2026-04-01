@@ -28,9 +28,7 @@ describe("openid routes", () => {
     });
 
     it("returns the openid configuration", async () => {
-      let res: Response = await fetch(
-        `${auth0Url}/.well-known/openid-configuration`
-      );
+      let res: Response = await fetch(`${auth0Url}/.well-known/openid-configuration`);
 
       const json = await res.json();
 

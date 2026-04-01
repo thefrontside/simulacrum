@@ -1,4 +1,4 @@
-{ 
+{
   "extends": "@frontside/tsconfig",
   "compilerOptions": {
     "rootDir": ".",

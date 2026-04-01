@@ -13,15 +13,11 @@ describe("example as service rig", { concurrency: 1 }, () => {
 
       // wait until all declared services have registered a port
       yield* waitFor(() => {
-        return ["A", "B"].every(
-          (name) => typeof provided?.status?.get(name)?.port === "number",
-        );
+        return ["A", "B"].every((name) => typeof provided?.status?.get(name)?.port === "number");
       }, 5000);
 
       if (!provided.status) {
-        throw new Error(
-          `expected service status to be available after services started`,
-        );
+        throw new Error(`expected service status to be available after services started`);
       }
 
       const ps: number[] = [];
@@ -30,19 +26,14 @@ describe("example as service rig", { concurrency: 1 }, () => {
         if (typeof port === "number") ps.push(port);
       }
 
-      assert(
-        ps.length > 0,
-        "expected at least one service port to be registered",
-      );
+      assert(ps.length > 0, "expected at least one service port to be registered");
       assert.ok(ps[0], "service A should have a port registered");
       assert.ok(ps[1], "service B should have a port registered");
 
       // check each tapped port for healthy status while graph is running
       for (const p of ps) {
         yield* waitForOperation(function* () {
-          const status = yield* until(
-            fetch("http://localhost:" + p + "/status"),
-          );
+          const status = yield* until(fetch("http://localhost:" + p + "/status"));
           return status.ok;
         }, 2000);
       }
@@ -61,9 +52,7 @@ describe("example as service rig", { concurrency: 1 }, () => {
       }, 5000);
 
       if (!provided.status) {
-        throw new Error(
-          `expected service status to be available after services started`,
-        );
+        throw new Error(`expected service status to be available after services started`);
       }
 
       const ps: number[] = [];
@@ -72,19 +61,14 @@ describe("example as service rig", { concurrency: 1 }, () => {
         if (typeof port === "number") ps.push(port);
       }
 
-      assert(
-        ps.length > 0,
-        "expected at least one service port to be registered",
-      );
+      assert(ps.length > 0, "expected at least one service port to be registered");
       assert.ok(ps[0], "service fast should have a port registered");
       assert.ok(ps[1], "service slow should have a port registered");
 
       // check each tapped port for healthy status while graph is running
       for (const p of ps) {
         yield* waitForOperation(function* () {
-          const status = yield* until(
-            fetch("http://localhost:" + p + "/status"),
-          );
+          const status = yield* until(fetch("http://localhost:" + p + "/status"));
           return status.ok;
         }, 2000);
       }

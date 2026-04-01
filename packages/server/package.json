@@ -2,60 +2,32 @@
   "name": "@simulacrum/server",
   "version": "0.8.0",
   "description": "Helpers and control plane to handle simulators and observability",
-  "author": "Frontside Engineering <engineering@frontside.com>",
-  "license": "MIT",
+  "keywords": [
+    "emulation",
+    "integration testing",
+    "mock",
+    "mocking",
+    "simulation"
+  ],
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
+  "license": "MIT",
+  "author": "Frontside Engineering <engineering@frontside.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git",
     "directory": "packages/server"
   },
-  "keywords": [
-    "simulation",
-    "emulation",
-    "mock",
-    "mocking",
-    "integration testing"
-  ],
-  "type": "module",
   "files": [
     "README.md",
     "dist",
     "src"
   ],
-  "scripts": {
-    "clean": "echo skip",
-    "test": "node --import tsx --test --test-timeout=60000 test/*.test.ts",
-    "prepack": "npm run build",
-    "build": "tsdown",
-    "lint": "echo noop",
-    "tsc": "tsc --noEmit",
-    "example:process": "node --import tsx ./example/process-graph.ts",
-    "example:sim": "node --import tsx ./example/simulation-graph.ts",
-    "example:concurrency": "node --import tsx ./example/concurrency-layers.ts"
-  },
-  "dependencies": {
-    "@effectionx/context-api": "^0.5.3",
-    "@effectionx/process": "^0.7.4",
-    "@effectionx/stream-helpers": "^0.8.2",
-    "@effectionx/timebox": "^0.4.3",
-    "chokidar": "^5.0.0",
-    "effection": "4.0.2",
-    "picomatch": "^4.0.4"
-  },
-  "devDependencies": {
-    "@types/picomatch": "^4.0.2"
-  },
-  "exports": {
-    ".": {
-      "development": "./src/index.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
-    },
-    "./package.json": "./package.json"
-  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
   "typesVersions": {
     "*": {
       "*": [
@@ -64,19 +36,42 @@
       ]
     }
   },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
   "publishConfig": {
     "exports": {
       ".": {
-        "require": "./dist/index.cjs",
-        "import": "./dist/index.mjs"
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
       },
       "./package.json": "./package.json"
     }
   },
-  "volta": {
-    "extends": "../../package.json"
+  "scripts": {
+    "build": "tsdown",
+    "clean": "echo skip",
+    "lint": "oxlint",
+    "prepack": "pnpm run build",
+    "test": "node --test-timeout=60000 --experimental-transform-types --test test/*.test.ts",
+    "test:service-main": "node --experimental-transform-types ./test/service-main.ts",
+    "tsc": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@effectionx/context-api": "^0.2.1",
+    "@effectionx/process": "^0.6.2",
+    "@effectionx/stream-helpers": "^0.8.2",
+    "@effectionx/timebox": "^0.4.3",
+    "chokidar": "^5.0.0",
+    "effection": "^4.0.2",
+    "picomatch": "^4.0.4"
+  },
+  "devDependencies": {
+    "@types/picomatch": "^4.0.2"
   }
 }

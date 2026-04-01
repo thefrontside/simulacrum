@@ -12,6 +12,6 @@ export default defineConfig({
   shims: true,
   minify: false,
   // runs with @arethetypeswrong/core which checks types
-  attw: false,
+  attw: true,
   publint: true,
 });

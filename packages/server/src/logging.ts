@@ -16,9 +16,8 @@ export const stdio = createApi("@simulacrum/logging", {
   },
 });
 
-let useAttributesImpl:
-  | undefined
-  | ((attrs: Record<string, unknown>) => Operation<void>) = undefined;
+let useAttributesImpl: undefined | ((attrs: Record<string, unknown>) => Operation<void>) =
+  undefined;
 
 function* resolveUseAttributes() {
   if (typeof useAttributesImpl !== "undefined") {

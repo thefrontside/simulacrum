@@ -9,12 +9,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: volta-cli/action@v4
+      - uses: jdx/mise-action@v2
       - name: Install TLS Certificate
         uses: ./.github/actions/install-cert
 
       - name: Install Node.js dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      - run: npm run prepack
-      - run: npm test
+      - run: pnpm run prepack
+      - run: pnpm test

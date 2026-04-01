@@ -1,9 +1,9 @@
-declare module 'ldapjs' {
+declare module "ldapjs" {
   interface RDNS {
     attrs: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [key: string]: any;
-    }
+    };
   }
   interface DN {
     rdns: RDNS[];
@@ -33,7 +33,7 @@ declare module 'ldapjs' {
 
   export interface BindRequest {
     credentials: string;
-    dn: DN
+    dn: DN;
   }
 }
 
@@ -42,7 +42,7 @@ export interface LDAPOptions {
   port?: number;
   baseDN: string;
   bindDn: string;
-  groupDN: string
+  groupDN: string;
   bindPassword: string;
 }
 

@@ -2,43 +2,71 @@
   "name": "@simulacrum/foundation-simulator",
   "version": "0.6.1",
   "description": "Base simulator to build simulators for integration testing.",
-  "author": "Frontside Engineering <engineering@frontside.com>",
-  "license": "MIT",
+  "keywords": [
+    "emulation",
+    "integration testing",
+    "mock",
+    "mocking",
+    "simulation"
+  ],
   "bugs": {
     "url": "https://github.com/thefrontside/simulacrum/issues"
   },
+  "license": "MIT",
+  "author": "Frontside Engineering <engineering@frontside.com>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git",
     "directory": "packages/foundation"
   },
-  "keywords": [
-    "simulation",
-    "emulation",
-    "mock",
-    "mocking",
-    "integration testing"
-  ],
-  "type": "module",
   "files": [
     "README.md",
     "dist",
     "src"
   ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./*"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs"
+      },
+      "./package.json": "./package.json"
+    }
+  },
   "scripts": {
-    "start": "node --import=tsx ./example/singleFileServer/start.ts",
-    "start:simple": "node --import=tsx ./example/simpleStart/index.ts",
-    "start:singlefile": "node --import=tsx ./example/singleFileServer/start.ts",
-    "start:extensive": "node --import=tsx ./example/extensiveServer/start.ts",
-    "start:pingback": "node --import=tsx ./example/pingback/start.ts",
-    "start:pingback:watch": "node --import=tsx --watch-path=./example/pingback ./example/pingback/start.ts",
+    "bench": "vitest bench",
+    "build": "tsdown",
+    "lint": "oxlint",
+    "prepack": "pnpm run build",
+    "start": "node --experimental-transform-types ./example/singleFileServer/start.ts",
+    "start:extensive": "node --experimental-transform-types ./example/extensiveServer/start.ts",
+    "start:pingback": "node --experimental-transform-types ./example/pingback/start.ts",
+    "start:pingback:watch": "node --experimental-transform-types --watch-path=./example/pingback ./example/pingback/start.ts",
+    "start:simple": "node --experimental-transform-types ./example/simpleStart/index.ts",
+    "start:singlefile": "node --experimental-transform-types ./example/singleFileServer/start.ts",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "bench": "vitest bench",
-    "lint": "echo \"eventually run \"eslint src example\" but it currently fails to parse\"",
-    "tsc": "tsc --noEmit",
-    "prepack": "npm run build",
-    "build": "tsdown"
+    "tsc": "tsc --noEmit"
   },
   "dependencies": {
     "ajv-formats": "^3.0.1",
@@ -54,36 +82,5 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3"
-  },
-  "exports": {
-    ".": {
-      "development": "./src/index.ts",
-      "require": "./dist/index.cjs",
-      "import": "./dist/index.mjs"
-    },
-    "./package.json": "./package.json"
-  },
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*",
-        "./*"
-      ]
-    }
-  },
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.cts",
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "require": "./dist/index.cjs",
-        "import": "./dist/index.mjs"
-      },
-      "./package.json": "./package.json"
-    }
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }

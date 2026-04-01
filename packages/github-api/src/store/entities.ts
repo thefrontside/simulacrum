@@ -10,10 +10,7 @@ export const githubUserSchema = z
     bio: z.string().default(""),
     email: z.string().optional(),
     url: z.string().url().optional(),
-    avatar_url: z
-      .string()
-      .optional()
-      .default("https://github.com/images/error/octocat_happy.gif"),
+    avatar_url: z.string().optional().default("https://github.com/images/error/octocat_happy.gif"),
     organizations: z.array(z.string()),
     created_at: z
       .string()
@@ -22,8 +19,7 @@ export const githubUserSchema = z
   })
   .transform((user) => {
     if (!user.name) user.name = user.login;
-    if (!user.email)
-      user.email = faker.internet.email({ firstName: user.name });
+    if (!user.email) user.email = faker.internet.email({ firstName: user.name });
     return user;
   });
 export type GitHubUser = z.infer<typeof githubUserSchema>;
@@ -85,10 +81,7 @@ export const githubRepositorySchema = z
     id: z.number().default(3000),
     node_id: z.string().optional(),
     name: z.string(),
-    description: z
-      .string()
-      .optional()
-      .default("Generic repository description"),
+    description: z.string().optional().default("Generic repository description"),
     owner: z.string(),
     full_name: z.string().optional().default(""),
     packages: z.array(z.string()).optional(),
@@ -186,10 +179,7 @@ export const githubRepositorySchema = z
           .object({ status: z.string() })
           .optional()
           .default({ status: "enabled" }),
-        secret_scanning: z
-          .object({ status: z.string() })
-          .optional()
-          .default({ status: "enabled" }),
+        secret_scanning: z.object({ status: z.string() }).optional().default({ status: "enabled" }),
         secret_scanning_push_protection: z
           .object({ status: z.string() })
           .optional()
@@ -274,21 +264,17 @@ export type GitHubRepository = z.infer<typeof githubRepositorySchema>;
 
 export const githubBranchSchema = z.object({
   name: z.string().optional().default("main"),
-  commit: z
-    .object({ sha: z.string().optional(), url: z.string().optional() })
-    .default({
-      sha: faker.git.commitSha(),
-      // @ts-expect-error
-      url: `https://api.github.com/repos/octocat/Hello-World/commits/${this?.sha}`,
-    }),
+  commit: z.object({ sha: z.string().optional(), url: z.string().optional() }).default({
+    sha: faker.git.commitSha(),
+    // @ts-expect-error
+    url: `https://api.github.com/repos/octocat/Hello-World/commits/${this?.sha}`,
+  }),
   protected: z.boolean().optional().default(true),
   protection: z.any().optional(),
   protection_url: z
     .string()
     .optional()
-    .default(
-      "https://api.github.com/repos/octocat/hello-world/branches/master/protection"
-    ),
+    .default("https://api.github.com/repos/octocat/hello-world/branches/master/protection"),
 });
 export type GitHubBranch = z.infer<typeof githubBranchSchema>;
 
@@ -307,10 +293,7 @@ export const githubOrganizationSchema = z
       .optional(),
 
     teams: z.union([z.array(z.string()), z.undefined()]),
-    avatar_url: z
-      .string()
-      .optional()
-      .default("https://github.com/images/error/octocat_happy.gif"),
+    avatar_url: z.string().optional().default("https://github.com/images/error/octocat_happy.gif"),
     gravatar_id: z.string().optional().default(""),
     site_admin: z.boolean().optional().default(true),
     url: z.string().url().optional(),
@@ -367,9 +350,7 @@ export type GitHubOrganization = z.infer<typeof githubOrganizationSchema>;
 export const githubBlobSchema = z
   .object({
     content: z.string().optional().default(faker.lorem.paragraphs),
-    encoding: z
-      .union([z.literal("string"), z.literal("base64")])
-      .default("string"),
+    encoding: z.union([z.literal("string"), z.literal("base64")]).default("string"),
     owner: z.string(),
     repo: z.string(),
     // below we ensure that one of these is specified, but the other is then optional
@@ -411,9 +392,7 @@ export const gitubInitialStoreSchema = z
 export type GitHubStore = z.output<typeof gitubInitialStoreSchema>;
 export type GitHubInitialStore = z.input<typeof gitubInitialStoreSchema>;
 
-export const convertInitialStateToStoreState = (
-  initialState: GitHubStore | undefined
-) => {
+export const convertInitialStateToStoreState = (initialState: GitHubStore | undefined) => {
   if (!initialState) return undefined;
   const storeObject = {
     users: convertObjToProp(initialState.users, "login"),

@@ -15,7 +15,7 @@ export function getSchema(schemaFile: SchemaFile | string) {
     (schemaDefaults as unknown as string[]).includes(schemaFile)
       ? path.join(root, "schema", schemaFile)
       : schemaFile,
-    "utf-8"
+    "utf-8",
   );
 
   return schemaFile.endsWith(".json") ? JSON.parse(fileString) : fileString;

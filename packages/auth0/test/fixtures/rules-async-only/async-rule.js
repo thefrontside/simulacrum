@@ -4,9 +4,6 @@ fake async rule
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function asyncRule(user, context, callback) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let fetch = require("node-fetch");
-
   let fetcher = async (url) => {
     let response = await fetch(url);
     let checkURLStatus = response.status;
@@ -34,8 +31,6 @@ async function asyncRule(user, context, callback) {
   user.checkURLTwoStatus = checkTwo.checkURLStatus;
   user.checkURLTwoText = checkTwo.checkURLText.toLowerCase();
 
-  console.log(
-    `added checkURL, ${user.checkURLOne} and ${user.checkURLTwo}, to user, ${user.name}`
-  );
+  console.log(`added checkURL, ${user.checkURLOne} and ${user.checkURLTwo}, to user, ${user.name}`);
   callback(null, user, context);
 }

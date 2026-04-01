@@ -9,17 +9,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-      - uses: volta-cli/action@v4
+      - uses: jdx/mise-action@v2
       - name: Install Node.js dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Run linters
-        run: npm run lint
+        run: pnpm run lint
+
+      - name: Run linters
+        run: pnpm run fmt:check
 
       # note this is required for type checking
       # in part due to graphql codegen
       - name: Build All
-        run: npm run prepack
+        run: pnpm run prepack
 
       - name: Run tsc
-        run: npm run tsc
+        run: pnpm run tsc

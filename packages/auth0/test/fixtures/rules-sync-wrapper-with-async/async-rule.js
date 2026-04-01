@@ -4,9 +4,6 @@ fake async rule
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function syncWrapper(user, context, callback) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let fetch = require("node-fetch");
-
   // these is a contrived rule, but entirely possible
   //  that someone would run a fetch and attach output
   //  to the user as part of the token
