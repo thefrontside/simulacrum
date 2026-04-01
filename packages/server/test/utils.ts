@@ -46,7 +46,7 @@ export function* waitForOperation(
       try {
         const ok = yield* predicate();
         if (ok) return;
-      } catch (_) {
+      } catch (ignore) {
         // ignore and retry
       }
       yield* sleep(10);
@@ -68,7 +68,7 @@ export function* waitForFetchClosed(url: string, timeout = 2000) {
       try {
         const s = yield* until(fetch(url));
         if (!s.ok) return;
-      } catch (_) {
+      } catch (ignore) {
         return;
       }
       yield* sleep(10);

@@ -125,7 +125,7 @@ export function useChildSimulation(name: string, modulePath: string) {
             } else {
               yield* logger.stdout(str);
             }
-          } catch (_) {
+          } catch (ignore) {
             // just log lines that are not JSON
             yield* logger.stdout(str);
           }

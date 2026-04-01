@@ -38,7 +38,7 @@ function* normalizeSimulatorFactory(url: string) {
         return guardedFactory(factory);
       }
     }
-  } catch (err) {
+  } catch (ignore) {
     // no-op - will throw in fall through below
   }
   throw new Error("no factory or simulator instance found in module");
@@ -74,9 +74,9 @@ main(function* () {
     try {
       const res = yield* until(fetch(`http://127.0.0.1:${simulacrumPort}/data`));
       initData = yield* until(res.json());
-    } catch (err) {
+    } catch (ignore) {
       // ignore fetch failures
-      console.error("failed to fetch simulacrum data:", err);
+      console.error("failed to fetch simulacrum data:", ignore);
     }
   }
 
@@ -98,7 +98,7 @@ main(function* () {
       if (listening && typeof listening.ensureClose === "function") {
         yield* until(listening.ensureClose());
       }
-    } catch (err) {
+    } catch (ignore) {
       // ignore
     }
   }

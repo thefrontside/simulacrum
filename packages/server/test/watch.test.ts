@@ -39,19 +39,15 @@ it("restarts services on watched file change and restarts dependents", async () 
         { watch: true, watchDebounce: 20 },
       );
 
-      try {
-        const services = yield* op();
-        // subscribe to the immediate raw serviceChanges stream and wait for the first update
-        if (!services.serviceChanges) throw new Error("serviceChanges not available");
-        const subscription = yield* services.serviceChanges;
-        subscriptionReady.resolve();
+      const services = yield* op();
+      // subscribe to the immediate raw serviceChanges stream and wait for the first update
+      if (!services.serviceChanges) throw new Error("serviceChanges not available");
+      const subscription = yield* services.serviceChanges;
+      subscriptionReady.resolve();
 
-        // wait for the first raw update (will occur after the test touches the file)
-        const first = yield* subscription.next();
-        updates.push(String((first.value as { service: string }).service));
-      } catch (e) {
-        throw e;
-      }
+      // wait for the first raw update (will occur after the test touches the file)
+      const first = yield* subscription.next();
+      updates.push(String((first.value as { service: string }).service));
 
       yield* suspend();
     });
@@ -61,7 +57,7 @@ it("restarts services on watched file change and restarts dependents", async () 
       try {
         yield* until(fs.readFile(trigger, "utf8"));
         return true;
-      } catch (_) {
+      } catch (ignore) {
         return false;
       }
     }, 2000);
@@ -113,11 +109,7 @@ it("restarts dependents when watched service changes", async () => {
         { watch: true, watchDebounce: 20 },
       );
 
-      try {
-        yield* op();
-      } catch (e) {
-        throw e;
-      }
+      yield* op();
 
       yield* suspend();
     });
@@ -175,11 +167,7 @@ it("restarts transitive dependents when watched service changes", async () => {
         { watch: true, watchDebounce: 20 },
       );
 
-      try {
-        yield* op();
-      } catch (e) {
-        throw e;
-      }
+      yield* op();
 
       yield* suspend();
     });
@@ -269,35 +257,31 @@ it("debounces rapid changes per service", async () => {
         { watch: true, watchDebounce: 150 },
       );
 
-      try {
-        const services = yield* op();
-        if (!services.serviceUpdates || !services.serviceChanges)
-          throw new Error("service streams not available");
-        const debSub = yield* services.serviceUpdates;
-        const rawSub = yield* services.serviceChanges;
+      const services = yield* op();
+      if (!services.serviceUpdates || !services.serviceChanges)
+        throw new Error("service streams not available");
+      const debSub = yield* services.serviceUpdates;
+      const rawSub = yield* services.serviceChanges;
 
-        watcherReady.resolve();
+      watcherReady.resolve();
 
-        // collect debounced updates
-        yield* spawn(function* () {
-          while (true) {
-            const n = yield* debSub.next();
-            if (n.done) break;
-            updates.push((n.value as { service: string }).service);
-          }
-        });
+      // collect debounced updates
+      yield* spawn(function* () {
+        while (true) {
+          const n = yield* debSub.next();
+          if (n.done) break;
+          updates.push((n.value as { service: string }).service);
+        }
+      });
 
-        // count raw updates (should reflect every write)
-        yield* spawn(function* () {
-          while (true) {
-            const n = yield* rawSub.next();
-            if (n.done) break;
-            if ((n.value as { service: string }).service === "a") rawCount++;
-          }
-        });
-      } catch (e) {
-        throw e;
-      }
+      // count raw updates (should reflect every write)
+      yield* spawn(function* () {
+        while (true) {
+          const n = yield* rawSub.next();
+          if (n.done) break;
+          if ((n.value as { service: string }).service === "a") rawCount++;
+        }
+      });
 
       yield* suspend();
     });
