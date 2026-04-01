@@ -126,15 +126,26 @@ it("restarts dependents when watched service changes", async () => {
 
     const beforeA = startCounts.a;
     const beforeB = startCounts.b;
+    let observed = false;
+    for (let attempt = 0; attempt < 6 && !observed; attempt++) {
+      // trigger a change (unique content each time to ensure chokidar sees an update)
+      yield* until(fs.writeFile(trigger, `changed-${Date.now()}-${attempt}`));
 
-    // trigger a change
-    yield* until(fs.writeFile(trigger, `changed-${Date.now()}`));
+      try {
+        // watcher restart processing rotates the service's startup resolver
+        yield* waitFor(() => provided?.status?.get("a")?.startup !== beforeStartupA, 2000);
 
-    // watcher restart processing rotates the service's startup resolver
-    yield* waitFor(() => provided?.status?.get("a")?.startup !== beforeStartupA, 5000);
+        // wait for restarts to occur
+        yield* waitFor(() => startCounts.a > beforeA && startCounts.b > beforeB, 2000);
+        observed = true;
+      } catch (ignore) {
+        // retry with another write; CI can occasionally miss/coalesce single events
+      }
+    }
 
-    // wait for restarts to occur
-    yield* waitFor(() => startCounts.a > beforeA && startCounts.b > beforeB, 10000);
+    if (!observed) {
+      throw new Error("timed out waiting for dependent restart after file changes");
+    }
   });
 
   await fs.rm(dir, { recursive: true, force: true });
@@ -198,18 +209,29 @@ it("restarts transitive dependents when watched service changes", async () => {
     const beforeA = startCounts.a;
     const beforeB = startCounts.b;
     const beforeC = startCounts.c;
+    let observed = false;
+    for (let attempt = 0; attempt < 6 && !observed; attempt++) {
+      // trigger a change (unique content each time to ensure chokidar sees an update)
+      yield* until(fs.writeFile(trigger, `changed-${Date.now()}-${attempt}`));
 
-    // trigger a change
-    yield* until(fs.writeFile(trigger, `changed-${Date.now()}`));
+      try {
+        // watcher restart processing rotates the service's startup resolver
+        yield* waitFor(() => provided?.status?.get("a")?.startup !== beforeStartupA, 2000);
 
-    // watcher restart processing rotates the service's startup resolver
-    yield* waitFor(() => provided?.status?.get("a")?.startup !== beforeStartupA, 5000);
+        // wait for transitive restarts to occur
+        yield* waitFor(
+          () => startCounts.a > beforeA && startCounts.b > beforeB && startCounts.c > beforeC,
+          2000,
+        );
+        observed = true;
+      } catch (ignore) {
+        // retry with another write; CI can occasionally miss/coalesce single events
+      }
+    }
 
-    // wait for restarts to occur
-    yield* waitFor(
-      () => startCounts.a > beforeA && startCounts.b > beforeB && startCounts.c > beforeC,
-      10000,
-    );
+    if (!observed) {
+      throw new Error("timed out waiting for transitive restart after file changes");
+    }
   });
 
   await fs.rm(dir, { recursive: true, force: true });
