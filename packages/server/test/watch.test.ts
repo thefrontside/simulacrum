@@ -86,6 +86,8 @@ it("restarts dependents when watched service changes", async () => {
   await fs.writeFile(trigger, "initial");
 
   const startCounts: Record<string, number> = { a: 0, b: 0 };
+  let provided: { status?: Map<string, { startup: unknown }> } | undefined;
+  const servicesReady = withResolvers<void>();
 
   await run(function* () {
     yield* spawn(function* () {
@@ -109,7 +111,8 @@ it("restarts dependents when watched service changes", async () => {
         { watch: true, watchDebounce: 20 },
       );
 
-      yield* op();
+      provided = yield* op();
+      servicesReady.resolve();
 
       yield* suspend();
     });
@@ -117,11 +120,21 @@ it("restarts dependents when watched service changes", async () => {
     // wait for initial startup
     yield* waitFor(() => startCounts.a > 0 && startCounts.b > 0, 2000);
 
+    // ensure we have access to status state from the running graph
+    yield* servicesReady.operation;
+    const beforeStartupA = provided?.status?.get("a")?.startup;
+
+    const beforeA = startCounts.a;
+    const beforeB = startCounts.b;
+
     // trigger a change
-    yield* until(fs.writeFile(trigger, "changed"));
+    yield* until(fs.writeFile(trigger, `changed-${Date.now()}`));
+
+    // watcher restart processing rotates the service's startup resolver
+    yield* waitFor(() => provided?.status?.get("a")?.startup !== beforeStartupA, 5000);
 
     // wait for restarts to occur
-    yield* waitFor(() => startCounts.a >= 2 && startCounts.b >= 2, 3000);
+    yield* waitFor(() => startCounts.a > beforeA && startCounts.b > beforeB, 10000);
   });
 
   await fs.rm(dir, { recursive: true, force: true });
@@ -137,6 +150,8 @@ it("restarts transitive dependents when watched service changes", async () => {
   await fs.writeFile(trigger, "initial");
 
   const startCounts: Record<string, number> = { a: 0, b: 0, c: 0 };
+  let provided: { status?: Map<string, { startup: unknown }> } | undefined;
+  const servicesReady = withResolvers<void>();
 
   await run(function* () {
     yield* spawn(function* () {
@@ -167,7 +182,8 @@ it("restarts transitive dependents when watched service changes", async () => {
         { watch: true, watchDebounce: 20 },
       );
 
-      yield* op();
+      provided = yield* op();
+      servicesReady.resolve();
 
       yield* suspend();
     });
@@ -175,11 +191,25 @@ it("restarts transitive dependents when watched service changes", async () => {
     // wait for initial startup
     yield* waitFor(() => startCounts.a > 0 && startCounts.b > 0 && startCounts.c > 0, 2000);
 
+    // ensure we have access to status state from the running graph
+    yield* servicesReady.operation;
+    const beforeStartupA = provided?.status?.get("a")?.startup;
+
+    const beforeA = startCounts.a;
+    const beforeB = startCounts.b;
+    const beforeC = startCounts.c;
+
     // trigger a change
-    yield* until(fs.writeFile(trigger, "changed"));
+    yield* until(fs.writeFile(trigger, `changed-${Date.now()}`));
+
+    // watcher restart processing rotates the service's startup resolver
+    yield* waitFor(() => provided?.status?.get("a")?.startup !== beforeStartupA, 5000);
 
     // wait for restarts to occur
-    yield* waitFor(() => startCounts.a >= 2 && startCounts.b >= 2 && startCounts.c >= 2, 3000);
+    yield* waitFor(
+      () => startCounts.a > beforeA && startCounts.b > beforeB && startCounts.c > beforeC,
+      10000,
+    );
   });
 
   await fs.rm(dir, { recursive: true, force: true });
