@@ -45,6 +45,8 @@ jobs:
       # covector
       - run: pnpm install --no-frozen-lockfile
         if: steps.covector.outputs.commandRan == 'version'
+      - run: pnpm run fmt
+        if: steps.covector.outputs.commandRan == 'version'
 
       - name: Create Pull Request With Versions Bumped
         id: cpr
