@@ -72,6 +72,7 @@
     "picomatch": "^4.0.4"
   },
   "devDependencies": {
+    "@simulacrum/foundation-simulator": "workspace:^",
     "@types/picomatch": "^4.0.2"
   }
 }

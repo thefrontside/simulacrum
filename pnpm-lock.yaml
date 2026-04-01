@@ -205,6 +205,9 @@ importers:
         specifier: ^4.0.4
         version: 4.0.4
     devDependencies:
+      '@simulacrum/foundation-simulator':
+        specifier: workspace:^
+        version: link:../foundation
       '@types/picomatch':
         specifier: ^4.0.2
         version: 4.0.2
