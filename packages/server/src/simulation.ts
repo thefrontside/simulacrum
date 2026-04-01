@@ -89,7 +89,12 @@ export function useChildSimulation(name: string, modulePath: string) {
     // attempt to read the simulacrum port from context; if not present, continue without it
     const contextPort = yield* SimulacrumEndpoint.get();
 
-    const parts = ["node", "--import", "tsx", "./bin/run-simulation-child.ts", modulePath];
+    const parts = [
+      "node",
+      "--experimental-transform-types",
+      "./bin/run-simulation-child.ts",
+      modulePath,
+    ];
     if (typeof contextPort === "number") {
       parts.push("--simulacrum-port", String(contextPort));
     }

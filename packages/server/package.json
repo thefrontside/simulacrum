@@ -59,7 +59,7 @@
     "lint": "oxlint",
     "prepack": "pnpm run build",
     "test": "node --test-timeout=60000 --experimental-transform-types --test test/*.test.ts",
-    "test:service-main": "node --experimental-transform-types ./test/service-main.ts",
+    "test:service-main": "node --experimental-transform-types ./test/services/service-main.ts",
     "tsc": "tsc --noEmit"
   },
   "dependencies": {

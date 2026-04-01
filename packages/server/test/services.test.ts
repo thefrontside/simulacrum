@@ -49,11 +49,17 @@ it("throws on cycles in dependency graph", async () => {
     await run(function* () {
       const runGraph = useServiceGraph({
         A: {
-          operation: useService("A", "node --import tsx ./test/services/service-a.ts"),
+          operation: useService(
+            "A",
+            "node --experimental-transform-types ./test/services/service-a.ts",
+          ),
           dependsOn: { startup: ["B"] as const },
         },
         B: {
-          operation: useService("B", "node --import tsx ./test/services/service-b.ts"),
+          operation: useService(
+            "B",
+            "node --experimental-transform-types ./test/services/service-b.ts",
+          ),
           dependsOn: { startup: ["A"] as const },
         },
       });
