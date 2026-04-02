@@ -91,7 +91,8 @@ export function useChildSimulation(name: string, modulePath: string) {
 
     const parts = [
       "node",
-      "--experimental-transform-types",
+      // safest considering current LTS of >v20
+      "--experimental-strip-types",
       "./bin/run-simulation-child.ts",
       modulePath,
     ];

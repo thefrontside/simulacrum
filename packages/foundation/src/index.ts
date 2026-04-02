@@ -42,7 +42,7 @@ import { apiProxy } from "./middleware/proxy.ts";
 import { delayMiddleware } from "./middleware/delay.ts";
 import { generateRoutesHTML } from "./routeTemplate.ts";
 import { createAppServer } from "./server.ts";
-import type { IdProp } from "starfx";
+import { sleep, type AnyState, type IdProp } from "starfx";
 
 // for use in the OpenAPI handler functions
 type SimulationHandlerFunctions = (
@@ -170,6 +170,7 @@ export function createFoundationSimulationServer<
     app.use(express.urlencoded({ extended: false }));
 
     let simulationStore = createSimulationStore(extendStore);
+    const simulationRoutes = [] as ((s: AnyState) => void)[];
     app.use(delayMiddleware(delayResponses));
 
     app.use((req, _res, next) => {
@@ -193,7 +194,6 @@ export function createFoundationSimulationServer<
           .map((stack) => stack.route)
           .filter((route): route is NonNullable<typeof route> => Boolean(route));
 
-        const simulationRoutes = [];
         for (let layer of layers) {
           for (let stack of layer.stack) {
             simulationRoutes.push(
@@ -210,8 +210,6 @@ export function createFoundationSimulationServer<
             );
           }
         }
-
-        simulationStore.store.dispatch(simulationStore.actions.batchUpdater(simulationRoutes));
       }
     }
 
@@ -224,7 +222,6 @@ export function createFoundationSimulationServer<
         .sync();
 
       if (jsonFiles.length > 0) {
-        const simulationRoutes = [];
         for (let jsonFile of jsonFiles) {
           const route = `/${jsonFile.slice(0, jsonFile.length - 5)}`;
           const filename = path.join(serveJsonFiles, jsonFile);
@@ -246,8 +243,6 @@ export function createFoundationSimulationServer<
             }),
           );
         }
-
-        simulationStore.store.dispatch(simulationStore.actions.batchUpdater(simulationRoutes));
       }
     }
 
@@ -324,11 +319,11 @@ export function createFoundationSimulationServer<
           },
         });
 
-        // initalize the backend
+        // initialize the backend
         api.init().then((init) => {
           const router = init.router;
           const operations = router.getOperations();
-          const simulationRoutes = operations.reduce(
+          const oasSimulationRoutes = operations.reduce(
             (routes, operation) => {
               const url = `${router.apiRoot === "/" ? "" : router.apiRoot}${operation.path}`;
               routes[`${operation.method}:${url}`] = {
@@ -343,11 +338,7 @@ export function createFoundationSimulationServer<
             },
             {} as Record<string, SimulationRoute>,
           );
-          simulationStore.store.dispatch(
-            simulationStore.actions.batchUpdater([
-              simulationStore.schema.simulationRoutes.add(simulationRoutes),
-            ]),
-          );
+          simulationRoutes.push(simulationStore.schema.simulationRoutes.add(oasSimulationRoutes));
           return init;
         });
         app.use((req, res, next) => {
@@ -393,7 +384,20 @@ export function createFoundationSimulationServer<
     // if no extendRouter routes or openapi routes handle this, return 404
     app.all("/{*splat}", (_req, res) => res.status(404).json({ error: "not found" }));
 
+    // wait to start passing route records to give the store a moment to register
+    //  which is technically race-y but in practice should be fine
+    //  as we don't have a way to wait currently
+    simulationStore.store
+      .run(function* () {
+        // forces some async work to allow children scopes to start, e.g. the thunks
+        yield* sleep(0);
+      })
+      .then(() => {
+        simulationStore.store.dispatch(simulationStore.actions.batchUpdater(simulationRoutes));
+      });
+
     const genericAppServer = createAppServer(app, protocol);
+
     return {
       listen: async (...listenArgs: Parameters<typeof genericAppServer.listen> | undefined[]) => {
         // over and above the `net` listen behavior, allow setting:
