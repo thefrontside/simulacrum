@@ -24,7 +24,7 @@ type IdentityProvider = {
 };
 
 export interface RuleContext<A, I> {
-  clientID: string;
+  clientId: string;
   accessToken: {
     scope: string | string[];
   } & A;

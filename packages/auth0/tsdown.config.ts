@@ -13,8 +13,10 @@ export default defineConfig({
   minify: false,
   // don't bundle up as have some relative path imports for static assets
   unbundle: true,
-  // if we unbundle, we want to skip this as well
-  skipNodeModulesBundle: true,
+  deps: {
+    // if we unbundle, we want to skip this as well
+    skipNodeModulesBundle: true,
+  },
   // runs with @arethetypeswrong/core which checks types
   attw: true,
   publint: true,

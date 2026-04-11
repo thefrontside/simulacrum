@@ -43,7 +43,7 @@ export const createAuth0Handlers = (
   options: Auth0Configuration,
   debug: boolean,
 ): Record<Routes, RequestHandler> => {
-  let { audience, scope, clientID, rulesDirectory } = options;
+  let { audience, scope, clientId, rulesDirectory } = options;
   let personQuery = createPersonQuery(simulationStore);
 
   let authorizeHandlers: Record<ResponseModes, RequestHandler> = {
@@ -92,15 +92,15 @@ export const createAuth0Handlers = (
     ["/login"]: function (req, res) {
       logger.log({ "/login": { body: req.body, query: req.query } });
       let query = req.query as QueryParams;
-      let responseClientId = query.client_id ?? clientID;
+      let responseClientId = query.client_id ?? clientId;
       let responseAudience = query.audience ?? audience;
-      assert(!!responseClientId, `no clientID assigned`);
+      assert(!!responseClientId, `no clientId assigned`);
 
       let html = loginView({
         domain: new URL(serviceURL(req)).host,
         scope,
         redirectUri: query.redirect_uri,
-        clientID: responseClientId,
+        clientId: responseClientId,
         audience: responseAudience,
         loginFailed: false,
       });
@@ -127,16 +127,16 @@ export const createAuth0Handlers = (
 
       if (!user) {
         let query = req.query as QueryParams;
-        let responseClientId = query.client_id ?? clientID;
+        let responseClientId = query.client_id ?? clientId;
         let responseAudience = query.audience ?? audience;
 
-        assert(!!clientID, `no clientID assigned`);
+        assert(!!clientId, `no clientId assigned`);
 
         let html = loginView({
           domain: new URL(serviceURL(req)).host,
           scope,
           redirectUri: query.redirect_uri,
-          clientID: responseClientId,
+          clientId: responseClientId,
           audience: responseAudience,
           loginFailed: true,
         });
@@ -188,16 +188,16 @@ export const createAuth0Handlers = (
       try {
         let iss = serviceURL(req);
 
-        let responseClientId: string = (req?.body?.client_id as string) ?? clientID;
+        let responseClientId: string = (req?.body?.client_id as string) ?? clientId;
         let responseAudience: string = (req?.body?.audience as string) ?? audience;
 
-        assert(!!responseClientId, "500::no clientID in options or request body");
+        assert(!!responseClientId, "500::no clientId in options or request body");
 
         let tokens = await createTokens({
           simulationStore,
           body: req.body,
           iss,
-          clientID: responseClientId,
+          clientId: responseClientId,
           audience: responseAudience,
           rulesDirectory,
           scope,

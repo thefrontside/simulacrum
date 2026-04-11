@@ -1,56 +1,39 @@
-import { cosmiconfigSync } from "cosmiconfig";
-import type { Auth0Configuration, ConfigSchema } from "../types.ts";
-import { configurationSchema } from "../types.ts";
+import { createRequire } from "node:module";
+import { program, object, field, type Attrs } from "configliere";
+import type { Auth0Configuration, ConfigFieldDef } from "../types.ts";
+import { configFields } from "../types.ts";
 
-const DefaultAuth0Port = 4400;
-
-export const DefaultArgs: ConfigSchema = {
-  clientID: "00000000000000000000000000000000",
-  audience: "https://thefrontside.auth0.com/api/v1/",
-  scope: "openid profile email offline_access",
+const pkg = createRequire(import.meta.url)("../../package.json") as {
+  name: string;
+  version: string;
 };
 
-type Explorer = ReturnType<typeof cosmiconfigSync>;
+export const auth0Program = program({
+  name: pkg.name,
+  version: pkg.version,
+  config: object(
+    Object.fromEntries(
+      Object.entries(configFields).map(([key, f]: [string, ConfigFieldDef]) => [
+        key,
+        {
+          description: f.description,
+          ...(f.aliases && { aliases: f.aliases }),
+          ...field(f.schema, ...(f.default !== undefined ? [field.default(f.default)] : [])),
+        },
+      ]),
+    ) as unknown as Attrs<Auth0Configuration>,
+  ),
+});
 
-function getPort({ domain, port }: Auth0Configuration): number {
-  if (typeof port === "number") {
-    return port;
-  }
+export function getConfig(
+  options?: Partial<Auth0Configuration>,
+  args: string[] = [],
+): Auth0Configuration {
+  const envs = [{ name: "env", value: process.env as Record<string, string> }];
+  const values = [{ name: "options", value: options }];
+  const result = auth0Program.parse({ args, envs, values });
 
-  if (domain) {
-    const parts = domain.split(":");
-    if (parts.length === 2) {
-      return parseInt(parts[1]!);
-    }
-  }
+  if (!result.ok) throw result.error;
 
-  return DefaultAuth0Port;
+  return result.value.config;
 }
-
-// This higher order function would only be used for testing and
-// allows different cosmiconfig instances to be used for testing
-export function getConfigCreator(explorer: Explorer) {
-  return function getConfig(options?: Partial<Auth0Configuration>): Auth0Configuration {
-    let searchResult = explorer.search();
-
-    let config: ConfigSchema = searchResult === null ? DefaultArgs : searchResult.config;
-
-    let strippedOptions = options ?? {};
-
-    let configuration = {
-      ...DefaultArgs,
-      ...config,
-      ...strippedOptions,
-    } as Auth0Configuration;
-
-    configuration.port = getPort(configuration);
-
-    configurationSchema.parse(configuration);
-
-    return configuration;
-  };
-}
-
-const explorer = cosmiconfigSync("auth0Simulator");
-
-export const getConfig = getConfigCreator(explorer);

@@ -13,29 +13,29 @@ export const createPersonQuery =
 
 export const deriveScope = ({
   scopeConfig,
-  clientID,
+  clientId,
   audience,
 }: {
   scopeConfig: ScopeConfig;
-  clientID: string;
+  clientId: string;
   audience: string;
 }) => {
   if (typeof scopeConfig === "string") return scopeConfig;
-  let defaultScope = scopeConfig.find((application) => application.clientID === "default");
+  let defaultScope = scopeConfig.find((application) => application.clientId === "default");
 
-  assert(!!clientID, `500::Did not have a clientID to derive the scope`);
+  assert(!!clientId, `500::Did not have a clientId to derive the scope`);
 
   let application = scopeConfig.find(
     (application) =>
-      application.clientID === clientID &&
+      application.clientId === clientId &&
       (application.audience ? application.audience === audience : true),
   );
 
   if (!application) {
-    let ignoreAudience = scopeConfig.find((application) => application.clientID === clientID);
+    let ignoreAudience = scopeConfig.find((application) => application.clientId === clientId);
     assert(
       ignoreAudience === undefined,
-      `500::Found application matching clientID, ${ignoreAudience?.clientID}, but incorrect audience, configured: ${ignoreAudience?.audience} :: passed: ${audience}`,
+      `500::Found application matching clientId, ${ignoreAudience?.clientId}, but incorrect audience, configured: ${ignoreAudience?.audience} :: passed: ${audience}`,
     );
   }
 
@@ -43,9 +43,9 @@ export const deriveScope = ({
     application = defaultScope;
   }
 
-  assert(!!application, `500::Could not find application with clientID: ${clientID}`);
+  assert(!!application, `500::Could not find application with clientId: ${clientId}`);
 
-  assert(!!application.scope, `500::${application.clientID} is expected to have a scope`);
+  assert(!!application.scope, `500::${application.clientId} is expected to have a scope`);
 
   return application.scope;
 };

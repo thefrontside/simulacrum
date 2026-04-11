@@ -1,33 +1,83 @@
 import { z } from "zod";
 
-export const configurationSchema = z.object({
-  port: z.optional(
-    z.number().gt(2999, "port must be greater than 2999").lt(10000, "must be less than 10000"),
-  ),
-  domain: z.optional(z.string().min(1, "domain is required")),
-  audience: z.optional(z.string().min(1, "audience is required")),
-  clientID: z.optional(z.string().max(32, "must be 32 characters long")),
-  scope: z.union([
-    z.string().min(1, "scope is required"),
-    z.array(
-      z.object({
-        clientID: z.string().max(32, "must be 32 characters long"),
-        audience: z.optional(z.string().min(1, "audience is required")),
-        scope: z.string().min(1, "scope is required"),
-      }),
+export interface ConfigFieldDef {
+  schema: z.ZodType;
+  description: string;
+  default?: string | number;
+  aliases?: string[];
+}
+
+export const configFields = {
+  port: {
+    schema: z.optional(
+      z.number().gt(2999, "port must be greater than 2999").lt(10000, "must be less than 10000"),
     ),
-  ]),
-  clientSecret: z.optional(z.string()),
-  rulesDirectory: z.optional(z.string()),
-  auth0SessionCookieName: z.optional(z.string()),
-  auth0CookieSecret: z.optional(z.string()),
-  connection: z.optional(z.string()),
-  cookieSecret: z.optional(z.string()),
+    description: "port to listen on",
+    default: 4400 as const,
+    aliases: ["-p"],
+  },
+  domain: {
+    schema: z.optional(z.string().min(1, "domain is required")),
+    description: "server domain",
+  },
+  audience: {
+    schema: z.optional(z.string().min(1, "audience is required")),
+    description: "auth0 audience",
+    default: "https://thefrontside.auth0.com/api/v1/" as const,
+  },
+  clientId: {
+    schema: z.optional(z.string().max(32, "must be 32 characters long")),
+    description: "auth0 client ID",
+    default: "00000000000000000000000000000000" as const,
+  },
+  clientSecret: {
+    schema: z.optional(z.string()),
+    description: "client secret",
+  },
+  scope: {
+    schema: z.union([
+      z.string().min(1, "scope is required"),
+      z.array(
+        z.object({
+          clientId: z.string().max(32, "must be 32 characters long"),
+          audience: z.optional(z.string().min(1, "audience is required")),
+          scope: z.string().min(1, "scope is required"),
+        }),
+      ),
+    ]),
+    description: "auth0 scope",
+    default: "openid profile email offline_access" as const,
+  },
+  rulesDirectory: {
+    schema: z.optional(z.string()),
+    description: "directory containing auth0 rules",
+  },
+  connection: {
+    schema: z.optional(z.string()),
+    description: "auth0 connection",
+  },
+  protocol: {
+    schema: z.optional(z.enum(["http", "https"])),
+    description: "server protocol",
+    default: "https",
+  },
+} satisfies Record<string, ConfigFieldDef>;
+
+export const configurationSchema = z.object({
+  port: configFields.port.schema,
+  domain: configFields.domain.schema,
+  audience: configFields.audience.schema,
+  clientId: configFields.clientId.schema,
+  clientSecret: configFields.clientSecret.schema,
+  scope: configFields.scope.schema,
+  rulesDirectory: configFields.rulesDirectory.schema,
+  connection: configFields.connection.schema,
+  protocol: configFields.protocol.schema,
 });
 
 export type ConfigSchema = z.infer<typeof configurationSchema>;
 
-type ReadonlyFields = "audience" | "clientID" | "scope" | "port";
+type ReadonlyFields = "audience" | "clientId" | "scope" | "port";
 
 // grant_type list as defined by auth0
 // https://auth0.com/docs/get-started/applications/application-grant-types#spec-conforming-grants
@@ -40,7 +90,7 @@ export type GrantType =
 
 export type ScopeConfig =
   | string
-  | { audience?: string | undefined; clientID: string; scope: string }[];
+  | { audience?: string | undefined; clientId: string; scope: string }[];
 
 export type Auth0Configuration = Required<Pick<ConfigSchema, ReadonlyFields>> &
   Omit<ConfigSchema, ReadonlyFields>;

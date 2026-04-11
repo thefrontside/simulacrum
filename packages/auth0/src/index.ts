@@ -21,19 +21,21 @@ export type Auth0Simulator = (args?: {
     extendRouter?: (router: Router, simulationStore: ExtendedSimulationStore) => void;
   };
   options?: Partial<Auth0Configuration>;
+  args?: string[];
 }) => FoundationSimulator<ExtendedSimulationStore>;
 
 export const simulation: Auth0Simulator = (args = {}) => {
-  const config = getConfig(args.options);
+  const config = getConfig(args.options, args.args);
   const parsedInitialState = !args?.initialState
     ? undefined
     : auth0InitialStoreSchema.parse(args?.initialState);
   return createFoundationSimulationServer({
-    port: config.port ?? 4400, // default port
-    protocol: "https",
+    ...(config.port !== undefined && { port: config.port }),
+    ...(config.protocol !== undefined && { protocol: config.protocol }),
     extendStore: extendStore(parsedInitialState, args?.extend?.extendStore),
     extendRouter: extendRouter(config, args.extend?.extendRouter, args.debug),
   })();
 };
 
+export { auth0Program } from "./config/get-config.ts";
 export { auth0UserSchema, defaultUser } from "./store/entities.ts";

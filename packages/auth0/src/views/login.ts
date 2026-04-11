@@ -5,7 +5,7 @@ interface LoginViewProps {
   domain: string;
   scope: ScopeConfig;
   redirectUri: string;
-  clientID: string;
+  clientId: string;
   audience: string;
   loginFailed: boolean;
 }
@@ -14,7 +14,7 @@ export const loginView = ({
   domain,
   scope: scopeConfig,
   redirectUri,
-  clientID,
+  clientId,
   audience,
   loginFailed = false,
 }: LoginViewProps): string => {
@@ -27,7 +27,7 @@ export const loginView = ({
           href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
           rel="stylesheet"
         />
-        <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.js"></script>
+        <script src="https://cdn.auth0.com/js/auth0/9.32.0/auth0.js"></script>
       </head>
       <title>login</title>
       <body>
@@ -116,7 +116,7 @@ export const loginView = ({
           document.addEventListener("DOMContentLoaded", function () {
             var webAuth = new window.auth0.default.WebAuth({
               domain: "${domain}",
-              clientID: "${clientID}",
+              clientID: "${clientId}",
               redirectUri: "${redirectUri}",
               audience: "${audience}",
               responseType: "token id_token",
@@ -136,7 +136,7 @@ export const loginView = ({
                   username: username.value,
                   password: password.value,
                   realm: "Username-Password-Authentication",
-                  scope: "${deriveScope({ scopeConfig, clientID, audience })}",
+                  scope: "${deriveScope({ scopeConfig, clientId, audience })}",
                   nonce: params.get("nonce"),
                   state: params.get("state"),
                 },
