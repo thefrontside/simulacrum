@@ -63,16 +63,16 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "@effectionx/context-api": "^0.2.1",
-    "@effectionx/process": "^0.6.2",
-    "@effectionx/stream-helpers": "^0.8.2",
-    "@effectionx/timebox": "^0.4.3",
+    "@effectionx/context-api": "~0.6.0",
+    "@effectionx/process": "~0.8.0",
+    "@effectionx/stream-helpers": "~0.8.2",
+    "@effectionx/timebox": "~0.4.3",
     "chokidar": "^5.0.0",
     "effection": "^4.0.2",
     "picomatch": "^4.0.4"
   },
   "devDependencies": {
     "@simulacrum/foundation-simulator": "workspace:^",
-    "@types/picomatch": "^4.0.2"
+    "@types/picomatch": "^4.0.3"
   }
 }
