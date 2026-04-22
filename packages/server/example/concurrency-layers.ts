@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { resource } from "effection";
 import { useServiceGraph } from "../src/services.ts";
-import { useChildSimulation } from "../src/simulation.ts";
+import { useSimulation } from "../src/simulation.ts";
 import { simulationCLI } from "../src/cli.ts";
 
 const servicesMap = {
@@ -18,11 +18,11 @@ const servicesMap = {
     watch: ["./example/services/basic-sim.ts"],
   },
   fast: {
-    operation: useChildSimulation("fast", "./example/services/basic-sim-1.ts"),
+    operation: useSimulation("fast", "./example/services/basic-sim-1.ts"),
     watch: ["./example/services/basic-sim-1.ts"],
   },
   slow: {
-    operation: useChildSimulation("slow", "./example/services/basic-sim-2.ts"),
+    operation: useSimulation("slow", "./example/services/basic-sim-2.ts"),
     watch: ["./example/services/basic-sim-2.ts"],
   },
 };

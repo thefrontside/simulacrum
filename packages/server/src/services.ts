@@ -1,26 +1,28 @@
 import {
   type Operation,
   type Stream,
+  type Task,
   type WithResolvers,
   resource,
   spawn,
   withResolvers,
   each,
   createContext,
+  run,
 } from "effection";
 
 import { useAttributes } from "./logging.ts";
 import { type ServiceUpdate, useWatcher } from "./watch.ts";
 import { logger } from "./logging.ts";
 import { startDataService } from "./data-service.ts";
+import { getOperationMetadata } from "./operation-metadata.ts";
 
 /**
  * Context key for the Simulacrum gateway listening port.
  *
  * When `useServiceGraph` starts the optional simulacrum gateway (via the
  * `globalData` option) it sets this context value to the listening port so
- * operations in the graph (including `useSimulation` and
- * `useChildSimulation`) can discover and fetch the `/data` payload.
+ * operations in the graph (including `useSimulation`) can discover and fetch the `/data` payload.
  */
 export const SimulacrumEndpoint = createContext<number>("SimulacrumEndpoint");
 
@@ -85,9 +87,9 @@ export function useServiceGraph<
     watch?: boolean;
     watchDebounce?: number;
   },
-): (subset?: Array<keyof S>) => Operation<ServiceGraph<S, T>> {
-  return (subset?: Array<keyof S>) =>
-    resource(function* (provide) {
+): (subset?: Array<keyof S>) => Operation<ServiceGraph<S, T>> & { task: Task<ServiceGraph<S, T>> } {
+  return (subset?: Array<keyof S>) => {
+    const r = resource<ServiceGraph<S, T>>(function* (provide) {
       // detect cycles in the dependency graph
       const nodes = Object.keys(services);
       // label the root of the service graph operation
@@ -201,6 +203,15 @@ export function useServiceGraph<
         });
         const task = status.get(service);
         if (!task) throw new Error(`missing status for service ${service}`);
+
+        const metadata = getOperationMetadata(effectiveServices[service].operation);
+        if (metadata?.watchSafe === false) {
+          yield* logger.stderr(
+            `warning: watched service '${service}' uses ${metadata.operationName ?? "an operation"} which may not reload module cache on restart. Skipping restart for this service.`,
+          );
+          return;
+        }
+
         // log so it is clear in the inspector output when a restart is triggered
         yield* logger.stdout(`restarting service ${service}`);
         // refresh the startup resolver
@@ -269,7 +280,7 @@ export function useServiceGraph<
           // run the service in a scoped child operation so it can be cleanly
           // cancelled when a file change triggers a restart
           const serviceTask = yield* spawn(function* () {
-            // capture any returned listening info (e.g., from useChildSimulation)
+            // capture any returned listening info (e.g., from useSimulation)
             const maybeProvided = yield* def.operation;
             if (maybeProvided && typeof maybeProvided === "object") {
               if ("port" in maybeProvided && typeof maybeProvided.port === "number") {
@@ -317,4 +328,8 @@ export function useServiceGraph<
         yield* logger.debug("shutting down service graph");
       }
     });
+    const graph = r as Operation<ServiceGraph<S, T>> & { task: Task<ServiceGraph<S, T>> };
+    graph.task = run(() => graph);
+    return graph;
+  };
 }

@@ -1,12 +1,12 @@
 # Server package examples
 
-This folder contains runnable examples demonstrating `useServiceGraph` and `useService`.
+This folder contains runnable examples demonstrating `useServiceGraph`, `useService`, and `useSimulation`.
 
-There are two sets of examples:
+The examples are:
 
-- **use-service** (top-level files like `process-graph.ts`, `concurrency-layers.ts`) — these spawn separate processes using `useService`. Use these to exercise the process-based behavior.
-
-- **simulation / child processes** (e.g., `simulation-graph.ts`) — these demonstrate `useChildSimulation()` which runs each service in a child process using a simulation factory. They show how to isolate simulations and start them as independent processes.
+- `process-graph.ts` — a process-based graph using `useService()` to start each service as a separate command.
+- `simulation-graph.ts` — a simulation graph using `useSimulation()` to start each service in a child process with module-path-based simulator factories.
+- `concurrency-layers.ts` — a simulation graph with `useSimulation()`, file watching, and restart propagation via `dependsOn.restart`.
 
 Quick commands:
 

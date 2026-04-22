@@ -1,7 +1,4 @@
 {
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "oxc.useExecPath": true,
-  "oxc.fmt.configPath": ".oxfmtrc.json",
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "editor.formatOnSave": false, // disable default behavior
   "editor.codeActionsOnSave": {

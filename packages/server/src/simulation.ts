@@ -8,61 +8,53 @@ import type {
   FoundationSimulatorListening,
 } from "@simulacrum/foundation-simulator";
 import { SimulacrumEndpoint } from "./services.ts";
+import { fileURLToPath } from "node:url";
+import { withOperationMetadata } from "./operation-metadata.ts";
 
-/**
- * Helper to start a foundation simulation server factory
- *
- * This is implemented as an Effection `resource` so cleanup is handled by the
- * `provide` finalizer when the operation's scope is closed.
- */ /**
- * Start a simulator provided by a factory and return its listening info.
- *
- * The factory may accept initialization data (fetched from the simulacrum
- * gateway when available) and should return a `FoundationSimulator` instance
- * (or a Promise resolving to one). This operation yields the simulator's
- * listening information (`{ port }`) once it starts.
- *
- * @param name - human-friendly name used for logging
- * @param createFactory - factory function that returns a `FoundationSimulator`
- * @returns an `Operation` that provides `FoundationSimulatorListening` when the
- * simulator is listening
- */ export function useSimulation<L extends object = Record<string, unknown>>(
+type UseSimulationOptions = {
+  subprocess?: boolean;
+};
+
+function useSimulationInProcess<L extends object = Record<string, unknown>>(
   name: string,
   createFactory: (initData?: unknown) => FoundationSimulator<L>,
 ): Operation<FoundationSimulatorListening<L>> {
-  return resource(function* (provide) {
-    yield* useAttributes({ name: `useSimulation ${name}` });
-    // attempt to read the simulacrum port from context; if not present, continue without it
-    const simulacrumPort = yield* SimulacrumEndpoint.get();
+  return withOperationMetadata(
+    resource(function* (provide) {
+      yield* useAttributes({ name: `useSimulation ${name}` });
+      // attempt to read the simulacrum port from context; if not present, continue without it
+      const simulacrumPort = yield* SimulacrumEndpoint.get();
 
-    // if present fetch the data chunk and pass it to the factory
-    let initData: unknown | undefined = undefined;
-    if (typeof simulacrumPort === "number" && !Number.isNaN(simulacrumPort)) {
-      try {
-        const res = yield* until(fetch(`http://127.0.0.1:${simulacrumPort}/data`));
-        initData = yield* until(res.json());
-      } catch (err) {
-        // ignore fetch failures
-        yield* logger.stderr("failed to fetch simulacrum data:", err);
+      // if present fetch the data chunk and pass it to the factory
+      let initData: unknown | undefined = undefined;
+      if (typeof simulacrumPort === "number" && !Number.isNaN(simulacrumPort)) {
+        try {
+          const res = yield* until(fetch(`http://127.0.0.1:${simulacrumPort}/data`));
+          initData = yield* until(res.json());
+        } catch (err) {
+          // ignore fetch failures
+          yield* logger.stderr("failed to fetch simulacrum data:", err);
+        }
       }
-    }
 
-    const createSim = createFactory(initData);
-    const listening: FoundationSimulatorListening<L> = yield* until(createSim.listen());
+      const createSim = createFactory(initData);
+      const listening: FoundationSimulatorListening<L> = yield* until(createSim.listen());
 
-    yield* logger.stdout(`${name} simulation: port ${listening.port}`);
-    yield* useAttributes({
-      name: `useSimulation ${name}`,
-      port: String(listening.port),
-    });
+      yield* logger.stdout(`${name} simulation: port ${listening.port}`);
+      yield* useAttributes({
+        name: `useSimulation ${name}`,
+        port: String(listening.port),
+      });
 
-    try {
-      yield* provide(listening);
-    } finally {
-      yield* until(listening.ensureClose());
-      yield* logger.stdout(`${name} simulation: closed port ${listening.port}`);
-    }
-  });
+      try {
+        yield* provide(listening);
+      } finally {
+        yield* until(listening.ensureClose());
+        yield* logger.stdout(`${name} simulation: closed port ${listening.port}`);
+      }
+    }),
+    { watchSafe: false, operationName: "useSimulation" },
+  );
 }
 
 // Spawn a child Node process to run a simulation factory in a fresh module
@@ -80,114 +72,173 @@ import { SimulacrumEndpoint } from "./services.ts";
  * @param modulePath - path to the module exporting a simulation factory or instance
  * @returns an `Operation` that provides `FoundationSimulatorListening` from the child
  */
-export function useChildSimulation(name: string, modulePath: string) {
-  return resource<{ port: number; pid: number }>(function* (provide) {
-    yield* useAttributes({
-      name: `useChildSimulation ${name}`,
-      module: modulePath,
-    });
-    // attempt to read the simulacrum port from context; if not present, continue without it
-    const contextPort = yield* SimulacrumEndpoint.get();
-
-    const parts = [
-      "node",
-      // safest considering current LTS of >v20
-      "--experimental-strip-types",
-      "./bin/run-simulation-child.ts",
-      modulePath,
-    ];
-    if (typeof contextPort === "number") {
-      parts.push("--simulacrum-port", String(contextPort));
-    }
-    const cmd = parts.map((s) => (s.includes(" ") ? `'${s}'` : s)).join(" ");
-
-    const process = yield* daemon(cmd);
-    const pid = process.pid;
-    yield* useAttributes({
-      name: `useChildSimulation ${name}`,
-      cmd,
-      pid: String(pid),
-    });
-
-    // read the first stdout JSON line to get the listening info
-    let port = undefined as number | undefined;
-    let ready = withResolvers<void>("wait until the port is returned to signal ready");
-
-    // forward raw stdout for logging in chunk form (no reassembly)
-    yield* spawn(function* () {
+export function useSimulationChildProcess(name: string, modulePath: string) {
+  return withOperationMetadata(
+    resource<{ port: number; pid: number }>(function* (provide) {
       yield* useAttributes({
-        name: "stdoutForward",
+        name: `useSimulation ${name}`,
+        module: modulePath,
       });
-      for (let line of yield* each(process.stdout)) {
-        const buf = Buffer.from(line);
-        const str = buf.toString();
+      // attempt to read the simulacrum port from context; if not present, continue without it
+      const contextPort = yield* SimulacrumEndpoint.get();
 
-        if (!port) {
-          try {
-            const parsed = JSON.parse(str);
-            if (parsed && parsed.ready && typeof parsed.port === "number") {
-              port = parsed.port;
-              ready.resolve();
-            } else {
+      const runnerPath = fileURLToPath(
+        import.meta.resolve("@simulacrum/server/bin/run-simulation-child.ts"),
+      );
+      const parts = [
+        "node",
+        // safest considering current LTS of >v20
+        "--experimental-strip-types",
+        runnerPath,
+        modulePath,
+      ];
+      if (typeof contextPort === "number") {
+        parts.push("--simulacrum-port", String(contextPort));
+      }
+      const cmd = parts.map((s) => (s.includes(" ") ? `'${s}'` : s)).join(" ");
+
+      const process = yield* daemon(cmd);
+      const pid = process.pid;
+      yield* useAttributes({
+        name: `useSimulation ${name}`,
+        cmd,
+        pid: String(pid),
+      });
+
+      // read the first stdout JSON line to get the listening info
+      let port = undefined as number | undefined;
+      let ready = withResolvers<void>("wait until the port is returned to signal ready");
+
+      // forward raw stdout for logging in chunk form (no reassembly)
+      yield* spawn(function* () {
+        yield* useAttributes({
+          name: "stdoutForward",
+        });
+        for (let line of yield* each(process.stdout)) {
+          const buf = Buffer.from(line);
+          const str = buf.toString();
+
+          if (!port) {
+            try {
+              const parsed = JSON.parse(str);
+              if (parsed && parsed.ready && typeof parsed.port === "number") {
+                port = parsed.port;
+                ready.resolve();
+              } else {
+                yield* logger.stdout(str);
+              }
+            } catch (ignore) {
+              // just log lines that are not JSON
               yield* logger.stdout(str);
             }
-          } catch (ignore) {
-            // just log lines that are not JSON
+          } else {
             yield* logger.stdout(str);
           }
-        } else {
-          yield* logger.stdout(str);
+
+          yield* each.next();
         }
-
-        yield* each.next();
-      }
-    });
-
-    yield* spawn(function* () {
-      yield* useAttributes({
-        name: "stderrForward",
       });
-      for (let line of yield* each(process.stderr)) {
-        const str = Buffer.from(line).toString();
-        yield* logger.stderr(str);
-        yield* each.next();
-      }
-    });
 
-    // spawn a watcher to detect if the child exits before printing the listening info
-    let status: unknown = undefined;
-    yield* spawn(function* () {
-      yield* useAttributes({
-        name: "childEarlyExitWatcher",
+      yield* spawn(function* () {
+        yield* useAttributes({
+          name: "stderrForward",
+        });
+        for (let line of yield* each(process.stderr)) {
+          const str = Buffer.from(line).toString();
+          yield* logger.stderr(str);
+          yield* each.next();
+        }
       });
-      status = yield* process.join();
+
+      // spawn a watcher to detect if the child exits before printing the listening info
+      let status: unknown = undefined;
+      yield* spawn(function* () {
+        yield* useAttributes({
+          name: "childEarlyExitWatcher",
+        });
+        status = yield* process.join();
+        if (!port) {
+          ready.reject(
+            new Error(
+              `child process exited before emitting listening info: ${JSON.stringify(status)}`,
+            ),
+          );
+        }
+      });
+
+      // wait to get the listening info from stdout (or reject if the process exited)
+      yield* ready.operation;
+
       if (!port) {
-        ready.reject(
-          new Error(
-            `child process exited before emitting listening info: ${JSON.stringify(status)}`,
-          ),
+        throw new Error(
+          `failed to get listening port from child process: ${JSON.stringify({
+            status,
+            pid,
+          })}`,
         );
       }
-    });
 
-    // wait to get the listening info from stdout (or reject if the process exited)
-    yield* ready.operation;
+      yield* logger.stdout(`${name} simulation: port ${port} pid ${pid}`);
 
-    if (!port) {
+      try {
+        yield* provide({ port, pid });
+      } finally {
+        yield* logger.debug(`${name} simulation: closed on port ${port}`);
+      }
+    }),
+    { watchSafe: true, operationName: "useSimulation" },
+  );
+}
+
+/**
+ * Run a simulator either in-process or in a child Node subprocess.
+ *
+ * When the second argument is a factory, `useSimulation` runs the simulator
+ * in-process and resolves to the simulator's listening information.
+ *
+ * When the second argument is a module path string, `useSimulation` starts the
+ * simulator in a fresh child process and resolves to the child's listening
+ * information plus PID.
+ *
+ * If `globalData` is configured on the runner, this operation fetches the
+ * data from the Simulacrum gateway and passes it as `initData` to the factory
+ * or child module.
+ *
+ * @param name - human-friendly name used for logging
+ * @param createFactory - factory function that returns a `FoundationSimulator`
+ * @param modulePath - path to a module exporting a simulator factory
+ * @param options - optional subprocess hint for overload resolution
+ */
+export function useSimulation<L extends object = Record<string, unknown>>(
+  name: string,
+  createFactory: (initData?: unknown) => FoundationSimulator<L>,
+  options?: { subprocess?: false },
+): Operation<FoundationSimulatorListening<L>>;
+export function useSimulation(
+  name: string,
+  modulePath: string,
+  options?: { subprocess?: true },
+): Operation<{ port: number; pid: number }>;
+export function useSimulation<L extends object = Record<string, unknown>>(
+  name: string,
+  factoryOrModulePath: ((initData?: unknown) => FoundationSimulator<L>) | string,
+  options: UseSimulationOptions = {},
+) {
+  if (typeof factoryOrModulePath === "string") {
+    if (options.subprocess === false) {
       throw new Error(
-        `failed to get listening port from child process: ${JSON.stringify({
-          status,
-          pid,
-        })}`,
+        "cannot use subprocess:false when the second argument is a module path string",
       );
     }
 
-    yield* logger.stdout(`${name} simulation: port ${port} pid ${pid}`);
+    return useSimulationChildProcess(name, factoryOrModulePath);
+  }
 
-    try {
-      yield* provide({ port, pid });
-    } finally {
-      yield* logger.debug(`${name} simulation: closed on port ${port}`);
-    }
-  });
+  if (options.subprocess === true) {
+    throw new Error(
+      "subprocess:true is only supported when using a module path string as the second argument",
+    );
+  }
+
+  return useSimulationInProcess(name, factoryOrModulePath);
 }

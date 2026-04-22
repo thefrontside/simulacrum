@@ -241,7 +241,7 @@ it("restarts transitive dependents when watched service changes", async () => {
   assert(startCounts.c >= 2, "c should have been restarted as dependent of b");
 });
 
-it("updates servicePorts when a service restarts", async () => {
+it("updates status ports when a child simulation restarts", async () => {
   const prefix = path.join(os.tmpdir(), "sim-port-rt-");
   const dir = await fs.mkdtemp(prefix);
   const trigger = path.join(dir, "trigger.txt");
@@ -252,7 +252,7 @@ it("updates servicePorts when a service restarts", async () => {
       {
         s: {
           watch: [dir],
-          operation: useSimulation("s", createFoundationSimulationServer({ port: 0 })),
+          operation: useSimulation("s", "./test/fixtures/init-data-sim.ts"),
         },
       },
       {

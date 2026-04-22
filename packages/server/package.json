@@ -21,6 +21,7 @@
   },
   "files": [
     "README.md",
+    "bin",
     "dist",
     "src"
   ],
@@ -42,6 +43,7 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
+    "./bin/run-simulation-child.ts": "./bin/run-simulation-child.ts",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -50,6 +52,7 @@
         "import": "./dist/index.mjs",
         "require": "./dist/index.cjs"
       },
+      "./bin/run-simulation-child.ts": "./bin/run-simulation-child.ts",
       "./package.json": "./package.json"
     }
   },

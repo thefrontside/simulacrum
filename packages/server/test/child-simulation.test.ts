@@ -2,13 +2,13 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 import { run, until } from "effection";
 import { useServiceGraph } from "../src/services.ts";
-import { useChildSimulation } from "../src/simulation.ts";
+import { useSimulation } from "../src/simulation.ts";
 import { waitFor } from "./utils.ts";
 
-describe("useChildSimulation", () => {
+describe("useSimulation (child process)", () => {
   it("starts a child and returns port", async () => {
     await run(function* () {
-      const listening = yield* useChildSimulation("child-test", "./test/fixtures/simple-sim.ts");
+      const listening = yield* useSimulation("child-test", "./test/fixtures/simple-sim.ts");
       assert(typeof listening.port === "number");
 
       // Verify we received a port and the child reported ready.
@@ -16,16 +16,24 @@ describe("useChildSimulation", () => {
     });
   });
 
+  it("supports module path child simulations via useSimulation", async () => {
+    await run(function* () {
+      const listening = yield* useSimulation("child-test", "./test/fixtures/simple-sim.ts");
+      assert(typeof listening.port === "number");
+      assert(typeof listening.pid === "number");
+    });
+  });
+
   it("handles non-JSON stdout before ready JSON from child", async () => {
     await run(function* () {
-      const listening = yield* useChildSimulation("non-json", "./test/fixtures/non-json-child.ts");
+      const listening = yield* useSimulation("non-json", "./test/fixtures/non-json-child.ts");
       assert(typeof listening.port === "number");
     });
   });
 
   it("ignores JSON logs without ready/port until real ready JSON is emitted", async () => {
     await run(function* () {
-      const listening = yield* useChildSimulation(
+      const listening = yield* useSimulation(
         "json-before-ready",
         "./test/fixtures/json-before-ready.ts",
       );
@@ -41,7 +49,7 @@ describe("useChildSimulation", () => {
         const op = useServiceGraph(
           {
             child: {
-              operation: useChildSimulation("child", "./test/fixtures/init-data-sim.ts"),
+              operation: useSimulation("child", "./test/fixtures/init-data-sim.ts"),
             },
           },
           { globalData: data },
@@ -64,7 +72,7 @@ describe("useChildSimulation", () => {
         const op = useServiceGraph(
           {
             child: {
-              operation: useChildSimulation("child", "./test/fixtures/init-data-sim.ts"),
+              operation: useSimulation("child", "./test/fixtures/init-data-sim.ts"),
             },
           },
           { globalData: data },
@@ -102,7 +110,7 @@ describe("useChildSimulation", () => {
         const op = useServiceGraph(
           {
             child: {
-              operation: useChildSimulation("child", "./test/fixtures/init-data-sim.ts"),
+              operation: useSimulation("child", "./test/fixtures/init-data-sim.ts"),
             },
           },
           { globalData: data },
@@ -124,7 +132,7 @@ describe("useChildSimulation", () => {
       const op = useServiceGraph(
         {
           child: {
-            operation: useChildSimulation("child", "./test/fixtures/init-data-sim.ts"),
+            operation: useSimulation("child", "./test/fixtures/init-data-sim.ts"),
           },
         },
         { globalData: { hello: "world" } },
@@ -147,7 +155,7 @@ describe("useChildSimulation", () => {
   it("rejects when child exits before emitting listening info", async () => {
     await assert.rejects(async () => {
       await run(function* () {
-        yield* useChildSimulation("broken", "./test/fixtures/broken-child.ts");
+        yield* useSimulation("broken", "./test/fixtures/broken-child.ts");
       });
     }, /child process exited before emitting listening info/);
   });
