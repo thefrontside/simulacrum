@@ -97,27 +97,12 @@ export function useSimulationChildProcess(name: string, modulePath: string) {
       }
       const cmd = parts.map((s) => (s.includes(" ") ? `'${s}'` : s)).join(" ");
 
-      const process = yield* daemon(cmd);
-      const pid = process.pid;
-      yield* useAttributes({
-        name: `useSimulation ${name}`,
-        cmd,
-        pid: String(pid),
-      });
-
       // read the first stdout JSON line to get the listening info
       let port = undefined as number | undefined;
-      let ready = withResolvers<void>("wait until the port is returned to signal ready");
-
-      // forward raw stdout for logging in chunk form (no reassembly)
-      yield* spawn(function* () {
-        yield* useAttributes({
-          name: "stdoutForward",
-        });
-        for (let line of yield* each(process.stdout)) {
-          const buf = Buffer.from(line);
-          const str = buf.toString();
-
+      yield* Stdio.around({
+        *stdout(line, _next) {
+          const [bytes] = line;
+          const str = bytes.toString();
           if (!port) {
             try {
               const parsed = JSON.parse(str);
@@ -134,21 +119,23 @@ export function useSimulationChildProcess(name: string, modulePath: string) {
           } else {
             yield* logger.stdout(str);
           }
-
-          yield* each.next();
-        }
-      });
-
-      yield* spawn(function* () {
-        yield* useAttributes({
-          name: "stderrForward",
-        });
-        for (let line of yield* each(process.stderr)) {
-          const str = Buffer.from(line).toString();
+        },
+        *stderr(line, _next) {
+          const [bytes] = line;
+          const str = bytes.toString();
           yield* logger.stderr(str);
-          yield* each.next();
-        }
+        },
       });
+
+      const process = yield* daemon(cmd);
+      const pid = process.pid;
+      yield* useAttributes({
+        name: `useSimulation ${name}`,
+        cmd,
+        pid: String(pid),
+      });
+
+      let ready = withResolvers<void>("wait until the port is returned to signal ready");
 
       // spawn a watcher to detect if the child exits before printing the listening info
       let status: unknown = undefined;
@@ -178,7 +165,7 @@ export function useSimulationChildProcess(name: string, modulePath: string) {
         );
       }
 
-      yield* logger.stdout(`${name} simulation: port ${port} pid ${pid}`);
+      yield* logger.debug(`${name} simulation: port ${port} pid ${pid}`);
 
       try {
         yield* provide({ port, pid });

@@ -6,53 +6,45 @@ import { simulationCLI } from "../src/cli.ts";
 
 const servicesMap = {
   A: {
-    operation: useService(
-      "A",
-      "node --experimental-transform-types ./example/services/basic-start-1.ts",
-      {
-        wellnessCheck: {
-          frequency: 10,
-          timeout: 15000,
-          *operation(stdio: Stream<string, void>) {
-            for (let line of yield* each<string>(stdio)) {
-              if (line.includes("started")) {
-                console.log("A ready (wellnessCheck)");
+    operation: useService("A", "node ./example/services/basic-start-1.ts", {
+      wellnessCheck: {
+        frequency: 10,
+        timeout: 15000,
+        *operation(stdio: Stream<string, void>) {
+          for (let line of yield* each<string>(stdio)) {
+            if (line.includes("started")) {
+              console.log("A ready (wellnessCheck)");
 
-                return { ok: true, value: undefined };
-              }
-              yield* each.next();
+              return { ok: true, value: undefined };
             }
-            // default: return success so the result type is well-formed
-            return { ok: true, value: undefined };
-          },
+            yield* each.next();
+          }
+          // default: return success so the result type is well-formed
+          return { ok: true, value: undefined };
         },
       },
-    ),
+    }),
   },
   B: {
     dependsOn: { startup: ["A"] as const },
-    operation: useService(
-      "B",
-      "node --experimental-transform-types ./example/services/basic-start-2.ts",
-      {
-        wellnessCheck: {
-          frequency: 10,
-          timeout: 15000,
-          *operation(stdio: Stream<string, void>) {
-            for (let line of yield* each<string>(stdio)) {
-              if (line.includes("started")) {
-                console.log("B ready (wellnessCheck)");
+    operation: useService("B", "node ./example/services/basic-start-2.ts", {
+      wellnessCheck: {
+        frequency: 10,
+        timeout: 15000,
+        *operation(stdio: Stream<string, void>) {
+          for (let line of yield* each<string>(stdio)) {
+            if (line.includes("started")) {
+              console.log("B ready (wellnessCheck)");
 
-                return { ok: true, value: undefined };
-              }
-              yield* each.next();
+              return { ok: true, value: undefined };
             }
-            // default: return success so the result type is well-formed
-            return { ok: true, value: undefined };
-          },
+            yield* each.next();
+          }
+          // default: return success so the result type is well-formed
+          return { ok: true, value: undefined };
         },
       },
-    ),
+    }),
   },
 };
 

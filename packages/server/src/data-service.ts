@@ -79,7 +79,7 @@ export function startDataService(data: DataServiceOptions = {}): Operation<{ por
     const port =
       typeof address === "object" && address !== null && "port" in address ? address.port : 0;
 
-    yield* logger.stdout(`data service started on port ${port}`);
+    yield* logger.debug(`data service started on port ${port}`);
     yield* useAttributes({ name: "dataService", port });
 
     try {

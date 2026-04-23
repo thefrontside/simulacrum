@@ -60,7 +60,7 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
     };
     if (values["watch-debounce"]) runOptions.watchDebounce = Number(values["watch-debounce"]);
 
-    Debugging.set(!!values.debug);
+    yield* Debugging.set(values.debug);
 
     // Start the graph and fetch the provided info
     // subset is a string array from CLI; cast to service key array for strict runner
@@ -84,11 +84,5 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
 export async function simulationCLI<S extends Record<string, ServiceDefinition<string, T>>, T>(
   serviceGraph: (subset?: Array<keyof S>) => Operation<ServiceGraph<S, T>>,
 ) {
-  return main(function* () {
-    try {
-      yield* simulationCLIOp(serviceGraph);
-    } finally {
-      yield* logger.debug("simulationCLI main finally");
-    }
-  });
+  return main(() => simulationCLIOp(serviceGraph));
 }

@@ -1,19 +1,8 @@
-import {
-  type Operation,
-  type Result,
-  type Stream,
-  each,
-  lift,
-  resource,
-  scoped,
-  sleep,
-  spawn,
-} from "effection";
+import { type Operation, type Result, type Stream, lift, resource, scoped, sleep } from "effection";
 import { useAttributes } from "./logging.ts";
 import { timebox } from "@effectionx/timebox";
-import { daemon } from "@effectionx/process";
+import { daemon, Stdio } from "@effectionx/process";
 import type { ExecOptions as ProcessOptions } from "@effectionx/process";
-import { logger } from "./logging.ts";
 import { createReplaySignal } from "./createReplaySignal.ts";
 import { withOperationMetadata } from "./operation-metadata.ts";
 
@@ -47,33 +36,26 @@ export function useService(
         // see https://github.com/npm/cli/issues/6684
         throw new Error("scripts run with npm don't respect signals to properly shutdown");
       }
-      const process = yield* daemon(cmd, options.processOptions);
+
       const stdio = createReplaySignal<string, void>();
       const stdioAdd = lift(stdio.send);
 
-      // forward raw stdout for logging in chunk form (no reassembly)
-      yield* spawn(function* () {
-        yield* useAttributes({ name: "stdoutForward" });
-        for (let line of yield* each(process.stdout)) {
-          const buf = Buffer.from(line);
-          const str = buf.toString();
-          yield* logger.stdout(str);
+      yield* Stdio.around({
+        *stdout(line, next) {
+          const [bytes] = line;
+          const str = bytes.toString();
           yield* stdioAdd(str);
-          yield* each.next();
-        }
+          return yield* next(bytes);
+        },
+        *stderr(line, next) {
+          const [bytes] = line;
+          const str = Buffer.from(bytes).toString();
+          yield* stdioAdd(str);
+          return yield* next(bytes);
+        },
       });
 
-      yield* spawn(function* () {
-        yield* useAttributes({ name: "stderrForward" });
-        for (let line of yield* each(process.stderr)) {
-          const str = Buffer.from(line).toString();
-          yield* logger.stderr(str);
-          yield* stdioAdd(str);
-          yield* each.next();
-        }
-      });
-
-      yield* sleep(0); // allow stdio forwarding to start
+      yield* daemon(cmd, options.processOptions);
 
       // if supplied, wellness check to ensure it is running or timeout with result
       if (options.wellnessCheck) {
