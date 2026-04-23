@@ -229,10 +229,10 @@ const runner = useServiceGraph(
 
 main(function* (): Operation<void> {
   const services = yield* runner();
-  const simulacrumPort = services.status?.get("simulacrum")?.port;
+  const simulacrumPort = services.status.get("simulacrum")?.port;
   const res = yield* until(fetch(`http://127.0.0.1:${simulacrumPort}/data`));
   const data = yield* until(res.json());
-  console.log(data)
+  console.log(data);
 });
 ```
 
@@ -252,8 +252,8 @@ The runner operation returns an object with the following shape:
 
 - `services` — the original service definitions passed to `useServiceGraph`
 - `status` — a `Map<string, ServiceStatus>` with runtime metadata for each service, including optional `port` and `pid` when the operation returns that information
-- `serviceUpdates` — a `Stream` of watcher updates, if watching is enabled
-- `serviceChanges` — a `Stream` of watcher restart events, if watching is enabled
+- `serviceUpdates` — a `Stream` of watcher updates when watching is enabled, otherwise `undefined`
+- `serviceChanges` — a `Stream` of watcher restart events when watching is enabled, otherwise `undefined`
 
 If a service operation returns an object like `{ port: number }` or `{ port: number; pid: number }`, that information is recorded on `status` so tests can discover listening endpoints.
 

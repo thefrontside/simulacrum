@@ -47,9 +47,9 @@ export type ServiceGraph<
   services: {
     [service in keyof S]: ServiceDefinition<keyof S, T>;
   };
-  serviceUpdates?: Stream<ServiceUpdate, unknown> | undefined;
-  serviceChanges?: Stream<ServiceUpdate, unknown> | undefined;
-  status?: Map<string, ServiceStatus>;
+  serviceUpdates: Stream<ServiceUpdate, unknown> | undefined;
+  serviceChanges: Stream<ServiceUpdate, unknown> | undefined;
+  status: Map<string, ServiceStatus>;
 };
 
 export type ServiceInfo = {
