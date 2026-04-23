@@ -83,9 +83,7 @@ export function useSimulationChildProcess(name: string, modulePath: string) {
       // attempt to read the simulacrum port from context; if not present, continue without it
       const contextPort = yield* SimulacrumEndpoint.get();
 
-      const runnerPath = fileURLToPath(
-        new URL("../bin/run-simulation-child.ts", import.meta.url),
-      );
+      const runnerPath = fileURLToPath(new URL("../bin/run-simulation-child.ts", import.meta.url));
       // TODO config to overwrite the hard coded option here
       const parts = (
         Number(versions.node.split(".")[0]) >= 24
