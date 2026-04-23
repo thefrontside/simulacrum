@@ -1,7 +1,7 @@
 import { resource, until, spawn, each, withResolvers } from "effection";
 import { useAttributes } from "./logging.ts";
 import type { Operation } from "effection";
-import { daemon } from "@effectionx/process";
+import { daemon, Stdio } from "@effectionx/process";
 import { logger } from "./logging.ts";
 import type {
   FoundationSimulator,
@@ -9,6 +9,7 @@ import type {
 } from "@simulacrum/foundation-simulator";
 import { SimulacrumEndpoint } from "./services.ts";
 import { fileURLToPath } from "node:url";
+import { versions } from "node:process";
 import { withOperationMetadata } from "./operation-metadata.ts";
 
 type UseSimulationOptions = {
@@ -85,13 +86,16 @@ export function useSimulationChildProcess(name: string, modulePath: string) {
       const runnerPath = fileURLToPath(
         import.meta.resolve("@simulacrum/server/bin/run-simulation-child.ts"),
       );
-      const parts = [
-        "node",
-        // safest considering current LTS of >v20
-        "--experimental-strip-types",
-        runnerPath,
-        modulePath,
-      ];
+      // TODO config to overwrite the hard coded option here
+      const parts = (
+        Number(versions.node.split(".")[0]) >= 24
+          ? ["node"]
+          : [
+              "node",
+              // safest considering current LTS of >v20
+              "--experimental-strip-types",
+            ]
+      ).concat([runnerPath, modulePath]);
       if (typeof contextPort === "number") {
         parts.push("--simulacrum-port", String(contextPort));
       }
