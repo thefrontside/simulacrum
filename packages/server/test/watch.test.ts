@@ -7,7 +7,6 @@ import os from "node:os";
 import { useServiceGraph } from "../src/services.ts";
 import { simulation } from "./fixtures/simple-sim.ts";
 import { useSimulation } from "../src/simulation.ts";
-import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
 import { waitFor, waitForOperation } from "./utils.ts";
 
 it("restarts services on watched file change and restarts dependents", async () => {

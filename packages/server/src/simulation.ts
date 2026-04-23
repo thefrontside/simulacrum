@@ -1,4 +1,4 @@
-import { resource, until, spawn, each, withResolvers } from "effection";
+import { resource, until, spawn, withResolvers } from "effection";
 import { useAttributes } from "./logging.ts";
 import type { Operation } from "effection";
 import { daemon, Stdio } from "@effectionx/process";
