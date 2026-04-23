@@ -84,7 +84,7 @@ export function useSimulationChildProcess(name: string, modulePath: string) {
       const contextPort = yield* SimulacrumEndpoint.get();
 
       const runnerPath = fileURLToPath(
-        import.meta.resolve("@simulacrum/server/bin/run-simulation-child.ts"),
+        new URL("../bin/run-simulation-child.ts", import.meta.url),
       );
       // TODO config to overwrite the hard coded option here
       const parts = (
