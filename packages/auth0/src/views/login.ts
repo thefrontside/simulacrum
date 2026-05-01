@@ -5,7 +5,7 @@ interface LoginViewProps {
   domain: string;
   scope: ScopeConfig;
   redirectUri: string;
-  clientId: string;
+  clientID: string;
   audience: string;
   loginFailed: boolean;
 }
@@ -14,7 +14,7 @@ export const loginView = ({
   domain,
   scope: scopeConfig,
   redirectUri,
-  clientId,
+  clientID,
   audience,
   loginFailed = false,
 }: LoginViewProps): string => {
@@ -116,7 +116,7 @@ export const loginView = ({
           document.addEventListener("DOMContentLoaded", function () {
             var webAuth = new window.auth0.default.WebAuth({
               domain: "${domain}",
-              clientID: "${clientId}",
+              clientID: "${clientID}",
               redirectUri: "${redirectUri}",
               audience: "${audience}",
               responseType: "token id_token",
@@ -136,7 +136,7 @@ export const loginView = ({
                   username: username.value,
                   password: password.value,
                   realm: "Username-Password-Authentication",
-                  scope: "${deriveScope({ scopeConfig, clientId, audience })}",
+                  scope: "${deriveScope({ scopeConfig, clientID, audience })}",
                   nonce: params.get("nonce"),
                   state: params.get("state"),
                 },

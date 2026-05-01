@@ -72,7 +72,7 @@
     "@simulacrum/server": "workspace:^",
     "assert-ts": "^0.3.4",
     "base64-url": "^2.3.3",
-    "configliere": "^0.3.0",
+    "configliere": "^0.4.0",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",

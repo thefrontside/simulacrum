@@ -21,7 +21,7 @@ import { type Auth0User } from "../store/entities.ts";
 export const createTokens = async ({
   body,
   iss,
-  clientId,
+  clientID,
   audience,
   rulesDirectory,
   scope: scopeConfig,
@@ -29,14 +29,14 @@ export const createTokens = async ({
 }: {
   body: Request["body"];
   iss: string;
-  clientId: string;
+  clientID: string;
   audience: string;
   rulesDirectory: string | undefined;
   scope: ScopeConfig;
   simulationStore: ExtendedSimulationStore;
 }) => {
   let { grant_type }: { grant_type: GrantType } = body;
-  let scope = deriveScope({ scopeConfig, clientId, audience });
+  let scope = deriveScope({ scopeConfig, clientID, audience });
 
   let accessToken = getBaseAccessToken({ iss, grant_type, scope, audience });
   let user: Auth0User | undefined;
@@ -73,12 +73,12 @@ export const createTokens = async ({
     body,
     iss,
     user,
-    clientId,
+    clientID,
     nonce,
   });
 
   let context: RuleContext<Partial<AccessTokenPayload>, IdTokenData> = {
-    clientId,
+    clientID,
     accessToken: { scope, sub: idTokenData.sub },
     idToken: idTokenData,
   };
@@ -113,13 +113,13 @@ export const getIdToken = ({
   body,
   iss,
   user,
-  clientId,
+  clientID,
   nonce,
 }: {
   body: Request["body"];
   iss: string;
   user: Auth0User;
-  clientId: string;
+  clientID: string;
   nonce: string | undefined;
 }) => {
   let userData: RuleUser = {
@@ -141,7 +141,7 @@ export const getIdToken = ({
     exp: expiresAt(),
     iat: epochTime(),
     email: user.email,
-    aud: clientId,
+    aud: clientID,
     sub: user.id,
   };
 

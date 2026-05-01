@@ -25,7 +25,7 @@ export const configFields = {
     description: "auth0 audience",
     default: "https://thefrontside.auth0.com/api/v1/" as const,
   },
-  clientId: {
+  clientID: {
     schema: z.optional(z.string().max(32, "must be 32 characters long")),
     description: "auth0 client ID",
     default: "00000000000000000000000000000000" as const,
@@ -39,7 +39,7 @@ export const configFields = {
       z.string().min(1, "scope is required"),
       z.array(
         z.object({
-          clientId: z.string().max(32, "must be 32 characters long"),
+          clientID: z.string().max(32, "must be 32 characters long"),
           audience: z.optional(z.string().min(1, "audience is required")),
           scope: z.string().min(1, "scope is required"),
         }),
@@ -67,7 +67,7 @@ export const configurationSchema = z.object({
   port: configFields.port.schema,
   domain: configFields.domain.schema,
   audience: configFields.audience.schema,
-  clientId: configFields.clientId.schema,
+  clientID: configFields.clientID.schema,
   clientSecret: configFields.clientSecret.schema,
   scope: configFields.scope.schema,
   rulesDirectory: configFields.rulesDirectory.schema,
@@ -77,7 +77,7 @@ export const configurationSchema = z.object({
 
 export type ConfigSchema = z.infer<typeof configurationSchema>;
 
-type ReadonlyFields = "audience" | "clientId" | "scope" | "port";
+type ReadonlyFields = "audience" | "clientID" | "scope" | "port";
 
 // grant_type list as defined by auth0
 // https://auth0.com/docs/get-started/applications/application-grant-types#spec-conforming-grants
@@ -90,7 +90,7 @@ export type GrantType =
 
 export type ScopeConfig =
   | string
-  | { audience?: string | undefined; clientId: string; scope: string }[];
+  | { audience?: string | undefined; clientID: string; scope: string }[];
 
 export type Auth0Configuration = Required<Pick<ConfigSchema, ReadonlyFields>> &
   Omit<ConfigSchema, ReadonlyFields>;

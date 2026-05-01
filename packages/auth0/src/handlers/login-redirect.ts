@@ -22,7 +22,7 @@ export const createLoginRedirectHandler = (options: Auth0Configuration): Request
       `/login?${stringify({
         state,
         redirect_uri,
-        client: client_id || options.clientId,
+        client: client_id || options.clientID,
         protocol: "oauth2",
         scope,
         response_type,

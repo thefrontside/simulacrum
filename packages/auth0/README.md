@@ -12,6 +12,10 @@ Simulation](https://frontside.com/blog/2022-01-13-auth0-simulator/).
     - [Code](#code)
     - [Example](#example)
   - [Configuration](#configuration)
+    - [CLI Flags](#cli-flags)
+    - [JSON Config Files](#json-config-files)
+    - [Environment Variables](#environment-variables)
+    - [Programmatic Options](#programmatic-options)
     - [Options](#options)
     - [Rules](#rules)
   - [Endpoints](#endpoints)
@@ -50,7 +54,7 @@ simulation instead of the Auth0 endpoint.
 ```json
 {
   "domain": "https://localhost:4400",
-  "clientId": "00000000000000000000000000000000",
+  "clientID": "00000000000000000000000000000000",
   "audience": "https://thefrontside.auth0.com/api/v1/"
 }
 ```
@@ -80,7 +84,7 @@ defaults as noted above, and run the Auth0 simulation server with `npx auth0-sim
 ## Configuration
 
 The Auth0 Simulator uses [configliere](https://github.com/thefrontside/configliere) to parse
-configuration from CLI flags, environment variables, and programmatic options.
+configuration from CLI flags, environment variables, JSON config files, and programmatic options.
 
 ### CLI Flags
 
@@ -90,11 +94,27 @@ When running from the command line, you can pass configuration as flags:
 npx @simulacrum/auth0-simulator --port 5000 --audience https://myapp.com/api
 ```
 
+The CLI also accepts an explicit `start` command, though it remains the default:
+
+```bash
+npx @simulacrum/auth0-simulator start --port 5000
+```
+
 Run with `--help` to see all available flags:
 
 ```bash
 npx @simulacrum/auth0-simulator --help
 ```
+
+### JSON Config Files
+
+You can stage configuration through a JSON file with `-c` and then override values with CLI flags:
+
+```bash
+npx @simulacrum/auth0-simulator -c auth0-simulator.json --port 5000
+```
+
+Values from CLI flags still take precedence over environment variables and config file values.
 
 ### Environment Variables
 
@@ -131,16 +151,16 @@ match the fields in the client application that is calling the auth0 server.
 | `port`           | `--port`, `-p`      | `PORT`            | Port to listen on                |
 | `domain`         | `--domain`          | `DOMAIN`          | Server domain                    |
 | `audience`       | `--audience`        | `AUDIENCE`        | Auth0 audience                   |
-| `clientId`       | `--client-id`       | `CLIENT_ID`       | Auth0 client ID                  |
+| `clientID`       | `--client-id`       | `CLIENT_ID`       | Auth0 client ID                  |
 | `scope`          | `--scope`           | `SCOPE`           | Auth0 scope                      |
 | `clientSecret`   | `--client-secret`   | `CLIENT_SECRET`   | Client secret                    |
 | `rulesDirectory` | `--rules-directory` | `RULES_DIRECTORY` | Directory containing auth0 rules |
 | `connection`     | `--connection`      | `CONNECTION`      | Auth0 connection                 |
 | `protocol`       | `--protocol`        | `PROTOCOL`        | Server protocol (https/http)     |
 
-The `scope` also accepts an array of objects containing `clientId`, `scope` and optionally
+The `scope` also accepts an array of objects containing `clientID`, `scope` and optionally
 `audience` to enable dynamic scopes from a single simulator (programmatic usage only). This should
-allow multiple clients to all use the same simulator. Additionally, setting the `clientId:
+allow multiple clients to all use the same simulator. Additionally, setting the `clientID:
 "default"` will enable a default fallback scope so every client does not need to be included.
 
 An optional [`rulesDirectory` field](#rules) can specify a directory of [auth0

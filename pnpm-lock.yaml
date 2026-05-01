@@ -45,8 +45,8 @@ importers:
         specifier: ^2.3.3
         version: 2.3.3
       configliere:
-        specifier: ^0.3.0
-        version: 0.3.0
+        specifier: ^0.4.0
+        version: 0.4.0
       cookie-session:
         specifier: ^2.1.0
         version: 2.1.1
@@ -1722,8 +1722,8 @@ packages:
     resolution: {integrity: sha512-gk/Z852D2Wtb//0I+kRFNKKE9dIIVirjoqPoA1wJU+XePVXZfGeBpk45+A1rKO4Q43prqWBNY/MiIeRLbPWUaA==}
     engines: {node: '>=4.0.0'}
 
-  configliere@0.3.0:
-    resolution: {integrity: sha512-4W3UipMaFyoMdt6ZQtx0tPsuEKdVJD1kPmrJuHSrakyJ0XPxJ1QR5HC+vGb/FSY+OGCeO50eEUq8I5faJs2Oqw==}
+  configliere@0.4.0:
+    resolution: {integrity: sha512-4bxK3+L+FHr9Xm/d69Syvvpvkj7lj7a4zz3B+tchuohg5WKeudyBS+4Oob5Zdgoh8I7+n2lj0lfa8I6cUXfcEg==}
     engines: {node: '>= 16'}
 
   constant-case@3.0.4:
@@ -2940,9 +2940,6 @@ packages:
   tree-kill@1.2.2:
     resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
     hasBin: true
-
-  ts-case-convert@2.1.0:
-    resolution: {integrity: sha512-Ye79el/pHYXfoew6kqhMwCoxp4NWjKNcm2kBzpmEMIU9dd9aBmHNNFtZ+WTm0rz1ngyDmfqDXDlyUnBXayiD0w==}
 
   ts-log@2.2.7:
     resolution: {integrity: sha512-320x5Ggei84AxzlXp91QkIGSw5wgaLT6GeAH0KsqDmRZdVWW2OiSeVvElVoatk3f7nicwXlElXsoFkARiGE2yg==}
@@ -4804,10 +4801,9 @@ snapshots:
 
   common-tags@1.8.2: {}
 
-  configliere@0.3.0:
+  configliere@0.4.0:
     dependencies:
       '@standard-schema/spec': 1.1.0
-      ts-case-convert: 2.1.0
 
   constant-case@3.0.4:
     dependencies:
@@ -6092,8 +6088,6 @@ snapshots:
   tr46@0.0.3: {}
 
   tree-kill@1.2.2: {}
-
-  ts-case-convert@2.1.0: {}
 
   ts-log@2.2.7: {}
 

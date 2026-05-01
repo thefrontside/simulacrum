@@ -21,11 +21,13 @@ export type Auth0Simulator = (args?: {
     extendRouter?: (router: Router, simulationStore: ExtendedSimulationStore) => void;
   };
   options?: Partial<Auth0Configuration>;
-  args?: string[];
+  config?: Auth0Configuration;
 }) => FoundationSimulator<ExtendedSimulationStore>;
 
 export const simulation: Auth0Simulator = (args = {}) => {
-  const config = getConfig(args.options, args.args);
+  // if config is provided, use it.
+  // Otherwise, get the config from passed in options and defaults
+  const config = args.config ?? getConfig(args.options);
   const parsedInitialState = !args?.initialState
     ? undefined
     : auth0InitialStoreSchema.parse(args?.initialState);
@@ -37,5 +39,5 @@ export const simulation: Auth0Simulator = (args = {}) => {
   })();
 };
 
-export { auth0Program } from "./config/get-config.ts";
+export { auth0ConfigParser, auth0Program, getConfig, readJsonConfig } from "./config/get-config.ts";
 export { auth0UserSchema, defaultUser } from "./store/entities.ts";

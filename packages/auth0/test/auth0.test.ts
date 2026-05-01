@@ -530,15 +530,15 @@ describe("Auth0 simulator", () => {
         const app = simulation({
           options: {
             scope: [
-              { clientId: "client-one", scope: "custom:access" },
-              { clientId: "client-two", scope: "more-custom:access" },
+              { clientID: "client-one", scope: "custom:access" },
+              { clientID: "client-two", scope: "more-custom:access" },
               {
-                clientId: "client-three",
+                clientID: "client-three",
                 audience: "https://vip",
                 scope: "custom:special-access",
               },
               {
-                clientId: "default",
+                clientID: "default",
                 scope: "openid profile email offline_access",
               },
             ],
@@ -551,7 +551,7 @@ describe("Auth0 simulator", () => {
         await server2.ensureClose();
       });
 
-      it("based on clientId in req.body", async () => {
+      it("based on clientID in req.body", async () => {
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
           method: "POST",
           headers: {
@@ -576,7 +576,7 @@ describe("Auth0 simulator", () => {
         expect(accessToken.payload.scope).toBe("custom:access");
       });
 
-      it("based on different clientId in req.body", async () => {
+      it("based on different clientID in req.body", async () => {
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
           method: "POST",
           headers: {
@@ -604,7 +604,7 @@ describe("Auth0 simulator", () => {
         expect(accessToken.payload.scope).toBe("more-custom:access");
       });
 
-      it("based on clientId and specific audience in req.body", async () => {
+      it("based on clientID and specific audience in req.body", async () => {
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
           method: "POST",
           headers: {
@@ -662,10 +662,10 @@ describe("Auth0 simulator", () => {
         const app = simulation({
           options: {
             scope: [
-              { clientId: "client-one", scope: "custom:access" },
-              { clientId: "client-two", scope: "more-custom:access" },
+              { clientID: "client-one", scope: "custom:access" },
+              { clientID: "client-two", scope: "more-custom:access" },
               {
-                clientId: "client-three",
+                clientID: "client-three",
                 audience: "https://vip",
                 scope: "custom:special-access",
               },
@@ -679,7 +679,7 @@ describe("Auth0 simulator", () => {
         await server2.ensureClose();
       });
 
-      it("on missing scope based on clientId", async () => {
+      it("on missing scope based on clientID", async () => {
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
           method: "POST",
           headers: {
@@ -696,7 +696,7 @@ describe("Auth0 simulator", () => {
 
         let text = await res.text();
 
-        expect(text).toBe("Could not find application with clientId: non-existent-client");
+        expect(text).toBe("Could not find application with clientID: non-existent-client");
       });
 
       it("on missing scope based on audience", async () => {
@@ -718,7 +718,7 @@ describe("Auth0 simulator", () => {
         let text = await res.text();
 
         expect(text).toBe(
-          "Found application matching clientId, client-three, but incorrect audience, configured: https://vip :: passed: https://bad-audience",
+          "Found application matching clientID, client-three, but incorrect audience, configured: https://vip :: passed: https://bad-audience",
         );
       });
     });
