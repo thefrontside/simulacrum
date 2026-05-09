@@ -60,37 +60,56 @@ node ./simulators/service-graph.ts
 If you are already working with `effection`, you may use the operation directly.
 
 ```ts
-import { beforeEach } from "node:test";
-import { run, suspend } from "effection";
-import { services } from "./simulators/service-graph.ts";
+import { beforeEach, test } from "@effectionx/bdd";
+import { until } from "effection";
+import { serviceGraph } from "./simulators/service-graph.ts";
 
-beforeEach(async () => {
-  await run(function* () {
-    const services = yield* services();
-    // or optionally pass a subset of services to run if not all are required for this test
-    const subsetOfServices = yield* services(["sim1"]);
-    yield* suspend();
-  });
+let graph: any // TODO get a type
+// note that this has an effection scope
+beforeEach(function* () {
+  graph = yield* serviceGraph();
+  // or optionally pass a subset of services to run if not all are required for this test
+  graph = yield* serviceGraph(["sim1"]);
+
+  // when the test completes, this will be shut down automatically as it is tied
+  // to an effection scope through `@effectionx/bdd`
 });
 
-test("things", async () => {
-  // run your assertions against the graph state
+test("things", function* () {
+ // run your assertions against the graph state
+  // for example, query the sim API
+  const port = graph.status.get("a")?.port;
+  const response = yield* until(fetch(`http://localhost:${port}`));
+  // use response here
 });
 ```
 
-If you are outside an `effection` scope, we include a convenience method to use the runner's `.task` property to `await` it like a promise.
+If you are outside an `effection` scope, we include a convenience method to use the runner's `.task()` helper and `await` it like a promise.
 
 ```ts
-import { beforeEach } from "node:test";
-import { services } from "./simulators/service-graph.ts";
+import { beforeEach, afterEach } from "node:test";
+import { serviceGraph } from "./simulators/service-graph.ts";
 
-let graph;
+let graph: any // TODO get a type
+let task;
 beforeEach(async () => {
-  graph = await services().task;
+  task = serviceGraph.task();
+  // or optionally pass a subset of serviceGraph to run if not all are required for this test
+  task = serviceGraph.task(["sim1"]);
+  // when the test completes, you need to manually shut down the graph such as in the `afterEach` below
+  graph = await task.start();
+});
+
+afterEach(async () => {
+  await task.halt();
 });
 
 test("things", async () => {
   // run your assertions against the graph state
+  // for example, query the sim API
+  const port = graph.status.get("a")?.port;
+  const response = await fetch(`http://localhost:${port}`);
+  // use response here
 });
 ```
 
@@ -257,7 +276,7 @@ The runner operation returns an object with the following shape:
 
 If a service operation returns an object like `{ port: number }` or `{ port: number; pid: number }`, that information is recorded on `status` so tests can discover listening endpoints.
 
-This is still an `effection` operation. If you are not operating within an `effection` scope, make use of the `task` property. It is a `type Future` which you may `await` and use like a `Promise`.
+This is still an `effection` operation. If you are not operating within an `effection` scope, make use of the runner's `task()` helper. It returns an awaitable promise-like handle whose `.start()` method resolves with the started graph, exposes the backing running task on `running`, and stays alive until you call `.halt()`.
 
 ### Simulation & process helpers 🔧
 
