@@ -1,12 +1,9 @@
-import { afterEach, beforeEach, describe, it } from "node:test";
+import { describe, it } from "node:test";
 import assert from "node:assert";
 import { resource, run, sleep, spawn, suspend } from "effection";
 import { useServiceGraph } from "../src/services.ts";
-import { waitFor, waitForFetchClosed } from "./utils.ts";
+import { waitFor } from "./utils.ts";
 import { useService } from "../src/service.ts";
-import { useSimulation } from "../src/simulation.ts";
-import { type StartedTask } from "../src/taskable.ts";
-import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
 
 describe("shutdown", () => {
   it("runs beforeStop hooks in reverse order", async () => {
@@ -284,68 +281,5 @@ describe("service subsets", () => {
     assert.ok(typeof b === "number", "b should start");
     assert.ok(typeof r === "number", "r should start");
     assert.ok(typeof other === "undefined", "other should NOT start");
-  });
-});
-
-describe("tasks and promises", () => {
-  let starts = 0;
-  const graphRunner = useServiceGraph({
-    a: {
-      operation: useSimulation("a", () => {
-        starts += 1;
-        return createFoundationSimulationServer({
-          port: 0,
-          extendRouter(router) {
-            router.get("/info", (_req, res) => res.json({ ok: true, starts }));
-          },
-        })();
-      }),
-    },
-  });
-
-  let task: ReturnType<typeof graphRunner.task>;
-  let services: StartedTask<typeof task>;
-
-  beforeEach(async () => {
-    starts = 0;
-    task = graphRunner.task();
-    services = await task.start();
-  });
-
-  afterEach(async () => {
-    const port = services.status?.get("a")?.port;
-    await task.halt();
-    if (port) {
-      await run(function* () {
-        yield* waitForFetchClosed(`http://127.0.0.1:${port}/info`, 2000);
-      });
-    }
-  });
-
-  it("returns a task factory on the service graph runner", async () => {
-    assert.strictEqual(typeof graphRunner.task, "function");
-    assert.strictEqual(typeof task.then, "function");
-    assert.strictEqual(typeof task.start, "function");
-    assert.strictEqual(typeof task.halt, "function");
-    assert.ok(task.running, "task should expose the backing Effection task");
-
-    assert.notStrictEqual(services.status, undefined);
-    const port = services.status?.get("a")?.port;
-    assert.ok(port && port > 0, "service port should be available after beforeEach startup");
-  });
-
-  it("can expose an awaitable task that starts once, stays running, and halts cleanly", async () => {
-    assert.notStrictEqual(services.status, undefined);
-    const simPort = services.status?.get("simulacrum")?.port;
-    assert.ok(simPort && simPort > 10000);
-    assert.strictEqual(typeof task.halt, "function");
-    assert.strictEqual(starts, 1, "task should only start the simulator once before halt");
-
-    const port = services.status?.get("a")?.port;
-    assert.ok(port && port > 0, "service port should be available after awaiting the task");
-
-    const response = await fetch(`http://127.0.0.1:${port}/info`);
-    assert.strictEqual(response.status, 200);
-    assert.deepStrictEqual(await response.json(), { ok: true, starts: 1 });
   });
 });

@@ -1,7 +1,7 @@
 import { parseArgs } from "node:util";
-import { main, suspend, type Operation } from "effection";
+import { main, suspend } from "effection";
 import { useAttributes } from "./logging.ts";
-import type { ServiceGraph, ServiceDefinition } from "./services.ts";
+import type { ServiceDefinition, ServiceGraphRunner } from "./services.ts";
 import { Debugging, logger } from "./logging.ts";
 
 /**
@@ -14,8 +14,8 @@ import { Debugging, logger } from "./logging.ts";
  *
  * @param serviceGraph - runner factory returned by `useServiceGraph`
  */
-export function* simulationCLIOp<S extends Record<string, any>, T = any>(
-  serviceGraph: (subset?: Array<keyof S>) => Operation<ServiceGraph<S, T>>,
+export function* simulationCLIOp<S extends Record<string, ServiceDefinition<string, any>>>(
+  serviceGraph: ServiceGraphRunner<S>,
 ) {
   try {
     const { values } = parseArgs({
@@ -81,8 +81,8 @@ export function* simulationCLIOp<S extends Record<string, any>, T = any>(
  *
  * @param serviceGraph - runner factory returned by `useServiceGraph`
  */
-export async function simulationCLI<S extends Record<string, ServiceDefinition<string, T>>, T>(
-  serviceGraph: (subset?: Array<keyof S>) => Operation<ServiceGraph<S, T>>,
+export async function simulationCLI<S extends Record<string, ServiceDefinition<string, any>>>(
+  serviceGraph: ServiceGraphRunner<S>,
 ) {
   return main(() => simulationCLIOp(serviceGraph));
 }

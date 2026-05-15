@@ -62,42 +62,65 @@ If you are already working with `effection`, you may use the operation directly.
 ```ts
 import { beforeEach, test } from "@effectionx/bdd";
 import { until } from "effection";
+import { useServiceTestRig } from "@simulacrum/server";
 import { serviceGraph } from "./simulators/service-graph.ts";
 
-let graph: any // TODO get a type
+const useRig = useServiceTestRig(serviceGraph, {
+  subset: ["sim1"],
+  createWith({ graph }) {
+    const port = graph.status.get("sim1")?.port;
+    return {
+      api: {
+        *fetchRoot() {
+          return yield* until(fetch(`http://localhost:${port}`));
+        },
+      },
+    };
+  },
+});
+
+let rig: any // TODO get a type
 // note that this has an effection scope
 beforeEach(function* () {
-  graph = yield* serviceGraph();
-  // or optionally pass a subset of services to run if not all are required for this test
-  graph = yield* serviceGraph(["sim1"]);
+  rig = yield* useRig();
 
   // when the test completes, this will be shut down automatically as it is tied
   // to an effection scope through `@effectionx/bdd`
 });
 
 test("things", function* () {
- // run your assertions against the graph state
-  // for example, query the sim API
-  const port = graph.status.get("a")?.port;
-  const response = yield* until(fetch(`http://localhost:${port}`));
+  const response = yield* rig.with.api.fetchRoot();
   // use response here
 });
 ```
 
-If you are outside an `effection` scope, we include a convenience method to use the runner's `.task()` helper and `await` it like a promise.
+If you are outside an `effection` scope, use the promise-flavored test rig.
 
 ```ts
 import { beforeEach, afterEach } from "node:test";
+import { createServiceTestRig } from "@simulacrum/server";
 import { serviceGraph } from "./simulators/service-graph.ts";
 
-let graph: any // TODO get a type
+const createRig = createServiceTestRig(serviceGraph, {
+  subset: ["sim1"],
+  createWith({ graph }) {
+    const port = graph.status.get("sim1")?.port;
+    return {
+      api: {
+        async fetchRoot() {
+          return fetch(`http://localhost:${port}`);
+        },
+      },
+    };
+  },
+});
+
+let rig: any // TODO get a type
 let task;
 beforeEach(async () => {
-  task = serviceGraph.task();
-  // or optionally pass a subset of serviceGraph to run if not all are required for this test
-  task = serviceGraph.task(["sim1"]);
+  task = createRig();
   // when the test completes, you need to manually shut down the graph such as in the `afterEach` below
-  graph = await task.start();
+  rig = await task.start();
 });
 
 afterEach(async () => {
@@ -105,10 +128,7 @@ afterEach(async () => {
 });
 
 test("things", async () => {
-  // run your assertions against the graph state
-  // for example, query the sim API
-  const port = graph.status.get("a")?.port;
-  const response = await fetch(`http://localhost:${port}`);
+  const response = await rig.with.api.fetchRoot();
   // use response here
 });
 ```
@@ -156,7 +176,8 @@ useServiceGraph(
     watch?: boolean;
     watchDebounce?: number;
   },
-): ServiceRunner<ServicesMap>
+): ServiceGraphRunner<ServicesMap>
+
 ```
 
 Creates a runner for a graph of services, simulators, and supporting processes.
@@ -168,26 +189,21 @@ Creates a runner for a graph of services, simulators, and supporting processes.
 
 ###### Returns
 
-- `ServiceRunner<ServicesMap>` - a runner operation factory that starts the graph when invoked
+- `ServiceGraphRunner<ServicesMap>` - a runner operation factory that starts the graph when invoked
 
 Call the runner inside an `effection` scope to start the graph:
 
 ```ts
-import { type Operation, run, main } from "effection";
+const runner = useServiceGraph(services, options);
 
-const graph = useServiceGraph(services, options);
-
-// within an Operation<any> such as
 main(function* () {
-  const services = yield* graph(subset); // holds while services run, subset is optional
+  const graph = yield* runner(["api"]); // subset is optional
 });
-// or as a promise
-const services = await run(() => graph(subset));
 ```
 
-File watching: pass `options.watch = true` and `options.watchDebounce` to enable watching and restart propagation across dependents. This is enabled through the CLI helper.
+The runner returned by `useServiceGraph(...)` is reusable and always returns an `Operation<ServiceGraph<ServicesMap>>`. If you need a promise-friendly lifecycle, wrap the graph in a test rig with `createServiceTestRig(...)`.
 
-#### ServiceDefinition: one service entry in the graph
+File watching: pass `options.watch = true` and `options.watchDebounce` to enable watching and restart propagation across dependents. This is enabled through the CLI helper.
 
 Each item in the `ServicesMap` passed as the first argument to `useServiceGraph` is a `ServiceDefinition`.
 
@@ -209,6 +225,54 @@ type ServiceDefinition<T> = {
 - Each service must provide an `operation: Operation<void>` or another long-lived `effection` operation that resolves when the service is ready.
 - The operation may also return service metadata such as `{ port: number }` or `{ port: number; pid: number }` to surface runtime information in the graph's `status` map.
 - If you are defining your own custom operation, use `try { ... yield* suspend(); } finally { ... }` inside an `effection` operation or `resource()` to run cleanup logic when the service stops.
+
+#### Test rigs
+
+Use a test rig when you want to start the graph and then derive helper clients or other testing utilities from the running services.
+
+```ts
+useServiceTestRig(
+  serviceGraph,
+  options?: {
+    subset?: string[];
+    createWith?: ({ graph }) => With;
+  },
+): () => Operation<{ graph: ServiceGraph; with: With }>
+
+createServiceTestRig(
+  serviceGraph,
+  options?: {
+    subset?: string[];
+    createWith?: ({ graph }) => With;
+  },
+): () => StartableTask<{ graph: ServiceGraph; with: With }>
+```
+
+- `useServiceTestRig(...)` is the `Operation`-flavored version for use inside an Effection scope.
+- `createServiceTestRig(...)` is the `Promise`-flavored version for any non-Effection caller that still needs explicit shutdown.
+- `createWith({ graph })` runs after the graph has started, so ports and other startup metadata are already available.
+- `createWith(...)` returns the helper object directly. In practice that means you will usually put generator methods on the helpers for Effection usage and async methods on the helpers for promise usage.
+
+```ts
+const services = useServiceGraph({
+  api: {
+    operation: useSimulation("api", createApiSimulator),
+  },
+});
+
+const createRig = createServiceTestRig(services, {
+  createWith({ graph }) {
+    const port = graph.status.get("api")?.port;
+    return {
+      api: createApiClient({ baseURL: `http://127.0.0.1:${port}` }),
+    };
+  },
+});
+
+const rig = await createRig().start();
+
+await rig.with.api.getUsers();
+```
 
 ##### `dependsOn`
 
@@ -275,8 +339,6 @@ The runner operation returns an object with the following shape:
 - `serviceChanges` — a `Stream` of watcher restart events when watching is enabled, otherwise `undefined`
 
 If a service operation returns an object like `{ port: number }` or `{ port: number; pid: number }`, that information is recorded on `status` so tests can discover listening endpoints.
-
-This is still an `effection` operation. If you are not operating within an `effection` scope, make use of the runner's `task()` helper. It returns an awaitable promise-like handle whose `.start()` method resolves with the started graph, exposes the backing running task on `running`, and stays alive until you call `.halt()`.
 
 ### Simulation & process helpers 🔧
 
