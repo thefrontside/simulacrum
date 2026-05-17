@@ -22,6 +22,13 @@ export type ServiceTestRigOperationFactory<S extends ServiceMap, W> = () => Oper
 
 export type ServiceTestRigTaskFactory<S extends ServiceMap, W> = () => ServiceTestRigTask<S, W>;
 
+export type ServiceTestRigFor<F extends (...args: never[]) => unknown> =
+  ReturnType<F> extends Operation<infer T>
+    ? T
+    : ReturnType<F> extends StartableTask<infer T>
+      ? T
+      : never;
+
 export function useServiceTestRig<S extends ServiceMap, W = Record<never, never>>(
   serviceGraph: ServiceGraphRunner<S>,
   options: ServiceTestRigOptions<S, W> = {},

@@ -53,7 +53,7 @@ node ./simulators/service-graph.ts
 ```
 
 > [!NOTE]
-> We use `node --import tsx file.ts` here to automatically handle the typescript conversion. This is a separate package that you may be interested in using, but it not a hard requirement necessarily. Newer versions of node also handle this for you. The latest v24 will run a typescript file directly.
+> More recent versions of `node` will handle TypeScript files directly. If using an older version of node or without the type-strip flag, you may try `tsx` as an alternative: `node --import tsx file.ts`. This is a separate package that you may be interested in using, but it not a hard requirement necessarily.
 
 ### Run from a test
 
@@ -62,7 +62,7 @@ If you are already working with `effection`, you may use the operation directly.
 ```ts
 import { beforeEach, test } from "@effectionx/bdd";
 import { until } from "effection";
-import { useServiceTestRig } from "@simulacrum/server";
+import { useServiceTestRig, type ServiceTestRigFor } from "@simulacrum/server";
 import { serviceGraph } from "./simulators/service-graph.ts";
 
 const useRig = useServiceTestRig(serviceGraph, {
@@ -79,7 +79,9 @@ const useRig = useServiceTestRig(serviceGraph, {
   },
 });
 
-let rig: any // TODO get a type
+type Rig = ServiceTestRigFor<typeof useRig>;
+
+let rig: Rig;
 // note that this has an effection scope
 beforeEach(function* () {
   rig = yield* useRig();
@@ -98,7 +100,7 @@ If you are outside an `effection` scope, use the promise-flavored test rig.
 
 ```ts
 import { beforeEach, afterEach } from "node:test";
-import { createServiceTestRig } from "@simulacrum/server";
+import { createServiceTestRig, type ServiceTestRigFor } from "@simulacrum/server";
 import { serviceGraph } from "./simulators/service-graph.ts";
 
 const createRig = createServiceTestRig(serviceGraph, {
@@ -115,8 +117,8 @@ const createRig = createServiceTestRig(serviceGraph, {
   },
 });
 
-let rig: any // TODO get a type
-let task;
+let task: ReturnType<typeof createRig>;
+let rig: ServiceTestRigFor<typeof createRig>;
 beforeEach(async () => {
   task = createRig();
   // when the test completes, you need to manually shut down the graph such as in the `afterEach` below
