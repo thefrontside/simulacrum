@@ -45,6 +45,11 @@ export type ServiceGraph<S extends ServiceMap> = {
   status: Map<string, ServiceStatus>;
 };
 
+export type ServiceGraphStatus = {
+  cwd: string;
+  services: Record<string, ServiceInfo>;
+};
+
 export type ServiceInfo = {
   port?: number | undefined;
   pid?: number | undefined;
@@ -57,8 +62,16 @@ export type ServiceStatus = {
   pid?: number | undefined;
 };
 
+export type ServiceGraphRunOptions = {
+  watch?: boolean;
+  watchDebounce?: number;
+  controlPort?: number | undefined;
+  requestStop?: (() => void) | undefined;
+};
+
 export type ServiceGraphRunner<S extends ServiceMap> = (
   subset?: Array<keyof S>,
+  runOptions?: ServiceGraphRunOptions,
 ) => Operation<ServiceGraph<S>>;
 
 export type ServiceGraphFor<R extends ServiceGraphRunner<any>> =
@@ -83,10 +96,18 @@ export function useServiceGraph<S extends ServiceMap>(
     globalData?: Record<string, unknown>;
     watch?: boolean;
     watchDebounce?: number;
+    controlPort?: number;
   },
 ): ServiceGraphRunner<S> {
-  return (subset?: Array<keyof S>) => {
+  return (subset?: Array<keyof S>, runOptions?: ServiceGraphRunOptions) => {
     return resource<ServiceGraph<S>>(function* (provide) {
+      const effectiveRunOptions = {
+        watch: runOptions?.watch ?? options?.watch,
+        watchDebounce: runOptions?.watchDebounce ?? options?.watchDebounce,
+        controlPort: runOptions?.controlPort ?? options?.controlPort,
+        requestStop: runOptions?.requestStop,
+      };
+
       // detect cycles in the dependency graph
       const nodes = Object.keys(services);
       // label the root of the service graph operation
@@ -150,7 +171,27 @@ export function useServiceGraph<S extends ServiceMap>(
 
       const status = new Map<string, ServiceStatus>();
 
-      const dataServiceProvided = yield* startDataService(options?.globalData ?? {});
+      function serializeStatus(): ServiceGraphStatus {
+        return {
+          cwd: process.cwd(),
+          services: Object.fromEntries(
+            Array.from(status.entries()).map(([name, service]) => [
+              name,
+              {
+                port: service.port,
+                pid: service.pid,
+              },
+            ]),
+          ),
+        };
+      }
+
+      const dataServiceProvided = yield* startDataService({
+        data: options?.globalData ?? {},
+        port: effectiveRunOptions.controlPort,
+        getStatus: serializeStatus,
+        requestStop: effectiveRunOptions.requestStop,
+      });
       yield* useAttributes({
         name: "serviceGraph",
         dataServicePort: String(dataServiceProvided.port),
@@ -173,13 +214,15 @@ export function useServiceGraph<S extends ServiceMap>(
       // active file descriptor and has been observed to keep the process alive
       // even after the root scope has been cancelled.
       const shouldWatch =
-        options?.watch === true ||
+        effectiveRunOptions.watch === true ||
         Object.values(effectiveServices).some((d) => Array.isArray(d.watch));
 
       const watcher = shouldWatch
         ? yield* useWatcher(
             effectiveServices,
-            options?.watchDebounce ? { watchDebounce: options.watchDebounce } : undefined,
+            effectiveRunOptions.watchDebounce
+              ? { watchDebounce: effectiveRunOptions.watchDebounce }
+              : undefined,
           )
         : undefined;
 

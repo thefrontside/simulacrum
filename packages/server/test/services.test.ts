@@ -188,17 +188,11 @@ describe("dependency handling", () => {
       await run(function* () {
         const runGraph = useServiceGraph({
           A: {
-            operation: useService(
-              "A",
-              "node --experimental-transform-types ./test/services/service-a.ts",
-            ),
+            operation: useService("A", "node ./test/services/service-a.ts"),
             dependsOn: { startup: ["B"] as const },
           },
           B: {
-            operation: useService(
-              "B",
-              "node --experimental-transform-types ./test/services/service-b.ts",
-            ),
+            operation: useService("B", "node ./test/services/service-b.ts"),
             dependsOn: { startup: ["A"] as const },
           },
         });
