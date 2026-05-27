@@ -50,6 +50,18 @@ Once you have that file, there are two common ways to use it.
 ```bash
 # start a local service graph defined in ./service-graph.ts
 node ./simulators/service-graph.ts
+
+# start it in the background on a stable control port
+node ./simulators/service-graph.ts --background --control-port 4310
+
+# start it in the background using the default control port (43034)
+node ./simulators/service-graph.ts --background
+
+# stop a backgrounded graph later through the same control port
+node ./simulators/service-graph.ts --stop --control-port 4310
+
+# stop a backgrounded graph on the default control port
+node ./simulators/service-graph.ts --stop
 ```
 
 > [!NOTE]
@@ -177,6 +189,7 @@ useServiceGraph(
     globalData?: Record<string, unknown>;
     watch?: boolean;
     watchDebounce?: number;
+    controlPort?: number;
   },
 ): ServiceGraphRunner<ServicesMap>
 
@@ -205,7 +218,23 @@ main(function* () {
 
 The runner returned by `useServiceGraph(...)` is reusable and always returns an `Operation<ServiceGraph<ServicesMap>>`. If you need a promise-friendly lifecycle, wrap the graph in a test rig with `createServiceTestRig(...)`.
 
+When you need to override runtime behavior at the call site, the runner also accepts a second argument:
+
+```ts
+type ServiceGraphRunOptions = {
+  watch?: boolean;
+  watchDebounce?: number;
+  controlPort?: number;
+  exclude?: string[];
+};
+
+const graph = yield * runner(["api"], { controlPort: 4310 });
+```
+
 File watching: pass `options.watch = true` and `options.watchDebounce` to enable watching and restart propagation across dependents. This is enabled through the CLI helper.
+Control port: pass `options.controlPort` or `runner(..., { controlPort })` when you want the runtime service to bind to a stable port for background/recall workflows.
+Exclude services: pass `runner(undefined, { exclude: ["worker"] })` or combine it with a subset to skip named services and automatically prune dependents that no longer have their startup requirements.
+The CLI uses `43034` as the default control port for `--background` and `--stop` when you do not provide `--control-port`.
 
 Each item in the `ServicesMap` passed as the first argument to `useServiceGraph` is a `ServiceDefinition`.
 
@@ -301,8 +330,11 @@ To enable file‑watching: pass `{ watch: true }` to the `useServiceGraph` optio
 When you call `useServiceGraph(...)` you may pass an optional `globalData` object in the options. The runner starts an HTTP data service, the simulacrum gateway, that serves that object so tests and child simulations can discover configuration or shared fixtures.
 
 - Endpoints: `GET /data` returns the full `globalData` JSON and `GET /data/<key>` returns a single key, or a `404`/`400` as appropriate.
+- Runtime control endpoints: `GET /health` reports that the runtime service is up, `GET /status` returns the current known ports and pids for services in the graph, and `POST /stop` requests shutdown when the graph was started through the CLI control flow.
 - Discovery: the gateway registers its listening port on the graph `status` map under the key `"simulacrum"`.
 - Service integration: when starting child simulations via `useSimulation` or `simulationCLI`, the runner passes the gateway port to the child so it can fetch `globalData` during startup.
+
+If you set `controlPort`, this runtime service becomes a stable recall point for the graph. That lets you start a graph in the background and reconnect to it later through the same local port.
 
 ```ts
 const runner = useServiceGraph(
@@ -325,11 +357,15 @@ The gateway is intended for local development and tests only. Conceptually, it p
 
 ### ServiceRunner & returned values
 
-The runner returned by `useServiceGraph` is itself an operation. This allows it to be portable. Define it in one spot, then import it into any CLI, start scripts or test runners of your choosing at start it there. Optionally, it takes an argument, `subset`, to only start part of the graph.
+The runner returned by `useServiceGraph` is itself an operation. This allows it to be portable. Define it in one spot, then import it into any CLI, start scripts or test runners of your choosing at start it there. Optionally, it takes an argument, `subset`, to only start part of the graph, and runtime options such as `exclude` to skip specific services.
 
 ##### `subset`
 
 When calling the runner you may pass a subset (e.g. `yield* runner(["serviceA"])`). Any required startup dependencies are included automatically. This is particularly useful when focusing on a specific feature or test case.
+
+##### `exclude`
+
+When calling the runner you may pass `exclude` in the second argument (e.g. `yield* runner(undefined, { exclude: ["serviceB"] })`). Excluded services are removed from the graph, and any dependent services that can no longer satisfy their startup dependencies are pruned automatically.
 
 ##### returned graph
 
@@ -460,8 +496,29 @@ The `options.wellnessCheck` object supports:
 
 #### simulationCLI(serviceGraph)
 
-- `simulationCLI` wraps the runner in a small CLI loop and provides convenience flags: `--services`, `--watch`, and `--watch-debounce`.
+- `simulationCLI` wraps the runner in a small CLI loop and provides convenience flags: `--services`, `--watch`, `--watch-debounce`, `--background`, `--stop`, and `--control-port`.
 - Use the CLI helper for local development workflows where you want to run your graph directly from a file (see `service-graph.ts` examples above).
+
+```bash
+# foreground
+node ./service-graph.ts --services api,auth --watch
+
+# background with a stable control port
+node ./service-graph.ts --background --control-port 4310
+
+# background with the default control port (43034)
+node ./service-graph.ts --background
+
+# later, stop that backgrounded graph
+node ./service-graph.ts --stop --control-port 4310
+
+# later, stop the graph on the default control port
+node ./service-graph.ts --stop
+```
+
+- `--background` starts the graph in a detached managed child process and waits until the runtime service responds on the requested control port.
+- `--stop` sends `POST /stop` to the runtime service on the requested control port.
+- `--control-port` defaults to `43034` for both `--background` and `--stop`.
 
 ## Development
 

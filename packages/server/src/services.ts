@@ -66,6 +66,7 @@ export type ServiceGraphRunOptions = {
   watch?: boolean;
   watchDebounce?: number;
   controlPort?: number | undefined;
+  exclude?: string[] | undefined;
   requestStop?: (() => void) | undefined;
 };
 
@@ -105,6 +106,7 @@ export function useServiceGraph<S extends ServiceMap>(
         watch: runOptions?.watch ?? options?.watch,
         watchDebounce: runOptions?.watchDebounce ?? options?.watchDebounce,
         controlPort: runOptions?.controlPort ?? options?.controlPort,
+        exclude: runOptions?.exclude,
         requestStop: runOptions?.requestStop,
       };
 
@@ -137,35 +139,75 @@ export function useServiceGraph<S extends ServiceMap>(
       }
 
       let effectiveServices = services; // {} as typeof services;
-      if (subset) {
-        const want = new Set<string>(
-          subset.map((s) => String(s).trim()).filter((s) => s.length > 0),
-        );
-        const included = new Set<string>();
+      const requested = subset
+        ? new Set<string>(subset.map((s) => String(s).trim()).filter((s) => s.length > 0))
+        : undefined;
+      const excluded = new Set<string>(
+        (effectiveRunOptions.exclude ?? [])
+          .map((s) => String(s).trim())
+          .filter((s) => s.length > 0),
+      );
+
+      for (const name of excluded) {
+        if (!(name in services)) {
+          throw new Error(`Excluded service '${name}' not found`);
+        }
+      }
+
+      if (requested || excluded.size > 0) {
+        const selected = requested ? new Set<string>() : new Set<string>(Object.keys(services));
+
         function include(name: string) {
-          if (included.has(name)) return;
+          if (selected.has(name)) return;
           if (!(name in services)) throw new Error(`Requested service '${name}' not found`);
-          included.add(name);
+          selected.add(name);
           for (const dep of services[name].dependsOn?.startup ?? []) {
             include(String(dep));
           }
         }
-        for (const name of want) include(name);
+
+        for (const name of requested ?? []) {
+          include(name);
+        }
+
+        for (const name of excluded) {
+          selected.delete(name);
+        }
+
+        let pruned = true;
+        while (pruned) {
+          pruned = false;
+          for (const name of Array.from(selected)) {
+            const deps = services[name].dependsOn?.startup ?? [];
+            if (deps.some((dep) => !selected.has(String(dep)))) {
+              selected.delete(name);
+              pruned = true;
+            }
+          }
+        }
+
+        for (const name of requested ?? []) {
+          if (!selected.has(name)) {
+            throw new Error(
+              `Requested service '${name}' cannot be started because it or one of its startup dependencies is excluded`,
+            );
+          }
+        }
 
         const picked: Partial<typeof services> = {};
-        for (const name of included) {
+        for (const name of selected) {
           picked[name as keyof typeof services] = services[name as keyof typeof services];
         }
         effectiveServices = picked as typeof services;
 
-        // annotate subset details AFTER calculations to avoid overwriting
         yield* useAttributes({
           name: "serviceGraph",
-          requestedServices: Array.from(want).join(", "),
-          includedServices: Array.from(included).join(", "),
+          requestedServices: Array.from(requested ?? []).join(", "),
+          excludedServices: Array.from(excluded).join(", "),
+          includedServices: Array.from(selected).join(", "),
         });
         yield* logger.stdout(
-          `simulation starting with subset of services: ${Array.from(included).join(", ")}`,
+          `simulation starting with services: ${Array.from(selected).join(", ")}`,
         );
       }
 

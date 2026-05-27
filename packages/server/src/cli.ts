@@ -12,6 +12,17 @@ import { Debugging, logger } from "./logging.ts";
 
 export const DEFAULT_CONTROL_PORT = 43034;
 
+function parseServiceList(value: string | undefined): string[] | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return value
+    .split(",")
+    .map((service) => service.trim())
+    .filter(Boolean);
+}
+
 function parseControlPort(value: string | undefined): number | undefined {
   if (value === undefined) {
     return undefined;
@@ -106,6 +117,7 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
     const { values } = parseArgs({
       options: {
         services: { type: "string", short: "s" },
+        "exclude-services": { type: "string" },
         debug: { type: "boolean", short: "d", default: false },
         help: { type: "boolean", short: "h" },
         watch: { type: "boolean" },
@@ -122,7 +134,7 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
 
     function* printUsage() {
       process.stdout.write(
-        `Usage: cli [-s|--services serviceName] [--watch] [--watch-debounce ms] [--background --control-port port] [--stop --control-port port]`,
+        `Usage: cli [-s|--services serviceName] [--exclude-services serviceName] [--watch] [--watch-debounce ms] [--background --control-port port] [--stop --control-port port]`,
       );
     }
 
@@ -130,12 +142,8 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
       return yield* printUsage();
     }
 
-    const subset = values.services
-      ? (values.services as string)
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : undefined;
+    const subset = parseServiceList(values.services as string | undefined);
+    const excluded = parseServiceList(values["exclude-services"] as string | undefined);
     const requestedControlPort = parseControlPort(values["control-port"] as string | undefined);
     const controlPort =
       values.background || values.stop || values["managed-child"]
@@ -144,6 +152,7 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
     yield* useAttributes({
       name: "cli",
       subset: subset ? subset.join(", ") : "",
+      excludedServices: excluded ? excluded.join(", ") : "",
       watch: String(!!values.watch),
       watchDebounce: String(values["watch-debounce"] ?? ""),
       debug: String(!!values.debug),
@@ -155,6 +164,7 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
     const runOptions: ServiceGraphRunOptions = {
       watch: !!values.watch,
       controlPort,
+      exclude: excluded,
     };
     if (values["watch-debounce"]) {
       runOptions.watchDebounce = Number(values["watch-debounce"]);

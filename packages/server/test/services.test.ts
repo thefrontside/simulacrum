@@ -276,4 +276,102 @@ describe("service subsets", () => {
     assert.ok(typeof r === "number", "r should start");
     assert.ok(typeof other === "undefined", "other should NOT start");
   });
+
+  it("excludes services and prunes dependents that can no longer start", async () => {
+    const startTimes = new Map<string, number>();
+    await run(function* () {
+      yield* spawn(function* () {
+        const services = {
+          a: {
+            operation: resource<void>(function* (provide) {
+              yield* sleep(20);
+              startTimes.set("a", Date.now());
+              yield* provide();
+            }),
+          },
+          b: {
+            operation: resource<void>(function* (provide) {
+              yield* sleep(20);
+              startTimes.set("b", Date.now());
+              yield* provide();
+            }),
+          },
+          r: {
+            dependsOn: { startup: ["a", "b"] as const },
+            operation: resource<void>(function* (provide) {
+              startTimes.set("r", Date.now());
+              yield* provide();
+            }),
+          },
+          other: {
+            operation: resource<void>(function* (provide) {
+              yield* sleep(20);
+              startTimes.set("other", Date.now());
+              yield* provide();
+            }),
+          },
+        };
+
+        const runGraph = useServiceGraph(services);
+        yield* runGraph(undefined, { exclude: ["b"] });
+        yield* suspend();
+      });
+      yield* waitFor(() => startTimes.has("a") && startTimes.has("other"), 2000);
+    });
+
+    assert.ok(typeof startTimes.get("a") === "number", "a should start");
+    assert.ok(typeof startTimes.get("other") === "number", "other should start");
+    assert.ok(typeof startTimes.get("b") === "undefined", "b should NOT start");
+    assert.ok(typeof startTimes.get("r") === "undefined", "r should NOT start");
+  });
+
+  it("throws when a requested subset service is excluded directly", async () => {
+    await assert.rejects(async () => {
+      await run(function* () {
+        const services = {
+          a: {
+            operation: resource<void>(function* (provide) {
+              yield* provide();
+            }),
+          },
+          b: {
+            operation: resource<void>(function* (provide) {
+              yield* provide();
+            }),
+          },
+        };
+
+        const runGraph = useServiceGraph(services);
+        yield* runGraph(["a"], { exclude: ["a"] });
+      });
+    }, /Requested service 'a' cannot be started because it or one of its startup dependencies is excluded/);
+  });
+
+  it("throws when a requested subset service depends on an excluded service", async () => {
+    await assert.rejects(async () => {
+      await run(function* () {
+        const services = {
+          a: {
+            operation: resource<void>(function* (provide) {
+              yield* provide();
+            }),
+          },
+          b: {
+            operation: resource<void>(function* (provide) {
+              yield* provide();
+            }),
+          },
+          r: {
+            dependsOn: { startup: ["a", "b"] as const },
+            operation: resource<void>(function* (provide) {
+              yield* provide();
+            }),
+          },
+        };
+
+        const runGraph = useServiceGraph(services);
+        yield* runGraph(["r"], { exclude: ["b"] });
+      });
+    }, /Requested service 'r' cannot be started because it or one of its startup dependencies is excluded/);
+  });
 });
