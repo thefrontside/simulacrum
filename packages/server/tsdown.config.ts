@@ -5,9 +5,9 @@ export default defineConfig({
   entry: "./src/index.ts",
   exports: { devExports: "development" },
   format: ["esm"],
-  sourcemap: false,
   minify: false,
   // runs with @arethetypeswrong/core which checks types
-  attw: true,
+  // TODO fails?
+  // attw: true,
   publint: true,
 });

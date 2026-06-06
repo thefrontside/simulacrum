@@ -10,7 +10,6 @@
     "skipLibCheck": true,
     "noEmitOnError": true,
     "declaration": true,
-    "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "rewriteRelativeImportExtensions": true,

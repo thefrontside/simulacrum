@@ -6,7 +6,6 @@ export default defineConfig({
   exports: { devExports: "development" },
   format: ["esm"],
   copy: [{ from: "src/views/public", to: "dist", flatten: false }],
-  sourcemap: false,
   // not really required and can mangle things
   minify: false,
   // don't bundle up as have some relative path imports for static assets
