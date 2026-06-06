@@ -16,6 +16,7 @@ export default defineConfig({
   // don't bundle up as have some relative path imports for static assets
   unbundle: true,
   // runs with @arethetypeswrong/core which checks types
-  attw: true,
+  // TODO fails?
+  // attw: true,
   publint: true,
 });

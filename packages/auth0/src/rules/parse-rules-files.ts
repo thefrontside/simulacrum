@@ -1,7 +1,7 @@
 import { extensionlessFileName } from "./extensionless-file-name.ts";
 import { assert } from "assert-ts";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 export function parseRulesFiles(rulesPath: string): { code: string; filename: string }[] {
   let ruleFiles = fs.readdirSync(rulesPath).filter((f) => path.extname(f) === ".js");
