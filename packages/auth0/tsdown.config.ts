@@ -4,7 +4,7 @@ export default defineConfig({
   name: "auth0",
   entry: "./src/index.ts",
   exports: { devExports: "development" },
-  format: ["esm", "cjs"],
+  format: ["esm"],
   dts: {
     sourcemap: true,
   },
