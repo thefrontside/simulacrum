@@ -1,5 +1,14 @@
 # Changelog
 
+## \[0.9.0]
+
+- [`9ef139f`](https://github.com/thefrontside/simulacrum/commit/9ef139f80b0403b4b66163ee7005b552640394c2) ([#359](https://github.com/thefrontside/simulacrum/pull/359) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Enabling oxfmt and oxlint for more consistency.
+- [`a3a8108`](https://github.com/thefrontside/simulacrum/commit/a3a8108f58e2523a3700b19900abbc53552c3e15) ([#357](https://github.com/thefrontside/simulacrum/pull/357) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Swap to pnpm within monorepo.
+
+### New Features
+
+- [`e81d6b9`](https://github.com/thefrontside/simulacrum/commit/e81d6b993fb64e4300588227645b162ec75c8f62) Define a graph of services and simulators to more easily run through the CLI helper or with a helper in tests.
+
 ## \[0.8.0]
 
 - [`d3850c6`](https://github.com/thefrontside/simulacrum/commit/d3850c657ea45c9e67790b63fb4341a95818c664) ([#345](https://github.com/thefrontside/simulacrum/pull/345) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Bump server to `effection` v4. With the tight dependency fitting into an `effection` runtime, bumping with a minor despite no specific breaking changes directly in this package. Additionally, we swapped to `@effectionx/process` and pulled in some other helpers. This was to prevent edge cases which were noted as part of the upgrade.
