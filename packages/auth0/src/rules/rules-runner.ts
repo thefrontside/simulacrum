@@ -21,7 +21,7 @@ async function runRule<A, I>(user: RuleUser, context: RuleContext<A, I>, rule: R
       setTimeout,
       console,
       require,
-      module,
+      importMeta: import.meta,
       resolve,
       reject,
       __simulator: {
