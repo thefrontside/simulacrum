@@ -178,8 +178,9 @@ export function createSimulationStore<
     const route = yield* select(schema.simulationRoutes.selectById, {
       id,
     });
-    if (route.url !== "")
+    if (route.url !== "") {
       yield* schema.update(schema.simulationRoutes.merge({ [id]: { calls: route.calls + 1 } }));
+    }
 
     yield* next();
   });
@@ -202,11 +203,11 @@ export function createSimulationStore<
   };
   const userTasks = inputTasks({ createWebhook, store, schema });
 
-  let inputedActions = inputActions({ thunks, store, schema });
+  let inputtedActions = inputActions({ thunks, store, schema });
   let actions = {
     simulationLog,
     batchUpdater,
-    ...inputedActions,
+    ...inputtedActions,
     ...userTasks.actions,
   };
 

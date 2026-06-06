@@ -26,8 +26,8 @@
     "covector": "pnpm dlx covector",
     "fmt": "oxfmt --write .",
     "fmt:check": "oxfmt --check .",
-    "lint": "pnpm -r --if-present run lint",
-    "lint:fix": "pnpm -r exec oxlint --fix",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "prepack": "pnpm -r --if-present run prepack",
     "test": "pnpm -r --if-present run test",
     "tsc": "pnpm -r --if-present run tsc"

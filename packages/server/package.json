@@ -21,6 +21,7 @@
   },
   "files": [
     "README.md",
+    "bin",
     "dist",
     "src"
   ],
@@ -42,6 +43,7 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
+    "./bin/run-simulation-child.ts": "./bin/run-simulation-child.ts",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -50,6 +52,7 @@
         "import": "./dist/index.mjs",
         "require": "./dist/index.cjs"
       },
+      "./bin/run-simulation-child.ts": "./bin/run-simulation-child.ts",
       "./package.json": "./package.json"
     }
   },
@@ -58,15 +61,21 @@
     "clean": "echo skip",
     "lint": "oxlint",
     "prepack": "pnpm run build",
-    "test": "node --test-timeout=60000 --experimental-transform-types --test test/*.test.ts",
-    "test:service-main": "node --experimental-transform-types ./test/service-main.ts",
+    "test": "node --test-timeout=60000 --test test/*.test.ts",
+    "test:service-main": "node ./test/services/service-main.ts",
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "@effectionx/context-api": "^0.2.1",
-    "@effectionx/process": "^0.6.2",
-    "@effectionx/timebox": "^0.3.1",
-    "effection": "^4.0.0"
+    "@effectionx/context-api": "~0.6.0",
+    "@effectionx/process": "~0.8.0",
+    "@effectionx/stream-helpers": "~0.8.2",
+    "@effectionx/timebox": "~0.4.3",
+    "chokidar": "^5.0.0",
+    "effection": "^4.0.2",
+    "picomatch": "^4.0.4"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@simulacrum/foundation-simulator": "workspace:^",
+    "@types/picomatch": "^4.0.3"
+  }
 }
