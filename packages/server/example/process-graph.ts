@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { each, type Stream } from "effection";
 import { useService } from "../src/service.ts";
-import { useServiceGraph } from "../src/services.ts";
+import { useServiceGraph } from "../src/service-graph.ts";
 import { simulationCLI } from "../src/cli.ts";
 
 const servicesMap = {

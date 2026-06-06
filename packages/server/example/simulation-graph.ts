@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { useServiceGraph } from "../src/services.ts";
+import { useServiceGraph } from "../src/service-graph.ts";
 import { useSimulation } from "../src/simulation.ts";
 import { simulationCLI } from "../src/cli.ts";
 

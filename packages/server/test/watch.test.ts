@@ -4,7 +4,7 @@ import { run, suspend, sleep, until, spawn, resource, ensure, withResolvers } fr
 import * as fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import { useServiceGraph } from "../src/services.ts";
+import { useServiceGraph } from "../src/service-graph.ts";
 import { simulation } from "./fixtures/simple-sim.ts";
 import { useSimulation } from "../src/simulation.ts";
 import { waitFor, waitForOperation } from "./utils.ts";

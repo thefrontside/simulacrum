@@ -1,6 +1,6 @@
 import { type Operation, resource } from "effection";
 import { taskable, type StartableTask } from "./taskable.ts";
-import type { ServiceDefinition, ServiceGraph, ServiceGraphRunner } from "./services.ts";
+import type { ServiceDefinition, ServiceGraph, ServiceGraphRunner } from "./service-graph.ts";
 
 type ServiceMap = Record<string, ServiceDefinition<string, any>>;
 

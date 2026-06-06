@@ -12,7 +12,7 @@ import {
 import { useAttributes } from "./logging.ts";
 import { type ServiceUpdate, useWatcher } from "./watch.ts";
 import { logger } from "./logging.ts";
-import { startDataService } from "./data-service.ts";
+import { startDataService } from "./control-service.ts";
 import { getOperationMetadata } from "./operation-metadata.ts";
 
 /**

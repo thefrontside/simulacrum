@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert";
 import { resource, run, sleep, spawn, suspend } from "effection";
-import { useServiceGraph } from "../src/services.ts";
+import { useServiceGraph } from "../src/service-graph.ts";
 import { waitFor } from "./utils.ts";
 import { useService } from "../src/service.ts";
 

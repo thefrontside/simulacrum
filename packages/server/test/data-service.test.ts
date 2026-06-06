@@ -2,7 +2,7 @@ import { it } from "node:test";
 import assert from "node:assert";
 import { createServer } from "node:net";
 import { run, until } from "effection";
-import { useServiceGraph } from "../src/services.ts";
+import { useServiceGraph } from "../src/service-graph.ts";
 import { useSimulation } from "../src/simulation.ts";
 import { waitFor } from "./utils.ts";
 import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";

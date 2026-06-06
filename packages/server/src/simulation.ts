@@ -7,7 +7,7 @@ import type {
   FoundationSimulator,
   FoundationSimulatorListening,
 } from "@simulacrum/foundation-simulator";
-import { SimulacrumEndpoint } from "./services.ts";
+import { SimulacrumEndpoint } from "./service-graph.ts";
 import { fileURLToPath } from "node:url";
 import { versions } from "node:process";
 import { withOperationMetadata } from "./operation-metadata.ts";

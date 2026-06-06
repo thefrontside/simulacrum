@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, it } from "node:test";
 import assert from "node:assert";
 import { run, until } from "effection";
-import { useServiceGraph } from "../src/services.ts";
+import { useServiceGraph } from "../src/service-graph.ts";
 import { useSimulation } from "../src/simulation.ts";
 import { createServiceTestRig, useServiceTestRig } from "../src/test-rig.ts";
 import { type StartedTask } from "../src/taskable.ts";

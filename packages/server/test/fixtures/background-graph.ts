@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { fileURLToPath } from "node:url";
 import { simulationCLI } from "../../src/cli.ts";
-import { useServiceGraph } from "../../src/services.ts";
+import { useServiceGraph } from "../../src/service-graph.ts";
 
 export const services = useServiceGraph(
   {},

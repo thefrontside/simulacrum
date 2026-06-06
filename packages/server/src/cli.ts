@@ -7,7 +7,7 @@ import type {
   ServiceGraphRunOptions,
   ServiceGraphRunner,
   ServiceGraphStatus,
-} from "./services.ts";
+} from "./service-graph.ts";
 import { Debugging, logger } from "./logging.ts";
 
 export const DEFAULT_CONTROL_PORT = 43034;
