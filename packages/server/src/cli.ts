@@ -124,6 +124,9 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
         "watch-debounce": { type: "string" },
         background: { type: "boolean" },
         stop: { type: "boolean" },
+        restart: { type: "boolean" },
+        status: { type: "boolean" },
+        "restart-service": { type: "string" },
         "control-port": { type: "string" },
         "managed-child": { type: "boolean" },
       },
@@ -134,12 +137,20 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
 
     function* printUsage() {
       process.stdout.write(
-        `Usage: cli [-s|--services serviceName] [--exclude-services serviceName] [--watch] [--watch-debounce ms] [--background --control-port port] [--stop --control-port port]`,
+        `Usage: cli [-s|--services serviceName] [--exclude-services serviceName] [--watch] [--watch-debounce ms] [--background --control-port port] [--stop --control-port port] [--restart --restart-service serviceName]`,
       );
     }
 
     if (values.help) {
       return yield* printUsage();
+    }
+
+    if (values.restart && values.stop) {
+      throw new Error("--restart and --stop cannot be used together");
+    }
+
+    if (values.restart && values.background) {
+      throw new Error("--restart and --background cannot be used together");
     }
 
     const subset = parseServiceList(values.services as string | undefined);
@@ -158,6 +169,8 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
       debug: String(!!values.debug),
       background: String(!!values.background),
       stop: String(!!values.stop),
+      restart: String(!!values.restart),
+      restartService: String(values["restart-service"] ?? ""),
       controlPort: String(controlPort ?? ""),
     });
 
@@ -179,6 +192,56 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
       if (!response.ok) {
         throw new Error(
           `failed to stop background graph on port ${controlPort}: ${response.status}`,
+        );
+      }
+      return;
+    }
+
+    if (values.status) {
+      const backgroundControlPort = controlPort ?? DEFAULT_CONTROL_PORT;
+      const url = new URL(`http://127.0.0.1:${backgroundControlPort}/status`);
+      const response = yield* until(fetch(url.toString(), { method: "GET" }));
+      if (!response.ok) {
+        throw new Error(
+          `failed to fetch status of background graph on port ${backgroundControlPort}: ${response.status}`,
+        );
+      }
+      const json = yield* until(response.json());
+      if (typeof json === "object" && json && "cwd" in json) {
+        console.log(
+          `cwd: ${json.cwd}\nservices:\n${
+            "services" in json
+              ? Object.entries(json.services as Record<string, { port?: number; pid?: number }>)
+                  .map(
+                    ([name, info]) =>
+                      `  ${name}: ${info.port ? `port ${info.port}` : ""}${info.pid ? `; pid ${info.pid}` : ""}`,
+                  )
+                  .join("\n")
+              : "no service info available"
+          }`,
+        );
+      }
+      return;
+    }
+
+    if (values.restart || values["restart-service"]) {
+      const backgroundControlPort = controlPort ?? DEFAULT_CONTROL_PORT;
+      const service = values["restart-service"] as string | undefined;
+      const url = new URL(`http://127.0.0.1:${backgroundControlPort}/restart`);
+      if (service) {
+        url.searchParams.set("service", service);
+      }
+      const response = yield* until(fetch(url.toString(), { method: "POST" }));
+      if (!response.ok) {
+        const text = yield* until(response.text());
+        throw new Error(
+          `failed to restart background graph on port ${backgroundControlPort}:\n  ${text}`,
+        );
+      }
+      const json = yield* until(response.json());
+      if (typeof json === "object" && json && "ok" in json && json.ok) {
+        console.log(
+          `restart request accepted for service '${service ?? "all"}' on background graph at port ${backgroundControlPort}`,
         );
       }
       return;

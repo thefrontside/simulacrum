@@ -68,6 +68,7 @@ export type ServiceGraphRunOptions = {
   controlPort?: number | undefined;
   exclude?: string[] | undefined;
   requestStop?: (() => void) | undefined;
+  requestRestart?: ((service?: string) => void) | undefined;
 };
 
 export type ServiceGraphRunner<S extends ServiceMap> = (
@@ -228,11 +229,23 @@ export function useServiceGraph<S extends ServiceMap>(
         };
       }
 
+      let restartRequested = withResolvers<string | undefined>("wait for a restart request");
+      function requestRestart(service?: string) {
+        if (service !== undefined && !(service in effectiveServices)) {
+          throw new Error(`unknown service '${service}'`);
+        }
+
+        const current = restartRequested;
+        restartRequested = withResolvers<string | undefined>("wait for a restart request");
+        current.resolve(service);
+      }
+
       const dataServiceProvided = yield* startDataService({
         data: options?.globalData ?? {},
         port: effectiveRunOptions.controlPort,
         getStatus: serializeStatus,
         requestStop: effectiveRunOptions.requestStop,
+        requestRestart,
       });
       yield* useAttributes({
         name: "serviceGraph",
@@ -321,6 +334,19 @@ export function useServiceGraph<S extends ServiceMap>(
           }
         });
       }
+
+      yield* spawn(function* () {
+        while (true) {
+          const service = yield* restartRequested.operation;
+          if (service === undefined) {
+            for (const name of Object.keys(effectiveServices)) {
+              yield* bumpService(name);
+            }
+          } else {
+            yield* bumpService(service);
+          }
+        }
+      });
 
       // small helper to await a service's dependencies
       function* waitDeps(name: string, restartCount: number): Operation<void> {

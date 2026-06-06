@@ -60,6 +60,12 @@ node ./simulators/service-graph.ts --background
 # stop a backgrounded graph later through the same control port
 node ./simulators/service-graph.ts --stop --control-port 4310
 
+# restart a backgrounded graph later through the same control port
+node ./simulators/service-graph.ts --restart --control-port 4310
+
+# restart a specific service in the graph
+node ./simulators/service-graph.ts --restart-service api --control-port 4310
+
 # stop a backgrounded graph on the default control port
 node ./simulators/service-graph.ts --stop
 ```

@@ -228,3 +228,49 @@ it("errors when backgrounding a graph that is already running and reports its cw
     yield* waitForFetchClosed(`http://127.0.0.1:${controlPort}/health`, 5000);
   });
 });
+
+it("can restart a backgrounded graph through the CLI", async () => {
+  const controlPort = await getAvailablePort();
+  const fixture = fileURLToPath(new URL("./fixtures/background-graph.ts", import.meta.url));
+  const packageCwd = fileURLToPath(new URL("..", import.meta.url));
+
+  const background = spawn(
+    process.execPath,
+    [fixture, "--background", "--control-port", String(controlPort)],
+    {
+      cwd: packageCwd,
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+
+  const startResult = await waitForExit(background);
+  assert.strictEqual(startResult.code, 0, startResult.stderr || startResult.stdout);
+
+  const restart = spawn(
+    process.execPath,
+    [fixture, "--restart", "--control-port", String(controlPort)],
+    {
+      cwd: packageCwd,
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+
+  const restartResult = await waitForExit(restart);
+  assert.strictEqual(restartResult.code, 0, restartResult.stderr || restartResult.stdout);
+
+  const healthRes = await fetch(`http://127.0.0.1:${controlPort}/health`);
+  assert.strictEqual(healthRes.status, 200);
+  assert.deepStrictEqual(await healthRes.json(), { ok: true, port: controlPort });
+
+  const stop = spawn(process.execPath, [fixture, "--stop", "--control-port", String(controlPort)], {
+    cwd: packageCwd,
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  const stopResult = await waitForExit(stop);
+  assert.strictEqual(stopResult.code, 0, stopResult.stderr || stopResult.stdout);
+
+  await run(function* () {
+    yield* waitForFetchClosed(`http://127.0.0.1:${controlPort}/health`, 5000);
+  });
+});

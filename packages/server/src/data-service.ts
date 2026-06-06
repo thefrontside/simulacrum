@@ -9,6 +9,7 @@ export type DataServiceOptions = {
   port?: number | undefined;
   getStatus?: () => unknown;
   requestStop?: (() => void) | undefined;
+  requestRestart?: ((service?: string) => void) | undefined;
 };
 
 function* listen(server: Server, port: number | undefined): Operation<void> {
@@ -143,6 +144,31 @@ export function startDataService(options: DataServiceOptions = {}): Operation<{ 
           });
           res.end(body);
           queueMicrotask(() => options.requestStop?.());
+          return;
+        }
+
+        if (req.method === "POST" && pathname === "/restart") {
+          if (!options.requestRestart) {
+            res.writeHead(501, { "content-type": "text/plain" });
+            res.end("restart not configured");
+            return;
+          }
+
+          const service = url.searchParams.get("service") ?? undefined;
+          try {
+            options.requestRestart(service);
+          } catch (error) {
+            res.writeHead(400, { "content-type": "text/plain" });
+            res.end(String(error));
+            return;
+          }
+
+          const body = JSON.stringify({ ok: true, restarting: true, service });
+          res.writeHead(202, {
+            "content-type": "application/json",
+            "content-length": String(Buffer.byteLength(body)),
+          });
+          res.end(body);
           return;
         }
 
