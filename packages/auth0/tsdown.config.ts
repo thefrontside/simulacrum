@@ -5,10 +5,8 @@ export default defineConfig({
   entry: "./src/index.ts",
   exports: { devExports: "development" },
   format: ["esm"],
-  dts: {
-    sourcemap: true,
-  },
   copy: [{ from: "src/views/public", to: "dist", flatten: false }],
+  sourcemap: false,
   // not really required and can mangle things
   minify: false,
   // don't bundle up as have some relative path imports for static assets

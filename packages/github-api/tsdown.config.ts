@@ -4,10 +4,8 @@ export default defineConfig({
   name: "github-api",
   entry: "./src/index.ts",
   exports: { devExports: "development" },
-  format: ["esm", "cjs"],
-  dts: {
-    sourcemap: true,
-  },
+  format: ["esm"],
+  sourcemap: false,
   // handles dirname
   shims: true,
   minify: false,
