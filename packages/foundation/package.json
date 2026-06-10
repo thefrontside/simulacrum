@@ -69,7 +69,6 @@
     "express": "^5.2.1",
     "fdir": "^6.5.0",
     "http-proxy-middleware": "^3.0.5",
-    "lodash": "^4.17.23",
     "openapi-backend": "^5.17.0",
     "starfx": "0.16.0"
   },

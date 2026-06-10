@@ -9,13 +9,11 @@ export default defineConfig({
   },
   exports: { devExports: "development" },
   format: ["esm"],
-  // handles dirname
-  shims: true,
   minify: false,
+  unused: true,
   // don't bundle up as have some relative path imports for static assets
   unbundle: true,
   // runs with @arethetypeswrong/core which checks types
-  // TODO fails?
-  // attw: true,
+  attw: { profile: "esm-only" },
   publint: true,
 });

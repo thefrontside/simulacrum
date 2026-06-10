@@ -33,11 +33,14 @@
     "tsc": "pnpm -r --if-present run tsc"
   },
   "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.3",
     "@types/node": "^24.0.0",
     "oxfmt": "^0.43.0",
     "oxlint": "^1.58.0",
+    "publint": "^0.3.21",
     "tsdown": "^0.22.2",
     "typescript": "5.8.3",
+    "unplugin-unused": "^0.5.7",
     "vitest": "^3.2.4"
   },
   "engines": {

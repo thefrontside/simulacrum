@@ -10,13 +10,12 @@ export default defineConfig({
   exports: { devExports: "development" },
   format: ["esm"],
   copy: [{ from: "src/views/public", to: "dist", flatten: false }],
-  shims: true,
   // not really required and can mangle things
   minify: false,
   // don't bundle up as have some relative path imports for static assets
   unbundle: true,
+  unused: true,
   // runs with @arethetypeswrong/core which checks types
-  // TODO fails?
-  // attw: true,
+  attw: { profile: "esm-only" },
   publint: true,
 });
