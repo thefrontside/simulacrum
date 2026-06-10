@@ -26,8 +26,6 @@
     "src"
   ],
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
   "typesVersions": {
     "*": {
@@ -40,17 +38,13 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.mjs"
     },
     "./package.json": "./package.json"
   },
   "publishConfig": {
     "exports": {
-      ".": {
-        "import": "./dist/index.mjs",
-        "require": "./dist/index.cjs"
-      },
+      ".": "./dist/index.mjs",
       "./package.json": "./package.json"
     }
   },
@@ -75,8 +69,5 @@
   "devDependencies": {
     "@simulacrum/foundation-simulator": "workspace:^",
     "@types/picomatch": "^4.0.3"
-  },
-  "inlinedDependencies": {
-    "starfx": "0.16.0"
   }
 }
