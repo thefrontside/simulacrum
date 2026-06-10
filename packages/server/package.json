@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/server",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Helpers and control plane to handle simulators and observability",
   "keywords": [
     "emulation",

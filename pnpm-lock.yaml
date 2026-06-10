@@ -42,8 +42,8 @@ importers:
         specifier: ^9.3.0
         version: 9.9.0
       '@simulacrum/foundation-simulator':
-        specifier: workspace:^
-        version: link:../foundation
+        specifier: ^0
+        version: 0.6.1(ajv@8.20.0)(picomatch@4.0.4)
       '@simulacrum/server':
         specifier: workspace:^
         version: link:../server
@@ -151,8 +151,8 @@ importers:
         specifier: ^10.9.1
         version: 10.11.0(graphql@16.13.2)
       '@simulacrum/foundation-simulator':
-        specifier: workspace:^
-        version: link:../foundation
+        specifier: ^0
+        version: 0.6.1(ajv@8.20.0)(picomatch@4.0.4)
       assert-ts:
         specifier: ^0.3.4
         version: 0.3.4
@@ -1666,6 +1666,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@simulacrum/foundation-simulator@0.6.1':
+    resolution: {integrity: sha512-y7H63RBg+9ky+0V5X9qPhD6jrYxkEX2kSKbVc9wLqHw1uNCsT/HzSSXUljaJlFxpaQe1dSUo1vSWE+1cgt2gKw==}
+
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
 
@@ -2186,6 +2189,10 @@ packages:
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
+  effection@3.6.1:
+    resolution: {integrity: sha512-ogsuH/cgxfOOaVUf53pYqhPJth4WhPlva0hGb4Roh6cZhttMoanMqwADkDk9ych28lKuQgntpCszbFRyRFifqg==}
+    engines: {node: '>= 16'}
+
   effection@4.0.2:
     resolution: {integrity: sha512-O8WMGP10nPuJDwbNGILcaCNWS+CvDYjcdsUSD79nWZ+WtUQ8h1MEV7JJwCSZCSeKx8+TdEaZ/8r6qPTR2o/o8w==}
     engines: {node: '>= 16'}
@@ -2475,6 +2482,9 @@ packages:
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
+
+  immer@10.2.0:
+    resolution: {integrity: sha512-d/+XTN3zfODyjr89gM3mPq1WNX2B8pYsu7eORitdwyA2sBubnTl3laYlBk4sXY5FUa5qTZGBDPJICVbvqzjlbw==}
 
   immer@11.1.4:
     resolution: {integrity: sha512-XREFCPo6ksxVzP4E0ekD5aMdf8WMwmdNaz6vuvxgI40UaEiu6q3p8X52aU6GdyvLY3XXX/8R7JOTXStz/nBbRw==}
@@ -3182,6 +3192,20 @@ packages:
 
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
+
+  starfx@0.15.0:
+    resolution: {integrity: sha512-qoTrShVhtx5kdydPxN6Z6iu+J/GchQqg/7RF2TOdYZTY+AQ7g4tDLbPTn1ch2ijIv0F9U3NcwPfrmzNkyez1lA==}
+    peerDependencies:
+      react: '>=18'
+      react-dom: '>=18'
+      react-redux: 9.x
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      react-redux:
+        optional: true
 
   starfx@0.16.0:
     resolution: {integrity: sha512-RFADvJf25hO/wIobZh43ALRo2qELOzb8FlvXlzQbpinNkDEPUWdftCz7Q2uh85vpU+BaJmH/gd/Qo/iIN5nTXw==}
@@ -4929,6 +4953,25 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.60.1':
     optional: true
 
+  '@simulacrum/foundation-simulator@0.6.1(ajv@8.20.0)(picomatch@4.0.4)':
+    dependencies:
+      ajv-formats: 3.0.1(ajv@8.20.0)
+      cors: 2.8.6
+      defu: 6.1.4
+      express: 5.2.1
+      fdir: 6.5.0(picomatch@4.0.4)
+      http-proxy-middleware: 3.0.5
+      lodash: 4.17.23
+      openapi-backend: 5.17.0
+      starfx: 0.15.0
+    transitivePeerDependencies:
+      - ajv
+      - picomatch
+      - react
+      - react-dom
+      - react-redux
+      - supports-color
+
   '@tybys/wasm-util@0.10.1':
     dependencies:
       tslib: 2.8.1
@@ -5461,6 +5504,8 @@ snapshots:
 
   ee-first@1.1.1: {}
 
+  effection@3.6.1: {}
+
   effection@4.0.2: {}
 
   electron-to-chromium@1.5.329: {}
@@ -5832,6 +5877,8 @@ snapshots:
   ieee754@1.2.1: {}
 
   ignore@5.3.2: {}
+
+  immer@10.2.0: {}
 
   immer@11.1.4: {}
 
@@ -6594,6 +6641,12 @@ snapshots:
       tslib: 2.8.1
 
   stackback@0.0.2: {}
+
+  starfx@0.15.0:
+    dependencies:
+      effection: 3.6.1
+      immer: 10.2.0
+      reselect: 5.1.1
 
   starfx@0.16.0:
     dependencies:

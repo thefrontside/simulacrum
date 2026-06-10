@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/github-api-simulator",
-  "version": "0.6.4",
+  "version": "0.7.0",
   "description": "Provides common functionality to frontend app and plugins.",
   "keywords": [
     "emulation",
@@ -66,7 +66,7 @@
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
     "@graphql-tools/utils": "^10.9.1",
-    "@simulacrum/foundation-simulator": "workspace:^",
+    "@simulacrum/foundation-simulator": "^0",
     "assert-ts": "^0.3.4",
     "express": "^5.2.1",
     "graphql": "^16.9.0",

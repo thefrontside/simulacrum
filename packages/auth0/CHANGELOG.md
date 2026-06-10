@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.12.0]
+
+- [`9ef139f`](https://github.com/thefrontside/simulacrum/commit/9ef139f80b0403b4b66163ee7005b552640394c2) ([#359](https://github.com/thefrontside/simulacrum/pull/359) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Enabling oxfmt and oxlint for more consistency.
+- [`a3a8108`](https://github.com/thefrontside/simulacrum/commit/a3a8108f58e2523a3700b19900abbc53552c3e15) ([#357](https://github.com/thefrontside/simulacrum/pull/357) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Swap to pnpm within monorepo.
+
+### Enhancements
+
+- [`a3a8108`](https://github.com/thefrontside/simulacrum/commit/a3a8108f58e2523a3700b19900abbc53552c3e15) ([#357](https://github.com/thefrontside/simulacrum/pull/357) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Pass in global fetch to rules runner.
+- [`fd1d673`](https://github.com/thefrontside/simulacrum/commit/fd1d6734ead5b723e8d83962775851517778b695) ([#350](https://github.com/thefrontside/simulacrum/pull/350) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Upgrades the foundation simulator to `starfx@0.16.0` which in turn upgrades to `effection@^4`. Highly unlikely to be a breaking change, but bumping a minor for safety.
+
 ## \[0.11.4]
 
 - [`86957dd`](https://github.com/thefrontside/simulacrum/commit/86957dd0e8ecd8a6bc536fd289df5e393c1774e3) ([#352](https://github.com/thefrontside/simulacrum/pull/352) by [@a-kriya](https://github.com/thefrontside/simulacrum/../../a-kriya)) preserve user-provided id in initialState instead of overwriting
