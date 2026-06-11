@@ -71,8 +71,8 @@
     "cosmiconfig": "^9.0.0",
     "express": "^5.2.1",
     "html-entities": "^2.5.2",
+    "jose": "^5.9.6",
     "jsesc": "^3.1.0",
-    "jsonwebtoken": "^9.0.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -81,7 +81,6 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsesc": "^3.0.3",
-    "@types/jsonwebtoken": "^9.0.9",
     "@types/keygrip": "^1.0.4",
     "effection": "^4.0.0",
     "keygrip": "^1.1.0"

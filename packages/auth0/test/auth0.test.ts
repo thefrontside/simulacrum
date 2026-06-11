@@ -4,11 +4,11 @@ import type { FoundationSimulatorListening } from "@simulacrum/foundation-simula
 
 import { stringify } from "querystring";
 import { decode, encode } from "base64-url";
-import jwt from "jsonwebtoken";
+import { decodeJwt, type JWTPayload } from "jose";
 
 import Keygrip from "keygrip";
 import { removeTrailingSlash } from "../src/handlers/url.ts";
-import type { AccessToken, IdToken, TokenSet } from "../src/types.ts";
+import type { TokenSet } from "../src/types.ts";
 import { epochTimeToLocalDate } from "../src/auth/date.ts";
 import { frontendSimulation } from "./helpers.ts";
 
@@ -242,8 +242,8 @@ describe("Auth0 simulator", () => {
     });
 
     describe("valid token", () => {
-      let idToken: IdToken;
-      let accessToken: AccessToken;
+      let idToken: JWTPayload;
+      let accessToken: JWTPayload;
       beforeEach(async () => {
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
           method: "POST",
@@ -263,25 +263,21 @@ describe("Auth0 simulator", () => {
           access_token: string;
         };
 
-        idToken = jwt.decode(json.id_token, {
-          complete: true,
-        }) as unknown as IdToken;
-        accessToken = jwt.decode(json.access_token, {
-          complete: true,
-        }) as unknown as AccessToken;
+        idToken = decodeJwt(json.id_token);
+        accessToken = decodeJwt(json.access_token);
       });
 
       it("should return an iss field with a forward slash", () => {
-        expect(idToken.payload.iss).toBe(`${auth0Url}/`);
+        expect(idToken.iss).toBe(`${auth0Url}/`);
       });
 
       it("token should contain a valid email", () => {
-        expect(idToken.payload.email).toBe(person.email);
+        expect(idToken.email).toBe(person.email);
       });
 
       it("sets the access token and id token iat fields in the past", () => {
         expect(
-          [accessToken.payload.iat, idToken.payload.iat].every(
+          ([accessToken.iat, idToken.iat] as number[]).every(
             (d) => epochTimeToLocalDate(d) < new Date(),
           ),
         ).toBe(true);
@@ -309,8 +305,8 @@ describe("Auth0 simulator", () => {
     });
 
     describe("grant_type=password", () => {
-      let idToken: IdToken;
-      let accessToken: AccessToken;
+      let idToken: JWTPayload;
+      let accessToken: JWTPayload;
       beforeEach(async () => {
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
           method: "POST",
@@ -336,25 +332,21 @@ describe("Auth0 simulator", () => {
           access_token: string;
         };
 
-        idToken = jwt.decode(json.id_token, {
-          complete: true,
-        }) as unknown as IdToken;
-        accessToken = jwt.decode(json.access_token, {
-          complete: true,
-        }) as unknown as AccessToken;
+        idToken = decodeJwt(json.id_token);
+        accessToken = decodeJwt(json.access_token);
       });
 
       it("id_token should contain client_id as aud", () => {
-        expect(idToken.payload.aud).toBe("test-id-to-confirm-it-uses-this");
+        expect(idToken.aud).toBe("test-id-to-confirm-it-uses-this");
       });
 
       it("access_token should contain audience as aud", () => {
-        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
+        expect(accessToken.aud).toBe("https://thefrontside.auth0.com/api/v0/");
       });
     });
 
     describe("grant_type=client_credentials", () => {
-      let accessToken: AccessToken;
+      let accessToken: JWTPayload;
       beforeEach(async () => {
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
           method: "POST",
@@ -378,19 +370,17 @@ describe("Auth0 simulator", () => {
           access_token: string;
         };
 
-        accessToken = jwt.decode(json.access_token, {
-          complete: true,
-        }) as unknown as AccessToken;
+        accessToken = decodeJwt(json.access_token);
       });
 
       it("access_token should contain audience as aud", () => {
-        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
+        expect(accessToken.aud).toBe("https://thefrontside.auth0.com/api/v0/");
       });
     });
 
     describe("grant_type=authorization_code", () => {
-      let idToken: IdToken;
-      let accessToken: AccessToken;
+      let idToken: JWTPayload;
+      let accessToken: JWTPayload;
       beforeEach(async () => {
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
           method: "POST",
@@ -415,26 +405,22 @@ describe("Auth0 simulator", () => {
           access_token: string;
         };
 
-        idToken = jwt.decode(json.id_token, {
-          complete: true,
-        }) as unknown as IdToken;
-        accessToken = jwt.decode(json.access_token, {
-          complete: true,
-        }) as unknown as AccessToken;
+        idToken = decodeJwt(json.id_token);
+        accessToken = decodeJwt(json.access_token);
       });
 
       it("id_token should contain client_id as aud", () => {
-        expect(idToken.payload.aud).toBe("test-id-to-confirm-it-uses-this");
+        expect(idToken.aud).toBe("test-id-to-confirm-it-uses-this");
       });
 
       it("access_token should contain audience as aud", () => {
-        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
+        expect(accessToken.aud).toBe("https://thefrontside.auth0.com/api/v0/");
       });
     });
 
     describe("grant_type=http://auth0.com/oauth/grant-type/passwordless/otp", () => {
-      let idToken: IdToken;
-      let accessToken: AccessToken;
+      let idToken: JWTPayload;
+      let accessToken: JWTPayload;
 
       beforeEach(async () => {
         let res: Response = await fetch(`${auth0Url}/oauth/token`, {
@@ -460,27 +446,23 @@ describe("Auth0 simulator", () => {
           access_token: string;
         };
 
-        idToken = jwt.decode(json.id_token, {
-          complete: true,
-        }) as unknown as IdToken;
-        accessToken = jwt.decode(json.access_token, {
-          complete: true,
-        }) as unknown as AccessToken;
+        idToken = decodeJwt(json.id_token);
+        accessToken = decodeJwt(json.access_token);
       });
 
       it("should return tokens for valid passwordless OTP request", () => {
         expect(idToken).toBeDefined();
         expect(accessToken).toBeDefined();
-        expect(idToken.payload.email).toBe(person.email);
-        expect(accessToken.payload.sub).toBeDefined();
+        expect(idToken.email).toBe(person.email);
+        expect(accessToken.sub).toBeDefined();
       });
 
       it("id_token should contain client_id as aud", () => {
-        expect(idToken.payload.aud).toBe("test-id-to-confirm-it-uses-this");
+        expect(idToken.aud).toBe("test-id-to-confirm-it-uses-this");
       });
 
       it("access_token should contain audience as aud", () => {
-        expect(accessToken.payload.aud).toBe("https://thefrontside.auth0.com/api/v0/");
+        expect(accessToken.aud).toBe("https://thefrontside.auth0.com/api/v0/");
       });
 
       it("should fail with invalid username", async () => {
@@ -517,7 +499,7 @@ describe("Auth0 simulator", () => {
         });
 
         expect(res.ok).toBe(false);
-        expect(res.status).toBe(500);
+        expect(res.status).toBe(401);
       });
     });
   });
@@ -569,11 +551,9 @@ describe("Auth0 simulator", () => {
 
         const json = (await res.json()) as { access_token: string };
 
-        let accessToken = jwt.decode(json.access_token, {
-          complete: true,
-        }) as unknown as AccessToken;
+        let accessToken = decodeJwt(json.access_token);
 
-        expect(accessToken.payload.scope).toBe("custom:access");
+        expect(accessToken.scope).toBe("custom:access");
       });
 
       it("based on different clientID in req.body", async () => {
@@ -597,11 +577,9 @@ describe("Auth0 simulator", () => {
           access_token: string;
         };
 
-        let accessToken = jwt.decode(json.access_token, {
-          complete: true,
-        }) as unknown as AccessToken;
+        let accessToken = decodeJwt(json.access_token);
 
-        expect(accessToken.payload.scope).toBe("more-custom:access");
+        expect(accessToken.scope).toBe("more-custom:access");
       });
 
       it("based on clientID and specific audience in req.body", async () => {
@@ -622,11 +600,9 @@ describe("Auth0 simulator", () => {
 
         const json = (await res.json()) as { access_token: string };
 
-        let accessToken = jwt.decode(json.access_token, {
-          complete: true,
-        }) as unknown as AccessToken;
+        let accessToken = decodeJwt(json.access_token);
 
-        expect(accessToken.payload.scope).toBe("custom:special-access");
+        expect(accessToken.scope).toBe("custom:special-access");
       });
 
       it("due to fallback scope", async () => {
@@ -646,11 +622,9 @@ describe("Auth0 simulator", () => {
 
         const json = (await res.json()) as { access_token: string };
 
-        let accessToken = jwt.decode(json.access_token, {
-          complete: true,
-        }) as unknown as AccessToken;
+        let accessToken = decodeJwt(json.access_token);
 
-        expect(accessToken.payload.scope).toBe("openid profile email offline_access");
+        expect(accessToken.scope).toBe("openid profile email offline_access");
       });
     });
 
