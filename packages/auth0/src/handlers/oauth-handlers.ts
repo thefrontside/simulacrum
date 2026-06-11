@@ -46,14 +46,20 @@ export const createTokens = async ({
 
   if (grant_type === "client_credentials") {
     return {
-      access_token: await new SignJWT(accessToken)
+      access_token: await new SignJWT({
+        ...accessToken,
+        // see https://community.auth0.com/t/sub-claim-format-for-m2m-tokens/39451
+        sub: `${body.client_id ?? clientID}@clients`,
+        // see https://community.auth0.com/t/difference-between-scopes-and-permissions-in-access-token/28900
+        gty: "client-credentials",
+      })
         .setProtectedHeader({ alg: "RS256" })
         .setIssuedAt()
         .setIssuer(iss)
         .setAudience(audience)
         .setExpirationTime(`${expiresInHours}h`)
         .sign(signingKey),
-      expires_in: 86400, // EXPIRATION_TIME,
+      expires_in: expiresAt(expiresInHours),
     };
   }
   // TODO: check refresh_token expiry date
@@ -123,7 +129,7 @@ export const createTokens = async ({
           nonce,
         })
       : undefined,
-    expires_in: expiresAt(expiresInHours), // EXPIRATION_TIME,
+    expires_in: expiresAt(expiresInHours),
   };
 };
 
