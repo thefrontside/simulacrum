@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, afterEach, expect } from "vitest";
 import { simulation } from "../src/index.ts";
 import type { FoundationSimulatorListening } from "@simulacrum/foundation-simulator";
-import jwt from "jsonwebtoken";
+import { decodeJwt } from "jose";
 import { assert } from "assert-ts";
 import { frontendSimulation } from "./helpers.ts";
 
@@ -104,15 +104,14 @@ describe("rules", () => {
       expect(res.ok).toBe(true);
       let token = (await res.json()) as unknown as { access_token: string };
 
-      const accessToken = jwt.decode(token.access_token, {
-        complete: true,
-      }) as unknown as { payload: Record<string, unknown> };
+      const accessToken = decodeJwt(token.access_token);
 
       assert(!!accessToken);
 
-      expect(accessToken.payload["https://example.nl/roles"]).toEqual(["example"]);
+      console.log(accessToken);
+      expect(accessToken["https://example.nl/roles"]).toEqual(["example"]);
 
-      expect(accessToken.payload["https://example.nl/email"]).toEqual("paulwaters.white@yahoo.com");
+      expect(accessToken["https://example.nl/email"]).toEqual("paulwaters.white@yahoo.com");
     });
   });
 
@@ -142,12 +141,10 @@ describe("rules", () => {
 
       let token = (await res.json()) as unknown as { id_token: string };
 
-      let idToken = jwt.decode(token.id_token, {
-        complete: true,
-      }) as unknown as { payload: Record<string, unknown> };
+      let idToken = decodeJwt(token.id_token);
 
-      expect(idToken.payload.picture).toContain("https://i.pravatar.cc");
-      expect(idToken.payload.name).toBe(person.name);
+      expect(idToken.picture).toContain("https://i.pravatar.cc");
+      expect(idToken.name).toBe(person.name);
     });
   });
 
@@ -177,11 +174,9 @@ describe("rules", () => {
 
       const token = (await res.json()) as unknown as { id_token: string };
 
-      let idToken = jwt.decode(token.id_token, {
-        complete: true,
-      }) as unknown as { payload: Record<string, unknown> };
-      expect(idToken.payload.name).toBe(otherPerson.name);
-      expect(idToken.payload.trustProfile).toContain("friend");
+      let idToken = decodeJwt(token.id_token);
+      expect(idToken.name).toBe(otherPerson.name);
+      expect(idToken.trustProfile).toContain("friend");
       await server.ensureClose();
     });
 
@@ -209,11 +204,9 @@ describe("rules", () => {
 
       const token = (await res.json()) as unknown as { id_token: string };
 
-      let idToken = jwt.decode(token.id_token, {
-        complete: true,
-      }) as unknown as { payload: Record<string, unknown> };
-      expect(idToken.payload.name).toBe(otherPerson.name);
-      expect(idToken.payload.trustProfile).toContain("foe");
+      let idToken = decodeJwt(token.id_token);
+      expect(idToken.name).toBe(otherPerson.name);
+      expect(idToken.trustProfile).toContain("foe");
       await server.ensureClose();
     });
   });
@@ -237,17 +230,15 @@ describe("rules", () => {
 
         const token = (await res.json()) as unknown as { id_token: string };
 
-        const idToken = jwt.decode(token.id_token, {
-          complete: true,
-        }) as unknown as { payload: Record<string, unknown> };
-        expect(idToken.payload.name).toBe(person.name);
+        const idToken = decodeJwt(token.id_token);
+        expect(idToken.name).toBe(person.name);
 
-        expect(idToken?.payload.checkURLOne).toBe("https://frontside.com");
-        expect(idToken?.payload.checkURLOneStatus).toBe(200);
-        expect(idToken?.payload.checkURLOneText).toBe("frontside");
-        expect(idToken?.payload.checkURLTwo).toBe("https://frontside.com/effection");
-        expect(idToken?.payload.checkURLTwoStatus).toBe(200);
-        expect(idToken?.payload.checkURLTwoText).toBe("effection");
+        expect(idToken?.checkURLOne).toBe("https://frontside.com");
+        expect(idToken?.checkURLOneStatus).toBe(200);
+        expect(idToken?.checkURLOneText).toBe("frontside");
+        expect(idToken?.checkURLTwo).toBe("https://frontside.com/effection");
+        expect(idToken?.checkURLTwoStatus).toBe(200);
+        expect(idToken?.checkURLTwoText).toBe("effection");
         await server.ensureClose();
       }, 15000);
     });
@@ -271,18 +262,16 @@ describe("rules", () => {
 
         const token = (await res.json()) as unknown as { id_token: string };
 
-        const idToken = jwt.decode(token.id_token, {
-          complete: true,
-        }) as unknown as { payload: Record<string, unknown> };
-        expect(idToken.payload.name).toBe(person.name);
+        const idToken = decodeJwt(token.id_token);
+        expect(idToken.name).toBe(person.name);
 
-        expect(idToken?.payload.checkURLOne).toBe("https://frontside.com");
-        expect(idToken?.payload.checkURLOneStatus).toBe(200);
-        expect(idToken?.payload.checkURLOneText).toBe("frontside");
+        expect(idToken?.checkURLOne).toBe("https://frontside.com");
+        expect(idToken?.checkURLOneStatus).toBe(200);
+        expect(idToken?.checkURLOneText).toBe("frontside");
 
-        expect(idToken?.payload.checkURLTwo).toBe("https://frontside.com/effection");
-        expect(idToken?.payload.checkURLTwoStatus).toBe(200);
-        expect(idToken?.payload.checkURLTwoText).toBe("effection");
+        expect(idToken?.checkURLTwo).toBe("https://frontside.com/effection");
+        expect(idToken?.checkURLTwoStatus).toBe(200);
+        expect(idToken?.checkURLTwoText).toBe("effection");
         await server.ensureClose();
       }, 15000);
     });
