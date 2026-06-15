@@ -4,6 +4,12 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    effection:
+      specifier: ^4.0.3
+      version: 4.0.3
+
 importers:
 
   .:
@@ -42,11 +48,8 @@ importers:
         specifier: ^9.3.0
         version: 9.9.0
       '@simulacrum/foundation-simulator':
-        specifier: ^0
-        version: 0.6.1(ajv@8.20.0)(picomatch@4.0.4)
-      '@simulacrum/server':
-        specifier: workspace:^
-        version: link:../server
+        specifier: ^0.7.0
+        version: 0.7.0(ajv@8.20.0)(picomatch@4.0.4)
       assert-ts:
         specifier: ^0.3.4
         version: 0.3.4
@@ -78,6 +81,9 @@ importers:
         specifier: ^3.24.1
         version: 3.25.76
     devDependencies:
+      '@simulacrum/server':
+        specifier: workspace:^
+        version: link:../server
       '@types/base64-url':
         specifier: ^2.2.2
         version: 2.2.2
@@ -97,8 +103,8 @@ importers:
         specifier: ^1.0.4
         version: 1.0.6
       effection:
-        specifier: ^4.0.0
-        version: 4.0.2
+        specifier: 'catalog:'
+        version: 4.0.3
       keygrip:
         specifier: ^1.1.0
         version: 1.1.0
@@ -114,8 +120,8 @@ importers:
         specifier: ^2.8.6
         version: 2.8.6
       defu:
-        specifier: ^6.1.4
-        version: 6.1.4
+        specifier: ^6.1.7
+        version: 6.1.7
       express:
         specifier: ^5.2.1
         version: 5.2.1
@@ -129,8 +135,8 @@ importers:
         specifier: ^5.17.0
         version: 5.17.0
       starfx:
-        specifier: 0.16.0
-        version: 0.16.0
+        specifier: ^0.16.1
+        version: 0.16.1
     devDependencies:
       '@types/cors':
         specifier: ^2.8.19
@@ -148,8 +154,8 @@ importers:
         specifier: ^10.9.1
         version: 10.11.0(graphql@16.13.2)
       '@simulacrum/foundation-simulator':
-        specifier: ^0
-        version: 0.6.1(ajv@8.20.0)(picomatch@4.0.4)
+        specifier: ^0.7.0
+        version: 0.7.0(ajv@8.20.0)(picomatch@4.0.4)
       assert-ts:
         specifier: ^0.3.4
         version: 0.3.4
@@ -187,23 +193,23 @@ importers:
   packages/server:
     dependencies:
       '@effectionx/context-api':
-        specifier: ~0.6.0
-        version: 0.6.0(effection@4.0.2)
+        specifier: ^0.6.0
+        version: 0.6.0(effection@4.0.3)
       '@effectionx/process':
-        specifier: ~0.8.0
-        version: 0.8.0(effection@4.0.2)
+        specifier: ^0.8.1
+        version: 0.8.1(effection@4.0.3)
       '@effectionx/stream-helpers':
-        specifier: ~0.8.2
-        version: 0.8.2(effection@4.0.2)
+        specifier: ^0.8.2
+        version: 0.8.2(effection@4.0.3)
       '@effectionx/timebox':
-        specifier: ~0.4.3
-        version: 0.4.3(effection@4.0.2)
+        specifier: ^0.4.3
+        version: 0.4.3(effection@4.0.3)
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
       effection:
-        specifier: ^4.0.2
-        version: 4.0.2
+        specifier: 'catalog:'
+        version: 4.0.3
       picomatch:
         specifier: ^4.0.4
         version: 4.0.4
@@ -340,11 +346,6 @@ packages:
   '@braidai/lang@1.1.2':
     resolution: {integrity: sha512-qBcknbBufNHlui137Hft8xauQMTZDKdophmLFv05r2eNmdIv/MlPuP4TdUknHG68UdWLgVZwgxVe735HzJNIwA==}
 
-  '@effectionx/context-api@0.5.3':
-    resolution: {integrity: sha512-OqS/7RGZtIoiRsL6dwetKLvS8F3NLiVU3iKlBbqxI+NPKXs/ackKn294eGlHUHx49Y89fUVU6YPalj2UbxwBzA==}
-    peerDependencies:
-      effection: ^3 || ^4
-
   '@effectionx/context-api@0.6.0':
     resolution: {integrity: sha512-t004qvlkJDMB6EhHP1lOQ97PeIn90m7cv4+wsRPnx4YBem+pJzTL+Sm1KWbKMjMeFJz4oqllUWuBJZsCi+nuTw==}
     peerDependencies:
@@ -358,8 +359,8 @@ packages:
     peerDependencies:
       effection: ^3 || ^4
 
-  '@effectionx/process@0.8.0':
-    resolution: {integrity: sha512-vwbK48JJl+I5t2G+eQyoLCoTp9IU3zkhGd+LmdxIS9PZp/v/j5Kq13eN4FvrZGx/KBYgibr57RBzu3F+Uf+uNw==}
+  '@effectionx/process@0.8.1':
+    resolution: {integrity: sha512-xyXlFja0Ill80lQ3IYfksXtJkqVmWuUOogRn/qlHWCAGlZj+MGGF8gOFbyzk/3Kx4pj14riVGgF/cyT5XCzqDw==}
     peerDependencies:
       effection: ^3 || ^4
 
@@ -1663,8 +1664,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@simulacrum/foundation-simulator@0.6.1':
-    resolution: {integrity: sha512-y7H63RBg+9ky+0V5X9qPhD6jrYxkEX2kSKbVc9wLqHw1uNCsT/HzSSXUljaJlFxpaQe1dSUo1vSWE+1cgt2gKw==}
+  '@simulacrum/foundation-simulator@0.7.0':
+    resolution: {integrity: sha512-CoTh/5oBZ4eECwE2Vy4byys13nTyGJCI80ylO8I8VHZX85sHhTyWWSy5KnE4GVOWV4Np0NnkIAZWko3+wQC6uw==}
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -2122,9 +2123,6 @@ packages:
   defaults@1.0.4:
     resolution: {integrity: sha512-eFuaLoy/Rxalv2kr+lqMlUnrDWV+3j4pljOIJgLIhI058IQfWJ7vXhyEIHu+HtC738klGALYxOKDO0bQP3tg8A==}
 
-  defu@6.1.4:
-    resolution: {integrity: sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==}
-
   defu@6.1.7:
     resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
 
@@ -2174,12 +2172,8 @@ packages:
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
-  effection@3.6.1:
-    resolution: {integrity: sha512-ogsuH/cgxfOOaVUf53pYqhPJth4WhPlva0hGb4Roh6cZhttMoanMqwADkDk9ych28lKuQgntpCszbFRyRFifqg==}
-    engines: {node: '>= 16'}
-
-  effection@4.0.2:
-    resolution: {integrity: sha512-O8WMGP10nPuJDwbNGILcaCNWS+CvDYjcdsUSD79nWZ+WtUQ8h1MEV7JJwCSZCSeKx8+TdEaZ/8r6qPTR2o/o8w==}
+  effection@4.0.3:
+    resolution: {integrity: sha512-bmzMdw1+q6d+O6J2iU314cXofWsZEDmeF2nqOjgOJe7R964RDJKamXdoO3iBvmMa7CJhgNcjZHow1ILzUP8Bjg==}
     engines: {node: '>= 16'}
 
   electron-to-chromium@1.5.329:
@@ -2467,9 +2461,6 @@ packages:
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
-
-  immer@10.2.0:
-    resolution: {integrity: sha512-d/+XTN3zfODyjr89gM3mPq1WNX2B8pYsu7eORitdwyA2sBubnTl3laYlBk4sXY5FUa5qTZGBDPJICVbvqzjlbw==}
 
   immer@11.1.4:
     resolution: {integrity: sha512-XREFCPo6ksxVzP4E0ekD5aMdf8WMwmdNaz6vuvxgI40UaEiu6q3p8X52aU6GdyvLY3XXX/8R7JOTXStz/nBbRw==}
@@ -3142,12 +3133,12 @@ packages:
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
-  starfx@0.15.0:
-    resolution: {integrity: sha512-qoTrShVhtx5kdydPxN6Z6iu+J/GchQqg/7RF2TOdYZTY+AQ7g4tDLbPTn1ch2ijIv0F9U3NcwPfrmzNkyez1lA==}
+  starfx@0.16.0:
+    resolution: {integrity: sha512-RFADvJf25hO/wIobZh43ALRo2qELOzb8FlvXlzQbpinNkDEPUWdftCz7Q2uh85vpU+BaJmH/gd/Qo/iIN5nTXw==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
-      react-redux: 9.x
+      react-redux: ^9
     peerDependenciesMeta:
       react:
         optional: true
@@ -3156,8 +3147,8 @@ packages:
       react-redux:
         optional: true
 
-  starfx@0.16.0:
-    resolution: {integrity: sha512-RFADvJf25hO/wIobZh43ALRo2qELOzb8FlvXlzQbpinNkDEPUWdftCz7Q2uh85vpU+BaJmH/gd/Qo/iIN5nTXw==}
+  starfx@0.16.1:
+    resolution: {integrity: sha512-qYAGHJJCYkBChTu9ZSmNTdzvNMDC0Hds+ecNh3TpTSCIqCi15U2+CJ+jI37b6TZuPG76+CUxFbzP+BA+qUb1TQ==}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
@@ -3723,52 +3714,47 @@ snapshots:
 
   '@braidai/lang@1.1.2': {}
 
-  '@effectionx/context-api@0.5.3(effection@4.0.2)':
+  '@effectionx/context-api@0.6.0(effection@4.0.3)':
     dependencies:
       '@effectionx/middleware': 0.1.1
-      effection: 4.0.2
-
-  '@effectionx/context-api@0.6.0(effection@4.0.2)':
-    dependencies:
-      '@effectionx/middleware': 0.1.1
-      effection: 4.0.2
+      effection: 4.0.3
 
   '@effectionx/middleware@0.1.1': {}
 
-  '@effectionx/node@0.2.4(effection@4.0.2)':
+  '@effectionx/node@0.2.4(effection@4.0.3)':
     dependencies:
-      effection: 4.0.2
+      effection: 4.0.3
 
-  '@effectionx/process@0.8.0(effection@4.0.2)':
+  '@effectionx/process@0.8.1(effection@4.0.3)':
     dependencies:
-      '@effectionx/context-api': 0.5.3(effection@4.0.2)
-      '@effectionx/node': 0.2.4(effection@4.0.2)
-      '@effectionx/scope-eval': 0.1.3(effection@4.0.2)
+      '@effectionx/context-api': 0.6.0(effection@4.0.3)
+      '@effectionx/node': 0.2.4(effection@4.0.3)
+      '@effectionx/scope-eval': 0.1.3(effection@4.0.3)
       cross-spawn: 7.0.6
       ctrlc-windows: 2.2.0
-      effection: 4.0.2
+      effection: 4.0.3
       shellwords-ts: 3.0.1
 
-  '@effectionx/scope-eval@0.1.3(effection@4.0.2)':
+  '@effectionx/scope-eval@0.1.3(effection@4.0.3)':
     dependencies:
-      effection: 4.0.2
+      effection: 4.0.3
 
-  '@effectionx/signals@0.5.3(effection@4.0.2)':
+  '@effectionx/signals@0.5.3(effection@4.0.3)':
     dependencies:
-      effection: 4.0.2
+      effection: 4.0.3
       immutable: 5.1.5
 
-  '@effectionx/stream-helpers@0.8.2(effection@4.0.2)':
+  '@effectionx/stream-helpers@0.8.2(effection@4.0.3)':
     dependencies:
-      '@effectionx/signals': 0.5.3(effection@4.0.2)
-      '@effectionx/timebox': 0.4.3(effection@4.0.2)
-      effection: 4.0.2
+      '@effectionx/signals': 0.5.3(effection@4.0.3)
+      '@effectionx/timebox': 0.4.3(effection@4.0.3)
+      effection: 4.0.3
       immutable: 5.1.5
       remeda: 2.33.7
 
-  '@effectionx/timebox@0.4.3(effection@4.0.2)':
+  '@effectionx/timebox@0.4.3(effection@4.0.3)':
     dependencies:
-      effection: 4.0.2
+      effection: 4.0.3
 
   '@emnapi/core@1.10.0':
     dependencies:
@@ -4902,17 +4888,17 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.60.1':
     optional: true
 
-  '@simulacrum/foundation-simulator@0.6.1(ajv@8.20.0)(picomatch@4.0.4)':
+  '@simulacrum/foundation-simulator@0.7.0(ajv@8.20.0)(picomatch@4.0.4)':
     dependencies:
       ajv-formats: 3.0.1(ajv@8.20.0)
       cors: 2.8.6
-      defu: 6.1.4
+      defu: 6.1.7
       express: 5.2.1
       fdir: 6.5.0(picomatch@4.0.4)
       http-proxy-middleware: 3.0.5
       lodash: 4.17.23
       openapi-backend: 5.17.0
-      starfx: 0.15.0
+      starfx: 0.16.0
     transitivePeerDependencies:
       - ajv
       - picomatch
@@ -5405,8 +5391,6 @@ snapshots:
     dependencies:
       clone: 1.0.4
 
-  defu@6.1.4: {}
-
   defu@6.1.7: {}
 
   depd@2.0.0: {}
@@ -5440,9 +5424,7 @@ snapshots:
 
   ee-first@1.1.1: {}
 
-  effection@3.6.1: {}
-
-  effection@4.0.2: {}
+  effection@4.0.3: {}
 
   electron-to-chromium@1.5.329: {}
 
@@ -5813,8 +5795,6 @@ snapshots:
   ieee754@1.2.1: {}
 
   ignore@5.3.2: {}
-
-  immer@10.2.0: {}
 
   immer@11.1.4: {}
 
@@ -6538,15 +6518,15 @@ snapshots:
 
   stackback@0.0.2: {}
 
-  starfx@0.15.0:
-    dependencies:
-      effection: 3.6.1
-      immer: 10.2.0
-      reselect: 5.1.1
-
   starfx@0.16.0:
     dependencies:
-      effection: 4.0.2
+      effection: 4.0.3
+      immer: 11.1.4
+      reselect: 5.1.1
+
+  starfx@0.16.1:
+    dependencies:
+      effection: 4.0.3
       immer: 11.1.4
       reselect: 5.1.1
 

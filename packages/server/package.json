@@ -58,10 +58,10 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "@effectionx/context-api": "~0.6.0",
-    "@effectionx/process": "~0.8.0",
-    "@effectionx/stream-helpers": "~0.8.2",
-    "@effectionx/timebox": "~0.4.3",
+    "@effectionx/context-api": "^0.6.0",
+    "@effectionx/process": "^0.8.1",
+    "@effectionx/stream-helpers": "^0.8.2",
+    "@effectionx/timebox": "^0.4.3",
     "chokidar": "^5.0.0",
     "effection": "catalog:",
     "picomatch": "^4.0.4"
