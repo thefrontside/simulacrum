@@ -2,3 +2,9 @@ packages:
   - packages/*
 blockExoticSubdeps: true
 trustPolicy: no-downgrade
+# don't use workspace: protocol as covector will handle versions
+linkWorkspacePackages: true
+disallowWorkspaceCycles: true
+
+catalog:
+  effection: ^4.0.3
