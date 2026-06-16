@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.8.0]
+
+### Enhancements
+
+- [`3317d15`](https://github.com/thefrontside/simulacrum/commit/3317d1537922042db1cd9994a5916b8d75e249af) ([#365](https://github.com/thefrontside/simulacrum/pull/365) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Convert package to ESM only. All LTS are able to import ESM, both from an ESM or CJS context.
+
+### Dependencies
+
+- [`b0313de`](https://github.com/thefrontside/simulacrum/commit/b0313decf4cc835b2ffd1c9e516576be166a438e) ([#370](https://github.com/thefrontside/simulacrum/pull/370) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Workspace deps with pnpm unintentionally expanded the dep range for `@simulacrum/foundation-simulator`. Clamp it down to only exact range defined.
+
 ## \[0.7.0]
 
 - [`9ef139f`](https://github.com/thefrontside/simulacrum/commit/9ef139f80b0403b4b66163ee7005b552640394c2) ([#359](https://github.com/thefrontside/simulacrum/pull/359) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Enabling oxfmt and oxlint for more consistency.
