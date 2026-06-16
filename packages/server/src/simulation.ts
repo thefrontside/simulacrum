@@ -14,6 +14,7 @@ import { existsSync } from "node:fs";
 
 type UseSimulationOptions = {
   subprocess?: boolean;
+  nodeArgs?: string[];
 };
 
 function useSimulationInProcess<L extends object = Record<string, unknown>>(
@@ -74,7 +75,11 @@ const runnerResolvedPath = existsSync(runnerPathTs) ? runnerPathTs : runnerPathJ
  * @param modulePath - path to the module exporting a simulation factory or instance
  * @returns an `Operation` that provides `FoundationSimulatorListening` from the child
  */
-export function useSimulationChildProcess(name: string, modulePath: string) {
+export function useSimulationChildProcess(
+  name: string,
+  modulePath: string,
+  options?: { nodeArgs?: string[] },
+) {
   return withOperationMetadata(
     resource<{ port: number; pid: number }>(function* (provide) {
       yield* useAttributes({
@@ -122,7 +127,7 @@ export function useSimulationChildProcess(name: string, modulePath: string) {
 
       const proc = yield* daemon("node", {
         cwd: process.cwd(),
-        arguments: args,
+        arguments: [...(options?.nodeArgs ?? []), ...args],
       });
       const pid = proc.pid;
       yield* useAttributes({
@@ -200,7 +205,7 @@ export function useSimulation<L extends object = Record<string, unknown>>(
 export function useSimulation(
   name: string,
   modulePath: string,
-  options?: { subprocess?: true },
+  options?: { subprocess?: true; nodeArgs?: string[] },
 ): Operation<{ port: number; pid: number }>;
 export function useSimulation<L extends object = Record<string, unknown>>(
   name: string,
@@ -214,7 +219,11 @@ export function useSimulation<L extends object = Record<string, unknown>>(
       );
     }
 
-    return useSimulationChildProcess(name, factoryOrModulePath);
+    return useSimulationChildProcess(
+      name,
+      factoryOrModulePath,
+      options.nodeArgs ? { nodeArgs: options.nodeArgs } : undefined,
+    );
   }
 
   if (options.subprocess === true) {
