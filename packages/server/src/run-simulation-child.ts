@@ -73,7 +73,7 @@ main(function* () {
   if (typeof simulacrumPort === "number" && !Number.isNaN(simulacrumPort)) {
     try {
       const res = yield* until(fetch(`http://127.0.0.1:${simulacrumPort}/data`));
-      initData = yield* until(res.json());
+      initData = (yield* until(res.json())) as unknown as JSON;
     } catch (ignore) {
       // ignore fetch failures
       console.error("failed to fetch simulacrum data:", ignore);

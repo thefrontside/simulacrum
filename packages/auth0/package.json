@@ -62,8 +62,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
-    "@simulacrum/foundation-simulator": "^0",
-    "@simulacrum/server": "workspace:^",
+    "@simulacrum/foundation-simulator": "^0.7.0",
     "assert-ts": "^0.3.4",
     "base64-url": "^2.3.3",
     "cookie-session": "^2.1.0",
@@ -76,13 +75,14 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@simulacrum/server": "workspace:^",
     "@types/base64-url": "^2.2.2",
     "@types/cookie-session": "^2.0.49",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsesc": "^3.0.3",
     "@types/keygrip": "^1.0.4",
-    "effection": "^4.0.0",
+    "effection": "catalog:",
     "keygrip": "^1.1.0"
   }
 }
