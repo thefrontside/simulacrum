@@ -19,9 +19,11 @@
     "url": "git+https://github.com/thefrontside/simulacrum.git",
     "directory": "packages/server"
   },
+  "bin": {
+    "server": "./src/run-simulation-child.ts"
+  },
   "files": [
     "README.md",
-    "bin",
     "dist",
     "src"
   ],
@@ -40,11 +42,19 @@
       "development": "./src/index.ts",
       "default": "./dist/index.mjs"
     },
+    "./run-simulation-child": {
+      "development": "./src/run-simulation-child.ts",
+      "default": "./dist/run-simulation-child.mjs"
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {
+    "bin": {
+      "server": "./dist/run-simulation-child.mjs"
+    },
     "exports": {
       ".": "./dist/index.mjs",
+      "./run-simulation-child": "./dist/run-simulation-child.mjs",
       "./package.json": "./package.json"
     }
   },

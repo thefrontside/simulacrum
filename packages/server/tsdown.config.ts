@@ -2,7 +2,7 @@ import { defineConfig } from "tsdown";
 
 export default defineConfig({
   name: "server",
-  entry: "./src/index.ts",
+  entry: ["./src/index.ts", "./src/run-simulation-child.ts"],
   deps: {
     // if we unbundle, we want to skip this as well
     skipNodeModulesBundle: true,
