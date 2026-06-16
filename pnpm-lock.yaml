@@ -48,7 +48,7 @@ importers:
         specifier: ^9.3.0
         version: 9.9.0
       '@simulacrum/foundation-simulator':
-        specifier: ^0.7.0
+        specifier: ^0.8.0
         version: link:../foundation
       assert-ts:
         specifier: ^0.3.4
@@ -154,7 +154,7 @@ importers:
         specifier: ^10.9.1
         version: 10.11.0(graphql@16.13.2)
       '@simulacrum/foundation-simulator':
-        specifier: ^0.7.0
+        specifier: ^0.8.0
         version: link:../foundation
       assert-ts:
         specifier: ^0.3.4
