@@ -9,8 +9,8 @@ import type {
 } from "@simulacrum/foundation-simulator";
 import { SimulacrumEndpoint } from "./service-graph.ts";
 import { fileURLToPath } from "node:url";
-import { versions } from "node:process";
 import { withOperationMetadata } from "./operation-metadata.ts";
+import { existsSync } from "node:fs";
 
 type UseSimulationOptions = {
   subprocess?: boolean;
@@ -58,13 +58,14 @@ function useSimulationInProcess<L extends object = Record<string, unknown>>(
   );
 }
 
-// Spawn a child Node process to run a simulation factory in a fresh module
-// environment. This avoids sharing module cache and allows restarts to pick up
-// new code. The runtime uses `bin/run-simulation-child.ts`.
+const runnerPathTs = fileURLToPath(new URL("./run-simulation-child.ts", import.meta.url));
+const runnerPathJs = fileURLToPath(new URL("./run-simulation-child.js", import.meta.url));
+const runnerResolvedPath = existsSync(runnerPathTs) ? runnerPathTs : runnerPathJs;
+
 /**
  * Spawn a child Node process to run a simulation factory.
  *
- * This runs `bin/run-simulation-child.ts <modulePath>` in a separate Node
+ * This runs `./run-simulation-child.js <modulePath>` in a separate Node
  * process and reads the first JSON line printed to stdout to discover the
  * child's listening port. Optionally the simulacrum gateway port will be
  * passed to the child so it can fetch `globalData`.
@@ -83,21 +84,11 @@ export function useSimulationChildProcess(name: string, modulePath: string) {
       // attempt to read the simulacrum port from context; if not present, continue without it
       const contextPort = yield* SimulacrumEndpoint.get();
 
-      const runnerPath = fileURLToPath(new URL("../bin/run-simulation-child.ts", import.meta.url));
-      // TODO config to overwrite the hard coded option here
-      const parts = (
-        Number(versions.node.split(".")[0]) >= 24
-          ? ["node"]
-          : [
-              "node",
-              // safest considering current LTS of >v20
-              "--experimental-strip-types",
-            ]
-      ).concat([runnerPath, modulePath]);
+      const moduleResolvedPath = fileURLToPath(new URL(modulePath, `file://${process.cwd()}/`));
+      const args = [runnerResolvedPath, moduleResolvedPath];
       if (typeof contextPort === "number") {
-        parts.push("--simulacrum-port", String(contextPort));
+        args.push("--simulacrum-port", String(contextPort));
       }
-      const cmd = parts.map((s) => (s.includes(" ") ? `'${s}'` : s)).join(" ");
 
       // read the first stdout JSON line to get the listening info
       let port = undefined as number | undefined;
@@ -129,11 +120,14 @@ export function useSimulationChildProcess(name: string, modulePath: string) {
         },
       });
 
-      const process = yield* daemon(cmd);
-      const pid = process.pid;
+      const proc = yield* daemon("node", {
+        cwd: process.cwd(),
+        arguments: args,
+      });
+      const pid = proc.pid;
       yield* useAttributes({
         name: `useSimulation ${name}`,
-        cmd,
+        cmd: `node ${args.map((arg) => JSON.stringify(arg)).join(" ")}`,
         pid: String(pid),
       });
 
@@ -145,7 +139,7 @@ export function useSimulationChildProcess(name: string, modulePath: string) {
         yield* useAttributes({
           name: "childEarlyExitWatcher",
         });
-        status = yield* process.join();
+        status = yield* proc.join();
         if (!port) {
           ready.reject(
             new Error(

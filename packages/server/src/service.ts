@@ -55,7 +55,7 @@ export function useService(
         },
       });
 
-      yield* daemon(cmd, options.processOptions);
+      yield* daemon(cmd, { shell: true, ...options.processOptions });
 
       // if supplied, wellness check to ensure it is running or timeout with result
       if (options.wellnessCheck) {
