@@ -1,15 +1,14 @@
 import { resource, until, spawn, withResolvers } from "effection";
-import { useAttributes } from "./logging.ts";
 import type { Operation } from "effection";
 import { daemon, Stdio } from "@effectionx/process";
-import { logger } from "./logging.ts";
+import { useAttributes, logger } from "./logging.ts";
 import type {
   FoundationSimulator,
   FoundationSimulatorListening,
 } from "@simulacrum/foundation-simulator";
 import { SimulacrumEndpoint } from "./service-graph.ts";
-import { fileURLToPath } from "node:url";
 import { withOperationMetadata } from "./operation-metadata.ts";
+import { fileURLToPath } from "node:url";
 import { existsSync } from "node:fs";
 
 type UseSimulationOptions = {
@@ -60,13 +59,13 @@ function useSimulationInProcess<L extends object = Record<string, unknown>>(
 }
 
 const runnerPathTs = fileURLToPath(new URL("./run-simulation-child.ts", import.meta.url));
-const runnerPathJs = fileURLToPath(new URL("./run-simulation-child.js", import.meta.url));
+const runnerPathJs = fileURLToPath(new URL("./run-simulation-child.mjs", import.meta.url));
 const runnerResolvedPath = existsSync(runnerPathTs) ? runnerPathTs : runnerPathJs;
 
 /**
  * Spawn a child Node process to run a simulation factory.
  *
- * This runs `./run-simulation-child.js <modulePath>` in a separate Node
+ * This runs `./run-simulation-child.mjs <modulePath>` in a separate Node
  * process and reads the first JSON line printed to stdout to discover the
  * child's listening port. Optionally the simulacrum gateway port will be
  * passed to the child so it can fetch `globalData`.
