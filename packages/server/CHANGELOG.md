@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.10.1]
+
+### Bug Fixes
+
+- [`06bf8c7`](https://github.com/thefrontside/simulacrum/commit/06bf8c70e959df1a58cbb2ffd3cbd578a3aea26a) ([#371](https://github.com/thefrontside/simulacrum/pull/371) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) `run-simulation-child.js` was not properly bundled. Add as entrypoint which adds it as a `bin` and includes it in bundling. The `bin` should be usuable, but will likely only be used directly within the lib.
+
 ## \[0.10.0]
 
 ### Enhancements
