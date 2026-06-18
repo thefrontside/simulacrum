@@ -1,5 +1,28 @@
 # Changelog
 
+## \[0.8.0]
+
+### Enhancements
+
+- [`3317d15`](https://github.com/thefrontside/simulacrum/commit/3317d1537922042db1cd9994a5916b8d75e249af) ([#365](https://github.com/thefrontside/simulacrum/pull/365) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Convert package to ESM only. All LTS are able to import ESM, both from an ESM or CJS context.
+
+### Dependencies
+
+- [`b0313de`](https://github.com/thefrontside/simulacrum/commit/b0313decf4cc835b2ffd1c9e516576be166a438e) ([#370](https://github.com/thefrontside/simulacrum/pull/370) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Bump `starfx` to fix `scope.set()` error from `effection` tuple change.
+
+## \[0.7.0]
+
+- [`9ef139f`](https://github.com/thefrontside/simulacrum/commit/9ef139f80b0403b4b66163ee7005b552640394c2) ([#359](https://github.com/thefrontside/simulacrum/pull/359) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Enabling oxfmt and oxlint for more consistency.
+- [`a3a8108`](https://github.com/thefrontside/simulacrum/commit/a3a8108f58e2523a3700b19900abbc53552c3e15) ([#357](https://github.com/thefrontside/simulacrum/pull/357) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Swap to pnpm within monorepo.
+
+### Enhancements
+
+- [`fd1d673`](https://github.com/thefrontside/simulacrum/commit/fd1d6734ead5b723e8d83962775851517778b695) ([#350](https://github.com/thefrontside/simulacrum/pull/350) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Upgrades the foundation simulator to `starfx@0.16.0` which in turn upgrades to `effection@^4`. Highly unlikely to be a breaking change, but bumping a minor for safety.
+
+### Bug Fixes
+
+- [`872388e`](https://github.com/thefrontside/simulacrum/commit/872388edb084b65a624e2fae7c8deb8878e87965) Order initial log dispatching to help avoid the race condition made more prevalent by more direct sync vs async handling in effection v4.
+
 ## \[0.6.1]
 
 - [`d4f2be5`](https://github.com/thefrontside/simulacrum/commit/d4f2be576503e2fd374b996c26e33682d592e5ac) ([#349](https://github.com/thefrontside/simulacrum/pull/349) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Skip simulator asset minification. Also remove usage of `String.raw`. This was breaking the `/login` view in the Auth0 simulator with the way `tsdown` was escaping the strings.

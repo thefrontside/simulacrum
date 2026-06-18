@@ -1,7 +1,8 @@
 import { assert } from "assert-ts";
 import { decode, decode as decodeBase64 } from "base64-url";
 import { epochTime, expiresAt } from "../auth/date.ts";
-import { createJsonWebToken } from "../auth/jwt.ts";
+import { signingKey } from "../auth/constants.ts";
+import { SignJWT } from "jose";
 import { createRulesRunner } from "../rules/rules-runner.ts";
 import { deriveScope, createPersonQuery } from "./utils.ts";
 
@@ -37,13 +38,29 @@ export const createTokens = async ({
 }) => {
   let { grant_type }: { grant_type: GrantType } = body;
   let scope = deriveScope({ scopeConfig, clientID, audience });
+  const expiresInHours = 24;
 
-  let accessToken = getBaseAccessToken({ iss, grant_type, scope, audience });
+  let accessToken = getBaseAccessToken({ iss, grant_type, scope, audience, expiresInHours });
   let user: Auth0User | undefined;
   let nonce: string | undefined;
 
   if (grant_type === "client_credentials") {
-    return { access_token: createJsonWebToken(accessToken) };
+    return {
+      access_token: await new SignJWT({
+        ...accessToken,
+        // see https://community.auth0.com/t/sub-claim-format-for-m2m-tokens/39451
+        sub: `${body.client_id ?? clientID}@clients`,
+        // see https://community.auth0.com/t/difference-between-scopes-and-permissions-in-access-token/28900
+        gty: "client-credentials",
+      })
+        .setProtectedHeader({ alg: "RS256" })
+        .setIssuedAt()
+        .setIssuer(iss)
+        .setAudience(audience)
+        .setExpirationTime(`${expiresInHours}h`)
+        .sign(signingKey),
+      expires_in: expiresAt(expiresInHours),
+    };
   }
   // TODO: check refresh_token expiry date
   else if (grant_type === "refresh_token") {
@@ -75,6 +92,7 @@ export const createTokens = async ({
     user,
     clientID,
     nonce,
+    expiresInHours,
   });
 
   let context: RuleContext<Partial<AccessTokenPayload>, IdTokenData> = {
@@ -88,15 +106,20 @@ export const createTokens = async ({
   await rulesRunner(userData, context);
 
   return {
-    access_token: createJsonWebToken({
+    access_token: await new SignJWT({
       ...accessToken,
       ...context.accessToken,
       ...(scope.split(" ").includes("email") ? { email: user.email } : {}),
-    }),
-    id_token: createJsonWebToken({
-      ...userData,
-      ...context.idToken,
-    }),
+    })
+      .setProtectedHeader({ alg: "RS256" })
+      .setIssuedAt()
+      .setExpirationTime(`${expiresInHours}h`)
+      .sign(signingKey),
+    id_token: await new SignJWT({ ...userData, ...context.idToken })
+      .setProtectedHeader({ alg: "RS256" })
+      .setIssuedAt()
+      .setExpirationTime(`${expiresInHours}h`)
+      .sign(signingKey),
     refresh_token: issueRefreshToken(scope, grant_type)
       ? createRefreshToken({
           exp: idTokenData.exp,
@@ -106,6 +129,7 @@ export const createTokens = async ({
           nonce,
         })
       : undefined,
+    expires_in: expiresAt(expiresInHours),
   };
 };
 
@@ -115,12 +139,14 @@ export const getIdToken = ({
   user,
   clientID,
   nonce,
+  expiresInHours,
 }: {
   body: Request["body"];
   iss: string;
   user: Auth0User;
   clientID: string;
   nonce: string | undefined;
+  expiresInHours: number;
 }) => {
   let userData: RuleUser = {
     name: body?.name ?? user.name,
@@ -138,7 +164,7 @@ export const getIdToken = ({
     alg: "RS256",
     typ: "JWT",
     iss,
-    exp: expiresAt(),
+    exp: expiresAt(expiresInHours ?? 24),
     iat: epochTime(),
     email: user.email,
     aud: clientID,
@@ -157,14 +183,16 @@ export const getBaseAccessToken = ({
   grant_type,
   scope,
   audience,
+  expiresInHours,
 }: {
   iss: string;
   grant_type: string;
   scope: string;
   audience: string;
+  expiresInHours: number;
 }): Partial<AccessTokenPayload> => ({
   iss,
-  exp: expiresAt(),
+  exp: expiresAt(expiresInHours ?? 24),
   iat: epochTime(),
   aud: audience,
   gty: grant_type,
@@ -183,7 +211,7 @@ const verifyUserExistsInStore = ({
   let { code } = body;
   let personQuery = createPersonQuery(simulationStore);
   let nonce: string | undefined;
-  let username: string;
+  let username: string | undefined;
   let password: string | undefined;
 
   if (grant_type === "http://auth0.com/oauth/grant-type/passwordless/otp") {
@@ -202,7 +230,7 @@ const verifyUserExistsInStore = ({
   let user: Auth0User | undefined = personQuery((person) => {
     assert(!!person.email, `500::no email defined on person scenario`);
 
-    let valid = person.email.toLowerCase() === username.toLowerCase();
+    let valid = !!username && person.email.toLowerCase() === username.toLowerCase();
 
     if (typeof password === "undefined") {
       return valid;

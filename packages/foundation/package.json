@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/foundation-simulator",
-  "version": "0.6.1",
+  "version": "0.8.0",
   "description": "Base simulator to build simulators for integration testing.",
   "keywords": [
     "emulation",
@@ -25,8 +25,6 @@
     "src"
   ],
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
   "typesVersions": {
     "*": {
@@ -39,17 +37,13 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.mjs"
     },
     "./package.json": "./package.json"
   },
   "publishConfig": {
     "exports": {
-      ".": {
-        "import": "./dist/index.mjs",
-        "require": "./dist/index.cjs"
-      },
+      ".": "./dist/index.mjs",
       "./package.json": "./package.json"
     }
   },
@@ -71,13 +65,12 @@
   "dependencies": {
     "ajv-formats": "^3.0.1",
     "cors": "^2.8.6",
-    "defu": "^6.1.4",
+    "defu": "^6.1.7",
     "express": "^5.2.1",
     "fdir": "^6.5.0",
     "http-proxy-middleware": "^3.0.5",
-    "lodash": "^4.17.23",
-    "openapi-backend": "^5.16.1",
-    "starfx": "0.16.0"
+    "openapi-backend": "^5.17.0",
+    "starfx": "^0.16.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

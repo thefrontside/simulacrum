@@ -9,14 +9,14 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 const AUTH0_URL = `https://localhost:${AUTH0_PORT}`;
 
 // Ensure built distribution is present; if not, build it so the smoke test can run locally
-if (!existsSync("./dist/index.cjs")) {
+if (!existsSync("./dist/index.mjs")) {
   console.log("ci-smoke: dist not found, running `pnpm run build`...");
   execSync("pnpm run prepack", { stdio: "inherit" });
 }
 
 // Helper to start the built auth0 service with a wellness check (reused by tests)
 function startAuth0() {
-  return useService("auth0", "node ./bin/start.cjs", {
+  return useService("auth0", "node ./bin/start.mjs", {
     wellnessCheck: {
       timeout: 30000,
       *operation(_stdio) {

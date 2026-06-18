@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-const githubAPIsimulator = require("../dist/index.cjs");
+import { simulation } from "../dist/index.mjs";
 
-const app = githubAPIsimulator.simulation();
+const app = simulation();
 app.listen(3300, () =>
   console.log(`github-api simulation server started at http://localhost:3300`),
 );

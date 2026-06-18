@@ -26,23 +26,26 @@
     "covector": "pnpm dlx covector",
     "fmt": "oxfmt --write .",
     "fmt:check": "oxfmt --check .",
-    "lint": "pnpm -r --if-present run lint",
-    "lint:fix": "pnpm -r exec oxlint --fix",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "prepack": "pnpm -r --if-present run prepack",
     "test": "pnpm -r --if-present run test",
     "tsc": "pnpm -r --if-present run tsc"
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
+    "@arethetypeswrong/core": "^0.18.3",
+    "@types/node": "^24.13.2",
     "oxfmt": "^0.43.0",
-    "oxlint": "^1.58.0",
-    "tsdown": "^0.21.7",
+    "oxlint": "^1.70.0",
+    "publint": "^0.3.21",
+    "tsdown": "^0.22.2",
     "typescript": "5.8.3",
-    "vitest": "^3.2.4"
+    "unplugin-unused": "^0.5.7",
+    "vitest": "^3.2.6"
   },
   "engines": {
     "node": ">=24",
     "pnpm": ">=10"
   },
-  "packageManager": "pnpm@10.17.1"
+  "packageManager": "pnpm@10.34.3"
 }

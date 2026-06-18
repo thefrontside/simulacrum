@@ -9,7 +9,7 @@ import { assert } from "assert-ts";
 import { stringify } from "querystring";
 import { encode } from "base64-url";
 import { userNamePasswordForm } from "../views/username-password.ts";
-import { decode as decodeToken } from "jsonwebtoken";
+import { decodeJwt as decodeToken } from "jose";
 import { createPersonQuery } from "./utils.ts";
 
 export type Routes =
@@ -205,7 +205,7 @@ export const createAuth0Handlers = (
 
         res.status(200).json({
           ...tokens,
-          expires_in: 86400,
+          expires_in: tokens.expires_in,
           token_type: "Bearer",
         });
       } catch (error) {
@@ -233,7 +233,7 @@ export const createAuth0Handlers = (
       }
 
       assert(!!token, "no authorization header or access_token");
-      let { sub } = decodeToken(token, { json: true }) as { sub: string };
+      let { sub } = decodeToken(token);
 
       let user = personQuery((person) => {
         assert(!!person.id, `no email defined on person scenario`);

@@ -1,6 +1,13 @@
 import type { Resolve, Subscription } from "effection";
 import { action, resource } from "effection";
 
+/**
+ * Create a replayable signal which exposes `send`/`close` helpers while
+ * preserving the original subscription semantics. Useful for forwarding
+ * child process stdio lines for wellness checks and logging.
+ *
+ * @returns a Signal-like value with `send` and `close` methods and a `next` operation
+ */
 export function createReplaySignal<T, TClose>() {
   const subscribers = new Set<Subscription<T, TClose>>();
   // single shared durable queue storage

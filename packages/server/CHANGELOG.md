@@ -1,5 +1,35 @@
 # Changelog
 
+## \[0.10.1]
+
+### Bug Fixes
+
+- [`06bf8c7`](https://github.com/thefrontside/simulacrum/commit/06bf8c70e959df1a58cbb2ffd3cbd578a3aea26a) ([#371](https://github.com/thefrontside/simulacrum/pull/371) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) `run-simulation-child.js` was not properly bundled. Add as entrypoint which adds it as a `bin` and includes it in bundling. The `bin` should be usuable, but will likely only be used directly within the lib.
+
+## \[0.10.0]
+
+### Enhancements
+
+- [`3317d15`](https://github.com/thefrontside/simulacrum/commit/3317d1537922042db1cd9994a5916b8d75e249af) ([#365](https://github.com/thefrontside/simulacrum/pull/365) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Convert package to ESM only. All LTS are able to import ESM, both from an ESM or CJS context.
+- [`b0313de`](https://github.com/thefrontside/simulacrum/commit/b0313decf4cc835b2ffd1c9e516576be166a438e) ([#370](https://github.com/thefrontside/simulacrum/pull/370) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Allow `useSimulation` to set extra `nodeArgs` for spawning a `child_process`. This enables using `--import` or other utilities such as might be required for directly executing TypeScript files on some verisons of node.
+
+### Bug Fixes
+
+- [`b0313de`](https://github.com/thefrontside/simulacrum/commit/b0313decf4cc835b2ffd1c9e516576be166a438e) ([#370](https://github.com/thefrontside/simulacrum/pull/370) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Fix path resolution in `useSimulation` and default to `shell: true` for `useService`.
+
+### Dependencies
+
+- [`b0313de`](https://github.com/thefrontside/simulacrum/commit/b0313decf4cc835b2ffd1c9e516576be166a438e) ([#370](https://github.com/thefrontside/simulacrum/pull/370) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Bump `@effectionx/process` to align and dedupe `@effectionx/context-api`.
+
+## \[0.9.0]
+
+- [`9ef139f`](https://github.com/thefrontside/simulacrum/commit/9ef139f80b0403b4b66163ee7005b552640394c2) ([#359](https://github.com/thefrontside/simulacrum/pull/359) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Enabling oxfmt and oxlint for more consistency.
+- [`a3a8108`](https://github.com/thefrontside/simulacrum/commit/a3a8108f58e2523a3700b19900abbc53552c3e15) ([#357](https://github.com/thefrontside/simulacrum/pull/357) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Swap to pnpm within monorepo.
+
+### New Features
+
+- [`e81d6b9`](https://github.com/thefrontside/simulacrum/commit/e81d6b993fb64e4300588227645b162ec75c8f62) Define a graph of services and simulators to more easily run through the CLI helper or with a helper in tests.
+
 ## \[0.8.0]
 
 - [`d3850c6`](https://github.com/thefrontside/simulacrum/commit/d3850c657ea45c9e67790b63fb4341a95818c664) ([#345](https://github.com/thefrontside/simulacrum/pull/345) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Bump server to `effection` v4. With the tight dependency fitting into an `effection` runtime, bumping with a minor despite no specific breaking changes directly in this package. Additionally, we swapped to `@effectionx/process` and pulled in some other helpers. This was to prevent edge cases which were noted as part of the upgrade.

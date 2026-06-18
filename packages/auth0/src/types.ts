@@ -156,11 +156,3 @@ export interface RefreshToken {
   user: { id: string };
   nonce?: string | undefined;
 }
-
-type Token<P> = {
-  payload: P;
-};
-
-export type IdToken = Token<IdTokenData>;
-
-export type AccessToken = Token<AccessTokenPayload>;

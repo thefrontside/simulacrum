@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/auth0-simulator",
-  "version": "0.11.4",
+  "version": "0.13.0",
   "description": "Run local instance of Auth0 API for local development and integration testing",
   "keywords": [
     "auth0",
@@ -22,14 +22,12 @@
     "type": "git",
     "url": "git+https://github.com/thefrontside/simulacrum.git"
   },
-  "bin": "bin/start.cjs",
+  "bin": "bin/start.mjs",
   "files": [
     "bin/**/*",
     "dist/**/*"
   ],
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
   "typesVersions": {
     "*": {
@@ -42,17 +40,13 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.mjs"
     },
     "./package.json": "./package.json"
   },
   "publishConfig": {
     "exports": {
-      ".": {
-        "import": "./dist/index.mjs",
-        "require": "./dist/index.cjs"
-      },
+      ".": "./dist/index.mjs",
       "./package.json": "./package.json"
     }
   },
@@ -68,8 +62,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^9.3.0",
-    "@simulacrum/foundation-simulator": "workspace:^",
-    "@simulacrum/server": "workspace:^",
+    "@simulacrum/foundation-simulator": "^0.8.0",
     "assert-ts": "^0.3.4",
     "base64-url": "^2.3.3",
     "configliere": "^0.4.0",
@@ -77,19 +70,19 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "html-entities": "^2.5.2",
+    "jose": "^5.9.6",
     "jsesc": "^3.1.0",
-    "jsonwebtoken": "^9.0.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@simulacrum/server": "workspace:^",
     "@types/base64-url": "^2.2.2",
     "@types/cookie-session": "^2.0.49",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsesc": "^3.0.3",
-    "@types/jsonwebtoken": "^9.0.9",
     "@types/keygrip": "^1.0.4",
-    "effection": "^4.0.0",
+    "effection": "catalog:",
     "keygrip": "^1.1.0"
   }
 }

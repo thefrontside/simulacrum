@@ -1,14 +1,17 @@
 import path from "path";
 import vm from "vm";
 import fs from "fs";
+import { createRequire } from "node:module";
 import { assert } from "assert-ts";
 import { parseRulesFiles } from "./parse-rules-files.ts";
 import type { Rule, RuleContext, RuleUser } from "./types.ts";
 
 export type RulesRunner = <A, I>(user: RuleUser, context: RuleContext<A, I>) => void;
 
+const require = createRequire(import.meta.url);
+
 async function runRule<A, I>(user: RuleUser, context: RuleContext<A, I>, rule: Rule) {
-  await new Promise((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     let sandbox = {
       process,
       Buffer,
@@ -21,7 +24,7 @@ async function runRule<A, I>(user: RuleUser, context: RuleContext<A, I>, rule: R
       setTimeout,
       console,
       require,
-      module,
+      importMeta: import.meta,
       resolve,
       reject,
       __simulator: {
@@ -37,16 +40,18 @@ async function runRule<A, I>(user: RuleUser, context: RuleContext<A, I>, rule: R
 
     console.debug(`executing rule ${path.basename(filename)}`);
 
-    let script = new vm.Script(`
-      (async function(exports) {
-        try {
-          await (${code})(__simulator.user, __simulator.context, resolve);
-        } catch (err) {
-          console.error(err);
-          reject();
-        }
-      })(module.exports)
-    `);
+    let script = new vm.Script(
+      `
+        (async function runRule() {
+          try {
+            await (${code})(__simulator.user, __simulator.context, resolve);
+          } catch (err) {
+            console.error(err);
+            reject(err);
+          }
+        })();
+      `,
+    );
 
     script.runInContext(vmContext, {
       filename,

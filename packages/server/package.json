@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/server",
-  "version": "0.8.0",
+  "version": "0.10.1",
   "description": "Helpers and control plane to handle simulators and observability",
   "keywords": [
     "emulation",
@@ -19,14 +19,15 @@
     "url": "git+https://github.com/thefrontside/simulacrum.git",
     "directory": "packages/server"
   },
+  "bin": {
+    "server": "./src/run-simulation-child.ts"
+  },
   "files": [
     "README.md",
     "dist",
     "src"
   ],
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.cts",
   "typesVersions": {
     "*": {
@@ -39,17 +40,21 @@
   "exports": {
     ".": {
       "development": "./src/index.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.mjs"
+    },
+    "./run-simulation-child": {
+      "development": "./src/run-simulation-child.ts",
+      "default": "./dist/run-simulation-child.mjs"
     },
     "./package.json": "./package.json"
   },
   "publishConfig": {
+    "bin": {
+      "server": "./dist/run-simulation-child.mjs"
+    },
     "exports": {
-      ".": {
-        "import": "./dist/index.mjs",
-        "require": "./dist/index.cjs"
-      },
+      ".": "./dist/index.mjs",
+      "./run-simulation-child": "./dist/run-simulation-child.mjs",
       "./package.json": "./package.json"
     }
   },
@@ -58,15 +63,21 @@
     "clean": "echo skip",
     "lint": "oxlint",
     "prepack": "pnpm run build",
-    "test": "node --test-timeout=60000 --experimental-transform-types --test test/*.test.ts",
-    "test:service-main": "node --experimental-transform-types ./test/service-main.ts",
+    "test": "node --test-timeout=60000 --test test/*.test.ts",
+    "test:service-main": "node ./test/services/service-main.ts",
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "@effectionx/context-api": "^0.2.1",
-    "@effectionx/process": "^0.6.2",
-    "@effectionx/timebox": "^0.3.1",
-    "effection": "^4.0.0"
+    "@effectionx/context-api": "^0.6.0",
+    "@effectionx/process": "^0.8.1",
+    "@effectionx/stream-helpers": "^0.8.2",
+    "@effectionx/timebox": "^0.4.3",
+    "chokidar": "^5.0.0",
+    "effection": "catalog:",
+    "picomatch": "^4.0.4"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@simulacrum/foundation-simulator": "workspace:^",
+    "@types/picomatch": "^4.0.3"
+  }
 }
