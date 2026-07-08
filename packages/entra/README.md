@@ -43,9 +43,7 @@ Or run it from code:
 import { simulation } from "@simulacrum/entra-simulator";
 
 const app = simulation();
-app.listen(4400, () =>
-  console.log("Entra simulation server started at https://localhost:4400"),
-);
+app.listen(4400, () => console.log("Entra simulation server started at https://localhost:4400"));
 ```
 
 Seed your own users with `initialState`:
@@ -54,7 +52,12 @@ Seed your own users with `initialState`:
 const app = simulation({
   initialState: {
     users: [
-      { id: "11111111-1111-1111-1111-111111111111", name: "Ada Lovelace", email: "ada@example.com", password: "hunter2" },
+      {
+        id: "11111111-1111-1111-1111-111111111111",
+        name: "Ada Lovelace",
+        email: "ada@example.com",
+        password: "hunter2",
+      },
     ],
   },
   options: {
@@ -142,13 +145,13 @@ Configuration is loaded with [cosmiconfig](https://github.com/cosmiconfig/cosmic
 under the module name `entraSimulator` (e.g. a `.entraSimulatorrc.json` file), and
 can be overridden with the `options` argument to `simulation()`.
 
-| Option     | Default                                    | Description                                                                                   |
-| ---------- | ------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| `port`     | `4400`                                     | Port the https server listens on.                                                             |
-| `tenant`   | `0e8a3b8a-0000-4000-a000-0000000000ab`     | Default tenant used for the bin/example authority. Any tenant used in the path is honored and becomes the token `tid`/issuer tenant. |
-| `clientId` | `00000000-0000-0000-0000-000000000000`     | Default application (client) id used when a request does not supply one.                       |
-| `audience` | `00000000-0000-0000-0000-000000000000`     | Default access-token audience for `client_credentials` when no `resource` is passed.           |
-| `scope`    | `openid profile email offline_access`      | Default scope echoed when a request does not supply one.                                        |
+| Option     | Default                                | Description                                                                                                                          |
+| ---------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `port`     | `4400`                                 | Port the https server listens on.                                                                                                    |
+| `tenant`   | `0e8a3b8a-0000-4000-a000-0000000000ab` | Default tenant used for the bin/example authority. Any tenant used in the path is honored and becomes the token `tid`/issuer tenant. |
+| `clientId` | `00000000-0000-0000-0000-000000000000` | Default application (client) id used when a request does not supply one.                                                             |
+| `audience` | `00000000-0000-0000-0000-000000000000` | Default access-token audience for `client_credentials` when no `resource` is passed.                                                 |
+| `scope`    | `openid profile email offline_access`  | Default scope echoed when a request does not supply one.                                                                             |
 
 The `tenant` segment in the authority path is authoritative: whatever tenant an
 application uses becomes the `tid` claim and the issuer tenant, keeping the
