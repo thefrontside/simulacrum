@@ -14,6 +14,7 @@ Simulacrum removes these constraints from your process by allowing you to simula
 
 - [github-api](packages/github-api) - [@simulacrum/github-api-simulator](https://www.npmjs.com/package/@simulacrum/github-api-simulator)
 - [auth0](packages/auth0) - [@simulacrum/auth0-simulator](https://www.npmjs.com/package/@simulacrum/auth0-simulator)
+- [entra](packages/entra) - [@simulacrum/entra-simulator](https://www.npmjs.com/package/@simulacrum/entra-simulator)
 - [ldap](packages/ldap) - [@simulacrum/ldap-simulator](https://www.npmjs.com/package/@simulacrum/ldap-simulator)
 
 > [!WARNING]
