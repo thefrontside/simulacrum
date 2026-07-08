@@ -97,4 +97,8 @@ export const extendStore = (
   actions: extendActions(extended?.actions),
   selectors: extendSelectors(extended?.selectors),
   schema: inputSchema(initialState, extended?.schema),
+  // forward the flag through so `extend.extendStore.logs = true` actually turns
+  // on action logging instead of being silently dropped (only set the key when
+  // provided, to satisfy exactOptionalPropertyTypes downstream)
+  ...(typeof extended?.logs !== "undefined" ? { logs: extended.logs } : {}),
 });

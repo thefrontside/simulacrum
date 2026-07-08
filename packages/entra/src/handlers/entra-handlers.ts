@@ -1,5 +1,6 @@
 import { assert } from "assert-ts";
 import { stringify } from "querystring";
+import { encode } from "html-entities";
 import { decodeJwt } from "jose";
 import type { Request, RequestHandler, Response } from "express";
 import type { ExtendedSimulationStore } from "../store/index.ts";
@@ -70,8 +71,7 @@ const redirectWithCode = (res: Response, query: AuthorizeQuery, user: EntraUser)
     return;
   }
 
-  let separator = mode === "fragment" ? "#" : "?";
-  res.redirect(302, `${query.redirect_uri}${separator}${stringify(params)}`);
+  res.redirect(302, appendParams(query.redirect_uri, mode, params));
 };
 
 const redirectWithError = (
@@ -83,17 +83,34 @@ const redirectWithError = (
   let params: Record<string, string> = { error, error_description: description };
   if (typeof query.state !== "undefined") params.state = query.state;
   let mode = defaultResponseMode(query);
-  let separator = mode === "fragment" ? "#" : "?";
-  res.redirect(302, `${query.redirect_uri}${separator}${stringify(params)}`);
+  res.redirect(302, appendParams(query.redirect_uri, mode, params));
+};
+
+// Append the response params to the redirect_uri. `fragment` uses `#`; `query`
+// uses `?` — unless the redirect_uri already carries a query string, in which
+// case `&` keeps the URL well-formed instead of producing `...?a=1?code=...`.
+const appendParams = (
+  redirectUri: string,
+  mode: ResponseMode,
+  params: Record<string, string>,
+): string => {
+  let qs = stringify(params);
+  if (mode === "fragment") return `${redirectUri}#${qs}`;
+  let separator = redirectUri.includes("?") ? "&" : "?";
+  return `${redirectUri}${separator}${qs}`;
 };
 
 const autoPostForm = (action: string, fields: Record<string, string>): string => {
+  // Escape the action (redirect_uri) and every value. Beyond the obvious markup
+  // safety, a legitimate `state`/`redirect_uri` containing `"`, `&`, or `<` would
+  // otherwise break out of the attribute and corrupt the posted value, making the
+  // developer's app reject the callback with a state mismatch.
   let inputs = Object.entries(fields)
-    .map(([name, value]) => `<input type="hidden" name="${name}" value="${value}" />`)
+    .map(([name, value]) => `<input type="hidden" name="${name}" value="${encode(value)}" />`)
     .join("\n");
   return /*html*/ `<html><head><title>Working...</title></head>
     <body onload="document.forms[0].submit()">
-      <form method="post" action="${action}">
+      <form method="post" action="${encode(action)}">
         ${inputs}
         <noscript><button type="submit">Continue</button></noscript>
       </form>

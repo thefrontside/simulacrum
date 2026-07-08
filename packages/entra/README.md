@@ -191,7 +191,8 @@ Endpoints (tenant-scoped, mirroring real Entra):
 - `POST /:tenant/login` (login form submission)
 - `POST /:tenant/oauth2/v2.0/token`
 - `GET  /:tenant/oauth2/v2.0/logout`
-- `GET  /oidc/userinfo` (Microsoft Graph style)
+- `GET  /oidc/userinfo` — Microsoft Graph style, mounted **globally** (not under
+  `/:tenant`), matching the real `https://graph.microsoft.com/oidc/userinfo`
 
 ## What is (and isn't) simulated
 

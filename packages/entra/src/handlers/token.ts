@@ -216,7 +216,8 @@ const refreshTokenTokens = async (ctx: TokenContext): Promise<TokenResponse> => 
     clientId,
     scope,
     nonce: decoded.nonce,
-    authTime: epochTime(),
+    // preserve the original sign-in time across the refresh (real Entra behavior)
+    authTime: decoded.auth_time,
   });
 };
 
@@ -261,7 +262,14 @@ const finishUserTokens = async ({
     : undefined;
 
   let refreshToken = scopeIncludes(scope, "offline_access")
-    ? buildRefreshToken({ sub: user.id, oid: user.id, nonce, scope, client_id: clientId })
+    ? buildRefreshToken({
+        sub: user.id,
+        oid: user.id,
+        nonce,
+        scope,
+        client_id: clientId,
+        auth_time: authTime,
+      })
     : undefined;
 
   return tokenResponse({ accessToken, idToken, refreshToken, scope });

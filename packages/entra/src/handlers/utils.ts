@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { encode, decode } from "base64-url";
+import { assert } from "assert-ts";
 import type { ExtendedSimulationStore } from "../store/index.ts";
 import type { EntraUser } from "../store/entities.ts";
 import type { AuthorizationCode, RefreshTokenPayload } from "../types.ts";
@@ -18,13 +19,26 @@ export const createUserQuery =
 export const encodeAuthorizationCode = (code: AuthorizationCode): string =>
   encode(JSON.stringify(code));
 
+// A malformed (truncated, tampered, or non-base64url) code/token would otherwise
+// throw a raw SyntaxError and surface as an opaque 500. Real Entra answers a bad
+// grant with `400 invalid_grant`, so mirror that — it keeps a developer's OAuth
+// library and their debugging on the happy path.
+const decodeStatelessToken = <T>(value: string): T => {
+  try {
+    return JSON.parse(decode(value)) as T;
+  } catch {
+    assert(false, "400::invalid_grant");
+  }
+};
+
 export const decodeAuthorizationCode = (value: string): AuthorizationCode =>
-  JSON.parse(decode(value));
+  decodeStatelessToken<AuthorizationCode>(value);
 
 export const encodeRefreshToken = (token: RefreshTokenPayload): string =>
   encode(JSON.stringify(token));
 
-export const decodeRefreshToken = (value: string): RefreshTokenPayload => JSON.parse(decode(value));
+export const decodeRefreshToken = (value: string): RefreshTokenPayload =>
+  decodeStatelessToken<RefreshTokenPayload>(value);
 
 // PKCE verification (RFC 7636). Returns true when the presented verifier
 // satisfies the challenge that was captured at /authorize time. When no

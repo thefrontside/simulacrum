@@ -71,12 +71,12 @@ export const createOpenIdHandlers = (): {
         cloud_graph_host_name: "graph.windows.net",
         msgraph_host: "graph.microsoft.com",
         rbac_url: "https://pas.windows.net",
+        // only advertise grants the token endpoint actually implements — a
+        // library that trusts this list should never receive a surprise 400
         grant_types_supported: [
           "authorization_code",
           "refresh_token",
           "client_credentials",
-          "urn:ietf:params:oauth:grant-type:jwt-bearer",
-          "implicit",
           "password",
         ],
       });

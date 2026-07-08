@@ -64,6 +64,9 @@ export interface RefreshTokenPayload {
   nonce?: string | undefined;
   scope: string;
   client_id: string;
+  // original authentication time, preserved so refreshed id tokens report when
+  // the user actually signed in (as real Entra does) rather than "just now"
+  auth_time: number;
   iat: number;
   exp: number;
 }

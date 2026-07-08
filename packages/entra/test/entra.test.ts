@@ -214,6 +214,108 @@ describe("Entra ID simulator", () => {
     });
   });
 
+  describe("response modes and redirect robustness", () => {
+    const loginWith = (extra: Record<string, string>) => {
+      let pkce = createPkcePair();
+      return fetch(`${authority}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        redirect: "manual",
+        body: stringify({
+          username: person.email,
+          password: person.password,
+          client_id: clientId,
+          redirect_uri: redirectUri,
+          response_type: "code",
+          scope: "openid",
+          state: "state-123",
+          nonce: "nonce-abc",
+          code_challenge: pkce.challenge,
+          code_challenge_method: "S256",
+          ...extra,
+        }),
+      });
+    };
+
+    it("returns the code in the fragment for response_mode=fragment", async () => {
+      let res = await loginWith({ response_mode: "fragment" });
+      expect(res.status).toBe(302);
+      let location = res.headers.get("location")!;
+      // fragment, not query — the params live after `#`
+      expect(location.startsWith(`${redirectUri}#`)).toBe(true);
+      let fragment = new URLSearchParams(location.split("#")[1]);
+      expect(fragment.get("code")).toBeTruthy();
+      expect(fragment.get("state")).toBe("state-123");
+    });
+
+    it("returns an auto-submitting form for response_mode=form_post", async () => {
+      let res = await loginWith({ response_mode: "form_post" });
+      expect(res.status).toBe(200);
+      expect(res.headers.get("content-type")).toContain("text/html");
+      let body = await res.text();
+      expect(body).toContain(`method="post"`);
+      expect(body).toContain(`action="${redirectUri}"`);
+      expect(body).toContain(`name="code"`);
+      expect(body).toContain(`name="state"`);
+    });
+
+    it("html-escapes reflected values in the form_post body", async () => {
+      // a state a real app might use (JSON/quoted) must survive intact and must
+      // not break out of the HTML attribute
+      let res = await loginWith({
+        response_mode: "form_post",
+        state: `a"><script>alert(1)</script>&b`,
+      });
+      let body = await res.text();
+      expect(body).not.toContain("<script>alert(1)</script>");
+      expect(body).toContain("&lt;script&gt;");
+    });
+
+    it("uses `&` when the redirect_uri already has a query string", async () => {
+      let res = await loginWith({
+        response_mode: "query",
+        redirect_uri: "http://localhost:3000/auth/callback?rt=1",
+      });
+      expect(res.status).toBe(302);
+      let location = res.headers.get("location")!;
+      // exactly one `?`, and the OAuth params were appended with `&`
+      expect(location.split("?").length).toBe(2);
+      expect(location).toContain("rt=1&code=");
+      let parsed = new URL(location);
+      expect(parsed.searchParams.get("rt")).toBe("1");
+      expect(parsed.searchParams.get("code")).toBeTruthy();
+    });
+
+    it("answers a malformed authorization code with 400, not 500", async () => {
+      let res = await fetch(`${authority}/oauth2/v2.0/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: stringify({
+          grant_type: "authorization_code",
+          code: "this-is-not-a-valid-code",
+          client_id: clientId,
+          redirect_uri: redirectUri,
+        }),
+      });
+      expect(res.status).toBe(400);
+      expect(await res.text()).toContain("invalid_grant");
+    });
+
+    it("answers a malformed refresh_token with 400, not 500", async () => {
+      let res = await fetch(`${authority}/oauth2/v2.0/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: stringify({
+          grant_type: "refresh_token",
+          refresh_token: "garbage-token",
+          client_id: clientId,
+        }),
+      });
+      expect(res.status).toBe(400);
+      expect(await res.text()).toContain("invalid_grant");
+    });
+  });
+
   describe("refresh_token grant", () => {
     let pkce = createPkcePair();
     let refreshToken: string;
