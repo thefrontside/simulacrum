@@ -1,7 +1,7 @@
 import { assert } from "assert-ts";
 import { decode, decode as decodeBase64 } from "base64-url";
 import { epochTime, expiresAt } from "../auth/date.ts";
-import { signingKey } from "../auth/constants.ts";
+import { signingKey, JWKS } from "../auth/constants.ts";
 import { SignJWT } from "jose";
 import { createRulesRunner } from "../rules/rules-runner.ts";
 import { deriveScope, createPersonQuery } from "./utils.ts";
@@ -53,7 +53,7 @@ export const createTokens = async ({
         // see https://community.auth0.com/t/difference-between-scopes-and-permissions-in-access-token/28900
         gty: "client-credentials",
       })
-        .setProtectedHeader({ alg: "RS256" })
+        .setProtectedHeader({ alg: "RS256", kid: JWKS.keys[0].kid })
         .setIssuedAt()
         .setIssuer(iss)
         .setAudience(audience)
@@ -111,12 +111,12 @@ export const createTokens = async ({
       ...context.accessToken,
       ...(scope.split(" ").includes("email") ? { email: user.email } : {}),
     })
-      .setProtectedHeader({ alg: "RS256" })
+      .setProtectedHeader({ alg: "RS256", kid: JWKS.keys[0].kid })
       .setIssuedAt()
       .setExpirationTime(`${expiresInHours}h`)
       .sign(signingKey),
     id_token: await new SignJWT({ ...userData, ...context.idToken })
-      .setProtectedHeader({ alg: "RS256" })
+      .setProtectedHeader({ alg: "RS256", kid: JWKS.keys[0].kid })
       .setIssuedAt()
       .setExpirationTime(`${expiresInHours}h`)
       .sign(signingKey),
