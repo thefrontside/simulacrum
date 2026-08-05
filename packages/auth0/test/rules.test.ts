@@ -43,6 +43,20 @@ async function createSimulation(rulesDirectory: Fixtures, initialPerson?: Partia
       users: [simulationPerson],
     },
     options: { rulesDirectory },
+    extend: {
+      extendRouter(router) {
+        router.get("/frontside", (_req, res) => {
+          res.send(
+            "<!DOCTYPE html><html><head><title>frontside</title></head><body></body></html>",
+          );
+        });
+        router.get("/effection", (_req, res) => {
+          res.send(
+            "<!DOCTYPE html><html><head><title>effection</title></head><body></body></html>",
+          );
+        });
+      },
+    },
   });
   let server = await app.listen(basePort);
 
@@ -233,10 +247,10 @@ describe("rules", () => {
         const idToken = decodeJwt(token.id_token);
         expect(idToken.name).toBe(person.name);
 
-        expect(idToken?.checkURLOne).toBe("https://frontside.com");
+        expect(idToken?.checkURLOne).toBe(`${auth0Url}/frontside`);
         expect(idToken?.checkURLOneStatus).toBe(200);
         expect(idToken?.checkURLOneText).toBe("frontside");
-        expect(idToken?.checkURLTwo).toBe("https://frontside.com/effection");
+        expect(idToken?.checkURLTwo).toBe(`${auth0Url}/effection`);
         expect(idToken?.checkURLTwoStatus).toBe(200);
         expect(idToken?.checkURLTwoText).toBe("effection");
         await server.ensureClose();
@@ -265,11 +279,11 @@ describe("rules", () => {
         const idToken = decodeJwt(token.id_token);
         expect(idToken.name).toBe(person.name);
 
-        expect(idToken?.checkURLOne).toBe("https://frontside.com");
+        expect(idToken?.checkURLOne).toBe(`${auth0Url}/frontside`);
         expect(idToken?.checkURLOneStatus).toBe(200);
         expect(idToken?.checkURLOneText).toBe("frontside");
 
-        expect(idToken?.checkURLTwo).toBe("https://frontside.com/effection");
+        expect(idToken?.checkURLTwo).toBe(`${auth0Url}/effection`);
         expect(idToken?.checkURLTwoStatus).toBe(200);
         expect(idToken?.checkURLTwoText).toBe("effection");
         await server.ensureClose();
