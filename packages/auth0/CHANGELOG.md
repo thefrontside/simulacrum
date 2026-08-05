@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.13.1]
+
+- [`d4edee7`](https://github.com/thefrontside/simulacrum/commit/d4edee78aed5b00636b4c38031e8085c4830998d) ([#375](https://github.com/thefrontside/simulacrum/pull/375) by [@joergjaeckel](https://github.com/thefrontside/simulacrum/../../joergjaeckel)) Include kid (`JWKS.keys[0].kid`) in `SignJWT().setProtectedHeader()` for `access_token` and `id_token` so clients performing JWKS-based signature verification can find the correct public key.
+
 ## \[0.13.0]
 
 ### Enhancements
