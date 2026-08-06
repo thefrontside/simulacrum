@@ -39,5 +39,12 @@ export const simulation: Auth0Simulator = (args = {}) => {
   })();
 };
 
-export { auth0ConfigParser, auth0Program, getConfig, readJsonConfig } from "./config/get-config.ts";
+export {
+  auth0ConfigParser,
+  auth0Program,
+  getCLIConfig,
+  getConfig,
+  readJsonConfig,
+  type CLIConfigResult,
+} from "./config/get-config.ts";
 export { auth0UserSchema, defaultUser } from "./store/entities.ts";

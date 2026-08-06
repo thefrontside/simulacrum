@@ -13,7 +13,6 @@ export const configFields = {
       z.number().gt(2999, "port must be greater than 2999").lt(10000, "must be less than 10000"),
     ),
     description: "port to listen on",
-    default: 4400 as const,
     aliases: ["-p"],
   },
   domain: {

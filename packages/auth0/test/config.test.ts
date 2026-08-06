@@ -2,55 +2,12 @@ import { afterEach, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { createContext } from "configliere";
-import { auth0Program, getConfig } from "../src/index.ts";
-import type { Auth0Configuration } from "../src/types.ts";
-
-function readJsonConfig(path: string): Record<string, unknown> {
-  return JSON.parse(require("node:fs").readFileSync(path, "utf8")) as Record<string, unknown>;
-}
-
-function parseCliConfig(args: string[]): { value: Auth0Configuration } {
-  let envs = [{ name: "env", value: process.env as Record<string, string> }];
-  let parser = auth0Program.parse({ args, envs });
-
-  if (!parser.ok) {
-    throw parser.error;
-  }
-
-  if (parser.value.help || parser.value.version) {
-    throw new Error("expected config result");
-  }
-
-  let command = parser.value.config;
-
-  if (command.help) {
-    throw new Error("expected config result");
-  }
-
-  if (command.name !== "start") {
-    throw new TypeError(`Unknown command ${command.name}`);
-  }
-
-  let configPath = command.config.config;
-  let values = configPath ? [{ name: configPath, value: readJsonConfig(configPath) }] : [];
-  let configParser = command.config.next(values[0]?.value ?? {});
-  let input = {
-    args: parser.remainder.args ?? [],
-    envs: parser.remainder.envs ?? envs,
-    values,
-  };
-  let result = configParser.parse(input, createContext(input));
-
-  if (!result.ok) {
-    throw result.error;
-  }
-
-  return result;
-}
+import { getCLIConfig, getConfig } from "../src/index.ts";
 
 describe("CLI config parsing", () => {
   let tempDirectory: string | undefined;
+
+  let envs = [{ name: "env", value: process.env as Record<string, string> }];
 
   afterEach(() => {
     if (tempDirectory) {
@@ -60,9 +17,13 @@ describe("CLI config parsing", () => {
   });
 
   it("parses config directly from argv", () => {
-    let result = parseCliConfig(["--port", "4567"]);
+    let result = getCLIConfig({ args: ["--port", "4567"], envs });
 
-    expect(result.value.port).toBe(4567);
+    expect(result.type).toBe("config");
+
+    if (result.type === "config") {
+      expect(result.value.port).toBe(4567);
+    }
   });
 
   it("loads a JSON config file before parsing remaining args", () => {
@@ -71,33 +32,46 @@ describe("CLI config parsing", () => {
     writeFileSync(configPath, JSON.stringify({ port: 4567 }), "utf8");
     let clientID = "client-id-value-for-cli-merge-01";
 
-    let result = parseCliConfig(["-c", configPath, "--client-id", clientID]);
+    let result = getCLIConfig({ args: ["-c", configPath, "--client-id", clientID], envs });
 
-    expect(result.value.port).toBe(4567);
-    expect(result.value.clientID).toBe(clientID);
+    expect(result.type).toBe("config");
+
+    if (result.type === "config") {
+      expect(result.value.port).toBe(4567);
+      expect(result.value.clientID).toBe(clientID);
+    }
   });
 
-  it("returns command help from the staged CLI parser", () => {
-    let parser = auth0Program.parse({ args: ["start", "--help"], envs: [] });
+  it("returns command help when requested", () => {
+    let result = getCLIConfig({ args: ["start", "--help"], envs: [] });
 
-    expect(parser.ok).toBe(true);
+    expect(result.type).toBe("help");
 
-    if (!parser.ok) {
-      throw parser.error;
+    if (result.type === "help") {
+      expect(result.text).toContain("start [OPTIONS]");
     }
+  });
 
-    let command = parser.value.config;
+  it("returns the program version when requested", () => {
+    let result = getCLIConfig({ args: ["--version"], envs: [] });
 
-    if (!command.help) {
-      throw new Error("expected help response");
+    expect(result.type).toBe("version");
+
+    if (result.type === "version") {
+      expect(result.text).toMatch(/\d+\.\d+\.\d+/);
     }
-
-    expect(command.text).toContain("start [OPTIONS]");
   });
 
   it("derives domain from port for programmatic config", () => {
     let config = getConfig({ port: 4567 });
 
+    expect(config.domain).toBe("localhost:4567");
+  });
+
+  it("derives port from domain for programmatic config", () => {
+    let config = getConfig({ domain: "localhost:4567" });
+
+    expect(config.port).toBe(4567);
     expect(config.domain).toBe("localhost:4567");
   });
 
