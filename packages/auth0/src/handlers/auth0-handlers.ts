@@ -92,15 +92,15 @@ export const createAuth0Handlers = (
     ["/login"]: function (req, res) {
       logger.log({ "/login": { body: req.body, query: req.query } });
       let query = req.query as QueryParams;
-      let responseClientId = query.client_id ?? clientID;
+      let responseClientID = query.client_id ?? clientID;
       let responseAudience = query.audience ?? audience;
-      assert(!!responseClientId, `no clientID assigned`);
+      assert(!!responseClientID, `no clientID assigned`);
 
       let html = loginView({
         domain: new URL(serviceURL(req)).host,
         scope,
         redirectUri: query.redirect_uri,
-        clientID: responseClientId,
+        clientID: responseClientID,
         audience: responseAudience,
         loginFailed: false,
       });
@@ -127,7 +127,7 @@ export const createAuth0Handlers = (
 
       if (!user) {
         let query = req.query as QueryParams;
-        let responseClientId = query.client_id ?? clientID;
+        let responseClientID = query.client_id ?? clientID;
         let responseAudience = query.audience ?? audience;
 
         assert(!!clientID, `no clientID assigned`);
@@ -136,7 +136,7 @@ export const createAuth0Handlers = (
           domain: new URL(serviceURL(req)).host,
           scope,
           redirectUri: query.redirect_uri,
-          clientID: responseClientId,
+          clientID: responseClientID,
           audience: responseAudience,
           loginFailed: true,
         });
@@ -188,16 +188,16 @@ export const createAuth0Handlers = (
       try {
         let iss = serviceURL(req);
 
-        let responseClientId: string = (req?.body?.client_id as string) ?? clientID;
+        let responseClientID: string = (req?.body?.client_id as string) ?? clientID;
         let responseAudience: string = (req?.body?.audience as string) ?? audience;
 
-        assert(!!responseClientId, "500::no clientID in options or request body");
+        assert(!!responseClientID, "500::no clientID in options or request body");
 
         let tokens = await createTokens({
           simulationStore,
           body: req.body,
           iss,
-          clientID: responseClientId,
+          clientID: responseClientID,
           audience: responseAudience,
           rulesDirectory,
           scope,
