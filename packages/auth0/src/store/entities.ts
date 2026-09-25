@@ -8,6 +8,7 @@ export const auth0UserSchema = z
     name: z.string(),
     password: z.string().optional().default("12345"),
     email: z.string().email().optional(),
+    email_verified: z.boolean().default(true),
     picture: z.string().url().optional(),
     user_metadata: z.record(z.unknown()).default({}),
     app_metadata: z.record(z.unknown()).default({}),
@@ -27,8 +28,16 @@ export const auth0InitialStoreSchema = z.object({
   users: z.array(auth0UserSchema),
 });
 export type AuthSession = { username: string; nonce: string };
+export type PasswordTicket = {
+  id: string;
+  userId: string;
+  expiresAt: number;
+  resultUrl?: string | undefined;
+  markEmailAsVerified: boolean;
+};
 export type Auth0Store = z.output<typeof auth0InitialStoreSchema> & {
   sessions: AuthSession[];
+  passwordTickets: PasswordTicket[];
 };
 export type Auth0InitialStore = z.input<typeof auth0InitialStoreSchema>;
 

@@ -119,3 +119,17 @@ The following endpoints have been assigned handlers:
 - `/v2/logout`
 - `/.well-known/jwks.json`
 - `/.well-known/openid-configuration`
+- `/lo/reset` (password-change ticket page)
+
+### Management API
+
+A subset of the [Auth0 Management API](https://auth0.com/docs/api/management/v2) is served under `/api/v2`, backed by the same store the login flow reads, so a user created here can log in and a metadata update shows up in the next token. Requests need a bearer token signed by the simulator, e.g. from a `client_credentials` grant on `/oauth/token`.
+
+- `POST /api/v2/users` — `409` if the email is taken. The id is `auth0|<user_id>` (generated when omitted), `email_verified` defaults to `false`, and `password` to the same default as seeded users.
+- `GET /api/v2/users/:id`
+- `PATCH /api/v2/users/:id` — `user_metadata` and `app_metadata` are merged at the top level, and a `null` value removes the key, as in Auth0.
+- `DELETE /api/v2/users/:id`
+- `GET /api/v2/users-by-email?email=`
+- `POST /api/v2/tickets/password-change` — accepts `user_id` (or `email`), `result_url`, `ttl_sec` and `mark_email_as_verified`. The returned ticket URL opens a page on `/lo/reset` that sets the password and, if given, redirects to `result_url`.
+
+Errors use Auth0's `{ statusCode, error, message, errorCode }` shape.
