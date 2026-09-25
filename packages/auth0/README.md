@@ -74,6 +74,23 @@ app.listen(4400, () => console.log(`auth0 simulation server started at https://l
 
 By passing an `initialState`, you may control the initial users in the store.
 
+```js
+const app = simulation({
+  initialState: {
+    users: [
+      {
+        id: "auth0|alice",
+        name: "Alice",
+        email: "alice@example.com",
+        password: "12345",
+        user_metadata: { theme: "dark" },
+        app_metadata: { roles: ["admin"] },
+      },
+    ],
+  },
+});
+```
+
 ### Example
 
 The folks at Auth0 maintain many samples such as
@@ -213,6 +230,8 @@ For example, a [sample rules directory](./test/rules) is in the auth0 package fo
 
 If we want to run these rules files then we would add the `rulesDirectory` field to the [options
 object](#options).
+
+As in Auth0, rules receive the stored user's `user_metadata` and `app_metadata` on the `user` argument. Neither is added to the tokens unless a rule copies a value into a claim.
 
 ## Endpoints
 
