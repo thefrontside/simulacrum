@@ -6,6 +6,7 @@ import { createSession } from "../middleware/session.ts";
 import { defaultErrorHandler } from "../middleware/error-handling.ts";
 import { createAuth0Handlers } from "./auth0-handlers.ts";
 import { createOpenIdHandlers } from "./openid-handlers.ts";
+import { createManagementApiHandlers } from "./management-api-handlers.ts";
 import path from "path";
 import { type Auth0Configuration } from "../types.ts";
 
@@ -20,6 +21,7 @@ export const extendRouter =
     const serviceURL = (request: Request) => `${request.protocol}://${request.get("Host")}/`;
     const auth0 = createAuth0Handlers(simulationStore, serviceURL, config, debug);
     const openid = createOpenIdHandlers(serviceURL);
+    const management = createManagementApiHandlers(simulationStore, serviceURL);
 
     router.use(express.static(publicDir)).use(createSession()).use(createCors()).use(noCache());
 
@@ -42,7 +44,16 @@ export const extendRouter =
       .get("/userinfo", auth0["/userinfo"])
       .get("/v2/logout", auth0["/v2/logout"])
       .get("/.well-known/jwks.json", openid["/.well-known/jwks.json"])
-      .get("/.well-known/openid-configuration", openid["/.well-known/openid-configuration"]);
+      .get("/.well-known/openid-configuration", openid["/.well-known/openid-configuration"])
+      .get("/lo/reset", management["GET /lo/reset"])
+      .post("/lo/reset", management["POST /lo/reset"])
+      .use("/api/v2", management.authenticate)
+      .post("/api/v2/users", management["POST /api/v2/users"])
+      .get("/api/v2/users/:id", management["GET /api/v2/users/:id"])
+      .patch("/api/v2/users/:id", management["PATCH /api/v2/users/:id"])
+      .delete("/api/v2/users/:id", management["DELETE /api/v2/users/:id"])
+      .get("/api/v2/users-by-email", management["GET /api/v2/users-by-email"])
+      .post("/api/v2/tickets/password-change", management["POST /api/v2/tickets/password-change"]);
 
     // needs to be the last middleware added
     router.use(defaultErrorHandler);
