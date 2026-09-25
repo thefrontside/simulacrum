@@ -3,7 +3,6 @@ import { STATUS_CODES } from "node:http";
 import type { Request, RequestHandler, Response } from "express";
 import { createLocalJWKSet, jwtVerify } from "jose";
 import { faker } from "@faker-js/faker";
-import { z } from "zod";
 import { JWKS } from "../auth/constants.ts";
 import { auth0UserSchema, type Auth0User, type PasswordTicket } from "../store/entities.ts";
 import type { AnyState } from "@simulacrum/foundation-simulator";
@@ -88,7 +87,9 @@ export const createManagementApiHandlers = (
       }
       try {
         // the key is public, so this is Auth0 parity rather than security: login tokens are refused
-        await jwtVerify(token, jwks, { audience: `${serviceURL(req)}api/v2/` });
+        let { payload } = await jwtVerify(token, jwks, { audience: `${serviceURL(req)}api/v2/` });
+        // user tokens only get self-service scopes on Auth0; store-wide access is for M2M
+        if (payload.gty !== "client-credentials") throw new Error("not a client_credentials token");
       } catch {
         return sendError(res, 401, "Invalid token");
       }
@@ -138,19 +139,7 @@ export const createManagementApiHandlers = (
       if (!user) return sendError(res, 404, "The user does not exist.", "inexistent_user");
 
       let body = req.body ?? {};
-      if (typeof body.email === "string") {
-        if (!z.string().email().safeParse(body.email).success) {
-          return sendError(
-            res,
-            400,
-            "Payload validation error: 'Object didn't pass validation for format email'.",
-          );
-        }
-        if (findByEmail(body.email) && findByEmail(body.email) !== user) {
-          return sendError(res, 409, "The specified new email already exists", "auth0_idp_error");
-        }
-      }
-      let updated: Auth0User = {
+      let parsed = auth0UserSchema.safeParse({
         ...user,
         ...(typeof body.name === "string" && { name: body.name }),
         ...(typeof body.email === "string" && { email: body.email.toLowerCase() }),
@@ -159,7 +148,16 @@ export const createManagementApiHandlers = (
         ...(typeof body.picture === "string" && { picture: body.picture }),
         user_metadata: mergeMetadata(user.user_metadata, body.user_metadata),
         app_metadata: mergeMetadata(user.app_metadata, body.app_metadata),
-      };
+      });
+      if (!parsed.success) {
+        return sendError(res, 400, `Payload validation error: ${parsed.error.message}`);
+      }
+      let updated = parsed.data;
+
+      let owner = updated.email && findByEmail(updated.email);
+      if (owner && owner.id !== user.id) {
+        return sendError(res, 409, "The specified new email already exists", "auth0_idp_error");
+      }
 
       update(schema.users.add({ [user.id]: updated }));
       res.status(200).json(toApiUser(updated));
