@@ -3,6 +3,7 @@ import { STATUS_CODES } from "node:http";
 import type { Request, RequestHandler, Response } from "express";
 import { createLocalJWKSet, jwtVerify } from "jose";
 import { faker } from "@faker-js/faker";
+import { z } from "zod";
 import { JWKS } from "../auth/constants.ts";
 import { auth0UserSchema, type Auth0User, type PasswordTicket } from "../store/entities.ts";
 import type { AnyState } from "@simulacrum/foundation-simulator";
@@ -86,7 +87,8 @@ export const createManagementApiHandlers = (
         return sendError(res, 401, "Missing authentication");
       }
       try {
-        await jwtVerify(token, jwks);
+        // the key is public, so this is Auth0 parity rather than security: login tokens are refused
+        await jwtVerify(token, jwks, { audience: `${serviceURL(req)}api/v2/` });
       } catch {
         return sendError(res, 401, "Invalid token");
       }
@@ -108,7 +110,8 @@ export const createManagementApiHandlers = (
         email: email.toLowerCase(),
         // Auth0 marks created users unverified unless told otherwise
         email_verified: body.email_verified ?? false,
-        password: body.password,
+        // Auth0 requires one; a random one keeps the account closed until a ticket sets it
+        password: body.password ?? randomUUID(),
         picture: body.picture,
         user_metadata: body.user_metadata,
         app_metadata: body.app_metadata,
@@ -135,6 +138,18 @@ export const createManagementApiHandlers = (
       if (!user) return sendError(res, 404, "The user does not exist.", "inexistent_user");
 
       let body = req.body ?? {};
+      if (typeof body.email === "string") {
+        if (!z.string().email().safeParse(body.email).success) {
+          return sendError(
+            res,
+            400,
+            "Payload validation error: 'Object didn't pass validation for format email'.",
+          );
+        }
+        if (findByEmail(body.email) && findByEmail(body.email) !== user) {
+          return sendError(res, 409, "The specified new email already exists", "auth0_idp_error");
+        }
+      }
       let updated: Auth0User = {
         ...user,
         ...(typeof body.name === "string" && { name: body.name }),
