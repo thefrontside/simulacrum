@@ -9,6 +9,8 @@ export const auth0UserSchema = z
     password: z.string().optional().default("12345"),
     email: z.string().email().optional(),
     picture: z.string().url().optional(),
+    user_metadata: z.record(z.unknown()).default({}),
+    app_metadata: z.record(z.unknown()).default({}),
   })
   .transform((user) => {
     if (!user.email) user.email = faker.internet.email({ firstName: user.name });

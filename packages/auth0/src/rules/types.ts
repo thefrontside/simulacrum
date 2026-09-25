@@ -14,6 +14,8 @@ export interface RuleUser {
   family_name?: string | undefined;
   name?: string | undefined;
   identities: IdentityProvider[] | undefined;
+  user_metadata?: Record<string, unknown> | undefined;
+  app_metadata?: Record<string, unknown> | undefined;
 }
 
 type IdentityProvider = {
