@@ -263,7 +263,7 @@ export const createAuth0Handlers = (
         given_name: user.name,
         family_name: user.name,
         email: user.email,
-        email_verified: true,
+        email_verified: user.email_verified,
         locale: "en",
         hd: "okta.com",
       };
