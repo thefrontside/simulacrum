@@ -61,6 +61,23 @@ app.listen(4400, () => console.log(`auth0 simulation server started at https://l
 
 By passing an `initialState`, you may control the initial users in the store.
 
+```js
+const app = simulation({
+  initialState: {
+    users: [
+      {
+        id: "auth0|alice",
+        name: "Alice",
+        email: "alice@example.com",
+        password: "12345",
+        user_metadata: { theme: "dark" },
+        app_metadata: { roles: ["admin"] },
+      },
+    ],
+  },
+});
+```
+
 ### Example
 
 The folks at Auth0 maintain many samples such as [github.com/auth0-samples/auth0-react-samples](https://github.com/auth0-samples/auth0-react-samples). Follow the instructions to run the sample, set the configuration in `auth_config.json` to match the defaults as noted above, and run the Auth0 simulation server with `npx auth0-simulator`.
@@ -86,6 +103,8 @@ Set the `rulesDirectory` of the [options field](#options) to a path relative to 
 For example, a [sample rules directory](./test/rules) is in the auth0 package for testing.
 
 If we want to run these rules files then we would add the `rulesDirectory` field to the [options object](#options).
+
+As in Auth0, rules receive the stored user's `user_metadata` and `app_metadata` on the `user` argument. Neither is added to the tokens unless a rule copies a value into a claim.
 
 ## Endpoints
 

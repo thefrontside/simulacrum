@@ -19,13 +19,20 @@ let Fields = {
 
 type FixtureDirectories =
   | "user"
+  | "metadata"
   | "access-token"
   | "user-dependent"
   | "async-only"
   | "sync-wrapper-with-async";
 
 type Fixtures = `test/fixtures/rules-${FixtureDirectories}`;
-let person = {
+let person: {
+  name: string;
+  email: string;
+  password: string;
+  user_metadata?: Record<string, unknown>;
+  app_metadata?: Record<string, unknown>;
+} = {
   name: "Paul Waters",
   email: "paulwaters.white@yahoo.com",
   password: "12345",
@@ -159,6 +166,64 @@ describe("rules", () => {
 
       expect(idToken.picture).toContain("https://i.pravatar.cc");
       expect(idToken.name).toBe(person.name);
+    });
+  });
+
+  describe("user and app metadata", () => {
+    let code: string;
+    let server: FoundationSimulatorListening<unknown>;
+
+    beforeEach(async () => {
+      ({ code, server } = await createSimulation("test/fixtures/rules-metadata", {
+        user_metadata: { theme: "dark" },
+        app_metadata: { organisation_id: "org_123" },
+      }));
+    });
+    afterEach(async () => {
+      await server.ensureClose();
+    });
+
+    it("exposes the stored metadata to rules", async () => {
+      let res: Response = await fetch(`${auth0Url}/oauth/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code,
+        }),
+      });
+
+      expect(res.ok).toBe(true);
+      let token = (await res.json()) as unknown as { access_token: string; id_token: string };
+
+      let accessToken = decodeJwt(token.access_token);
+      let idToken = decodeJwt(token.id_token);
+
+      expect(accessToken["https://example.nl/org"]).toBe("org_123");
+      expect(idToken["https://example.nl/theme"]).toBe("dark");
+    });
+
+    it("does not copy the metadata itself into the tokens", async () => {
+      let res: Response = await fetch(`${auth0Url}/oauth/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...Fields,
+          code,
+        }),
+      });
+
+      let token = (await res.json()) as unknown as { access_token: string; id_token: string };
+
+      for (let jwt of [token.access_token, token.id_token]) {
+        let claims = decodeJwt(jwt);
+        expect(claims).not.toHaveProperty("user_metadata");
+        expect(claims).not.toHaveProperty("app_metadata");
+      }
     });
   });
 
