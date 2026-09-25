@@ -71,6 +71,18 @@ describe("Management API", () => {
       expect(await res.json()).toMatchObject({ statusCode: 401, error: "Unauthorized" });
     });
 
+    it("rejects a simulator token for another audience", async () => {
+      let res = await fetch(`${auth0Url}/oauth/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ grant_type: "client_credentials", client_id: clientId }),
+      });
+      let { access_token } = (await res.json()) as { access_token: string };
+
+      let apiRes = await api(`/users/${encodeURIComponent(seeded.id)}`, { token: access_token });
+      expect(apiRes.status).toBe(401);
+    });
+
     it("rejects a token the simulator did not sign", async () => {
       let res = await api(`/users/${encodeURIComponent(seeded.id)}`, { token: "not.a.jwt" });
       expect(res.status).toBe(401);
@@ -97,6 +109,11 @@ describe("Management API", () => {
       expect(res.status).toBe(200);
       let { id_token } = (await res.json()) as { id_token: string };
       expect(decodeJwt(id_token).sub).toBe(user.user_id);
+    });
+
+    it("does not give a user created without a password a guessable one", async () => {
+      await createUser({ email: "no-password@example.com" });
+      expect((await login("no-password@example.com", "12345")).status).toBe(401);
     });
 
     it("prefixes a caller-supplied user_id", async () => {
@@ -167,6 +184,30 @@ describe("Management API", () => {
       expect(res.status).toBe(200);
 
       expect(await claim()).toBe("org_2");
+    });
+
+    it("refuses to patch in an invalid email", async () => {
+      let res = await api(`/users/${encodeURIComponent(seeded.id)}`, {
+        method: "PATCH",
+        body: { email: "nope" },
+      });
+      expect(res.status).toBe(400);
+    });
+
+    it("refuses to patch in another user's email, but accepts the user's own", async () => {
+      let user = await createUser({ email: "taken@example.com" });
+
+      let res = await api(`/users/${encodeURIComponent(seeded.id)}`, {
+        method: "PATCH",
+        body: { email: "Taken@example.com" },
+      });
+      expect(res.status).toBe(409);
+
+      res = await api(`/users/${encodeURIComponent(user.user_id)}`, {
+        method: "PATCH",
+        body: { email: "TAKEN@example.com" },
+      });
+      expect(res.status).toBe(200);
     });
 
     it("answers 404 when patching an unknown user", async () => {
