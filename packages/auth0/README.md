@@ -61,6 +61,23 @@ app.listen(4400, () => console.log(`auth0 simulation server started at https://l
 
 By passing an `initialState`, you may control the initial users in the store.
 
+```js
+const app = simulation({
+  initialState: {
+    users: [
+      {
+        id: "auth0|alice",
+        name: "Alice",
+        email: "alice@example.com",
+        password: "12345",
+        user_metadata: { theme: "dark" },
+        app_metadata: { roles: ["admin"] },
+      },
+    ],
+  },
+});
+```
+
 ### Example
 
 The folks at Auth0 maintain many samples such as [github.com/auth0-samples/auth0-react-samples](https://github.com/auth0-samples/auth0-react-samples). Follow the instructions to run the sample, set the configuration in `auth_config.json` to match the defaults as noted above, and run the Auth0 simulation server with `npx auth0-simulator`.
@@ -87,6 +104,8 @@ For example, a [sample rules directory](./test/rules) is in the auth0 package fo
 
 If we want to run these rules files then we would add the `rulesDirectory` field to the [options object](#options).
 
+As in Auth0, rules receive the stored user's `user_metadata` and `app_metadata` on the `user` argument. Neither is added to the tokens unless a rule copies a value into a claim.
+
 ## Endpoints
 
 The following endpoints have been assigned handlers:
@@ -100,3 +119,17 @@ The following endpoints have been assigned handlers:
 - `/v2/logout`
 - `/.well-known/jwks.json`
 - `/.well-known/openid-configuration`
+- `/lo/reset` (password-change ticket page)
+
+### Management API
+
+A subset of the [Auth0 Management API](https://auth0.com/docs/api/management/v2) is served under `/api/v2`, backed by the same store the login flow reads, so a user created here can log in and a metadata update shows up in the next token. Requests need a bearer token signed by the simulator from a `client_credentials` grant on `/oauth/token` with the audience `https://<simulator host>/api/v2/`. Scopes are not checked.
+
+- `POST /api/v2/users` — `409` if the email is taken. The id is `auth0|<user_id>` (generated when omitted), `email_verified` defaults to `false`, and a user created without a `password` gets a random one, so they can only log in once a password-change ticket has set it.
+- `GET /api/v2/users/:id`
+- `PATCH /api/v2/users/:id` — `user_metadata` and `app_metadata` are merged at the top level, and a `null` value removes the key, as in Auth0.
+- `DELETE /api/v2/users/:id`
+- `GET /api/v2/users-by-email?email=`
+- `POST /api/v2/tickets/password-change` — accepts `user_id` (or `email`), `result_url`, `ttl_sec` and `mark_email_as_verified`. The returned ticket URL opens a page on `/lo/reset` that sets the password and, if given, redirects to `result_url`.
+
+Errors use Auth0's `{ statusCode, error, message, errorCode }` shape.

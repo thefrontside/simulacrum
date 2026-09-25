@@ -115,7 +115,7 @@ export const createTokens = async ({
       .setIssuedAt()
       .setExpirationTime(`${expiresInHours}h`)
       .sign(signingKey),
-    id_token: await new SignJWT({ ...userData, ...context.idToken })
+    id_token: await new SignJWT({ ...profileClaims(userData), ...context.idToken })
       .setProtectedHeader({ alg: "RS256", kid: JWKS.keys[0].kid })
       .setIssuedAt()
       .setExpirationTime(`${expiresInHours}h`)
@@ -151,11 +151,14 @@ export const getIdToken = ({
   let userData: RuleUser = {
     name: body?.name ?? user.name,
     email: body?.email ?? user.email,
-    email_verified: true,
+    email_verified: user.email_verified,
     user_id: body?.id ?? user.id,
     nickname: body?.nickname,
     picture: body?.picture ?? user.picture,
     identities: body?.identities,
+    // cloned so a rule mutating them can't write through to the store
+    user_metadata: structuredClone(user.user_metadata),
+    app_metadata: structuredClone(user.app_metadata),
   };
 
   assert(!!user.email, "500::User in store requires an email");
@@ -177,6 +180,9 @@ export const getIdToken = ({
 
   return { userData, idTokenData };
 };
+
+// Rules see the metadata, but Auth0 only puts it in a token when a rule adds it as a claim.
+const profileClaims = ({ user_metadata: _u, app_metadata: _a, ...claims }: RuleUser) => claims;
 
 export const getBaseAccessToken = ({
   iss,
