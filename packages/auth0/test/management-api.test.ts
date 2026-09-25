@@ -83,6 +83,25 @@ describe("Management API", () => {
       expect(apiRes.status).toBe(401);
     });
 
+    it("rejects a user's token even for the Management API audience", async () => {
+      let res = await fetch(`${auth0Url}/oauth/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          grant_type: "password",
+          client_id: clientId,
+          username: seeded.email,
+          password: seeded.password,
+          audience: `${auth0Url}/api/v2/`,
+        }),
+      });
+      let { access_token } = (await res.json()) as { access_token: string };
+      expect(decodeJwt(access_token).aud).toBe(`${auth0Url}/api/v2/`);
+
+      let apiRes = await api(`/users/${encodeURIComponent(seeded.id)}`, { token: access_token });
+      expect(apiRes.status).toBe(401);
+    });
+
     it("rejects a token the simulator did not sign", async () => {
       let res = await api(`/users/${encodeURIComponent(seeded.id)}`, { token: "not.a.jwt" });
       expect(res.status).toBe(401);
@@ -190,6 +209,14 @@ describe("Management API", () => {
       let res = await api(`/users/${encodeURIComponent(seeded.id)}`, {
         method: "PATCH",
         body: { email: "nope" },
+      });
+      expect(res.status).toBe(400);
+    });
+
+    it("validates the whole patched user", async () => {
+      let res = await api(`/users/${encodeURIComponent(seeded.id)}`, {
+        method: "PATCH",
+        body: { picture: "not-a-url" },
       });
       expect(res.status).toBe(400);
     });
