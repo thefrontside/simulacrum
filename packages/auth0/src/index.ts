@@ -21,19 +21,35 @@ export type Auth0Simulator = (args?: {
     extendRouter?: (router: Router, simulationStore: ExtendedSimulationStore) => void;
   };
   options?: Partial<Auth0Configuration>;
+  config?: Auth0Configuration;
 }) => FoundationSimulator<ExtendedSimulationStore>;
 
-export const simulation: Auth0Simulator = (args = {}) => {
-  const config = getConfig(args.options);
-  const parsedInitialState = !args?.initialState
+export const simulation: Auth0Simulator = ({
+  debug,
+  initialState,
+  extend,
+  options,
+  config: suppliedConfig,
+} = {}) => {
+  // if config is provided, use it.
+  // Otherwise, get the config from passed in options and defaults
+  const config = suppliedConfig ?? getConfig(options);
+  const parsedInitialState = initialState === undefined
     ? undefined
-    : auth0InitialStoreSchema.parse(args?.initialState);
+    : auth0InitialStoreSchema.parse(initialState);
   return createFoundationSimulationServer({
-    port: config.port ?? 4400, // default port
-    protocol: "https",
-    extendStore: extendStore(parsedInitialState, args?.extend?.extendStore),
-    extendRouter: extendRouter(config, args.extend?.extendRouter, args.debug),
+    ...(config.port !== undefined && { port: config.port }),
+    ...(config.protocol !== undefined && { protocol: config.protocol }),
+    extendStore: extendStore(parsedInitialState, extend?.extendStore),
+    extendRouter: extendRouter(config, extend?.extendRouter, debug),
   })();
 };
 
+export {
+  auth0App,
+  getCLIConfig,
+  getConfig,
+  readJsonConfig,
+  type CLIConfigResult,
+} from "./config/get-config.ts";
 export { auth0UserSchema, defaultUser } from "./store/entities.ts";
