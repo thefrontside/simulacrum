@@ -94,12 +94,6 @@ When running from the command line, you can pass configuration as flags:
 npx @simulacrum/auth0-simulator --port 5000 --audience https://myapp.com/api
 ```
 
-The CLI also accepts an explicit `start` command, though it remains the default:
-
-```bash
-npx @simulacrum/auth0-simulator start --port 5000
-```
-
 Run with `--help` to see all available flags:
 
 ```bash

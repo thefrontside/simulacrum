@@ -57,8 +57,8 @@ importers:
         specifier: ^2.3.3
         version: 2.3.3
       configliere:
-        specifier: ^0.4.0
-        version: 0.4.0
+        specifier: ^0.6.0
+        version: 0.6.0
       cookie-session:
         specifier: ^2.1.0
         version: 2.1.1
@@ -78,8 +78,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       zod:
-        specifier: ^3.24.1
-        version: 3.25.76
+        specifier: ^4.4.3
+        version: 4.5.4
     devDependencies:
       '@simulacrum/server':
         specifier: workspace:^
@@ -169,8 +169,8 @@ importers:
         specifier: ^5.15.1
         version: 5.18.1(graphql@16.13.2)
       zod:
-        specifier: ^3.24.1
-        version: 3.25.76
+        specifier: ^4.4.3
+        version: 4.5.4
     devDependencies:
       '@graphql-codegen/cli':
         specifier: ^5.0.7
@@ -1913,8 +1913,8 @@ packages:
     resolution: {integrity: sha512-gk/Z852D2Wtb//0I+kRFNKKE9dIIVirjoqPoA1wJU+XePVXZfGeBpk45+A1rKO4Q43prqWBNY/MiIeRLbPWUaA==}
     engines: {node: '>=4.0.0'}
 
-  configliere@0.4.0:
-    resolution: {integrity: sha512-4bxK3+L+FHr9Xm/d69Syvvpvkj7lj7a4zz3B+tchuohg5WKeudyBS+4Oob5Zdgoh8I7+n2lj0lfa8I6cUXfcEg==}
+  configliere@0.6.0:
+    resolution: {integrity: sha512-7c7Soc2hbumAZQYVmhjs56X9mngz+moui7yjog4CfSus/cXY2/qwkXLKsvOLM8NM7foELnaWCSeXbwOYFQfW0g==}
     engines: {node: '>= 16'}
 
   constant-case@3.0.4:
@@ -3416,8 +3416,8 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  zod@4.5.4:
+    resolution: {integrity: sha512-sC95tT5iHHH9gtpj6A81kh+NEaRAUFN+qlUPDUbRfOMvNf5QCBqsb3WgvnpVtK5Y+4UfA6KqufotuTvMGiTlsA==}
 
 snapshots:
 
@@ -5092,7 +5092,7 @@ snapshots:
 
   common-tags@1.8.2: {}
 
-  configliere@0.4.0:
+  configliere@0.6.0:
     dependencies:
       '@standard-schema/spec': 1.1.0
 
@@ -6621,4 +6621,4 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@3.25.76: {}
+  zod@4.5.4: {}

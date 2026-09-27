@@ -24,24 +24,29 @@ export type Auth0Simulator = (args?: {
   config?: Auth0Configuration;
 }) => FoundationSimulator<ExtendedSimulationStore>;
 
-export const simulation: Auth0Simulator = (args = {}) => {
+export const simulation: Auth0Simulator = ({
+  debug,
+  initialState,
+  extend,
+  options,
+  config: suppliedConfig,
+} = {}) => {
   // if config is provided, use it.
   // Otherwise, get the config from passed in options and defaults
-  const config = args.config ?? getConfig(args.options);
-  const parsedInitialState = !args?.initialState
+  const config = suppliedConfig ?? getConfig(options);
+  const parsedInitialState = initialState === undefined
     ? undefined
-    : auth0InitialStoreSchema.parse(args?.initialState);
+    : auth0InitialStoreSchema.parse(initialState);
   return createFoundationSimulationServer({
     ...(config.port !== undefined && { port: config.port }),
     ...(config.protocol !== undefined && { protocol: config.protocol }),
-    extendStore: extendStore(parsedInitialState, args?.extend?.extendStore),
-    extendRouter: extendRouter(config, args.extend?.extendRouter, args.debug),
+    extendStore: extendStore(parsedInitialState, extend?.extendStore),
+    extendRouter: extendRouter(config, extend?.extendRouter, debug),
   })();
 };
 
 export {
-  auth0ConfigParser,
-  auth0Program,
+  auth0App,
   getCLIConfig,
   getConfig,
   readJsonConfig,

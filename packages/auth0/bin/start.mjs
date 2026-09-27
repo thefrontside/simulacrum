@@ -11,8 +11,11 @@ const envs = [{ name: "env", value: /** @type {Record<string, string>} */ (proce
 async function main() {
   const result = getCLIConfig({ args, envs });
 
-  if (result.type === "help" || result.type === "version") {
+  if (result.type !== "config") {
     console.log(result.text);
+    if (result.type === "error") {
+      process.exitCode = 1;
+    }
     return;
   }
 

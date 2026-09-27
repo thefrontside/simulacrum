@@ -55,7 +55,7 @@
     "lint": "oxlint",
     "prepack": "pnpm run build",
     "start": "node --experimental-transform-types ./example/index.mts",
-    "start:bin": "node ./bin/start.cjs",
+    "start:bin": "node ./bin/start.mjs",
     "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest run --fileParallelism=false",
     "test:watch": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest watch --fileParallelism=false",
     "tsc": "tsc --noEmit"
@@ -65,14 +65,14 @@
     "@simulacrum/foundation-simulator": "^0.8.0",
     "assert-ts": "^0.3.4",
     "base64-url": "^2.3.3",
-    "configliere": "^0.4.0",
+    "configliere": "^0.6.0",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "html-entities": "^2.5.2",
     "jose": "^5.9.6",
     "jsesc": "^3.1.0",
-    "zod": "^3.24.1"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@simulacrum/server": "workspace:^",

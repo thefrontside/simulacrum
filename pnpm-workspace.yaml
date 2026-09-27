@@ -1,9 +1,9 @@
 packages:
   - packages/*
 blockExoticSubdeps: true
-# don't use workspace: protocol as covector will handle versions
-linkWorkspacePackages: deep
-disallowWorkspaceCycles: true
 
 catalog:
   effection: ^4.0.3
+disallowWorkspaceCycles: true
+# don't use workspace: protocol as covector will handle versions
+linkWorkspacePackages: deep
