@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { main, sleep, suspend, until, withResolvers } from "effection";
+import { main, sleep, until, withResolvers } from "effection";
 import { spawn as spawnProcess } from "node:child_process";
 import { useAttributes } from "./logging.ts";
 import type {
@@ -211,10 +211,12 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
         console.log(
           `cwd: ${json.cwd}\nservices:\n${
             "services" in json
-              ? Object.entries(json.services as Record<string, { port?: number; pid?: number }>)
+              ? Object.entries(
+                  json.services as Record<string, { state?: string; port?: number; pid?: number }>,
+                )
                   .map(
                     ([name, info]) =>
-                      `  ${name}: ${info.port ? `port ${info.port}` : ""}${info.pid ? `; pid ${info.pid}` : ""}`,
+                      `  ${name}: ${info.state ?? "unknown"}${info.port ? `; port ${info.port}` : ""}${info.pid ? `; pid ${info.pid}` : ""}`,
                   )
                   .join("\n")
               : "no service info available"
@@ -258,25 +260,19 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
       return;
     }
 
-    if (values["managed-child"]) {
-      const stopRequested = withResolvers<void>("wait for a stop request from the runtime service");
-
-      yield* serviceGraph(subset as unknown as Array<keyof S>, {
-        ...runOptions,
-        requestStop: () => stopRequested.resolve(),
-      });
-
-      yield* stopRequested.operation;
-      return;
+    if (!values["managed-child"]) {
+      yield* throwIfGraphAlreadyRunning(requestedControlPort ?? DEFAULT_CONTROL_PORT);
     }
-
-    yield* throwIfGraphAlreadyRunning(requestedControlPort ?? DEFAULT_CONTROL_PORT);
 
     // Start the graph and fetch the provided info
     // subset is a string array from CLI; cast to service key array for strict runner
-    yield* serviceGraph(subset as unknown as Array<keyof S>, runOptions);
+    const stopRequested = withResolvers<void>("wait for a stop request from the runtime service");
+    yield* serviceGraph(subset as unknown as Array<keyof S>, {
+      ...runOptions,
+      requestStop: () => stopRequested.resolve(),
+    });
 
-    yield* suspend();
+    yield* stopRequested.operation;
   } finally {
     yield* logger.debug("simulationCLI finally");
   }

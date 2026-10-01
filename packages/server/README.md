@@ -523,7 +523,7 @@ node ./service-graph.ts --stop
 ```
 
 - `--background` starts the graph in a detached managed child process and waits until the runtime service responds on the requested control port.
-- `--stop` sends `POST /stop` to the runtime service on the requested control port.
+- `--stop` sends `POST /stop` to the runtime service on the requested control port. It works for both foreground and background graphs.
 - `--control-port` defaults to `43034` for both `--background` and `--stop`.
 
 ## Development

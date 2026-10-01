@@ -42,6 +42,10 @@
       "development": "./src/index.ts",
       "default": "./dist/index.mjs"
     },
+    "./run-reaper": {
+      "development": "./src/run-reaper.ts",
+      "default": "./dist/run-reaper.mjs"
+    },
     "./run-simulation-child": {
       "development": "./src/run-simulation-child.ts",
       "default": "./dist/run-simulation-child.mjs"
@@ -54,6 +58,7 @@
     },
     "exports": {
       ".": "./dist/index.mjs",
+      "./run-reaper": "./dist/run-reaper.mjs",
       "./run-simulation-child": "./dist/run-simulation-child.mjs",
       "./package.json": "./package.json"
     }
