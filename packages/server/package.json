@@ -79,6 +79,7 @@
     "@effectionx/stream-helpers": "^0.8.2",
     "@effectionx/timebox": "^0.4.3",
     "chokidar": "^5.0.0",
+    "ctrlc-windows": "^2.2.0",
     "effection": "catalog:",
     "picomatch": "^4.0.4"
   },

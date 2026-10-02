@@ -14,7 +14,7 @@ import {
   type Operation,
 } from "effection";
 
-export const DEFAULT_REAPER_KILL_DELAY = 1000;
+export const DEFAULT_REAPER_KILL_DELAY = 10_000;
 const REAPER_SHUTDOWN_TIMEOUT = 1000;
 
 export type ProcessReaperClient = {

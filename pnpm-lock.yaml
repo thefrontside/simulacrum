@@ -210,6 +210,9 @@ importers:
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
+      ctrlc-windows:
+        specifier: ^2.2.0
+        version: 2.2.0
       effection:
         specifier: 'catalog:'
         version: 4.0.3
