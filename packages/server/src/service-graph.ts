@@ -8,11 +8,12 @@ import {
   each,
   createContext,
 } from "effection";
+import { ProcessApi } from "@effectionx/process";
 
 import { useAttributes } from "./logging.ts";
 import { type ServiceUpdate, useWatcher } from "./watch.ts";
 import { logger } from "./logging.ts";
-import { startDataService } from "./control-service.ts";
+import { type ServiceState, useControlPlane } from "./control-plane.ts";
 import { getOperationMetadata } from "./operation-metadata.ts";
 
 /**
@@ -47,10 +48,12 @@ export type ServiceGraph<S extends ServiceMap> = {
 
 export type ServiceGraphStatus = {
   cwd: string;
+  pid: number;
   services: Record<string, ServiceInfo>;
 };
 
 export type ServiceInfo = {
+  state: ServiceState;
   port?: number | undefined;
   pid?: number | undefined;
 };
@@ -58,8 +61,9 @@ export type ServiceInfo = {
 export type ServiceStatus = {
   startup: WithResolvers<void>;
   running: WithResolvers<void>;
-  port?: number | undefined;
-  pid?: number | undefined;
+  readonly state: ServiceState;
+  readonly port?: number | undefined;
+  readonly pid?: number | undefined;
 };
 
 export type ServiceGraphRunOptions = {
@@ -214,21 +218,6 @@ export function useServiceGraph<S extends ServiceMap>(
 
       const status = new Map<string, ServiceStatus>();
 
-      function serializeStatus(): ServiceGraphStatus {
-        return {
-          cwd: process.cwd(),
-          services: Object.fromEntries(
-            Array.from(status.entries()).map(([name, service]) => [
-              name,
-              {
-                port: service.port,
-                pid: service.pid,
-              },
-            ]),
-          ),
-        };
-      }
-
       let restartRequested = withResolvers<string | undefined>("wait for a restart request");
       function requestRestart(service?: string) {
         if (service !== undefined && !(service in effectiveServices)) {
@@ -240,28 +229,36 @@ export function useServiceGraph<S extends ServiceMap>(
         current.resolve(service);
       }
 
-      const dataServiceProvided = yield* startDataService({
+      const controlPlane = yield* useControlPlane({
         data: options?.globalData ?? {},
         port: effectiveRunOptions.controlPort,
-        getStatus: serializeStatus,
+        services: Object.keys(effectiveServices),
         requestStop: effectiveRunOptions.requestStop,
         requestRestart,
       });
       yield* useAttributes({
         name: "serviceGraph",
-        dataServicePort: String(dataServiceProvided.port),
+        dataServicePort: String(controlPlane.port),
       });
 
       status.set("simulacrum", {
         startup: withResolvers<void>(),
         running: withResolvers<void>(),
-        port: dataServiceProvided.port,
+        get state() {
+          return controlPlane.getServiceInfo("simulacrum")!.state;
+        },
+        get port() {
+          return controlPlane.getServiceInfo("simulacrum")?.port;
+        },
+        get pid() {
+          return controlPlane.getServiceInfo("simulacrum")?.pid;
+        },
       });
       status.get("simulacrum")?.startup.resolve();
 
       // set the SimulacrumEndpoint in this operation scope so children started
       // in this graph can access the port via context
-      yield* SimulacrumEndpoint.set(dataServiceProvided.port);
+      yield* SimulacrumEndpoint.set(controlPlane.port);
 
       // start up a watcher only when the CLI or caller explicitly asks for it
       // or when at least one of the services has a `watch` configuration. by
@@ -286,6 +283,15 @@ export function useServiceGraph<S extends ServiceMap>(
         status.set(name, {
           startup: withResolvers<void>(),
           running: withResolvers<void>(),
+          get state() {
+            return controlPlane.getServiceInfo(name)!.state;
+          },
+          get port() {
+            return controlPlane.getServiceInfo(name)?.port;
+          },
+          get pid() {
+            return controlPlane.getServiceInfo(name)?.pid;
+          },
         });
         if (def.watch && watcher) {
           watcher.add(name, def.watch);
@@ -310,14 +316,11 @@ export function useServiceGraph<S extends ServiceMap>(
 
         // log so it is clear in the inspector output when a restart is triggered
         yield* logger.stdout(`restarting service ${service}`);
+        controlPlane.setServiceInfo(service, { state: "stopping" });
         // refresh the startup resolver
         task.startup = withResolvers<void>();
 
-        // remove any recorded port/pid for the service; it will be re-registered when it starts again
-        delete task.port;
-        delete task.pid;
-
-        // signal the running operation to stop so it can clean up
+        // Let the operation clean up before clearing its control-plane record.
         task.running.resolve();
       }
 
@@ -378,6 +381,7 @@ export function useServiceGraph<S extends ServiceMap>(
             status: `restarted ${++restartCount} times`,
           });
           yield* waitDeps(service, restartCount);
+          controlPlane.setServiceInfo(service, { state: "starting" });
 
           const def = effectiveServices[service];
           const task = status.get(service);
@@ -389,6 +393,12 @@ export function useServiceGraph<S extends ServiceMap>(
           // run the service in a scoped child operation so it can be cleanly
           // cancelled when a file change triggers a restart
           const serviceTask = yield* spawn(function* () {
+            yield* ProcessApi.around({
+              *exec(args, next) {
+                return yield* controlPlane.trackProcess(service, next(...args));
+              },
+            });
+
             // capture any returned listening info (e.g., from useSimulation)
             const maybeProvided = yield* def.operation;
             if (maybeProvided && typeof maybeProvided === "object") {
@@ -397,22 +407,29 @@ export function useServiceGraph<S extends ServiceMap>(
                   name: `service ${service}`,
                   port: String(maybeProvided.port),
                 });
-                task.port = maybeProvided.port;
+                controlPlane.setServiceInfo(service, { port: maybeProvided.port });
               }
               if ("pid" in maybeProvided && typeof maybeProvided.pid === "number") {
-                task.pid = maybeProvided.pid;
                 yield* useAttributes({
                   name: `service ${service}`,
                   pid: String(maybeProvided.pid),
                 });
+                controlPlane.setServiceInfo(service, { pid: maybeProvided.pid });
               }
             }
 
+            controlPlane.setServiceInfo(service, { state: "ready" });
             task.startup.resolve();
             // wait until the watcher asks for this service to be restarted
             yield* task.running.operation;
           });
-          yield* serviceTask;
+          try {
+            yield* serviceTask;
+          } catch (error) {
+            controlPlane.setServiceInfo(service, { state: "failed" });
+            throw error;
+          }
+          controlPlane.clearServiceInfo(service, "waiting");
         }
       }
 

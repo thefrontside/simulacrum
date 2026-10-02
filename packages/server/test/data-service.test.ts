@@ -4,6 +4,7 @@ import { createServer } from "node:net";
 import { run, until } from "effection";
 import { useServiceGraph } from "../src/service-graph.ts";
 import { useSimulation } from "../src/simulation.ts";
+import { useService } from "../src/service.ts";
 import { waitFor } from "./utils.ts";
 import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
 
@@ -96,12 +97,15 @@ it("binds the control service to a requested static port and exposes health/stat
             })(),
           ),
         },
+        notSelected: {
+          operation: useSimulation("not-selected", "./test/fixtures/init-data-sim.ts"),
+        },
       },
       {
         globalData: { featureFlag: true },
         controlPort,
       },
-    )();
+    )(["api"]);
 
     yield* waitFor(() => typeof runGraph.status?.get("api")?.port === "number", 3000);
 
@@ -112,14 +116,40 @@ it("binds the control service to a requested static port and exposes health/stat
     const statusRes = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
     assert.strictEqual(statusRes.status, 200);
     const statusJson = (yield* until(statusRes.json())) as {
-      services: Record<string, { port?: number; pid?: number }>;
+      services: Record<string, { state: string; port?: number; pid?: number }>;
     };
 
     assert.strictEqual(statusJson.services.simulacrum?.port, controlPort);
+    assert.strictEqual(statusJson.services.simulacrum?.state, "ready");
     assert.strictEqual(statusJson.services.api?.port, runGraph.status.get("api")?.port);
+    assert.strictEqual(statusJson.services.api?.state, "ready");
+    assert.strictEqual("notSelected" in statusJson.services, false);
 
     const dataRes = yield* until(fetch(`http://127.0.0.1:${controlPort}/data/featureFlag`));
     assert.strictEqual(dataRes.status, 200);
     assert.deepStrictEqual(yield* until(dataRes.json()), true);
+  });
+});
+
+it("tracks useService processes under their graph service name", async () => {
+  const controlPort = await getAvailablePort();
+
+  await run(function* () {
+    yield* useServiceGraph(
+      {
+        worker: {
+          operation: useService("display-name", "node ./test/services/service-main.ts"),
+        },
+      },
+      { controlPort },
+    )();
+
+    const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
+    const status = (yield* until(response.json())) as {
+      services: Record<string, { state: string; pid?: number }>;
+    };
+    assert.strictEqual(typeof status.services.worker?.pid, "number");
+    assert.strictEqual(status.services.worker?.state, "ready");
+    assert.strictEqual("display-name" in status.services, false);
   });
 });
