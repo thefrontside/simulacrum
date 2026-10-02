@@ -1,5 +1,5 @@
 import { once } from "node:events";
-import { fork, spawn } from "node:child_process";
+import { fork, spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { it } from "node:test";
@@ -53,6 +53,22 @@ async function waitForPidExit(pid: number) {
   throw new Error(`timed out waiting for process ${pid} to exit`);
 }
 
+function killProcessTree(pid: number | undefined) {
+  if (!pid) return;
+  try {
+    if (process.platform === "win32") {
+      spawnSync("taskkill", ["/PID", String(pid), "/T", "/F"], {
+        stdio: "ignore",
+        windowsHide: true,
+      });
+    } else {
+      process.kill(-pid, "SIGKILL");
+    }
+  } catch {
+    // The process tree may already have exited.
+  }
+}
+
 it("reaps watched processes after its IPC connection closes", async () => {
   const victim = startVictim();
   const reaper = fork(reaperPath, ["50"], {
@@ -69,7 +85,7 @@ it("reaps watched processes after its IPC connection closes", async () => {
     await once(reaper, "exit");
   } finally {
     if (reaper.connected) reaper.kill();
-    if (!victim.killed) victim.kill("SIGKILL");
+    killProcessTree(victim.pid);
   }
 });
 
@@ -87,7 +103,7 @@ it("does not reap processes after an explicit shutdown", async () => {
     assert.strictEqual(victim.exitCode, null);
   } finally {
     if (reaper.connected) reaper.kill();
-    if (!victim.killed) victim.kill("SIGKILL");
+    killProcessTree(victim.pid);
   }
 });
 
@@ -114,7 +130,7 @@ it("escalates to SIGKILL when a watched process ignores SIGTERM", async () => {
     // cleanup only used to ensure no processes are left running
     // if something is broken
     if (reaper.connected) reaper.kill();
-    if (!victim.killed) victim.kill("SIGKILL");
+    killProcessTree(victim.pid);
   }
 });
 
@@ -141,14 +157,14 @@ it("reaps all watched processes but leaves unwatched processes running", async (
     await once(reaper, "exit");
     assert.strictEqual(unwatched.exitCode, null);
     assert.strictEqual(unwatched.signalCode, null);
-    unwatched.kill("SIGKILL");
+    killProcessTree(unwatched.pid);
     await unwatchedExit;
   } finally {
     // cleanup only used to ensure no processes are left running
     // if something is broken
     if (reaper.connected) reaper.kill();
     for (const victim of [...watched, unwatched]) {
-      if (!victim.killed) victim.kill("SIGKILL");
+      killProcessTree(victim.pid);
     }
   }
 });
@@ -185,7 +201,7 @@ it("kills descendants in the watched process group", async () => {
     await once(reaper, "exit");
   } finally {
     if (reaper.connected) reaper.kill();
-    if (!victim.killed) victim.kill("SIGKILL");
+    killProcessTree(victim.pid);
     if (grandchildPid !== undefined) {
       try {
         process.kill(grandchildPid, "SIGKILL");

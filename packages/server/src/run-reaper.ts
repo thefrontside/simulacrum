@@ -31,7 +31,10 @@ function signalAll(signal: NodeJS.Signals): void {
         // @effectionx/process starts POSIX processes in their own process group.
         process.kill(-pid, signal);
       }
-    } catch {
+    } catch (error) {
+      if (process.platform !== "win32" && (error as NodeJS.ErrnoException).code === "ESRCH") {
+        watched.delete(pid);
+      }
       // The process may have exited between registration and reaping.
     }
   }
@@ -45,7 +48,11 @@ function anyWatchedProcessGroupAlive(): boolean {
       process.kill(-pid, 0);
       return true;
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "ESRCH") return true;
+      if ((error as NodeJS.ErrnoException).code === "ESRCH") {
+        watched.delete(pid);
+      } else {
+        return true;
+      }
     }
   }
   return false;
@@ -56,10 +63,13 @@ function reap(): void {
   signalAll("SIGTERM");
   const deadline = Date.now() + killDelay;
   const check = () => {
-    if (!anyWatchedProcessGroupAlive()) {
+    if (watched.size === 0) {
       process.exit(0);
     } else if (Date.now() >= deadline) {
+      // Do not probe PGID liveness here; a completed group ID could be reused.
       signalAll("SIGKILL");
+      process.exit(0);
+    } else if (!anyWatchedProcessGroupAlive()) {
       process.exit(0);
     } else {
       reapTimer = delay(check, Math.min(100, deadline - Date.now()));
