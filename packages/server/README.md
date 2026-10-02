@@ -541,11 +541,22 @@ simulationCLI(services, {
     return launch({
       ...request,
       command: "unshare",
-      args: ["--pid", "--fork", "--mount-proc", "--kill-child", request.command, ...request.args],
+      args: [
+        "--user",
+        "--map-root-user",
+        "--pid",
+        "--fork",
+        "--mount-proc",
+        "--kill-child",
+        request.command,
+        ...request.args,
+      ],
     });
   },
 });
 ```
+
+This example requires unprivileged user namespaces to be enabled by the system. If they are disabled, use an appropriately privileged setup instead.
 
 The same hook is used in foreground and background modes; the request includes the mode, stdio policy, and detachment setting. The default launcher uses Node's child-process API. Custom launchers can delegate with a modified request or implement their own spawning behavior.
 

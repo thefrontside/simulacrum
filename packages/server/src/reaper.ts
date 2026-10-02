@@ -3,8 +3,10 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { once } from "@effectionx/node/events";
 import {
+  call,
   createQueue,
   ensure,
+  race,
   resource,
   sleep,
   spawn,
@@ -13,6 +15,7 @@ import {
 } from "effection";
 
 export const DEFAULT_REAPER_KILL_DELAY = 1000;
+const REAPER_SHUTDOWN_TIMEOUT = 1000;
 
 export type ProcessReaperClient = {
   add(pid: number): void;
@@ -141,7 +144,30 @@ export function useProcessReaper(
       } catch {
         current.child.disconnect();
       }
-      yield* exited;
+      const stopped = yield* race([
+        call(function* () {
+          yield* exited;
+          return true;
+        }),
+        call(function* () {
+          yield* sleep(REAPER_SHUTDOWN_TIMEOUT);
+          return false;
+        }),
+      ]);
+
+      if (!stopped) {
+        if (current.child.exitCode === null && current.child.signalCode === null) {
+          current.child.kill("SIGKILL");
+        }
+        yield* race([
+          call(function* () {
+            yield* exited;
+          }),
+          call(function* () {
+            yield* sleep(REAPER_SHUTDOWN_TIMEOUT);
+          }),
+        ]);
+      }
     });
 
     yield* ensureWorkerReady();
