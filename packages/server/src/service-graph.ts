@@ -48,6 +48,7 @@ export type ServiceGraph<S extends ServiceMap> = {
 
 export type ServiceGraphStatus = {
   cwd: string;
+  pid: number;
   services: Record<string, ServiceInfo>;
 };
 

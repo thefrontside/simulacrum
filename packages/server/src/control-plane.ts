@@ -1,9 +1,23 @@
-import { ensure, resource, spawn, type Operation, withResolvers } from "effection";
+import {
+  action,
+  call,
+  ensure,
+  race,
+  resource,
+  sleep,
+  spawn,
+  type Operation,
+  type Subscription,
+  type WithResolvers,
+  useScope,
+  withResolvers,
+} from "effection";
 import type { Process } from "@effectionx/process";
+import { on } from "@effectionx/node/events";
 import { useAttributes } from "./logging.ts";
 import { createServer } from "node:http";
 import { logger } from "./logging.ts";
-import type { Server } from "node:http";
+import type { Server, ServerResponse } from "node:http";
 import { type ProcessReaperClient, useProcessReaper } from "./reaper.ts";
 
 export type ServiceState = "waiting" | "starting" | "ready" | "stopping" | "failed";
@@ -30,42 +44,37 @@ export type ControlPlane = {
   trackProcess: (name: string, process: Operation<Process>) => Operation<Process>;
 };
 
+function* nextEvent<T extends unknown[]>(subscription: Subscription<T, never>): Operation<T> {
+  const next = yield* subscription.next();
+  if (next.done) throw new Error("event stream closed unexpectedly");
+  return next.value;
+}
+
 function* listen(server: Server, port: number | undefined): Operation<void> {
-  const ready = withResolvers<void>("wait for control plane to start listening");
-
-  const onError = (error: Error) => {
-    server.off("listening", onListening);
-    ready.reject(error);
-  };
-  const onListening = () => {
-    server.off("error", onError);
-    ready.resolve();
-  };
-
-  server.once("error", onError);
-  server.once("listening", onListening);
+  const listening = yield* on<[]>(server, "listening");
+  const errors = yield* on<[Error]>(server, "error");
   server.listen(port ?? 0, "127.0.0.1");
 
-  try {
-    yield* ready.operation;
-  } finally {
-    server.off("error", onError);
-    server.off("listening", onListening);
-  }
+  yield* race([
+    nextEvent(listening),
+    call(function* () {
+      const [error] = yield* nextEvent(errors);
+      throw error;
+    }),
+  ]);
 }
 
 function* close(server: Server): Operation<void> {
-  const closed = withResolvers<void>("wait for control plane to stop listening");
-
-  server.close((error) => {
-    if (error) {
-      closed.reject(error);
-    } else {
-      closed.resolve();
-    }
-  });
-
-  yield* closed.operation;
+  yield* action<void>((resolve, reject) => {
+    server.close((error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+    return () => {};
+  }, "close control plane");
 }
 
 type ControlPlaneServerOptions = {
@@ -76,9 +85,101 @@ type ControlPlaneServerOptions = {
   requestRestart?: ((service?: string) => void) | undefined;
 };
 
-function useControlPlaneServer(options: ControlPlaneServerOptions): Operation<{ port: number }> {
+const CONTROL_PLANE_READY_TIMEOUT = 30_000;
+
+function useControlPlaneServer(
+  options: ControlPlaneServerOptions,
+): Operation<{ port: number; notifyServiceChange: () => void }> {
   return resource(function* (provide) {
+    const scope = yield* useScope();
     let port = 0;
+    const readinessWaiters = new Map<
+      ServerResponse,
+      { done: WithResolvers<void>; onClose: () => void }
+    >();
+
+    function respondToReadyWaiter(
+      res: ServerResponse,
+      statusCode: number,
+      body: Record<string, unknown>,
+    ) {
+      const waiter = readinessWaiters.get(res);
+      if (!waiter) return;
+      readinessWaiters.delete(res);
+      res.off("close", waiter.onClose);
+      waiter.done.resolve();
+      if (res.destroyed) return;
+      const response = JSON.stringify(body);
+      res.writeHead(statusCode, {
+        "content-type": "application/json",
+        "content-length": String(Buffer.byteLength(response)),
+      });
+      res.end(response);
+    }
+
+    function currentReadiness(): { statusCode: number; body: Record<string, unknown> } | undefined {
+      const failed = Array.from(options.services.entries()).find(
+        ([, info]) => info.state === "failed" || info.state === "stopping",
+      );
+      if (failed) {
+        return {
+          statusCode: 503,
+          body: { ready: false, service: failed[0], state: failed[1].state },
+        };
+      }
+      if (Array.from(options.services.values()).every((info) => info.state === "ready")) {
+        return { statusCode: 200, body: { ready: true, port } };
+      }
+      return undefined;
+    }
+
+    function notifyServiceChange() {
+      const readiness = currentReadiness();
+      if (!readiness) return;
+      for (const res of readinessWaiters.keys()) {
+        respondToReadyWaiter(res, readiness.statusCode, readiness.body);
+      }
+    }
+
+    function waitForReadiness(res: ServerResponse) {
+      const readiness = currentReadiness();
+      if (readiness) {
+        const body = JSON.stringify(readiness.body);
+        res.writeHead(readiness.statusCode, {
+          "content-type": "application/json",
+          "content-length": String(Buffer.byteLength(body)),
+        });
+        res.end(body);
+        return;
+      }
+
+      const onClose = () => {
+        const waiter = readinessWaiters.get(res);
+        if (waiter) waiter.done.resolve();
+        readinessWaiters.delete(res);
+      };
+      const waiter = { done: withResolvers<void>(), onClose };
+      readinessWaiters.set(res, waiter);
+      res.once("close", onClose);
+
+      const task = scope.run(function* () {
+        const timedOut = yield* race([
+          call(function* () {
+            yield* sleep(CONTROL_PLANE_READY_TIMEOUT);
+            return true;
+          }),
+          call(function* () {
+            yield* waiter.done.operation;
+            return false;
+          }),
+        ]);
+        if (timedOut) {
+          respondToReadyWaiter(res, 504, { ready: false, reason: "readiness timed out" });
+        }
+      });
+      void task.catch((error) => console.error("control plane readiness wait failed:", error));
+    }
+
     const server = createServer((req, res) => {
       try {
         const url = new URL(req.url ?? "", `http://127.0.0.1`);
@@ -128,9 +229,15 @@ function useControlPlaneServer(options: ControlPlaneServerOptions): Operation<{ 
           return;
         }
 
+        if (req.method === "GET" && pathname === "/ready") {
+          waitForReadiness(res);
+          return;
+        }
+
         if (req.method === "GET" && pathname === "/status") {
           const body = JSON.stringify({
             cwd: process.cwd(),
+            pid: process.pid,
             services: Object.fromEntries(options.services),
           });
           res.writeHead(200, {
@@ -193,6 +300,9 @@ function useControlPlaneServer(options: ControlPlaneServerOptions): Operation<{ 
 
     yield* listen(server, options.port);
     yield* ensure(function* () {
+      for (const res of readinessWaiters.keys()) {
+        respondToReadyWaiter(res, 503, { ready: false, reason: "control plane is stopping" });
+      }
       if (server.listening) yield* close(server);
       yield* logger.debug(`control plane stopped on port ${port}`);
     });
@@ -201,7 +311,7 @@ function useControlPlaneServer(options: ControlPlaneServerOptions): Operation<{ 
     port = typeof address === "object" && address !== null && "port" in address ? address.port : 0;
     yield* logger.debug(`control plane started on port ${port}`);
     yield* useAttributes({ name: "controlPlane", port });
-    yield* provide({ port });
+    yield* provide({ port, notifyServiceChange });
   });
 }
 
@@ -222,6 +332,15 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
     const services = new Map<string, ControlPlaneServiceInfo>(
       (options.services ?? []).map((name) => [name, { state: "waiting" }]),
     );
+    yield* useAttributes({ name: "controlPlane", keys: Object.keys(data).join(", ") });
+    const { port, notifyServiceChange } = yield* useControlPlaneServer({
+      data,
+      port: options.port,
+      services,
+      requestStop: options.requestStop,
+      requestRestart: options.requestRestart,
+    });
+
     function setServiceInfo(name: string, info: Partial<ControlPlaneServiceInfo>) {
       const current = services.get(name) ?? { state: "waiting" as const };
       if (info.pid !== undefined && current.pid !== info.pid) {
@@ -236,6 +355,7 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       if (info.port !== undefined) current.port = info.port;
       if (info.state !== undefined) current.state = info.state;
       services.set(name, current);
+      notifyServiceChange();
     }
 
     function clearServiceInfo(name: string, state?: ServiceState) {
@@ -248,6 +368,7 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       } else {
         services.set(name, { state: state ?? "waiting" });
       }
+      notifyServiceChange();
     }
 
     function registerProcess(name: string, pid: number): () => void {
@@ -277,14 +398,6 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
 
       return process;
     }
-    yield* useAttributes({ name: "controlPlane", keys: Object.keys(data).join(", ") });
-    const { port } = yield* useControlPlaneServer({
-      data,
-      port: options.port,
-      services,
-      requestStop: options.requestStop,
-      requestRestart: options.requestRestart,
-    });
     setServiceInfo("simulacrum", { port, state: "ready" });
 
     yield* provide({

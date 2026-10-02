@@ -74,6 +74,7 @@
   },
   "dependencies": {
     "@effectionx/context-api": "^0.6.0",
+    "@effectionx/node": "^0.2.4",
     "@effectionx/process": "^0.8.1",
     "@effectionx/stream-helpers": "^0.8.2",
     "@effectionx/timebox": "^0.4.3",

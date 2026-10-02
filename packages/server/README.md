@@ -504,6 +504,7 @@ The `options.wellnessCheck` object supports:
 
 - `simulationCLI` wraps the runner in a small CLI loop and provides convenience flags: `--services`, `--watch`, `--watch-debounce`, `--background`, `--stop`, and `--control-port`.
 - Use the CLI helper for local development workflows where you want to run your graph directly from a file (see `service-graph.ts` examples above).
+- By default, foreground and background CLI modes launch a managed child process. Use the `start` subcommand to run directly in the current process, or use `useServiceTestRig` / `createServiceTestRig` for in-process tests.
 
 ```bash
 # foreground
@@ -522,9 +523,31 @@ node ./service-graph.ts --stop --control-port 4310
 node ./service-graph.ts --stop
 ```
 
-- `--background` starts the graph in a detached managed child process and waits until the runtime service responds on the requested control port.
+- Foreground inherits stdio to print it to your terminal; `--background` detaches it and waits until all selected services report ready.
 - `--stop` sends `POST /stop` to the runtime service on the requested control port. It works for both foreground and background graphs.
 - `--control-port` defaults to `43034` for both `--background` and `--stop`.
+
+The control plane's `/health` endpoint reports whether its HTTP server is running. `/status` returns an immediate service-state snapshot. `/ready` waits up to 30 seconds for all selected services to become ready, returning `503` if a service fails or begins stopping and `504` on timeout.
+
+##### Custom graph launcher
+
+Pass an optional second argument to `simulationCLI` to customize how the managed graph process is launched. Its `launchGraph` hook receives the launch request and a default launcher it can delegate to. For example, a team using only linux could opt to wrap the graph in `unshare` for more direct namespace protection:
+
+```ts
+import { simulationCLI } from "@simulacrum/server";
+
+simulationCLI(services, {
+  launchGraph(request, launch) {
+    return launch({
+      ...request,
+      command: "unshare",
+      args: ["--pid", "--fork", "--mount-proc", "--kill-child", request.command, ...request.args],
+    });
+  },
+});
+```
+
+The same hook is used in foreground and background modes; the request includes the mode, stdio policy, and detachment setting. The default launcher uses Node's child-process API. Custom launchers can delegate with a modified request or implement their own spawning behavior.
 
 ## Development
 

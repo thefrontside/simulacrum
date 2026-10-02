@@ -1,6 +1,18 @@
 import { parseArgs } from "node:util";
-import { main, sleep, until, withResolvers } from "effection";
-import { spawn as spawnProcess } from "node:child_process";
+import {
+  main,
+  call,
+  ensure,
+  race,
+  sleep,
+  until,
+  useAbortSignal,
+  withResolvers,
+  type Operation,
+  type Subscription,
+} from "effection";
+import { spawn as spawnProcess, type ChildProcess } from "node:child_process";
+import { on, once } from "@effectionx/node/events";
 import { useAttributes } from "./logging.ts";
 import type {
   ServiceDefinition,
@@ -11,6 +23,31 @@ import type {
 import { Debugging, logger } from "./logging.ts";
 
 export const DEFAULT_CONTROL_PORT = 43034;
+
+export type GraphLaunchRequest = {
+  command: string;
+  args: string[];
+  mode: "foreground" | "background";
+  cwd: string;
+  env: NodeJS.ProcessEnv;
+  detached: boolean;
+  stdio: "inherit" | "ignore";
+};
+
+export type GraphLaunchHook = (
+  request: GraphLaunchRequest,
+  launchDefault: (request: GraphLaunchRequest) => ChildProcess,
+) => ChildProcess;
+
+export type SimulationCLIOptions = {
+  launchGraph?: GraphLaunchHook;
+};
+
+function* nextEvent<T extends unknown[]>(subscription: Subscription<T, never>): Operation<T> {
+  const next = yield* subscription.next();
+  if (next.done) throw new Error("event stream closed unexpectedly");
+  return next.value;
+}
 
 function parseServiceList(value: string | undefined): string[] | undefined {
   if (!value) {
@@ -35,36 +72,132 @@ function parseControlPort(value: string | undefined): number | undefined {
   return port;
 }
 
-async function launchBackgroundProcess() {
+function launchGraphProcess(
+  mode: GraphLaunchRequest["mode"],
+  launchGraph?: GraphLaunchHook,
+): ChildProcess {
   const childArgs = process.argv.slice(1).filter((arg) => arg !== "--background");
-  childArgs.push("--managed-child");
+  childArgs.splice(1, 0, "start");
+  if (
+    mode === "background" &&
+    !childArgs.some((arg) => arg === "--control-port" || arg.startsWith("--control-port="))
+  ) {
+    childArgs.push("--control-port", String(DEFAULT_CONTROL_PORT));
+  }
 
-  const child = spawnProcess(process.execPath, [...process.execArgv, ...childArgs], {
-    detached: true,
-    stdio: "ignore",
+  const request: GraphLaunchRequest = {
+    command: process.execPath,
+    args: [...process.execArgv, ...childArgs],
+    mode,
+    cwd: process.cwd(),
     env: process.env,
-  });
+    detached: mode === "background",
+    stdio: mode === "background" ? "ignore" : "inherit",
+  };
 
-  child.unref();
+  const launchDefault = (next: GraphLaunchRequest) =>
+    spawnProcess(next.command, next.args, {
+      cwd: next.cwd,
+      env: next.env,
+      detached: next.detached,
+      stdio: next.stdio,
+    });
+  const child = launchGraph ? launchGraph(request, launchDefault) : launchDefault(request);
+  if (mode === "background") child.unref();
+  return child;
 }
 
 function* waitForControlService(controlPort: number) {
+  const signal = yield* useAbortSignal();
   const deadline = Date.now() + 5000;
 
   while (Date.now() < deadline) {
+    let response: Response;
     try {
-      const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/health`));
-      if (response.ok) {
-        return;
-      }
-    } catch (ignore) {
-      // keep polling until the child is ready or we time out
+      response = yield* until(fetch(`http://127.0.0.1:${controlPort}/ready`, { signal }));
+    } catch {
+      // it will error if we try to fetch before the service is actually listening
+      // maybe order things better in the future to avoid this requirement?
+      yield* sleep(25);
+      continue;
     }
 
-    yield* sleep(25);
+    if (!response.ok) {
+      const reason = yield* until(response.text());
+      throw new Error(`background graph on port ${controlPort} did not become ready: ${reason}`);
+    }
+    return;
   }
 
-  throw new Error(`timed out waiting for background graph on port ${controlPort}`);
+  throw new Error(`timed out waiting for control plane on port ${controlPort}`);
+}
+
+function* waitForBackgroundGraph(controlPort: number, child: ChildProcess) {
+  const exits = yield* on<[number | null, NodeJS.Signals | null]>(child, "exit");
+  const errors = yield* on<[Error]>(child, "error");
+  yield* race([
+    waitForControlService(controlPort),
+    call(function* () {
+      const [code, signal] = yield* nextEvent(exits);
+      throw new Error(
+        `managed graph exited before becoming ready (code ${code}, signal ${signal})`,
+      );
+    }),
+    call(function* () {
+      const [error] = yield* nextEvent(errors);
+      throw error;
+    }),
+  ]);
+}
+
+function* waitForForegroundGraph(child: ChildProcess) {
+  let exits: Subscription<[number | null, NodeJS.Signals | null], never> | undefined;
+  yield* ensure(function* () {
+    if (child.pid === undefined || child.exitCode !== null || child.signalCode !== null) return;
+
+    const exit = exits
+      ? nextEvent(exits)
+      : once<[number | null, NodeJS.Signals | null]>(child, "exit");
+    child.kill("SIGTERM");
+    const stopped = yield* race([
+      call(function* () {
+        yield* exit;
+        return true;
+      }),
+      call(function* () {
+        yield* sleep(1000);
+        return false;
+      }),
+    ]);
+
+    if (!stopped && child.exitCode === null && child.signalCode === null) {
+      child.kill("SIGKILL");
+      if (exits) {
+        yield* nextEvent(exits);
+      } else {
+        yield* once<[number | null, NodeJS.Signals | null]>(child, "exit");
+      }
+    }
+  });
+
+  exits = yield* on<[number | null, NodeJS.Signals | null]>(child, "exit");
+  const errors = yield* on<[Error]>(child, "error");
+
+  const outcome = yield* race([
+    call(function* () {
+      const [code, signal] = yield* nextEvent(exits);
+      return { type: "exit" as const, code, signal };
+    }),
+    call(function* () {
+      const [error] = yield* nextEvent(errors);
+      return { type: "error" as const, error };
+    }),
+  ]);
+
+  if (outcome.type === "error") throw outcome.error;
+  if (outcome.code !== 0) {
+    throw new Error(`foreground graph exited (code ${outcome.code}, signal ${outcome.signal})`);
+  }
 }
 
 function* hasControlService(controlPort: number) {
@@ -112,9 +245,10 @@ function* throwIfGraphAlreadyRunning(controlPort: number) {
  */
 export function* simulationCLIOp<S extends Record<string, ServiceDefinition<string, any>>>(
   serviceGraph: ServiceGraphRunner<S>,
+  options: SimulationCLIOptions = {},
 ) {
   try {
-    const { values } = parseArgs({
+    const { values, positionals } = parseArgs({
       options: {
         services: { type: "string", short: "s" },
         "exclude-services": { type: "string" },
@@ -128,7 +262,6 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
         status: { type: "boolean" },
         "restart-service": { type: "string" },
         "control-port": { type: "string" },
-        "managed-child": { type: "boolean" },
       },
       allowPositionals: true,
       allowNegative: true,
@@ -157,7 +290,7 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
     const excluded = parseServiceList(values["exclude-services"] as string | undefined);
     const requestedControlPort = parseControlPort(values["control-port"] as string | undefined);
     const controlPort =
-      values.background || values.stop || values["managed-child"]
+      values.background || values.stop
         ? (requestedControlPort ?? DEFAULT_CONTROL_PORT)
         : requestedControlPort;
     yield* useAttributes({
@@ -249,20 +382,32 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
       return;
     }
 
-    if (values.background && !values["managed-child"]) {
-      const backgroundControlPort = controlPort ?? DEFAULT_CONTROL_PORT;
+    if (positionals[0] !== "start") {
+      const mode = values.background ? "background" : "foreground";
+      const graphControlPort =
+        mode === "background" ? (controlPort ?? DEFAULT_CONTROL_PORT) : requestedControlPort;
+      yield* throwIfGraphAlreadyRunning(graphControlPort ?? DEFAULT_CONTROL_PORT);
 
-      yield* throwIfGraphAlreadyRunning(backgroundControlPort);
-
-      yield* until(launchBackgroundProcess());
-      yield* waitForControlService(backgroundControlPort);
-      yield* logger.stdout(`background graph ready on http://127.0.0.1:${backgroundControlPort}`);
+      const child = launchGraphProcess(mode, options.launchGraph);
+      if (mode === "background") {
+        try {
+          yield* waitForBackgroundGraph(graphControlPort ?? DEFAULT_CONTROL_PORT, child);
+        } catch (error) {
+          if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+          throw error;
+        }
+        yield* logger.stdout(`background graph ready on http://127.0.0.1:${graphControlPort}`);
+      } else {
+        yield* waitForForegroundGraph(child);
+      }
       return;
     }
 
-    if (!values["managed-child"]) {
-      yield* throwIfGraphAlreadyRunning(requestedControlPort ?? DEFAULT_CONTROL_PORT);
+    if (values.background) {
+      throw new Error("use --background without the 'start' subcommand");
     }
+
+    yield* throwIfGraphAlreadyRunning(requestedControlPort ?? DEFAULT_CONTROL_PORT);
 
     // Start the graph and fetch the provided info
     // subset is a string array from CLI; cast to service key array for strict runner
@@ -287,9 +432,10 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
  */
 export async function simulationCLI<S extends Record<string, ServiceDefinition<string, any>>>(
   serviceGraph: ServiceGraphRunner<S>,
+  options: SimulationCLIOptions = {},
 ) {
   try {
-    return await main(() => simulationCLIOp(serviceGraph));
+    return await main(() => simulationCLIOp(serviceGraph, options));
   } catch (err) {
     process.exitCode = 1;
     console.error("simulationCLI error:", err instanceof Error ? err.stack : err);

@@ -8,6 +8,7 @@ import { DEFAULT_CONTROL_PORT } from "../src/cli.ts";
 import { waitForFetchClosed } from "./utils.ts";
 
 type StatusPayload = {
+  pid?: number;
   services?: Record<string, { state?: string; port?: number; pid?: number }>;
 };
 
@@ -115,6 +116,7 @@ it("can background a graph and stop it through the CLI using the control port", 
 
   const startResult = await waitForExit(background);
   assert.strictEqual(startResult.code, 0, startResult.stderr || startResult.stdout);
+  assert.match(startResult.stdout, /custom launcher: background/);
 
   const healthRes = await fetch(`http://127.0.0.1:${controlPort}/health`);
   assert.strictEqual(healthRes.status, 200);
@@ -151,6 +153,35 @@ it("can background a graph and stop it through the CLI using the control port", 
   });
 });
 
+it("does not report a background graph ready until its services are ready", async () => {
+  const controlPort = await getAvailablePort();
+  const fixture = fileURLToPath(new URL("./fixtures/reaper-graph.ts", import.meta.url));
+  const background = spawn(
+    process.execPath,
+    [fixture, "--background", "--control-port", String(controlPort)],
+    {
+      cwd: fileURLToPath(new URL("..", import.meta.url)),
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+
+  const result = await waitForExit(background);
+  assert.strictEqual(result.code, 0, result.stderr || result.stdout);
+
+  const status = await fetch(`http://127.0.0.1:${controlPort}/status`);
+  const json = (await status.json()) as {
+    services: Record<string, { state?: string; port?: number }>;
+  };
+  assert.strictEqual(json.services.child?.state, "ready");
+  assert.strictEqual(typeof json.services.child?.port, "number");
+
+  const response = await fetch(`http://127.0.0.1:${controlPort}/stop`, { method: "POST" });
+  assert.strictEqual(response.status, 202);
+  await run(function* () {
+    yield* waitForFetchClosed(`http://127.0.0.1:${controlPort}/health`, 5000);
+  });
+});
+
 it("can stop a foreground graph through its control port", async () => {
   const controlPort = await getAvailablePort();
   const fixture = fileURLToPath(new URL("./fixtures/background-graph.ts", import.meta.url));
@@ -165,8 +196,61 @@ it("can stop a foreground graph through its control port", async () => {
     assert.strictEqual(response.status, 202);
     const result = await waitForExit(graph);
     assert.strictEqual(result.code, 0, result.stderr || result.stdout);
+    assert.match(result.stdout, /custom launcher: foreground/);
   } finally {
     if (!graph.killed) graph.kill("SIGKILL");
+  }
+});
+
+it("forwards foreground launcher termination to the managed graph", async () => {
+  const controlPort = await getAvailablePort();
+  const fixture = fileURLToPath(new URL("./fixtures/background-graph.ts", import.meta.url));
+  const graph = spawn(process.execPath, [fixture, "--control-port", String(controlPort)], {
+    cwd: fileURLToPath(new URL("..", import.meta.url)),
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  try {
+    await waitForHealth(controlPort);
+    const status = await waitForStatus(controlPort, (value) => typeof value.pid === "number");
+    const managedPid = status.pid;
+    assert.ok(typeof managedPid === "number");
+
+    const graphExit = waitForExit(graph);
+    graph.kill("SIGTERM");
+    const result = await graphExit;
+    assert.strictEqual(result.code, 143, result.stderr || result.stdout);
+    await waitForPidExit(managedPid);
+    await run(function* () {
+      yield* waitForFetchClosed(`http://127.0.0.1:${controlPort}/health`, 5000);
+    });
+  } finally {
+    if (graph.exitCode === null) graph.kill("SIGKILL");
+  }
+});
+
+it("starts the graph directly with the start subcommand", async () => {
+  const controlPort = await getAvailablePort();
+  const fixture = fileURLToPath(new URL("./fixtures/background-graph.ts", import.meta.url));
+  const graph = spawn(process.execPath, [fixture, "start", "--control-port", String(controlPort)], {
+    cwd: fileURLToPath(new URL("..", import.meta.url)),
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  try {
+    await waitForHealth(controlPort);
+    const status = await waitForStatus(
+      controlPort,
+      (payload) => payload.services?.simulacrum?.state === "ready",
+    );
+    assert.strictEqual(status.pid, graph.pid);
+
+    const response = await fetch(`http://127.0.0.1:${controlPort}/stop`, { method: "POST" });
+    assert.strictEqual(response.status, 202);
+    const result = await waitForExit(graph);
+    assert.strictEqual(result.code, 0, result.stderr || result.stdout);
+  } finally {
+    if (graph.exitCode === null) graph.kill("SIGKILL");
   }
 });
 
@@ -186,16 +270,20 @@ it("reaps child simulators when a graph is hard-killed", async () => {
         typeof status.services?.child?.pid === "number" &&
         typeof status.services?.child?.port !== "number",
     )) as {
+      pid: number;
       services: Record<string, { state?: string; pid?: number }>;
     };
     const pid = json.services.child?.pid;
     assert.ok(typeof pid === "number");
     assert.strictEqual(json.services.child?.state, "starting");
 
-    graph.kill("SIGKILL");
+    const graphExit = waitForExit(graph);
+    process.kill(json.pid, "SIGKILL");
+    await waitForPidExit(json.pid);
     await waitForPidExit(pid);
+    await graphExit;
   } finally {
-    if (!graph.killed) graph.kill("SIGKILL");
+    if (graph.exitCode === null) graph.kill("SIGKILL");
   }
 });
 

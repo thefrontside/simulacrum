@@ -11,5 +11,10 @@ export const services = useServiceGraph(
 );
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  simulationCLI(services);
+  simulationCLI(services, {
+    launchGraph(request, launchDefault) {
+      process.stdout.write(`custom launcher: ${request.mode}\n`);
+      return launchDefault(request);
+    },
+  });
 }

@@ -1,6 +1,7 @@
 import { fork, type ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { once } from "@effectionx/node/events";
 import {
   createQueue,
   ensure,
@@ -132,8 +133,7 @@ export function useProcessReaper(
       if (!current?.child.connected) return;
       if (current.child.exitCode !== null || current.child.signalCode !== null) return;
 
-      const exited = withResolvers<void>("wait for process reaper to stop");
-      current.child.once("exit", () => exited.resolve());
+      const exited = once<[number | null, NodeJS.Signals | null]>(current.child, "exit");
       try {
         current.child.send({ type: "shutdown" }, () => {
           if (current.child.connected) current.child.disconnect();
@@ -141,7 +141,7 @@ export function useProcessReaper(
       } catch {
         current.child.disconnect();
       }
-      yield* exited.operation;
+      yield* exited;
     });
 
     yield* ensureWorkerReady();
