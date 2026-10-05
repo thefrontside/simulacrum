@@ -504,7 +504,7 @@ The `options.wellnessCheck` object supports:
 
 - `simulationCLI` wraps the runner in a small CLI loop and provides convenience flags: `--services`, `--watch`, `--watch-debounce`, `--background`, `--stop`, and `--control-port`.
 - Use the CLI helper for local development workflows where you want to run your graph directly from a file (see `service-graph.ts` examples above).
-- By default, foreground and background CLI modes launch a managed child process. Use the `start` subcommand to run directly in the current process, or use `useServiceTestRig` / `createServiceTestRig` for in-process tests.
+- Foreground and background CLI modes launch a managed child process to provide robustness against various external process kills or failures. Foreground inherits terminal stdio and forwards Ctrl+C for graceful shutdown; `--background` detaches the child. `useServiceTestRig` / `createServiceTestRig` run the service graph in-process allowing the test runner to manage the service lifecycle.
 
 ```bash
 # foreground
@@ -523,15 +523,15 @@ node ./service-graph.ts --stop --control-port 4310
 node ./service-graph.ts --stop
 ```
 
-- Foreground inherits stdio to print it to your terminal; `--background` detaches it and waits until all selected services report ready.
+- Foreground inherits stdio to print it to your terminal; `--background` runs a detached process and waits until all selected services report ready.
 - `--stop` sends `POST /stop` to the runtime service on the requested control port. It works for both foreground and background graphs.
 - `--control-port` defaults to `43034` for both `--background` and `--stop`.
 
-The control plane's `/health` endpoint reports whether its HTTP server is running. `/status` returns an immediate service-state snapshot. `/ready` waits up to 30 seconds for all selected services to become ready, returning `503` if a service fails or begins stopping and `504` on timeout.
+The control plane's `/health` endpoint reports whether its HTTP server is running. `/status` returns an immediate service-state snapshot, including the command and arguments for services that launch an OS process. When a tracked process exits, its service reports `lastExit` with the observed exit code and/or signal; graph-requested restarts may also include `requestedSignal`. The `simulacrum` service also reports the graph's `launcher` command when started through the managed CLI; this can differ from its `command` when a wrapper such as `unshare` or `tini` is used. In-process services have no separate launch command. Service PIDs may be host PIDs or relative to a nested PID namespace. `/ready` waits up to 30 seconds for all selected services to become ready, returning `503` if a service fails or begins stopping and `504` on timeout.
 
 ##### Custom graph launcher
 
-Pass an optional second argument to `simulationCLI` to customize how the managed graph process is launched. Its `launchGraph` hook receives the launch request and a default launcher it can delegate to. For example, a team using only linux could opt to wrap the graph in `unshare` for more direct namespace protection:
+Pass an optional second argument to `simulationCLI` to customize how the managed graph process is launched. Its `launchGraph` hook receives the launch request and a default launcher it can delegate to. For example, a team using only Linux could wrap the graph in a PID namespace and use `tini` as its init process:
 
 ```ts
 import { simulationCLI } from "@simulacrum/server";
@@ -548,6 +548,9 @@ simulationCLI(services, {
         "--fork",
         "--mount-proc",
         "--kill-child",
+        "tini",
+        "-g",
+        "--",
         request.command,
         ...request.args,
       ],
@@ -556,9 +559,9 @@ simulationCLI(services, {
 });
 ```
 
-This example requires unprivileged user namespaces to be enabled by the system. If they are disabled, use an appropriately privileged setup instead.
+This example requires `tini` to be on `PATH` and unprivileged user namespaces to be enabled. If user namespaces are disabled, use an appropriately privileged setup instead.
 
-The same hook is used in foreground and background modes; the request includes the mode, stdio policy, and detachment setting. The default launcher uses Node's child-process API. Custom launchers can delegate with a modified request or implement their own spawning behavior.
+The same hook is then used in foreground and background modes. The request includes the mode, stdio policy, and detachment setting. The default launcher uses Node's child-process API in both modes. Custom launchers can delegate with a modified request or implement their own spawning behavior; foreground launchers should preserve stdio and forward SIGINT for graceful shutdown.
 
 ## Development
 

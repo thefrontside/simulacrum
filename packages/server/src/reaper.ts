@@ -14,7 +14,7 @@ import {
   type Operation,
 } from "effection";
 
-export const DEFAULT_REAPER_KILL_DELAY = 10_000;
+export const DEFAULT_PROCESS_SHUTDOWN_GRACE = 10_000;
 const REAPER_SHUTDOWN_TIMEOUT = 1000;
 
 export type ProcessReaperClient = {
@@ -54,7 +54,7 @@ function send(child: ChildProcess, message: ReaperMessage): void {
  * interpreting the resulting IPC disconnect as a crash.
  */
 export function useProcessReaper(
-  killDelay = DEFAULT_REAPER_KILL_DELAY,
+  killDelay = DEFAULT_PROCESS_SHUTDOWN_GRACE,
 ): Operation<ProcessReaperClient> {
   return resource(function* (provide) {
     const watched = new Set<number>();

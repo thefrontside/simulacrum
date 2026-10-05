@@ -12,21 +12,19 @@ import {
   useScope,
   withResolvers,
 } from "effection";
-import type { Process } from "@effectionx/process";
+import type { ExecOptions, Process } from "@effectionx/process";
+import type { ExitStatus } from "@effectionx/process";
 import { on } from "@effectionx/node/events";
 import { useAttributes } from "./logging.ts";
 import { createServer } from "node:http";
 import { logger } from "./logging.ts";
 import type { Server, ServerResponse } from "node:http";
 import { type ProcessReaperClient, useProcessReaper } from "./reaper.ts";
+import { ServiceStatusRecord, type ServiceInfo, type ServiceState } from "./service-status.ts";
+import { GraphLauncher } from "./service-graph-context.ts";
 
-export type ServiceState = "waiting" | "starting" | "ready" | "stopping" | "failed";
-
-export type ControlPlaneServiceInfo = {
-  state: ServiceState;
-  port?: number | undefined;
-  pid?: number | undefined;
-};
+export type { ServiceInfo, ServiceState } from "./service-status.ts";
+export type ControlPlaneServiceInfo = ServiceInfo;
 
 export type ControlPlaneOptions = {
   data?: Record<string, unknown>;
@@ -38,10 +36,16 @@ export type ControlPlaneOptions = {
 
 export type ControlPlane = {
   port: number;
-  getServiceInfo: (name: string) => ControlPlaneServiceInfo | undefined;
-  setServiceInfo: (name: string, info: Partial<ControlPlaneServiceInfo>) => void;
+  getServiceStatus: (name: string) => ServiceStatusRecord | undefined;
+  getServiceInfo: (name: string) => ServiceInfo | undefined;
+  setServiceInfo: (name: string, info: Partial<ServiceInfo>) => void;
   clearServiceInfo: (name: string, state?: ServiceState) => void;
-  trackProcess: (name: string, process: Operation<Process>) => Operation<Process>;
+  trackProcess: <T extends Process>(
+    name: string,
+    command: string,
+    options: ExecOptions,
+    process: Operation<T>,
+  ) => Operation<T>;
 };
 
 function* nextEvent<T extends unknown[]>(subscription: Subscription<T, never>): Operation<T> {
@@ -80,7 +84,7 @@ function* close(server: Server): Operation<void> {
 type ControlPlaneServerOptions = {
   data: Record<string, unknown>;
   port: number | undefined;
-  services: Map<string, ControlPlaneServiceInfo>;
+  services: Map<string, ServiceStatusRecord>;
   requestStop?: (() => void) | undefined;
   requestRestart?: ((service?: string) => void) | undefined;
 };
@@ -119,7 +123,7 @@ function useControlPlaneServer(
 
     function currentReadiness(): { statusCode: number; body: Record<string, unknown> } | undefined {
       const failed = Array.from(options.services.entries()).find(
-        ([, info]) => info.state === "failed" || info.state === "stopping",
+        ([, status]) => status.state === "failed" || status.state === "stopping",
       );
       if (failed) {
         return {
@@ -127,7 +131,7 @@ function useControlPlaneServer(
           body: { ready: false, service: failed[0], state: failed[1].state },
         };
       }
-      if (Array.from(options.services.values()).every((info) => info.state === "ready")) {
+      if (Array.from(options.services.values()).every((status) => status.state === "ready")) {
         return { statusCode: 200, body: { ready: true, port } };
       }
       return undefined;
@@ -235,10 +239,12 @@ function useControlPlaneServer(
         }
 
         if (req.method === "GET" && pathname === "/status") {
+          const services = Object.fromEntries(
+            Array.from(options.services, ([name, status]) => [name, status.snapshot()]),
+          );
           const body = JSON.stringify({
             cwd: process.cwd(),
-            pid: process.pid,
-            services: Object.fromEntries(options.services),
+            services,
           });
           res.writeHead(200, {
             "content-type": "application/json",
@@ -329,10 +335,23 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
   return resource(function* (provide) {
     const data = options.data ?? {};
     const reaper: ProcessReaperClient = yield* useProcessReaper();
-    const services = new Map<string, ControlPlaneServiceInfo>(
-      (options.services ?? []).map((name) => [name, { state: "waiting" }]),
+    const launcher = yield* GraphLauncher.get();
+    const services = new Map<string, ServiceStatusRecord>(
+      (options.services ?? []).map((name) => [name, new ServiceStatusRecord()]),
+    );
+    services.set(
+      "simulacrum",
+      new ServiceStatusRecord({
+        pid: process.pid,
+        command: {
+          executable: process.execPath,
+          arguments: [...process.execArgv, ...process.argv.slice(1)],
+        },
+        launcher,
+      }),
     );
     yield* useAttributes({ name: "controlPlane", keys: Object.keys(data).join(", ") });
+    // start up the http metadata and data service
     const { port, notifyServiceChange } = yield* useControlPlaneServer({
       data,
       port: options.port,
@@ -341,68 +360,82 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       requestRestart: options.requestRestart,
     });
 
-    function setServiceInfo(name: string, info: Partial<ControlPlaneServiceInfo>) {
-      const current = services.get(name) ?? { state: "waiting" as const };
-      if (info.pid !== undefined && current.pid !== info.pid) {
-        if (current.pid !== undefined) reaper.remove(current.pid);
-        reaper.add(info.pid);
+    function setServiceInfo(name: string, info: Partial<ServiceInfo>) {
+      const current = services.get(name) ?? new ServiceStatusRecord();
+      const previousPid = current.pid;
+      current.update(info);
+      if (previousPid !== current.pid) {
+        if (previousPid !== undefined) reaper.remove(previousPid);
+        if (current.pid !== undefined) reaper.add(current.pid);
       }
-      if ("pid" in info && info.pid === undefined && current.pid !== undefined) {
-        reaper.remove(current.pid);
-        delete current.pid;
-      }
-      if (info.pid !== undefined) current.pid = info.pid;
-      if (info.port !== undefined) current.port = info.port;
-      if (info.state !== undefined) current.state = info.state;
       services.set(name, current);
       notifyServiceChange();
     }
 
     function clearServiceInfo(name: string, state?: ServiceState) {
-      const previous = services.get(name);
-      if (previous?.pid !== undefined) reaper.remove(previous.pid);
-      if (previous) {
-        delete previous.port;
-        delete previous.pid;
-        if (state !== undefined) previous.state = state;
-      } else {
-        services.set(name, { state: state ?? "waiting" });
-      }
+      const previous = services.get(name) ?? new ServiceStatusRecord();
+      if (previous.pid !== undefined) reaper.remove(previous.pid);
+      previous.clear(state);
+      services.set(name, previous);
       notifyServiceChange();
     }
 
-    function registerProcess(name: string, pid: number): () => void {
-      setServiceInfo(name, { pid });
-      let active = true;
-      return () => {
-        if (!active) return;
-        active = false;
-        if (services.get(name)?.pid === pid) {
-          clearServiceInfo(name);
-        }
-      };
-    }
-
-    function* trackProcess(name: string, operation: Operation<Process>): Operation<Process> {
-      let release: (() => void) | undefined;
+    function* trackProcess<T extends Process>(
+      name: string,
+      command: string,
+      options: ExecOptions,
+      operation: Operation<T>,
+    ): Operation<T> {
+      let release: ((state?: ServiceState, exit?: ExitStatus) => void) | undefined;
       yield* ensure(() => {
-        release?.();
+        const current = services.get(name);
+        release?.(current?.state === "ready" ? "failed" : undefined);
       });
 
       const process = yield* operation;
-      release = registerProcess(name, process.pid);
+      setServiceInfo(name, {
+        pid: process.pid,
+        command: {
+          executable: command,
+          arguments: options.arguments ?? [],
+          ...(options.shell === undefined ? {} : { shell: options.shell }),
+        },
+      });
+      let active = true;
+      release = (state?: ServiceState, exit?: ExitStatus) => {
+        if (!active) return;
+        active = false;
+        const current = services.get(name);
+        if (current?.pid === process.pid) {
+          const requestedSignal = current.snapshot().requestedSignal;
+          clearServiceInfo(name, state);
+          if (exit) {
+            setServiceInfo(name, {
+              lastExit: {
+                ...(requestedSignal ? { requestedSignal } : {}),
+                ...(exit.code == null ? {} : { code: exit.code }),
+                ...(exit.signal == null ? {} : { signal: exit.signal }),
+              },
+              requestedSignal: undefined,
+            });
+          }
+        }
+      };
       yield* spawn(function* () {
-        yield* process.join();
-        release?.();
+        const exit = yield* process.join();
+        const current = services.get(name);
+        release(current?.state === "ready" ? "failed" : undefined, exit);
       });
 
       return process;
     }
+
     setServiceInfo("simulacrum", { port, state: "ready" });
 
     yield* provide({
       port,
-      getServiceInfo: (name) => services.get(name),
+      getServiceStatus: (name) => services.get(name),
+      getServiceInfo: (name) => services.get(name)?.snapshot(),
       setServiceInfo,
       clearServiceInfo,
       trackProcess,

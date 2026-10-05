@@ -5,8 +5,7 @@ import { run, until } from "effection";
 import { useServiceGraph } from "../src/service-graph.ts";
 import { useSimulation } from "../src/simulation.ts";
 import { useService } from "../src/service.ts";
-import { waitFor } from "./utils.ts";
-import { createFoundationSimulationServer } from "@simulacrum/foundation-simulator";
+import { waitFor, waitForOperation } from "./utils.ts";
 
 async function getAvailablePort(): Promise<number> {
   return await new Promise((resolve, reject) => {
@@ -91,11 +90,7 @@ it("binds the control service to a requested static port and exposes health/stat
     const runGraph = yield* useServiceGraph(
       {
         api: {
-          operation: useSimulation("api", () =>
-            createFoundationSimulationServer({
-              port: 0,
-            })(),
-          ),
+          operation: useSimulation("api", "./test/fixtures/init-data-sim.ts"),
         },
         notSelected: {
           operation: useSimulation("not-selected", "./test/fixtures/init-data-sim.ts"),
@@ -116,18 +111,46 @@ it("binds the control service to a requested static port and exposes health/stat
     const statusRes = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
     assert.strictEqual(statusRes.status, 200);
     const statusJson = (yield* until(statusRes.json())) as {
-      services: Record<string, { state: string; port?: number; pid?: number }>;
+      services: Record<
+        string,
+        {
+          state: string;
+          port?: number;
+          pid?: number;
+          command?: { executable: string; arguments: string[] };
+          lastExit?: { requestedSignal?: string; code?: number; signal?: string };
+        }
+      >;
     };
 
     assert.strictEqual(statusJson.services.simulacrum?.port, controlPort);
     assert.strictEqual(statusJson.services.simulacrum?.state, "ready");
+    assert.strictEqual(statusJson.services.simulacrum?.pid, process.pid);
+    assert.strictEqual(statusJson.services.simulacrum?.command?.executable, process.execPath);
     assert.strictEqual(statusJson.services.api?.port, runGraph.status.get("api")?.port);
     assert.strictEqual(statusJson.services.api?.state, "ready");
+    assert.strictEqual(statusJson.services.api?.command?.executable, "node");
+    assert.ok(statusJson.services.api?.command?.arguments[0]?.includes("run-simulation-child"));
     assert.strictEqual("notSelected" in statusJson.services, false);
 
     const dataRes = yield* until(fetch(`http://127.0.0.1:${controlPort}/data/featureFlag`));
     assert.strictEqual(dataRes.status, 200);
     assert.deepStrictEqual(yield* until(dataRes.json()), true);
+
+    const apiPid = statusJson.services.api?.pid;
+    assert.strictEqual(typeof apiPid, "number");
+    process.kill(apiPid!, "SIGTERM");
+    yield* waitForOperation(function* () {
+      const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
+      const status = (yield* until(response.json())) as typeof statusJson;
+      const lastExit = status.services.api?.lastExit;
+      return (
+        status.services.api?.state === "failed" &&
+        status.services.api?.pid === undefined &&
+        status.services.api?.port === undefined &&
+        (typeof lastExit?.code === "number" || typeof lastExit?.signal === "string")
+      );
+    });
   });
 });
 
@@ -146,10 +169,18 @@ it("tracks useService processes under their graph service name", async () => {
 
     const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
     const status = (yield* until(response.json())) as {
-      services: Record<string, { state: string; pid?: number }>;
+      services: Record<
+        string,
+        { state: string; pid?: number; command?: { executable: string; arguments: string[] } }
+      >;
     };
     assert.strictEqual(typeof status.services.worker?.pid, "number");
     assert.strictEqual(status.services.worker?.state, "ready");
+    assert.deepStrictEqual(status.services.worker?.command, {
+      executable: "node ./test/services/service-main.ts",
+      arguments: [],
+      shell: true,
+    });
     assert.strictEqual("display-name" in status.services, false);
   });
 });

@@ -3,12 +3,12 @@ import { fork, spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 import { it } from "node:test";
-import { DEFAULT_REAPER_KILL_DELAY } from "../src/reaper.ts";
+import { DEFAULT_PROCESS_SHUTDOWN_GRACE } from "../src/reaper.ts";
 
 const reaperPath = fileURLToPath(new URL("../src/run-reaper.ts", import.meta.url));
 
-it("allows ten seconds for graceful shutdown by default", () => {
-  assert.strictEqual(DEFAULT_REAPER_KILL_DELAY, 10_000);
+it("allows the shared shutdown grace by default", () => {
+  assert.strictEqual(DEFAULT_PROCESS_SHUTDOWN_GRACE, 10_000);
 });
 
 async function waitForReady(child: ReturnType<typeof fork>) {
@@ -193,12 +193,13 @@ it("kills descendants in the watched process group", async () => {
 
     await waitForReady(reaper);
     const victimExit = waitForExit(victim);
+    const reaperExit = once(reaper, "exit");
     reaper.send({ type: "watch", pid: victim.pid });
     reaper.disconnect();
 
     await victimExit;
     await waitForPidExit(grandchildPid);
-    await once(reaper, "exit");
+    await reaperExit;
   } finally {
     if (reaper.connected) reaper.kill();
     killProcessTree(victim.pid);

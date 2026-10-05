@@ -4,6 +4,7 @@ import { createServer } from "node:net";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { run } from "effection";
+import { ctrlc } from "ctrlc-windows";
 import { DEFAULT_CONTROL_PORT } from "../src/cli.ts";
 import { waitForFetchClosed } from "./utils.ts";
 
@@ -131,7 +132,15 @@ it("can background a graph and stop it through the CLI using the control port", 
     (status) => typeof status.services?.simulacrum?.port === "number",
   )) as {
     cwd: string;
-    services: Record<string, { state?: string; port?: number; pid?: number }>;
+    services: Record<
+      string,
+      {
+        state?: string;
+        port?: number;
+        pid?: number;
+        launcher?: { executable: string; arguments: string[] };
+      }
+    >;
   };
   assert.strictEqual(
     statusJson.cwd.replace(/\/$/, ""),
@@ -139,6 +148,8 @@ it("can background a graph and stop it through the CLI using the control port", 
   );
   assert.strictEqual(statusJson.services.simulacrum?.port, controlPort);
   assert.strictEqual(statusJson.services.simulacrum?.state, "ready");
+  assert.strictEqual(statusJson.services.simulacrum?.launcher?.executable, process.execPath);
+  assert.ok(statusJson.services.simulacrum?.launcher?.arguments.includes("start"));
 
   const stop = spawn(process.execPath, [fixture, "--stop", "--control-port", String(controlPort)], {
     cwd: fileURLToPath(new URL("..", import.meta.url)),
@@ -212,8 +223,11 @@ it("forwards foreground launcher termination to the managed graph", async () => 
 
   try {
     await waitForHealth(controlPort);
-    const status = await waitForStatus(controlPort, (value) => typeof value.pid === "number");
-    const managedPid = status.pid;
+    const status = await waitForStatus(
+      controlPort,
+      (value) => typeof value.services?.simulacrum?.pid === "number",
+    );
+    const managedPid = status.services?.simulacrum?.pid;
     assert.ok(typeof managedPid === "number");
 
     const graphExit = waitForExit(graph);
@@ -221,6 +235,41 @@ it("forwards foreground launcher termination to the managed graph", async () => 
     const result = await graphExit;
     assert.strictEqual(result.code, 143, result.stderr || result.stdout);
     await waitForPidExit(managedPid);
+    await run(function* () {
+      yield* waitForFetchClosed(`http://127.0.0.1:${controlPort}/health`, 5000);
+    });
+  } finally {
+    if (graph.exitCode === null) graph.kill("SIGKILL");
+  }
+});
+
+it("gracefully shuts down a foreground graph on Ctrl+C", async () => {
+  const controlPort = await getAvailablePort();
+  const fixture = fileURLToPath(new URL("./fixtures/reaper-graph.ts", import.meta.url));
+  const graph = spawn(process.execPath, [fixture, "--control-port", String(controlPort)], {
+    cwd: fileURLToPath(new URL("..", import.meta.url)),
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+
+  try {
+    await waitForHealth(controlPort);
+    const status = await waitForStatus(
+      controlPort,
+      (value) => typeof value.services?.child?.pid === "number",
+    );
+    const childPid = status.services?.child?.pid;
+    assert.ok(typeof childPid === "number");
+
+    const graphExit = waitForExit(graph);
+    if (process.platform === "win32") {
+      assert.ok(typeof graph.pid === "number");
+      ctrlc(graph.pid);
+    } else {
+      graph.kill("SIGINT");
+    }
+    const result = await graphExit;
+    assert.strictEqual(result.code, 130, result.stderr || result.stdout);
+    await waitForPidExit(childPid);
     await run(function* () {
       yield* waitForFetchClosed(`http://127.0.0.1:${controlPort}/health`, 5000);
     });
@@ -243,7 +292,7 @@ it("starts the graph directly with the start subcommand", async () => {
       controlPort,
       (payload) => payload.services?.simulacrum?.state === "ready",
     );
-    assert.strictEqual(status.pid, graph.pid);
+    assert.strictEqual(status.services?.simulacrum?.pid, graph.pid);
 
     const response = await fetch(`http://127.0.0.1:${controlPort}/stop`, { method: "POST" });
     assert.strictEqual(response.status, 202);
@@ -270,16 +319,17 @@ it("reaps child simulators when a graph is hard-killed", async () => {
         typeof status.services?.child?.pid === "number" &&
         typeof status.services?.child?.port !== "number",
     )) as {
-      pid: number;
       services: Record<string, { state?: string; pid?: number }>;
     };
+    const rootPid = json.services.simulacrum?.pid;
     const pid = json.services.child?.pid;
+    assert.ok(typeof rootPid === "number");
     assert.ok(typeof pid === "number");
     assert.strictEqual(json.services.child?.state, "starting");
 
     const graphExit = waitForExit(graph);
-    process.kill(json.pid, "SIGKILL");
-    await waitForPidExit(json.pid);
+    process.kill(rootPid, "SIGKILL");
+    await waitForPidExit(rootPid);
     await waitForPidExit(pid);
     await graphExit;
   } finally {

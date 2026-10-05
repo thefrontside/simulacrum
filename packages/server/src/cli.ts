@@ -12,7 +12,7 @@ import {
   type Subscription,
 } from "effection";
 import { spawn as spawnProcess, type ChildProcess } from "node:child_process";
-import { on, once } from "@effectionx/node/events";
+import { on } from "@effectionx/node/events";
 import { useAttributes } from "./logging.ts";
 import type {
   ServiceDefinition,
@@ -21,6 +21,8 @@ import type {
   ServiceGraphStatus,
 } from "./service-graph.ts";
 import { Debugging, logger } from "./logging.ts";
+import { GRAPH_LAUNCHER_ENV, type ProcessCommand } from "./launch-metadata.ts";
+import { DEFAULT_PROCESS_SHUTDOWN_GRACE } from "./reaper.ts";
 
 export const DEFAULT_CONTROL_PORT = 43034;
 
@@ -95,13 +97,22 @@ function launchGraphProcess(
     stdio: mode === "background" ? "ignore" : "inherit",
   };
 
-  const launchDefault = (next: GraphLaunchRequest) =>
-    spawnProcess(next.command, next.args, {
+  const launchDefault = (next: GraphLaunchRequest) => {
+    const env: NodeJS.ProcessEnv = {
+      ...next.env,
+      [GRAPH_LAUNCHER_ENV]: JSON.stringify({
+        executable: next.command,
+        arguments: next.args,
+      } satisfies ProcessCommand),
+    };
+
+    return spawnProcess(next.command, next.args, {
       cwd: next.cwd,
-      env: next.env,
+      env,
       detached: next.detached,
       stdio: next.stdio,
     });
+  };
   const child = launchGraph ? launchGraph(request, launchDefault) : launchDefault(request);
   if (mode === "background") child.unref();
   return child;
@@ -151,39 +162,42 @@ function* waitForBackgroundGraph(controlPort: number, child: ChildProcess) {
 }
 
 function* waitForForegroundGraph(child: ChildProcess) {
-  let exits: Subscription<[number | null, NodeJS.Signals | null], never> | undefined;
+  const exits = yield* on<[number | null, NodeJS.Signals | null]>(child, "exit");
+  const errors = yield* on<[Error]>(child, "error");
+  let outcome:
+    | { type: "exit"; code: number | null; signal: NodeJS.Signals | null }
+    | { type: "error"; error: Error }
+    | undefined;
+
   yield* ensure(function* () {
     if (child.pid === undefined || child.exitCode !== null || child.signalCode !== null) return;
 
-    const exit = exits
-      ? nextEvent(exits)
-      : once<[number | null, NodeJS.Signals | null]>(child, "exit");
-    child.kill("SIGTERM");
-    const stopped = yield* race([
+    child.kill("SIGINT");
+    const shutdown = yield* race([
       call(function* () {
-        yield* exit;
-        return true;
+        const [code, signal] = yield* nextEvent(exits);
+        return { type: "exit" as const, code, signal };
       }),
       call(function* () {
-        yield* sleep(1000);
-        return false;
+        const [error] = yield* nextEvent(errors);
+        return { type: "error" as const, error };
+      }),
+      call(function* () {
+        yield* sleep(DEFAULT_PROCESS_SHUTDOWN_GRACE);
+        return { type: "timeout" as const };
       }),
     ]);
 
-    if (!stopped && child.exitCode === null && child.signalCode === null) {
+    if (shutdown.type !== "timeout") {
+      outcome = shutdown;
+    } else if (child.exitCode === null && child.signalCode === null) {
       child.kill("SIGKILL");
-      if (exits) {
-        yield* nextEvent(exits);
-      } else {
-        yield* once<[number | null, NodeJS.Signals | null]>(child, "exit");
-      }
+      const [code, signal] = yield* nextEvent(exits);
+      outcome = { type: "exit", code, signal };
     }
   });
 
-  exits = yield* on<[number | null, NodeJS.Signals | null]>(child, "exit");
-  const errors = yield* on<[Error]>(child, "error");
-
-  const outcome = yield* race([
+  outcome ??= yield* race([
     call(function* () {
       const [code, signal] = yield* nextEvent(exits);
       return { type: "exit" as const, code, signal };
@@ -339,17 +353,15 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
           `failed to fetch status of background graph on port ${backgroundControlPort}: ${response.status}`,
         );
       }
-      const json = yield* until(response.json());
+      const json = (yield* until(response.json())) as ServiceGraphStatus;
       if (typeof json === "object" && json && "cwd" in json) {
         console.log(
           `cwd: ${json.cwd}\nservices:\n${
             "services" in json
-              ? Object.entries(
-                  json.services as Record<string, { state?: string; port?: number; pid?: number }>,
-                )
+              ? Object.entries(json.services)
                   .map(
                     ([name, info]) =>
-                      `  ${name}: ${info.state ?? "unknown"}${info.port ? `; port ${info.port}` : ""}${info.pid ? `; pid ${info.pid}` : ""}`,
+                      `  ${name}: ${info.state ?? "unknown"}${info.port ? `; port ${info.port}` : ""}${info.pid ? `; pid ${info.pid}` : ""}${info.command ? `; command ${JSON.stringify(info.command)}` : ""}${info.launcher ? `; launcher ${JSON.stringify(info.launcher)}` : ""}${info.lastExit ? `; last exit ${JSON.stringify(info.lastExit)}` : ""}`,
                   )
                   .join("\n")
               : "no service info available"

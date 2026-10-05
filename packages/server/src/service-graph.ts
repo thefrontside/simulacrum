@@ -1,7 +1,6 @@
 import {
   type Operation,
   type Stream,
-  type WithResolvers,
   resource,
   spawn,
   withResolvers,
@@ -13,8 +12,13 @@ import { ProcessApi } from "@effectionx/process";
 import { useAttributes } from "./logging.ts";
 import { type ServiceUpdate, useWatcher } from "./watch.ts";
 import { logger } from "./logging.ts";
-import { type ServiceState, useControlPlane } from "./control-plane.ts";
+import { useControlPlane } from "./control-plane.ts";
 import { getOperationMetadata } from "./operation-metadata.ts";
+import type { ServiceInfo, ServiceStatusRecord } from "./service-status.ts";
+export type { ServiceInfo } from "./service-status.ts";
+import { selectServices } from "./select-services.ts";
+import { consumeGraphLauncher } from "./launch-metadata.ts";
+import { GraphLauncher } from "./service-graph-context.ts";
 
 /**
  * Context key for the Simulacrum gateway listening port.
@@ -48,23 +52,13 @@ export type ServiceGraph<S extends ServiceMap> = {
 
 export type ServiceGraphStatus = {
   cwd: string;
-  pid: number;
   services: Record<string, ServiceInfo>;
 };
 
-export type ServiceInfo = {
-  state: ServiceState;
-  port?: number | undefined;
-  pid?: number | undefined;
-};
-
-export type ServiceStatus = {
-  startup: WithResolvers<void>;
-  running: WithResolvers<void>;
-  readonly state: ServiceState;
-  readonly port?: number | undefined;
-  readonly pid?: number | undefined;
-};
+export type ServiceStatus = Pick<
+  ServiceStatusRecord,
+  "startup" | "running" | "state" | "port" | "pid" | "command" | "launcher" | "lastExit"
+>;
 
 export type ServiceGraphRunOptions = {
   watch?: boolean;
@@ -107,6 +101,8 @@ export function useServiceGraph<S extends ServiceMap>(
 ): ServiceGraphRunner<S> {
   return (subset?: Array<keyof S>, runOptions?: ServiceGraphRunOptions) => {
     return resource<ServiceGraph<S>>(function* (provide) {
+      yield* GraphLauncher.set(consumeGraphLauncher());
+
       const effectiveRunOptions = {
         watch: runOptions?.watch ?? options?.watch,
         watchDebounce: runOptions?.watchDebounce ?? options?.watchDebounce,
@@ -115,104 +111,22 @@ export function useServiceGraph<S extends ServiceMap>(
         requestStop: runOptions?.requestStop,
       };
 
-      // detect cycles in the dependency graph
-      const nodes = Object.keys(services);
       // label the root of the service graph operation
       yield* useAttributes({
         name: "serviceGraph",
-        totalServices: String(nodes.length),
+        totalServices: String(Object.keys(services).length),
       });
-      const temp = new Set<string>();
-      const perm = new Set<string>();
-
-      function visit(n: string) {
-        if (perm.has(n)) return;
-        if (temp.has(n)) throw new Error("Cycle detected in services");
-        temp.add(n);
-        const def = services[n];
-        const deps: readonly string[] = def.dependsOn?.startup ?? [];
-        for (const d of deps) {
-          if (!(d in services)) continue;
-          visit(d);
-        }
-        temp.delete(n);
-        perm.add(n);
-      }
-
-      for (const n of nodes) {
-        visit(n);
-      }
-
-      let effectiveServices = services; // {} as typeof services;
-      const requested = subset
-        ? new Set<string>(subset.map((s) => String(s).trim()).filter((s) => s.length > 0))
-        : undefined;
-      const excluded = new Set<string>(
-        (effectiveRunOptions.exclude ?? [])
-          .map((s) => String(s).trim())
-          .filter((s) => s.length > 0),
-      );
-
-      for (const name of excluded) {
-        if (!(name in services)) {
-          throw new Error(`Excluded service '${name}' not found`);
-        }
-      }
-
-      if (requested || excluded.size > 0) {
-        const selected = requested ? new Set<string>() : new Set<string>(Object.keys(services));
-
-        function include(name: string) {
-          if (selected.has(name)) return;
-          if (!(name in services)) throw new Error(`Requested service '${name}' not found`);
-          selected.add(name);
-          for (const dep of services[name].dependsOn?.startup ?? []) {
-            include(String(dep));
-          }
-        }
-
-        for (const name of requested ?? []) {
-          include(name);
-        }
-
-        for (const name of excluded) {
-          selected.delete(name);
-        }
-
-        let pruned = true;
-        while (pruned) {
-          pruned = false;
-          for (const name of Array.from(selected)) {
-            const deps = services[name].dependsOn?.startup ?? [];
-            if (deps.some((dep) => !selected.has(String(dep)))) {
-              selected.delete(name);
-              pruned = true;
-            }
-          }
-        }
-
-        for (const name of requested ?? []) {
-          if (!selected.has(name)) {
-            throw new Error(
-              `Requested service '${name}' cannot be started because it or one of its startup dependencies is excluded`,
-            );
-          }
-        }
-
-        const picked: Partial<typeof services> = {};
-        for (const name of selected) {
-          picked[name as keyof typeof services] = services[name as keyof typeof services];
-        }
-        effectiveServices = picked as typeof services;
-
+      const selection = selectServices(services, subset, effectiveRunOptions.exclude);
+      const effectiveServices = selection.services;
+      if (selection.filtered) {
         yield* useAttributes({
           name: "serviceGraph",
-          requestedServices: Array.from(requested ?? []).join(", "),
-          excludedServices: Array.from(excluded).join(", "),
-          includedServices: Array.from(selected).join(", "),
+          requestedServices: Array.from(selection.requested ?? []).join(", "),
+          excludedServices: Array.from(selection.excluded).join(", "),
+          includedServices: Array.from(selection.selected).join(", "),
         });
         yield* logger.stdout(
-          `simulation starting with services: ${Array.from(selected).join(", ")}`,
+          `simulation starting with services: ${Array.from(selection.selected).join(", ")}`,
         );
       }
 
@@ -241,20 +155,10 @@ export function useServiceGraph<S extends ServiceMap>(
         dataServicePort: String(controlPlane.port),
       });
 
-      status.set("simulacrum", {
-        startup: withResolvers<void>(),
-        running: withResolvers<void>(),
-        get state() {
-          return controlPlane.getServiceInfo("simulacrum")!.state;
-        },
-        get port() {
-          return controlPlane.getServiceInfo("simulacrum")?.port;
-        },
-        get pid() {
-          return controlPlane.getServiceInfo("simulacrum")?.pid;
-        },
-      });
-      status.get("simulacrum")?.startup.resolve();
+      const controlServiceStatus = controlPlane.getServiceStatus("simulacrum");
+      if (!controlServiceStatus) throw new Error("missing simulacrum service status");
+      status.set("simulacrum", controlServiceStatus);
+      controlServiceStatus.startup.resolve();
 
       // set the SimulacrumEndpoint in this operation scope so children started
       // in this graph can access the port via context
@@ -280,19 +184,9 @@ export function useServiceGraph<S extends ServiceMap>(
 
       for (const name of Object.keys(effectiveServices)) {
         const def = effectiveServices[name];
-        status.set(name, {
-          startup: withResolvers<void>(),
-          running: withResolvers<void>(),
-          get state() {
-            return controlPlane.getServiceInfo(name)!.state;
-          },
-          get port() {
-            return controlPlane.getServiceInfo(name)?.port;
-          },
-          get pid() {
-            return controlPlane.getServiceInfo(name)?.pid;
-          },
-        });
+        const serviceStatus = controlPlane.getServiceStatus(name);
+        if (!serviceStatus) throw new Error(`missing status for service '${name}'`);
+        status.set(name, serviceStatus);
         if (def.watch && watcher) {
           watcher.add(name, def.watch);
         }
@@ -317,6 +211,7 @@ export function useServiceGraph<S extends ServiceMap>(
         // log so it is clear in the inspector output when a restart is triggered
         yield* logger.stdout(`restarting service ${service}`);
         controlPlane.setServiceInfo(service, { state: "stopping" });
+        controlPlane.setServiceInfo(service, { requestedSignal: "SIGTERM" });
         // refresh the startup resolver
         task.startup = withResolvers<void>();
 
@@ -394,8 +289,10 @@ export function useServiceGraph<S extends ServiceMap>(
           // cancelled when a file change triggers a restart
           const serviceTask = yield* spawn(function* () {
             yield* ProcessApi.around({
+              // daemon() delegates to exec(), so this also tracks daemon processes.
               *exec(args, next) {
-                return yield* controlPlane.trackProcess(service, next(...args));
+                const [command, options] = args;
+                return yield* controlPlane.trackProcess(service, command, options, next(...args));
               },
             });
 
@@ -415,6 +312,22 @@ export function useServiceGraph<S extends ServiceMap>(
                   pid: String(maybeProvided.pid),
                 });
                 controlPlane.setServiceInfo(service, { pid: maybeProvided.pid });
+              }
+              if (
+                "command" in maybeProvided &&
+                typeof maybeProvided.command === "object" &&
+                maybeProvided.command !== null &&
+                "executable" in maybeProvided.command &&
+                typeof maybeProvided.command.executable === "string" &&
+                "arguments" in maybeProvided.command &&
+                Array.isArray(maybeProvided.command.arguments)
+              ) {
+                controlPlane.setServiceInfo(service, {
+                  command: {
+                    executable: maybeProvided.command.executable,
+                    arguments: maybeProvided.command.arguments,
+                  },
+                });
               }
             }
 
