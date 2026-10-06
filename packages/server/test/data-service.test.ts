@@ -273,6 +273,72 @@ it("tracks useService processes under their graph service name", async () => {
   });
 });
 
+it("fails a service when a non-current tracked daemon exits", async () => {
+  const controlPort = await getAvailablePort();
+  let firstDaemonPid: number | undefined;
+  let exitFirstDaemon: (() => void) | undefined;
+  let currentDaemonPid: number | undefined;
+
+  await run(function* () {
+    yield* useServiceGraph(
+      {
+        worker: {
+          operation: resource<void>(function* (provide) {
+            const exitOnInput =
+              'process.stdin.once("data", () => process.exit(0)); setInterval(() => {}, 1000)';
+            const firstDaemon = yield* daemon(process.execPath, {
+              arguments: ["-e", exitOnInput, "first-daemon"],
+            });
+            firstDaemonPid = firstDaemon.pid;
+            exitFirstDaemon = () => firstDaemon.stdin.send("exit");
+            const currentDaemon = yield* daemon(process.execPath, {
+              arguments: ["-e", exitOnInput, "current-daemon"],
+            });
+            currentDaemonPid = currentDaemon.pid;
+            yield* provide();
+            yield* suspend();
+          }),
+        },
+      },
+      { controlPort },
+    )();
+
+    assert.ok(typeof firstDaemonPid === "number");
+    assert.ok(exitFirstDaemon);
+    assert.ok(typeof currentDaemonPid === "number");
+    assert.notStrictEqual(firstDaemonPid, currentDaemonPid);
+
+    const readyResponse = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
+    const readyStatus = (yield* until(readyResponse.json())) as {
+      services: Record<string, { pid?: number; command?: { arguments: string[] } }>;
+    };
+    assert.strictEqual(readyStatus.services.worker?.pid, currentDaemonPid);
+    assert.ok(readyStatus.services.worker?.command?.arguments.includes("current-daemon"));
+
+    exitFirstDaemon();
+    yield* waitForOperation(function* () {
+      const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
+      const status = (yield* until(response.json())) as {
+        services: Record<
+          string,
+          {
+            state?: string;
+            pid?: number;
+            command?: { arguments: string[] };
+            lastExit?: { code?: number; signal?: string };
+          }
+        >;
+      };
+      return (
+        status.services.worker?.state === "failed" &&
+        status.services.worker.pid === currentDaemonPid &&
+        status.services.worker.command?.arguments.includes("current-daemon") === true &&
+        status.services.worker.lastExit?.code === 0
+      );
+    });
+  });
+});
+
 it("observes a process exit while its service scope remains alive", async () => {
   const controlPort = await getAvailablePort();
   let operationAlive = false;

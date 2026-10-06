@@ -445,19 +445,21 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
         active = false;
         tracking.release();
         const current = services.get(name);
+        const requestedSignal = current?.snapshot().requestedSignal;
         if (current?.pid === process.pid) {
-          const requestedSignal = current.snapshot().requestedSignal;
           clearServiceInfo(name, state);
-          if (exit) {
-            setServiceInfo(name, {
-              lastExit: {
-                ...(requestedSignal ? { requestedSignal } : {}),
-                ...(exit.code == null ? {} : { code: exit.code }),
-                ...(exit.signal == null ? {} : { signal: exit.signal }),
-              },
-              requestedSignal: undefined,
-            });
-          }
+        } else if (state !== undefined) {
+          setServiceInfo(name, { state });
+        }
+        if (exit) {
+          setServiceInfo(name, {
+            lastExit: {
+              ...(requestedSignal ? { requestedSignal } : {}),
+              ...(exit.code == null ? {} : { code: exit.code }),
+              ...(exit.signal == null ? {} : { signal: exit.signal }),
+            },
+            requestedSignal: undefined,
+          });
         }
       };
       yield* spawn(function* () {
