@@ -20,6 +20,23 @@ export type ServiceInfo = {
   lastExit?: ServiceExit | undefined;
 };
 
+export type ServiceInfoUpdate = Omit<Partial<ServiceInfo>, "command"> & {
+  command?: unknown;
+};
+
+function isProcessCommand(value: unknown): value is NonNullable<ServiceInfo["command"]> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "executable" in value &&
+    typeof value.executable === "string" &&
+    "arguments" in value &&
+    Array.isArray(value.arguments) &&
+    value.arguments.every((argument) => typeof argument === "string") &&
+    (!("shell" in value) || typeof value.shell === "boolean" || typeof value.shell === "string")
+  );
+}
+
 export class ServiceStatusRecord {
   #info: ServiceInfo;
   startup: WithResolvers<void> = withResolvers<void>();
@@ -53,7 +70,7 @@ export class ServiceStatusRecord {
     return this.#info.lastExit;
   }
 
-  update(info: Partial<ServiceInfo>): void {
+  update(info: ServiceInfoUpdate): void {
     if ("pid" in info && info.pid === undefined && this.#info.pid !== undefined) {
       delete this.#info.pid;
       delete this.#info.command;
@@ -61,7 +78,13 @@ export class ServiceStatusRecord {
       this.#info.pid = info.pid;
     }
 
-    if (info.command !== undefined) this.#info.command = info.command;
+    if (isProcessCommand(info.command)) {
+      this.#info.command = {
+        executable: info.command.executable,
+        arguments: [...info.command.arguments],
+        ...(info.command.shell === undefined ? {} : { shell: info.command.shell }),
+      };
+    }
     if (info.launcher !== undefined) this.#info.launcher = info.launcher;
     if (info.requestedSignal !== undefined) this.#info.requestedSignal = info.requestedSignal;
     if ("requestedSignal" in info && info.requestedSignal === undefined) {

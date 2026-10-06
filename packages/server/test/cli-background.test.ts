@@ -102,6 +102,27 @@ async function waitForStatus(controlPort: number, ready: (status: StatusPayload)
   throw new Error(`timed out waiting for graph status on port ${controlPort}`);
 }
 
+function waitForTrackedChildPids(child: ReturnType<typeof spawn>): Promise<[number, number]> {
+  return new Promise((resolve, reject) => {
+    let output = "";
+    const onData = (chunk: Buffer) => {
+      output += chunk.toString();
+      const match = output.match(/tracked-child-pids:(\d+),(\d+)/);
+      if (match) {
+        child.stdout?.off("data", onData);
+        child.off("exit", onExit);
+        resolve([Number(match[1]), Number(match[2])]);
+      }
+    };
+    const onExit = () => {
+      child.stdout?.off("data", onData);
+      reject(new Error(`graph exited before reporting child PIDs: ${output}`));
+    };
+    child.stdout?.on("data", onData);
+    child.once("exit", onExit);
+  });
+}
+
 it("can background a graph and stop it through the CLI using the control port", async () => {
   const controlPort = await getAvailablePort();
   const fixture = fileURLToPath(new URL("./fixtures/background-graph.ts", import.meta.url));
@@ -191,6 +212,59 @@ it("does not report a background graph ready until its services are ready", asyn
   await run(function* () {
     yield* waitForFetchClosed(`http://127.0.0.1:${controlPort}/health`, 5000);
   });
+});
+
+it("gracefully stops a background graph when the startup wait expires", async () => {
+  const controlPort = await getAvailablePort();
+  const fixture = fileURLToPath(new URL("./fixtures/reaper-graph.ts", import.meta.url));
+  const background = spawn(
+    process.execPath,
+    [fixture, "--background", "--control-port", String(controlPort), "--startup-timeout", "500"],
+    {
+      cwd: fileURLToPath(new URL("..", import.meta.url)),
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+
+  let childPid: number | undefined;
+  let graphPid: number | undefined;
+  let graphStopped = false;
+  try {
+    await waitForHealth(controlPort);
+    const initialStatus = await waitForStatus(
+      controlPort,
+      (value) => typeof value.services?.child?.pid === "number",
+    );
+    childPid = initialStatus.services?.child?.pid;
+    graphPid = initialStatus.services?.simulacrum?.pid;
+    assert.ok(typeof graphPid === "number");
+    assert.ok(typeof childPid === "number");
+
+    const result = await waitForExit(background);
+    assert.strictEqual(result.code, 1);
+    assert.match(result.stderr, /did not become ready/);
+    await waitForPidExit(childPid);
+    await run(function* () {
+      yield* waitForFetchClosed(`http://127.0.0.1:${controlPort}/health`, 5000);
+    });
+    graphStopped = true;
+  } finally {
+    if (background.exitCode === null) background.kill("SIGKILL");
+    if (!graphStopped && graphPid !== undefined) {
+      try {
+        process.kill(graphPid, "SIGKILL");
+      } catch {
+        // The graph may already have exited.
+      }
+    }
+    if (childPid !== undefined) {
+      try {
+        process.kill(childPid, "SIGKILL");
+      } catch {
+        // The graph may already have reaped the child.
+      }
+    }
+  }
 });
 
 it("can stop a foreground graph through its control port", async () => {
@@ -334,6 +408,46 @@ it("reaps child simulators when a graph is hard-killed", async () => {
     await graphExit;
   } finally {
     if (graph.exitCode === null) graph.kill("SIGKILL");
+  }
+});
+
+it("keeps reaper watches for multiple processes in one service", async () => {
+  const controlPort = await getAvailablePort();
+  const fixture = fileURLToPath(new URL("./fixtures/multi-process-graph.ts", import.meta.url));
+  const reported = spawn(process.execPath, ["-e", "setInterval(() => {}, 10000)"], {
+    detached: true,
+    stdio: "ignore",
+  });
+  assert.ok(typeof reported.pid === "number");
+  const graph = spawn(process.execPath, [fixture, "start", "--control-port", String(controlPort)], {
+    cwd: fileURLToPath(new URL("..", import.meta.url)),
+    env: { ...process.env, SIMULACRUM_TEST_REPORTED_PID: String(reported.pid) },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  const trackedPids = waitForTrackedChildPids(graph);
+
+  try {
+    await waitForHealth(controlPort);
+    const [firstPid, secondPid] = await trackedPids;
+    const status = await waitForStatus(
+      controlPort,
+      (value) =>
+        value.services?.worker?.pid === secondPid && value.services?.reported?.pid === reported.pid,
+    );
+    assert.strictEqual(status.services?.worker?.pid, secondPid);
+    assert.strictEqual(status.services?.reported?.pid, reported.pid);
+
+    const graphExit = waitForExit(graph);
+    graph.kill("SIGKILL");
+    await graphExit;
+    await waitForPidExit(firstPid);
+    await waitForPidExit(secondPid);
+    assert.doesNotThrow(() => process.kill(reported.pid!, 0));
+  } finally {
+    if (graph.exitCode === null) graph.kill("SIGKILL");
+    if (reported.exitCode === null && reported.signalCode === null) {
+      reported.kill("SIGKILL");
+    }
   }
 });
 

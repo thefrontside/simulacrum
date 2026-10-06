@@ -13,6 +13,7 @@ import {
 } from "effection";
 import { spawn as spawnProcess, type ChildProcess } from "node:child_process";
 import { on } from "@effectionx/node/events";
+import { ctrlc } from "ctrlc-windows";
 import { useAttributes } from "./logging.ts";
 import type {
   ServiceDefinition,
@@ -25,6 +26,7 @@ import { GRAPH_LAUNCHER_ENV, type ProcessCommand } from "./launch-metadata.ts";
 import { DEFAULT_PROCESS_SHUTDOWN_GRACE } from "./reaper.ts";
 
 export const DEFAULT_CONTROL_PORT = 43034;
+export const DEFAULT_STARTUP_TIMEOUT = 120_000;
 
 export type GraphLaunchRequest = {
   command: string;
@@ -43,6 +45,7 @@ export type GraphLaunchHook = (
 
 export type SimulationCLIOptions = {
   launchGraph?: GraphLaunchHook;
+  startupTimeout?: number;
 };
 
 function* nextEvent<T extends unknown[]>(subscription: Subscription<T, never>): Operation<T> {
@@ -74,11 +77,32 @@ function parseControlPort(value: string | undefined): number | undefined {
   return port;
 }
 
+function parseStartupTimeout(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined;
+
+  const timeout = Number(value);
+  if (!Number.isSafeInteger(timeout) || timeout < 0) {
+    throw new Error(`invalid startup timeout '${value}'`);
+  }
+  return timeout;
+}
+
 function launchGraphProcess(
   mode: GraphLaunchRequest["mode"],
   launchGraph?: GraphLaunchHook,
 ): ChildProcess {
-  const childArgs = process.argv.slice(1).filter((arg) => arg !== "--background");
+  const args = process.argv.slice(1);
+  const childArgs: string[] = [];
+  for (let index = 0; index < args.length; index++) {
+    const arg = args[index];
+    if (arg === "--background") continue;
+    if (arg === "--startup-timeout") {
+      index++;
+      continue;
+    }
+    if (arg.startsWith("--startup-timeout=")) continue;
+    childArgs.push(arg);
+  }
   childArgs.splice(1, 0, "start");
   if (
     mode === "background" &&
@@ -118,18 +142,32 @@ function launchGraphProcess(
   return child;
 }
 
-function* waitForControlService(controlPort: number) {
+function* waitForControlService(controlPort: number, startupTimeout: number) {
   const signal = yield* useAbortSignal();
-  const deadline = Date.now() + 5000;
+  const deadline = Date.now() + startupTimeout;
 
   while (Date.now() < deadline) {
-    let response: Response;
+    const controller = new AbortController();
+    const abortOnScopeExit = () => controller.abort(signal.reason);
+    const timeout = setTimeout(() => controller.abort(), deadline - Date.now());
+    signal.addEventListener("abort", abortOnScopeExit, { once: true });
+    let response: Response | undefined;
     try {
-      response = yield* until(fetch(`http://127.0.0.1:${controlPort}/ready`, { signal }));
+      response = yield* until(
+        fetch(`http://127.0.0.1:${controlPort}/ready`, { signal: controller.signal }),
+      );
     } catch {
-      // it will error if we try to fetch before the service is actually listening
-      // maybe order things better in the future to avoid this requirement?
-      yield* sleep(25);
+      if (signal.aborted) throw new Error("background readiness wait was interrupted");
+      if (Date.now() >= deadline) break;
+      yield* sleep(Math.min(25, deadline - Date.now()));
+      continue;
+    } finally {
+      clearTimeout(timeout);
+      signal.removeEventListener("abort", abortOnScopeExit);
+    }
+
+    if (response.status === 504) {
+      yield* until(response.text());
       continue;
     }
 
@@ -140,14 +178,65 @@ function* waitForControlService(controlPort: number) {
     return;
   }
 
-  throw new Error(`timed out waiting for control plane on port ${controlPort}`);
+  throw new Error(
+    `background graph on port ${controlPort} did not become ready within ${startupTimeout}ms`,
+  );
 }
 
-function* waitForBackgroundGraph(controlPort: number, child: ChildProcess) {
+function signalManagedChild(child: ChildProcess, signal: NodeJS.Signals, processGroup: boolean) {
+  if (child.pid === undefined) return;
+
+  if (process.platform === "win32") {
+    if (signal === "SIGINT") {
+      try {
+        ctrlc(child.pid);
+        return;
+      } catch {
+        // Fall back to ChildProcess signaling if console Ctrl+C is unavailable.
+      }
+    }
+    child.kill(signal);
+    return;
+  }
+
+  if (processGroup) {
+    try {
+      process.kill(-child.pid, signal);
+      return;
+    } catch {
+      // Fall back to the direct child if it does not own a separate group.
+    }
+  }
+  child.kill(signal);
+}
+
+function* stopManagedChild(child: ChildProcess, processGroup: boolean) {
+  if (child.pid === undefined || child.exitCode !== null || child.signalCode !== null) return;
+
+  const exits = yield* on<[number | null, NodeJS.Signals | null]>(child, "exit");
+  signalManagedChild(child, "SIGINT", processGroup);
+  const stopped = yield* race([
+    call(function* () {
+      yield* nextEvent(exits);
+      return true;
+    }),
+    call(function* () {
+      yield* sleep(DEFAULT_PROCESS_SHUTDOWN_GRACE);
+      return false;
+    }),
+  ]);
+
+  if (!stopped && child.exitCode === null && child.signalCode === null) {
+    signalManagedChild(child, "SIGKILL", processGroup);
+    if (child.exitCode === null && child.signalCode === null) yield* nextEvent(exits);
+  }
+}
+
+function* waitForBackgroundGraph(controlPort: number, child: ChildProcess, startupTimeout: number) {
   const exits = yield* on<[number | null, NodeJS.Signals | null]>(child, "exit");
   const errors = yield* on<[Error]>(child, "error");
   yield* race([
-    waitForControlService(controlPort),
+    waitForControlService(controlPort, startupTimeout),
     call(function* () {
       const [code, signal] = yield* nextEvent(exits);
       throw new Error(
@@ -270,6 +359,7 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
         help: { type: "boolean", short: "h" },
         watch: { type: "boolean" },
         "watch-debounce": { type: "string" },
+        "startup-timeout": { type: "string" },
         background: { type: "boolean" },
         stop: { type: "boolean" },
         restart: { type: "boolean" },
@@ -284,7 +374,7 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
 
     function* printUsage() {
       process.stdout.write(
-        `Usage: cli [-s|--services serviceName] [--exclude-services serviceName] [--watch] [--watch-debounce ms] [--background --control-port port] [--stop --control-port port] [--restart --restart-service serviceName]`,
+        `Usage: cli [-s|--services serviceName] [--exclude-services serviceName] [--watch] [--watch-debounce ms] [--startup-timeout ms] [--background --control-port port] [--stop --control-port port] [--restart --restart-service serviceName]`,
       );
     }
 
@@ -303,6 +393,13 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
     const subset = parseServiceList(values.services as string | undefined);
     const excluded = parseServiceList(values["exclude-services"] as string | undefined);
     const requestedControlPort = parseControlPort(values["control-port"] as string | undefined);
+    const startupTimeout =
+      parseStartupTimeout(values["startup-timeout"] as string | undefined) ??
+      options.startupTimeout ??
+      DEFAULT_STARTUP_TIMEOUT;
+    if (!Number.isSafeInteger(startupTimeout) || startupTimeout < 0) {
+      throw new Error(`invalid startup timeout '${startupTimeout}'`);
+    }
     const controlPort =
       values.background || values.stop
         ? (requestedControlPort ?? DEFAULT_CONTROL_PORT)
@@ -313,6 +410,7 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
       excludedServices: excluded ? excluded.join(", ") : "",
       watch: String(!!values.watch),
       watchDebounce: String(values["watch-debounce"] ?? ""),
+      startupTimeout: String(startupTimeout),
       debug: String(!!values.debug),
       background: String(!!values.background),
       stop: String(!!values.stop),
@@ -403,9 +501,17 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
       const child = launchGraphProcess(mode, options.launchGraph);
       if (mode === "background") {
         try {
-          yield* waitForBackgroundGraph(graphControlPort ?? DEFAULT_CONTROL_PORT, child);
+          yield* waitForBackgroundGraph(
+            graphControlPort ?? DEFAULT_CONTROL_PORT,
+            child,
+            startupTimeout,
+          );
         } catch (error) {
-          if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+          try {
+            yield* stopManagedChild(child, true);
+          } catch {
+            // Preserve the startup failure while making a best-effort shutdown.
+          }
           throw error;
         }
         yield* logger.stdout(`background graph ready on http://127.0.0.1:${graphControlPort}`);

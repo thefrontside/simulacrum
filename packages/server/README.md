@@ -260,7 +260,7 @@ type ServiceDefinition<T> = {
 
 - In most cases, pass `useSimulation(args)` or `useService(args)`.
 - Each service must provide an `operation: Operation<void>` or another long-lived `effection` operation that resolves when the service is ready.
-- The operation may also return service metadata such as `{ port: number }` or `{ port: number; pid: number }` to surface runtime information in the graph's `status` map.
+- The operation may also return service metadata such as `{ port: number }` or `{ port: number; pid: number }` to surface runtime information in the graph's `status` map. We also track all PIDs launched through `@effectionx/process` so the graph can track their lifecycle and clean them up in failure situations.
 - If you are defining your own custom operation, use `try { ... yield* suspend(); } finally { ... }` inside an `effection` operation or `resource()` to run cleanup logic when the service stops.
 
 #### Test rigs
@@ -502,7 +502,7 @@ The `options.wellnessCheck` object supports:
 
 #### simulationCLI(serviceGraph)
 
-- `simulationCLI` wraps the runner in a small CLI loop and provides convenience flags: `--services`, `--watch`, `--watch-debounce`, `--background`, `--stop`, and `--control-port`.
+- `simulationCLI` wraps the runner in a small CLI loop and provides convenience flags: `--services`, `--watch`, `--watch-debounce`, `--startup-timeout`, `--background`, `--stop`, and `--control-port`.
 - Use the CLI helper for local development workflows where you want to run your graph directly from a file (see `service-graph.ts` examples above).
 - Foreground and background CLI modes launch a managed child process to provide robustness against various external process kills or failures. Foreground inherits terminal stdio and forwards Ctrl+C for graceful shutdown; `--background` detaches the child. `useServiceTestRig` / `createServiceTestRig` run the service graph in-process allowing the test runner to manage the service lifecycle.
 
@@ -526,8 +526,10 @@ node ./service-graph.ts --stop
 - Foreground inherits stdio to print it to your terminal; `--background` runs a detached process and waits until all selected services report ready.
 - `--stop` sends `POST /stop` to the runtime service on the requested control port. It works for both foreground and background graphs.
 - `--control-port` defaults to `43034` for both `--background` and `--stop`.
+- The `--background` mode polls the control plane's HTTP `GET /ready` endpoint internally. Each request waits up to 30 seconds, and the client retries after a 504 until its total startup wait expires.
+- `--startup-timeout` sets the total background CLI wait in milliseconds and defaults to `120000`. `simulationCLI` also accepts `startupTimeout` in its options. If it expires, the CLI requests graceful graph shutdown, waits for the shared grace period, then escalates if needed before reporting the timeout.
 
-The control plane's `/health` endpoint reports whether its HTTP server is running. `/status` returns an immediate service-state snapshot, including the command and arguments for services that launch an OS process. When a tracked process exits, its service reports `lastExit` with the observed exit code and/or signal; graph-requested restarts may also include `requestedSignal`. The `simulacrum` service also reports the graph's `launcher` command when started through the managed CLI; this can differ from its `command` when a wrapper such as `unshare` or `tini` is used. In-process services have no separate launch command. Service PIDs may be host PIDs or relative to a nested PID namespace. `/ready` waits up to 30 seconds for all selected services to become ready, returning `503` if a service fails or begins stopping and `504` on timeout.
+The control plane's `/health` endpoint reports whether its HTTP server is running. `/status` returns an immediate service-state snapshot, including the command and arguments for services that launch a process. When a tracked process exits, its service reports `lastExit` with the observed exit code and/or signal; graph-requested restarts may also include `requestedSignal`. The `simulacrum` service also reports the graph's `launcher` command; this can differ from its `command` when a wrapper such as `unshare` or `tini` is used, see below.
 
 ##### Custom graph launcher
 

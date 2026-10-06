@@ -20,7 +20,12 @@ import { createServer } from "node:http";
 import { logger } from "./logging.ts";
 import type { Server, ServerResponse } from "node:http";
 import { type ProcessReaperClient, useProcessReaper } from "./reaper.ts";
-import { ServiceStatusRecord, type ServiceInfo, type ServiceState } from "./service-status.ts";
+import {
+  ServiceStatusRecord,
+  type ServiceInfo,
+  type ServiceInfoUpdate,
+  type ServiceState,
+} from "./service-status.ts";
 import { GraphLauncher } from "./service-graph-context.ts";
 
 export type { ServiceInfo, ServiceState } from "./service-status.ts";
@@ -38,7 +43,7 @@ export type ControlPlane = {
   port: number;
   getServiceStatus: (name: string) => ServiceStatusRecord | undefined;
   getServiceInfo: (name: string) => ServiceInfo | undefined;
-  setServiceInfo: (name: string, info: Partial<ServiceInfo>) => void;
+  setServiceInfo: (name: string, info: ServiceInfoUpdate) => void;
   clearServiceInfo: (name: string, state?: ServiceState) => void;
   trackProcess: <T extends Process>(
     name: string,
@@ -89,7 +94,7 @@ type ControlPlaneServerOptions = {
   requestRestart?: ((service?: string) => void) | undefined;
 };
 
-const CONTROL_PLANE_READY_TIMEOUT = 30_000;
+const READINESS_REQUEST_TIMEOUT = 30_000;
 
 function useControlPlaneServer(
   options: ControlPlaneServerOptions,
@@ -169,7 +174,7 @@ function useControlPlaneServer(
       const task = scope.run(function* () {
         const timedOut = yield* race([
           call(function* () {
-            yield* sleep(CONTROL_PLANE_READY_TIMEOUT);
+            yield* sleep(READINESS_REQUEST_TIMEOUT);
             return true;
           }),
           call(function* () {
@@ -360,21 +365,15 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       requestRestart: options.requestRestart,
     });
 
-    function setServiceInfo(name: string, info: Partial<ServiceInfo>) {
+    function setServiceInfo(name: string, info: ServiceInfoUpdate) {
       const current = services.get(name) ?? new ServiceStatusRecord();
-      const previousPid = current.pid;
       current.update(info);
-      if (previousPid !== current.pid) {
-        if (previousPid !== undefined) reaper.remove(previousPid);
-        if (current.pid !== undefined) reaper.add(current.pid);
-      }
       services.set(name, current);
       notifyServiceChange();
     }
 
     function clearServiceInfo(name: string, state?: ServiceState) {
       const previous = services.get(name) ?? new ServiceStatusRecord();
-      if (previous.pid !== undefined) reaper.remove(previous.pid);
       previous.clear(state);
       services.set(name, previous);
       notifyServiceChange();
@@ -393,6 +392,7 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       });
 
       const process = yield* operation;
+      reaper.add(process.pid);
       setServiceInfo(name, {
         pid: process.pid,
         command: {
@@ -422,7 +422,12 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
         }
       };
       yield* spawn(function* () {
-        const exit = yield* process.join();
+        let exit: ExitStatus | undefined;
+        try {
+          exit = yield* process.join();
+        } finally {
+          reaper.remove(process.pid);
+        }
         const current = services.get(name);
         release(current?.state === "ready" ? "failed" : undefined, exit);
       });

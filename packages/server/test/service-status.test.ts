@@ -34,3 +34,14 @@ it("clears the in-flight requested signal when a replacement starts", () => {
     lastExit: { requestedSignal: "SIGTERM", signal: "SIGTERM" },
   });
 });
+
+it("preserves a valid command when an update has no usable command", () => {
+  const status = new ServiceStatusRecord();
+  const command = { executable: "node", arguments: ["server.js"] };
+  status.update({ pid: 42, command });
+
+  status.update({ command: undefined });
+  status.update({ command: { executable: 42, arguments: "server.js" } });
+
+  assert.deepStrictEqual(status.snapshot().command, command);
+});

@@ -87,7 +87,7 @@ export type ServiceGraphFor<R extends ServiceGraphRunner<any>> =
  * callers.
  *
  * @param services - a map of service names to definitions
- * @param options - optional configuration: `{ globalData?, watch?, watchDebounce? }`
+ * @param options - optional graph configuration such as `globalData`, watching, and `controlPort`
  * @returns a runner function returning the graph operation
  */
 export function useServiceGraph<S extends ServiceMap>(
@@ -313,20 +313,9 @@ export function useServiceGraph<S extends ServiceMap>(
                 });
                 controlPlane.setServiceInfo(service, { pid: maybeProvided.pid });
               }
-              if (
-                "command" in maybeProvided &&
-                typeof maybeProvided.command === "object" &&
-                maybeProvided.command !== null &&
-                "executable" in maybeProvided.command &&
-                typeof maybeProvided.command.executable === "string" &&
-                "arguments" in maybeProvided.command &&
-                Array.isArray(maybeProvided.command.arguments)
-              ) {
+              if ("command" in maybeProvided) {
                 controlPlane.setServiceInfo(service, {
-                  command: {
-                    executable: maybeProvided.command.executable,
-                    arguments: maybeProvided.command.arguments,
-                  },
+                  command: maybeProvided.command,
                 });
               }
             }
