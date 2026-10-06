@@ -1,7 +1,8 @@
 import { it } from "node:test";
 import assert from "node:assert";
 import { createServer } from "node:net";
-import { run, until } from "effection";
+import { resource, run, until } from "effection";
+import { exec } from "@effectionx/process";
 import { useServiceGraph } from "../src/service-graph.ts";
 import { useSimulation } from "../src/simulation.ts";
 import { useService } from "../src/service.ts";
@@ -183,4 +184,51 @@ it("tracks useService processes under their graph service name", async () => {
     });
     assert.strictEqual("display-name" in status.services, false);
   });
+});
+
+it("observes a process exit while its service scope remains alive", async () => {
+  const controlPort = await getAvailablePort();
+  let operationAlive = false;
+  let exitChild: (() => void) | undefined;
+
+  await run(function* () {
+    yield* useServiceGraph(
+      {
+        worker: {
+          operation: resource<void>(function* (provide) {
+            const child = yield* exec(process.execPath, {
+              arguments: [
+                "-e",
+                "process.stdin.once('data', () => process.exit(0)); setInterval(() => {}, 1000)",
+              ],
+            });
+            exitChild = () => child.stdin.send("exit");
+            operationAlive = true;
+            try {
+              yield* provide();
+            } finally {
+              operationAlive = false;
+            }
+          }),
+        },
+      },
+      { controlPort },
+    )();
+
+    assert.strictEqual(operationAlive, true);
+    assert.ok(exitChild);
+    exitChild();
+
+    yield* waitForOperation(function* () {
+      const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
+      const status = (yield* until(response.json())) as {
+        services: Record<string, { state?: string; pid?: number }>;
+      };
+      return status.services.worker?.state === "failed" && status.services.worker.pid === undefined;
+    });
+
+    assert.strictEqual(operationAlive, true);
+  });
+
+  assert.strictEqual(operationAlive, false);
 });

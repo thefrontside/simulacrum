@@ -386,6 +386,8 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       operation: Operation<T>,
     ): Operation<T> {
       let release: ((state?: ServiceState, exit?: ExitStatus) => void) | undefined;
+
+      // This outer ensure runs after the wrapped process resource cleans up.
       yield* ensure(() => {
         const current = services.get(name);
         release?.(current?.state === "ready" ? "failed" : undefined);
@@ -405,6 +407,7 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       release = (state?: ServiceState, exit?: ExitStatus) => {
         if (!active) return;
         active = false;
+        reaper.remove(process.pid);
         const current = services.get(name);
         if (current?.pid === process.pid) {
           const requestedSignal = current.snapshot().requestedSignal;
@@ -422,12 +425,7 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
         }
       };
       yield* spawn(function* () {
-        let exit: ExitStatus | undefined;
-        try {
-          exit = yield* process.join();
-        } finally {
-          reaper.remove(process.pid);
-        }
+        const exit = yield* process.join();
         const current = services.get(name);
         release(current?.state === "ready" ? "failed" : undefined, exit);
       });
