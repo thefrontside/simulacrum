@@ -61,6 +61,16 @@ it("fails readiness when a daemon exits during service startup", async () => {
                 arguments: ["-e", "process.exit(1)"],
               });
               yield* child.join();
+              yield* waitForOperation(function* () {
+                const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
+                const status = (yield* until(response.json())) as {
+                  services: Record<string, { state?: string; pid?: number }>;
+                };
+                return (
+                  status.services.worker?.state === "failed" &&
+                  status.services.worker.pid === undefined
+                );
+              });
               yield* provide();
               yield* suspend();
             }),
@@ -72,8 +82,11 @@ it("fails readiness when a daemon exits during service startup", async () => {
     });
 
     yield* waitForOperation(function* () {
-      const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/health`));
-      return response.ok;
+      const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
+      const status = (yield* until(response.json())) as {
+        services: Record<string, { state?: string; pid?: number }>;
+      };
+      return status.services.worker?.state === "failed" && status.services.worker.pid === undefined;
     });
 
     const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/ready`));
@@ -98,6 +111,16 @@ it("allows finite exec helpers to exit during service startup", async () => {
               arguments: ["-e", "process.exit(0)"],
             });
             yield* child.join();
+            yield* waitForOperation(function* () {
+              const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/status`));
+              const status = (yield* until(response.json())) as {
+                services: Record<string, { state?: string; pid?: number }>;
+              };
+              return (
+                status.services.worker?.state === "starting" &&
+                status.services.worker.pid === undefined
+              );
+            });
             yield* provide();
             yield* suspend();
           }),
@@ -260,7 +283,7 @@ it("observes a process exit while its service scope remains alive", async () => 
       {
         worker: {
           operation: resource<void>(function* (provide) {
-            const child = yield* exec(process.execPath, {
+            const child = yield* daemon(process.execPath, {
               arguments: [
                 "-e",
                 "process.stdin.once('data', () => process.exit(0)); setInterval(() => {}, 1000)",

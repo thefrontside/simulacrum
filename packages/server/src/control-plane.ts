@@ -50,7 +50,7 @@ export type ControlPlane = {
     command: string,
     options: ExecOptions,
     process: Operation<T>,
-    failWhileStarting: boolean,
+    failOnExit: boolean,
   ) => Operation<T>;
 };
 
@@ -96,7 +96,7 @@ type ControlPlaneServerOptions = {
 };
 
 type TrackedProcess = {
-  failWhileStarting: boolean;
+  failOnExit: boolean;
   release(): void;
 };
 
@@ -387,19 +387,19 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
     }
 
     // daemon calls exec and we track both, so we need to ensure we only track each PID once.
-    // If we encounter a PID that is already being tracked, we only upgrade to
-    // a failWhileStarting flag and do not register it again. Ideally we only get daemon, but
-    // this protects against someone using exec directly and handling the status messages on a confusing manner.
-    function watchProcess(pid: number, failWhileStarting: boolean) {
+    // If we encounter a PID that is already being tracked, we only "upgrade" it and do not
+    // register it again. Ideally we only get daemon, but this protects against someone using
+    // exec directly and handling the status messages on a confusing manner.
+    function watchProcess(pid: number, failOnExit: boolean) {
       const existing = trackedProcesses.get(pid);
       if (existing) {
-        existing.failWhileStarting ||= failWhileStarting;
+        existing.failOnExit ||= failOnExit;
         return undefined;
       }
 
       let active = true;
       const tracking: TrackedProcess = {
-        failWhileStarting,
+        failOnExit,
         release() {
           if (!active) return;
           active = false;
@@ -418,18 +418,18 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       command: string,
       options: ExecOptions,
       operation: Operation<T>,
-      failWhileStarting: boolean,
+      failOnExit: boolean,
     ): Operation<T> {
       let release: ((state?: ServiceState, exit?: ExitStatus) => void) | undefined;
 
       // This outer ensure runs after the wrapped process resource cleans up.
       yield* ensure(() => {
         const current = services.get(name);
-        release?.(current?.state === "ready" ? "failed" : undefined);
+        release?.(failOnExit && current?.state !== "stopping" ? "failed" : undefined);
       });
 
       const process = yield* operation;
-      const tracking = watchProcess(process.pid, failWhileStarting);
+      const tracking = watchProcess(process.pid, failOnExit);
       if (!tracking) return process;
       setServiceInfo(name, {
         pid: process.pid,
@@ -463,9 +463,7 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       yield* spawn(function* () {
         const exit = yield* process.join();
         const current = services.get(name);
-        const failed =
-          current?.state === "ready" ||
-          (tracking.failWhileStarting && current?.state === "starting");
+        const failed = tracking.failOnExit && current?.state !== "stopping";
         release(failed ? "failed" : undefined, exit);
       });
 
