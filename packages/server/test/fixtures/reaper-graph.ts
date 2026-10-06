@@ -9,7 +9,11 @@ export const services = useServiceGraph(
       operation: useSimulation("simulator", "./test/fixtures/init-data-sim.ts"),
     },
   },
-  { globalData: { startupDelayMs: 750 } },
+  {
+    globalData: {
+      startupDelayMs: Number(process.env.SIMULACRUM_TEST_STARTUP_DELAY_MS ?? 750),
+    },
+  },
 );
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

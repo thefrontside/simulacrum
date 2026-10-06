@@ -219,9 +219,10 @@ it("gracefully stops a background graph when the startup wait expires", async ()
   const fixture = fileURLToPath(new URL("./fixtures/reaper-graph.ts", import.meta.url));
   const background = spawn(
     process.execPath,
-    [fixture, "--background", "--control-port", String(controlPort), "--startup-timeout", "500"],
+    [fixture, "--background", "--control-port", String(controlPort), "--startup-timeout", "2000"],
     {
       cwd: fileURLToPath(new URL("..", import.meta.url)),
+      env: { ...process.env, SIMULACRUM_TEST_STARTUP_DELAY_MS: "5000" },
       stdio: ["ignore", "pipe", "pipe"],
     },
   );
