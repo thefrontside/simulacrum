@@ -1,7 +1,7 @@
 import { it } from "node:test";
 import assert from "node:assert";
 import { createServer } from "node:net";
-import { resource, run, sleep, spawn, suspend, until } from "effection";
+import { resource, run, spawn, suspend, until } from "effection";
 import { daemon, exec } from "@effectionx/process";
 import { useServiceGraph } from "../src/service-graph.ts";
 import { useSimulation } from "../src/simulation.ts";
@@ -57,10 +57,10 @@ it("fails readiness when a daemon exits during service startup", async () => {
         {
           worker: {
             operation: resource<void>(function* (provide) {
-              yield* daemon(process.execPath, {
+              const child = yield* daemon(process.execPath, {
                 arguments: ["-e", "process.exit(1)"],
               });
-              yield* sleep(400);
+              yield* child.join();
               yield* provide();
               yield* suspend();
             }),
@@ -94,7 +94,10 @@ it("allows finite exec helpers to exit during service startup", async () => {
       {
         worker: {
           operation: resource<void>(function* (provide) {
-            yield* exec(process.execPath, { arguments: ["-e", "process.exit(0)"] });
+            const child = yield* exec(process.execPath, {
+              arguments: ["-e", "process.exit(0)"],
+            });
+            yield* child.join();
             yield* provide();
             yield* suspend();
           }),
