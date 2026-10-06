@@ -289,10 +289,25 @@ export function useServiceGraph<S extends ServiceMap>(
           // cancelled when a file change triggers a restart
           const serviceTask = yield* spawn(function* () {
             yield* ProcessApi.around({
-              // daemon() delegates to exec(), so this also tracks daemon processes.
               *exec(args, next) {
                 const [command, options] = args;
-                return yield* controlPlane.trackProcess(service, command, options, next(...args));
+                return yield* controlPlane.trackProcess(
+                  service,
+                  command,
+                  options,
+                  next(...args),
+                  false,
+                );
+              },
+              *daemon(args, next) {
+                const [command, options] = args;
+                return yield* controlPlane.trackProcess(
+                  service,
+                  command,
+                  options,
+                  next(...args),
+                  true,
+                );
               },
             });
 
@@ -320,7 +335,9 @@ export function useServiceGraph<S extends ServiceMap>(
               }
             }
 
-            controlPlane.setServiceInfo(service, { state: "ready" });
+            if (controlPlane.getServiceInfo(service)?.state !== "failed") {
+              controlPlane.setServiceInfo(service, { state: "ready" });
+            }
             task.startup.resolve();
             // wait until the watcher asks for this service to be restarted
             yield* task.running.operation;

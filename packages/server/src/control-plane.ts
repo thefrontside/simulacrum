@@ -50,6 +50,7 @@ export type ControlPlane = {
     command: string,
     options: ExecOptions,
     process: Operation<T>,
+    failWhileStarting: boolean,
   ) => Operation<T>;
 };
 
@@ -92,6 +93,11 @@ type ControlPlaneServerOptions = {
   services: Map<string, ServiceStatusRecord>;
   requestStop?: (() => void) | undefined;
   requestRestart?: ((service?: string) => void) | undefined;
+};
+
+type TrackedProcess = {
+  failWhileStarting: boolean;
+  release(): void;
 };
 
 const READINESS_REQUEST_TIMEOUT = 30_000;
@@ -344,6 +350,7 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
     const services = new Map<string, ServiceStatusRecord>(
       (options.services ?? []).map((name) => [name, new ServiceStatusRecord()]),
     );
+    const trackedProcesses = new Map<number, TrackedProcess>();
     services.set(
       "simulacrum",
       new ServiceStatusRecord({
@@ -379,11 +386,39 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       notifyServiceChange();
     }
 
+    // daemon calls exec and we track both, so we need to ensure we only track each PID once.
+    // If we encounter a PID that is already being tracked, we only upgrade to
+    // a failWhileStarting flag and do not register it again. Ideally we only get daemon, but
+    // this protects against someone using exec directly and handling the status messages on a confusing manner.
+    function watchProcess(pid: number, failWhileStarting: boolean) {
+      const existing = trackedProcesses.get(pid);
+      if (existing) {
+        existing.failWhileStarting ||= failWhileStarting;
+        return undefined;
+      }
+
+      let active = true;
+      const tracking: TrackedProcess = {
+        failWhileStarting,
+        release() {
+          if (!active) return;
+          active = false;
+          if (trackedProcesses.get(pid) !== tracking) return;
+          trackedProcesses.delete(pid);
+          reaper.remove(pid);
+        },
+      };
+      trackedProcesses.set(pid, tracking);
+      reaper.add(pid);
+      return tracking;
+    }
+
     function* trackProcess<T extends Process>(
       name: string,
       command: string,
       options: ExecOptions,
       operation: Operation<T>,
+      failWhileStarting: boolean,
     ): Operation<T> {
       let release: ((state?: ServiceState, exit?: ExitStatus) => void) | undefined;
 
@@ -394,7 +429,8 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       });
 
       const process = yield* operation;
-      reaper.add(process.pid);
+      const tracking = watchProcess(process.pid, failWhileStarting);
+      if (!tracking) return process;
       setServiceInfo(name, {
         pid: process.pid,
         command: {
@@ -407,7 +443,7 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       release = (state?: ServiceState, exit?: ExitStatus) => {
         if (!active) return;
         active = false;
-        reaper.remove(process.pid);
+        tracking.release();
         const current = services.get(name);
         if (current?.pid === process.pid) {
           const requestedSignal = current.snapshot().requestedSignal;
@@ -427,7 +463,10 @@ export function useControlPlane(options: ControlPlaneOptions = {}): Operation<Co
       yield* spawn(function* () {
         const exit = yield* process.join();
         const current = services.get(name);
-        release(current?.state === "ready" ? "failed" : undefined, exit);
+        const failed =
+          current?.state === "ready" ||
+          (tracking.failWhileStarting && current?.state === "starting");
+        release(failed ? "failed" : undefined, exit);
       });
 
       return process;

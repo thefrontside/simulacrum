@@ -1,8 +1,8 @@
 import { it } from "node:test";
 import assert from "node:assert";
 import { createServer } from "node:net";
-import { resource, run, until } from "effection";
-import { exec } from "@effectionx/process";
+import { resource, run, sleep, spawn, suspend, until } from "effection";
+import { daemon, exec } from "@effectionx/process";
 import { useServiceGraph } from "../src/service-graph.ts";
 import { useSimulation } from "../src/simulation.ts";
 import { useService } from "../src/service.ts";
@@ -45,6 +45,67 @@ it("starts data service and serves configured data", async () => {
     const res = yield* until(fetch(`http://127.0.0.1:${port}/data`));
     const json = yield* until(res.json());
     assert.deepStrictEqual(json, { a: 1, nested: { b: 2 } });
+  });
+});
+
+it("fails readiness when a daemon exits during service startup", async () => {
+  const controlPort = await getAvailablePort();
+
+  await run(function* () {
+    yield* spawn(function* () {
+      yield* useServiceGraph(
+        {
+          worker: {
+            operation: resource<void>(function* (provide) {
+              yield* daemon(process.execPath, {
+                arguments: ["-e", "process.exit(1)"],
+              });
+              yield* sleep(400);
+              yield* provide();
+              yield* suspend();
+            }),
+          },
+        },
+        { controlPort },
+      )();
+      yield* suspend();
+    });
+
+    yield* waitForOperation(function* () {
+      const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/health`));
+      return response.ok;
+    });
+
+    const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/ready`));
+    assert.strictEqual(response.status, 503);
+    assert.deepStrictEqual(yield* until(response.json()), {
+      ready: false,
+      service: "worker",
+      state: "failed",
+    });
+  });
+});
+
+it("allows finite exec helpers to exit during service startup", async () => {
+  const controlPort = await getAvailablePort();
+
+  await run(function* () {
+    const graph = yield* useServiceGraph(
+      {
+        worker: {
+          operation: resource<void>(function* (provide) {
+            yield* exec(process.execPath, { arguments: ["-e", "process.exit(0)"] });
+            yield* provide();
+            yield* suspend();
+          }),
+        },
+      },
+      { controlPort },
+    )();
+
+    assert.strictEqual(graph.status.get("worker")?.state, "ready");
+    const response = yield* until(fetch(`http://127.0.0.1:${controlPort}/ready`));
+    assert.strictEqual(response.status, 200);
   });
 });
 
