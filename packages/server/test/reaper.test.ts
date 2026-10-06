@@ -77,12 +77,13 @@ it("reaps watched processes after its IPC connection closes", async () => {
 
   try {
     await waitForReady(reaper);
+    const reaperExit = once(reaper, "exit");
     reaper.send({ type: "watch", pid: victim.pid });
     reaper.disconnect();
 
     const [code, signal] = await waitForExit(victim);
     assert.ok(code !== null || signal !== null);
-    await once(reaper, "exit");
+    await reaperExit;
   } finally {
     if (reaper.connected) reaper.kill();
     killProcessTree(victim.pid);
@@ -97,9 +98,10 @@ it("does not reap processes after an explicit shutdown", async () => {
 
   try {
     await waitForReady(reaper);
+    const reaperExit = once(reaper, "exit");
     reaper.send({ type: "watch", pid: victim.pid });
     reaper.send({ type: "shutdown" });
-    await once(reaper, "exit");
+    await reaperExit;
     assert.strictEqual(victim.exitCode, null);
   } finally {
     if (reaper.connected) reaper.kill();
@@ -116,6 +118,7 @@ it("escalates to SIGKILL when a watched process ignores SIGTERM", async () => {
   try {
     await waitForReady(reaper);
     const victimExit = waitForExit(victim);
+    const reaperExit = once(reaper, "exit");
     reaper.send({ type: "watch", pid: victim.pid });
     reaper.disconnect();
 
@@ -125,7 +128,7 @@ it("escalates to SIGKILL when a watched process ignores SIGTERM", async () => {
     } else {
       assert.strictEqual(signal, "SIGKILL");
     }
-    await once(reaper, "exit");
+    await reaperExit;
   } finally {
     // cleanup only used to ensure no processes are left running
     // if something is broken
@@ -150,11 +153,12 @@ it("reaps all watched processes but leaves unwatched processes running", async (
     }
     reaper.send({ type: "watch", pid: unwatched.pid });
     reaper.send({ type: "unwatch", pid: unwatched.pid });
+    const reaperExit = once(reaper, "exit");
     reaper.disconnect();
 
     const results = await Promise.all(watchedExits);
     assert.ok(results.every(([code, signal]) => code !== null || signal !== null));
-    await once(reaper, "exit");
+    await reaperExit;
     assert.strictEqual(unwatched.exitCode, null);
     assert.strictEqual(unwatched.signalCode, null);
     killProcessTree(unwatched.pid);
