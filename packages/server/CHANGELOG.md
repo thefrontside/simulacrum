@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.11.0]
+
+### Enhancements
+
+- [`e1ea716`](https://github.com/thefrontside/simulacrum/commit/e1ea7164c4b6706732e142a6790af00a4ffbbc58) ([#381](https://github.com/thefrontside/simulacrum/pull/381) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Add `launchGraph` option in `simulationCLI` to allow a user to "wrap" the service graph process. For example, a team using only linux could opt to wrap the graph in `unshare` for more direct kernel protections from zombie processes.
+- [`e1ea716`](https://github.com/thefrontside/simulacrum/commit/e1ea7164c4b6706732e142a6790af00a4ffbbc58) ([#381](https://github.com/thefrontside/simulacrum/pull/381) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Add a new reaper process. We hand it the pids of processes when they start and when they shutdown. If the main service graph gets hard killed and the reaper see it lost the parent, the reaper will kill all (now) zombied processes and shut itself down. This is primarily in place to prevent bad shutdown sequences leaving zombie processes.
+
+### Bug Fixes
+
+- [`e1ea716`](https://github.com/thefrontside/simulacrum/commit/e1ea7164c4b6706732e142a6790af00a4ffbbc58) ([#381](https://github.com/thefrontside/simulacrum/pull/381) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Allow the /stop endpoint even if the service graph is not backgrounded. Allows one terminal to start but another to stop (or to use the idea of backgrounding through another function such as in tmux, etc.).
+
 ## \[0.10.1]
 
 ### Bug Fixes
