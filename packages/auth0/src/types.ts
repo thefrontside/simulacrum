@@ -1,34 +1,3 @@
-import { z } from "zod";
-
-export const configurationSchema = z.object({
-  port: z.optional(
-    z.number().gt(2999, "port must be greater than 2999").lt(10000, "must be less than 10000"),
-  ),
-  domain: z.optional(z.string().min(1, "domain is required")),
-  audience: z.optional(z.string().min(1, "audience is required")),
-  clientID: z.optional(z.string().max(32, "must be 32 characters long")),
-  scope: z.union([
-    z.string().min(1, "scope is required"),
-    z.array(
-      z.object({
-        clientID: z.string().max(32, "must be 32 characters long"),
-        audience: z.optional(z.string().min(1, "audience is required")),
-        scope: z.string().min(1, "scope is required"),
-      }),
-    ),
-  ]),
-  clientSecret: z.optional(z.string()),
-  rulesDirectory: z.optional(z.string()),
-  auth0SessionCookieName: z.optional(z.string()),
-  auth0CookieSecret: z.optional(z.string()),
-  connection: z.optional(z.string()),
-  cookieSecret: z.optional(z.string()),
-});
-
-export type ConfigSchema = z.infer<typeof configurationSchema>;
-
-type ReadonlyFields = "audience" | "clientID" | "scope" | "port";
-
 // grant_type list as defined by auth0
 // https://auth0.com/docs/get-started/applications/application-grant-types#spec-conforming-grants
 export type GrantType =
@@ -42,8 +11,18 @@ export type ScopeConfig =
   | string
   | { audience?: string | undefined; clientID: string; scope: string }[];
 
-export type Auth0Configuration = Required<Pick<ConfigSchema, ReadonlyFields>> &
-  Omit<ConfigSchema, ReadonlyFields>;
+export interface Auth0Configuration {
+  port: number;
+  audience: string;
+  clientID: string;
+  scope: ScopeConfig;
+  domain?: string | undefined;
+  clientSecret?: string | undefined;
+  rulesDirectory?: string | undefined;
+  connection?: string | undefined;
+  protocol?: "http" | "https" | undefined;
+}
+
 export type ResponseModes = "query" | "web_message";
 
 export type QueryParams = {
