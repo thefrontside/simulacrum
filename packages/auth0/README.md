@@ -28,7 +28,7 @@ called from auth0 client libraries like
 [auth0-spa-js](https://github.com/auth0/auth0-spa-js) that use the OpenID [authorization code
 flow](https://developer.okta.com/docs/concepts/oauth-openid/).
 
-If this does not meet your needs then please create a github issue to start a conversation about
+If this does not meet your needs then please create a GitHub issue to start a conversation about
 adding new OpenID flows.
 
 ## Quick Start
@@ -45,7 +45,7 @@ This quick start assumes you have your own app with Auth0.
 You may start a server directly from the command line.
 
 ```bash
-npx @simulacrum/auth0-simulator  # this will start a simulation server at http://localhost:4400
+npx @simulacrum/auth0-simulator  # this will start a simulation server at https://localhost:4400
 ```
 
 Given no further input, it will use the default values as below. This will point your app at the
@@ -85,6 +85,8 @@ defaults as noted above, and run the Auth0 simulation server with `npx auth0-sim
 
 The Auth0 Simulator uses [configliere](https://github.com/thefrontside/configliere) to parse
 configuration from CLI flags, environment variables, JSON config files, and programmatic options.
+Configuration sources are resolved in this order: CLI flags, environment variables, JSON config,
+then built-in defaults.
 
 ### CLI Flags
 
@@ -108,7 +110,11 @@ You can stage configuration through a JSON file with `-c` and then override valu
 npx @simulacrum/auth0-simulator -c auth0-simulator.json --port 5000
 ```
 
-Values from CLI flags still take precedence over environment variables and config file values.
+When `-c` is not supplied, the simulator searches the current directory and its parents for
+`auth0Simulator.config.json`. Use `-c` to load a JSON config from any other path.
+
+YAML and JavaScript config files are not loaded. Values from CLI flags take precedence over
+environment variables and JSON config values.
 
 ### Environment Variables
 
@@ -133,6 +139,10 @@ const app = simulation({
   },
 });
 ```
+
+The library takes `config` which can be used when another configuration system has already produced a final
+`Auth0Configuration` object. This is useful if you want to parse config in another format. A supplied `config`
+is used as-is and is not normalized again.
 
 ### Options
 

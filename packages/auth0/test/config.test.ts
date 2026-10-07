@@ -6,10 +6,15 @@ import { getCLIConfig, getConfig } from "../src/index.ts";
 
 describe("CLI config parsing", () => {
   let tempDirectory: string | undefined;
+  let originalWorkingDirectory: string | undefined;
 
   let envs = [{ name: "env", value: process.env as Record<string, string> }];
 
   afterEach(() => {
+    if (originalWorkingDirectory) {
+      process.chdir(originalWorkingDirectory);
+      originalWorkingDirectory = undefined;
+    }
     if (tempDirectory) {
       rmSync(tempDirectory, { recursive: true, force: true });
       tempDirectory = undefined;
@@ -39,6 +44,57 @@ describe("CLI config parsing", () => {
     if (result.type === "config") {
       expect(result.value.port).toBe(4567);
       expect(result.value.clientID).toBe(clientID);
+    }
+  });
+
+  it("rejects legacy clientId in JSON config with a migration message", () => {
+    tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
+    let configPath = join(tempDirectory, "config.json");
+    writeFileSync(configPath, JSON.stringify({ clientId: "legacy-client-id" }), "utf8");
+
+    let result = getCLIConfig({ args: ["-c", configPath], envs: [] });
+
+    expect(result.type).toBe("error");
+
+    if (result.type === "error") {
+      expect(result.text).toContain('use "clientID" instead');
+    }
+  });
+
+  it("rejects legacy clientId in scope entries", () => {
+    tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
+    let configPath = join(tempDirectory, "config.json");
+    writeFileSync(
+      configPath,
+      JSON.stringify({ scope: [{ clientId: "legacy-client-id", scope: "custom:access" }] }),
+      "utf8",
+    );
+
+    let result = getCLIConfig({ args: ["-c", configPath], envs: [] });
+
+    expect(result.type).toBe("error");
+
+    if (result.type === "error") {
+      expect(result.text).toContain('Scope key "clientId"');
+    }
+  });
+
+  it("discovers a JSON config file in the working directory", () => {
+    tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
+    originalWorkingDirectory = process.cwd();
+    process.chdir(tempDirectory);
+    writeFileSync(
+      join(tempDirectory, "auth0Simulator.config.json"),
+      JSON.stringify({ port: 4567 }),
+      "utf8",
+    );
+
+    let result = getCLIConfig({ args: [], envs: [] });
+
+    expect(result.type).toBe("config");
+
+    if (result.type === "config") {
+      expect(result.value.port).toBe(4567);
     }
   });
 
@@ -75,6 +131,19 @@ describe("CLI config parsing", () => {
     }
   });
 
+  it("describes the client ID length limit accurately", () => {
+    let result = getCLIConfig({
+      args: ["--client-id", "x".repeat(33)],
+      envs: [],
+    });
+
+    expect(result.type).toBe("error");
+
+    if (result.type === "error") {
+      expect(result.text).toContain("must be at most 32 characters long");
+    }
+  });
+
   it("falls back to environment variables for unbound parameters", () => {
     let result = getCLIConfig({
       args: [],
@@ -85,6 +154,19 @@ describe("CLI config parsing", () => {
 
     if (result.type === "config") {
       expect(result.value.port).toBe(4588);
+    }
+  });
+
+  it("maps the client ID environment variable", () => {
+    let result = getCLIConfig({
+      args: [],
+      envs: [{ name: "env", value: { CLIENT_ID: "environment-client-id" } }],
+    });
+
+    expect(result.type).toBe("config");
+
+    if (result.type === "config") {
+      expect(result.value.clientID).toBe("environment-client-id");
     }
   });
 
@@ -138,6 +220,21 @@ describe("CLI config parsing", () => {
 
     expect(config.port).toBe(4567);
     expect(config.domain).toBe("localhost:4567");
+  });
+
+  it("resolves programmatic options above discovered JSON config", () => {
+    tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
+    originalWorkingDirectory = process.cwd();
+    process.chdir(tempDirectory);
+    writeFileSync(
+      join(tempDirectory, ".auth0Simulatorrc.json"),
+      JSON.stringify({ port: 4567 }),
+      "utf8",
+    );
+
+    let config = getConfig({ port: 4568 });
+
+    expect(config.port).toBe(4568);
   });
 
   it("throws when domain and port conflict", () => {

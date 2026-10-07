@@ -39,7 +39,7 @@ export const simulation: Auth0Simulator = ({
     : auth0InitialStoreSchema.parse(initialState);
   return createFoundationSimulationServer({
     ...(config.port !== undefined && { port: config.port }),
-    ...(config.protocol !== undefined && { protocol: config.protocol }),
+    protocol: config.protocol ?? "https",
     extendStore: extendStore(parsedInitialState, extend?.extendStore),
     extendRouter: extendRouter(config, extend?.extendRouter, debug),
   })();

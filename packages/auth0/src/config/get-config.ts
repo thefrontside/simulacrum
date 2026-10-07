@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createRequire } from "node:module";
 import {
@@ -46,34 +46,57 @@ export function readJsonConfig(path: string): Record<string, unknown> {
   return parsed as Record<string, unknown>;
 }
 
+function legacyClientIdIssue(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return;
+  }
+
+  let config = value as Record<string, unknown>;
+  if (Object.hasOwn(config, "clientId")) {
+    return `Configuration key "clientId" is no longer supported; use "clientID" instead.`;
+  }
+
+  if (
+    Array.isArray(config.scope) &&
+    config.scope.some((entry) =>
+      typeof entry === "object" && entry !== null && !Array.isArray(entry) &&
+      Object.hasOwn(entry, "clientId")
+    )
+  ) {
+    return `Scope key "clientId" is no longer supported; use "clientID" instead.`;
+  }
+
+  return undefined;
+}
+
 const configFields = {
   port: z.optional(
     z.number().gt(2999, "port must be greater than 2999").lt(10000, "port must be less than 10000"),
   ),
   domain: z.optional(z.string().min(1, "domain is required")),
-  audience: z.optional(z.string().min(1, "audience is required")),
-  clientID: z.optional(z.string().max(32, "must be 32 characters long")),
+  audience: z.string().min(1, "audience is required").default(fieldDefaults.audience),
+  clientID: z.string().max(32, "must be at most 32 characters long").default(fieldDefaults.clientID),
   clientSecret: z.optional(z.string()),
-  scope: z.optional(
-    z.union([
+  scope: z
+    .union([
       z.string().min(1, "scope is required"),
       z.array(
         z.object({
-          clientID: z.string().max(32, "must be 32 characters long"),
+          clientID: z.string().max(32, "must be at most 32 characters long"),
           audience: z.optional(z.string().min(1, "audience is required")),
           scope: z.string().min(1, "scope is required"),
         }),
       ),
-    ]),
-  ),
+    ])
+    .default(fieldDefaults.scope),
   rulesDirectory: z.optional(z.string()),
   connection: z.optional(z.string()),
-  protocol: z.optional(z.enum(["http", "https"])),
+  protocol: z.enum(["http", "https"]).default(fieldDefaults.protocol),
 };
 
 const DefaultAuth0Port = 4400;
 
-type NormalizedConfig = Auth0Configuration & Record<string, unknown>;
+type NormalizedConfig = Pick<Auth0Configuration, "port" | "domain">;
 
 function getDomainPort(domain: string): number | undefined {
   if (domain.includes("://")) {
@@ -95,60 +118,60 @@ function withDomainPort(domain: string, port: number): string {
   return domain.replace(/:\d+$/, "") + `:${port}`;
 }
 
-function normalizeConfig(input: Record<string, unknown>): NormalizedConfig {
-  let defined = Object.fromEntries(
-    Object.entries(input).filter(([key, value]) => key in configFields && value !== undefined),
-  );
-  let config = { ...fieldDefaults, ...defined } as NormalizedConfig;
-  let port = config.port;
+function normalizeConfig(input: {
+  port?: number | undefined;
+  domain?: string | undefined;
+}): NormalizedConfig {
+  let port = input.port;
 
   if (port === undefined) {
-    let domainPort = config.domain ? getDomainPort(config.domain) : undefined;
+    let domainPort = input.domain ? getDomainPort(input.domain) : undefined;
     let resolvedPort = domainPort ?? DefaultAuth0Port;
     return {
-      ...config,
       port: resolvedPort,
       domain:
-        config.domain === undefined
+        input.domain === undefined
           ? `localhost:${resolvedPort}`
-          : withDomainPort(config.domain, resolvedPort),
+          : withDomainPort(input.domain, resolvedPort),
     };
   }
 
-  if (config.domain === undefined) {
+  if (input.domain === undefined) {
     return {
-      ...config,
+      port,
       domain: `localhost:${port}`,
     };
   }
 
-  let domainPort = getDomainPort(config.domain);
+  let domainPort = getDomainPort(input.domain);
 
   // Preserve a conflicting pair for the model schema to report as an issue.
   if (domainPort !== undefined && domainPort !== port) {
-    return config;
+    return { port, domain: input.domain };
   }
 
   return {
-    ...config,
-    domain: withDomainPort(config.domain, port),
+    port,
+    domain: withDomainPort(input.domain, port),
   };
 }
 
-const configSchema = z.object(configFields).transform((input, context): Auth0Configuration => {
-  if (input.domain !== undefined && input.port !== undefined) {
-    let domainPort = getDomainPort(input.domain);
-    if (domainPort !== undefined && domainPort !== input.port) {
-      context.addIssue({
-        code: "custom",
-        message: `Configured domain ${input.domain} conflicts with port ${input.port}`,
-      });
-      return z.NEVER;
+const configSchema = z
+  .object({ port: configFields.port, domain: configFields.domain })
+  .transform((input, context): NormalizedConfig => {
+    if (input.domain !== undefined && input.port !== undefined) {
+      let domainPort = getDomainPort(input.domain);
+      if (domainPort !== undefined && domainPort !== input.port) {
+        context.addIssue({
+          code: "custom",
+          message: `Configured domain ${input.domain} conflicts with port ${input.port}`,
+        });
+        return z.NEVER;
+      }
     }
-  }
 
-  return normalizeConfig(input);
-});
+    return normalizeConfig(input);
+  });
 
 // the config file path binds ahead of the values checkpoint so it is visible
 // on the suspended model. everything after the checkpoint binds only once the
@@ -217,16 +240,39 @@ function parseConfig(
 
   let configPath = (first.model as { config?: unknown } | undefined)?.config;
   let values: Result<ValueSource[]> =
-    configPath === undefined ? { ok: true, value: [] } : loadConfig(String(configPath));
+    configPath === undefined ? discoverConfig() : loadConfig(String(configPath));
 
   return first.resume(values);
 }
 
+function discoverConfig(): Result<ValueSource[]> {
+  let directory = resolve(process.cwd());
+
+  while (true) {
+    let path = resolve(directory, "auth0Simulator.config.json");
+    if (existsSync(path)) {
+      return loadConfig(path);
+    }
+
+    let parent = resolve(directory, "..");
+    if (parent === directory) {
+      return { ok: true, value: [] };
+    }
+    directory = parent;
+  }
+}
+
 function loadConfig(path: string): Result<ValueSource[]> {
   try {
+    let config = readJsonConfig(path);
+    let issue = legacyClientIdIssue(config);
+    if (issue) {
+      return { ok: false, issues: [{ message: issue }] };
+    }
+
     return {
       ok: true,
-      value: [{ name: path, value: readJsonConfig(path) }],
+      value: [{ name: path, value: config }],
     };
   } catch (error) {
     return {
@@ -270,6 +316,11 @@ export type CLIConfigResult =
   | { type: "config"; value: Auth0Configuration };
 
 export function getCLIConfig({ args, envs, values }: CLIConfigInput): CLIConfigResult {
+  let issue = values?.map((source) => legacyClientIdIssue(source.value)).find(Boolean);
+  if (issue) {
+    return { type: "error", text: issue };
+  }
+
   let settled = parseConfig({ argv: args, envs: envs ?? [], values: values ?? [] });
 
   if (!settled.ok) {
@@ -284,5 +335,8 @@ export function getCLIConfig({ args, envs, values }: CLIConfigInput): CLIConfigR
     return { type: "version", text: printVersion(settled as never) };
   }
 
-  return { type: "config", value: settled.model as Auth0Configuration };
+  let { clientId: _clientId, ...model } = settled.model as Auth0Configuration & {
+    clientId?: string | undefined;
+  };
+  return { type: "config", value: model as Auth0Configuration };
 }

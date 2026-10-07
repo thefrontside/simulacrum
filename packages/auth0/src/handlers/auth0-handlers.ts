@@ -130,7 +130,7 @@ export const createAuth0Handlers = (
         let responseClientID = query.client_id ?? clientID;
         let responseAudience = query.audience ?? audience;
 
-        assert(!!clientID, `no clientID assigned`);
+        assert(!!responseClientID, `no clientID assigned`);
 
         let html = loginView({
           domain: new URL(serviceURL(req)).host,

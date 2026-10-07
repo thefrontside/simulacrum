@@ -12,10 +12,11 @@ let app = simulation({
 
 app.listen().then(({ server, port }) => {
   const info = server.address();
-  const host =
+  const rawHost =
     typeof info === "object" && info?.address && !["::", "0.0.0.0"].includes(info.address)
       ? info.address
       : "localhost";
+  const host = rawHost.includes(":") ? `[${rawHost}]` : rawHost;
   console.log(
     `Auth0 simulation server started at https://${host}:${port}\n` +
       `username: default@example.com\n` +

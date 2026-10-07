@@ -23,12 +23,13 @@ async function main() {
 
   const { server, port } = await app.listen();
   const info = server.address();
-  const host =
+  const rawHost =
     typeof info === "object" && info?.address && !["::", "0.0.0.0"].includes(info.address)
       ? info.address
       : "localhost";
+  const host = rawHost.includes(":") ? `[${rawHost}]` : rawHost;
   console.log(
-    `Auth0 simulation server started at https://${host}:${port}\n` +
+    `Auth0 simulation server started at ${result.value.protocol}://${host}:${port}\n` +
       `Visit the root route to view all available routes.\n\n` +
       `Point your configuration at this simulation server and use the default user below.\n` +
       `Email: ${defaultUser.email}\nPassword: ${defaultUser.password}\n` +
