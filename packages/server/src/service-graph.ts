@@ -69,10 +69,19 @@ export type ServiceGraphRunOptions = {
   requestRestart?: ((service?: string) => void) | undefined;
 };
 
-export type ServiceGraphRunner<S extends ServiceMap> = (
+export type ServiceGraphOptions = {
+  globalData?: Record<string, unknown>;
+  watch?: boolean;
+  watchDebounce?: number;
+  controlPort?: number;
+};
+
+export type ServiceGraphRunner<S extends ServiceMap> = ((
   subset?: Array<keyof S>,
   runOptions?: ServiceGraphRunOptions,
-) => Operation<ServiceGraph<S>>;
+) => Operation<ServiceGraph<S>>) & {
+  options?: ServiceGraphOptions | undefined;
+};
 
 export type ServiceGraphFor<R extends ServiceGraphRunner<any>> =
   R extends ServiceGraphRunner<infer S> ? ServiceGraph<S> : never;
@@ -92,14 +101,12 @@ export type ServiceGraphFor<R extends ServiceGraphRunner<any>> =
  */
 export function useServiceGraph<S extends ServiceMap>(
   services: S,
-  options?: {
-    globalData?: Record<string, unknown>;
-    watch?: boolean;
-    watchDebounce?: number;
-    controlPort?: number;
-  },
+  options?: ServiceGraphOptions,
 ): ServiceGraphRunner<S> {
-  return (subset?: Array<keyof S>, runOptions?: ServiceGraphRunOptions) => {
+  const runner: ServiceGraphRunner<S> = (
+    subset?: Array<keyof S>,
+    runOptions?: ServiceGraphRunOptions,
+  ) => {
     return resource<ServiceGraph<S>>(function* (provide) {
       yield* GraphLauncher.set(consumeGraphLauncher());
 
@@ -383,4 +390,7 @@ export function useServiceGraph<S extends ServiceMap>(
       }
     });
   };
+
+  runner.options = options;
+  return runner;
 }

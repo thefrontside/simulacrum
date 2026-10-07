@@ -91,6 +91,7 @@ function parseStartupTimeout(value: string | undefined): number | undefined {
 function launchGraphProcess(
   mode: GraphLaunchRequest["mode"],
   launchGraph?: GraphLaunchHook,
+  controlPort = DEFAULT_CONTROL_PORT,
 ): ChildProcess {
   const args = process.argv.slice(1);
   const childArgs: string[] = [];
@@ -106,7 +107,7 @@ function launchGraphProcess(
   }
   childArgs.splice(1, 0, "start");
   if (!childArgs.some((arg) => arg === "--control-port" || arg.startsWith("--control-port="))) {
-    childArgs.push("--control-port", String(DEFAULT_CONTROL_PORT));
+    childArgs.push("--control-port", String(controlPort));
   }
 
   const request: GraphLaunchRequest = {
@@ -401,7 +402,8 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
     if (!Number.isSafeInteger(startupTimeout) || startupTimeout < 0) {
       throw new Error(`invalid startup timeout '${startupTimeout}'`);
     }
-    const controlPort = requestedControlPort ?? DEFAULT_CONTROL_PORT;
+    const controlPort =
+      requestedControlPort ?? serviceGraph.options?.controlPort ?? DEFAULT_CONTROL_PORT;
     yield* useAttributes({
       name: "cli",
       subset: subset ? subset.join(", ") : "",
@@ -419,7 +421,7 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
 
     const runOptions: ServiceGraphRunOptions = {
       watch: !!values.watch,
-      controlPort,
+      controlPort: requestedControlPort,
       exclude: excluded,
     };
     if (values["watch-debounce"]) {
@@ -494,7 +496,7 @@ export function* simulationCLIOp<S extends Record<string, ServiceDefinition<stri
       const mode = values.background ? "background" : "foreground";
       yield* throwIfGraphAlreadyRunning(controlPort);
 
-      const child = launchGraphProcess(mode, options.launchGraph);
+      const child = launchGraphProcess(mode, options.launchGraph, controlPort);
       if (mode === "background") {
         yield* waitForBackgroundGraph(controlPort, child, startupTimeout);
         yield* logger.stdout(`background graph ready on http://127.0.0.1:${controlPort}`);

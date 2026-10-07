@@ -482,6 +482,54 @@ it("defaults background and stop commands to the default control port", async ()
   });
 });
 
+it("uses the graph-configured control port when no CLI port is supplied", async () => {
+  const controlPort = await getAvailablePort();
+  const fixture = fileURLToPath(new URL("./fixtures/background-graph.ts", import.meta.url));
+  const packageCwd = fileURLToPath(new URL("..", import.meta.url));
+  const env = {
+    ...process.env,
+    SIMULACRUM_TEST_GRAPH_CONTROL_PORT: String(controlPort),
+  };
+  let stopped = false;
+
+  try {
+    const background = spawn(process.execPath, [fixture, "--background"], {
+      cwd: packageCwd,
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    const startResult = await waitForExit(background);
+    assert.strictEqual(startResult.code, 0, startResult.stderr || startResult.stdout);
+    await waitForHealth(controlPort);
+
+    const stop = spawn(process.execPath, [fixture, "--stop"], {
+      cwd: packageCwd,
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    const stopResult = await waitForExit(stop);
+    assert.strictEqual(stopResult.code, 0, stopResult.stderr || stopResult.stdout);
+    stopped = true;
+
+    await run(function* () {
+      yield* waitForFetchClosed(`http://127.0.0.1:${controlPort}/health`, 5000);
+    });
+  } finally {
+    if (!stopped) {
+      try {
+        const stop = spawn(process.execPath, [fixture, "--stop"], {
+          cwd: packageCwd,
+          env,
+          stdio: ["ignore", "pipe", "pipe"],
+        });
+        await waitForExit(stop);
+      } catch {
+        // The graph may not have reached startup before the test failed.
+      }
+    }
+  }
+});
+
 it("errors before starting a foreground graph when a background graph is already running on the default control port", async () => {
   await ensureDefaultControlPortAvailable();
 

@@ -211,6 +211,8 @@ Creates a runner for a graph of services, simulators, and supporting processes.
 ###### Returns
 
 - `ServiceGraphRunner<ServicesMap>` - a runner operation factory that starts the graph when invoked
+- `options`:
+  -`simulationCLI` uses service graph `options.controlPort` when no `--control-port` override is supplied.
 
 Call the runner inside an `effection` scope to start the graph:
 
@@ -240,7 +242,7 @@ const graph = yield * runner(["api"], { controlPort: 4310 });
 File watching: pass `options.watch = true` and `options.watchDebounce` to enable watching and restart propagation across dependents. This is enabled through the CLI helper.
 Control port: pass `options.controlPort` or `runner(..., { controlPort })` when you want the runtime service to bind to a stable port for background/recall workflows.
 Exclude services: pass `runner(undefined, { exclude: ["worker"] })` or combine it with a subset to skip named services and automatically prune dependents that no longer have their startup requirements.
-The CLI uses `43034` as the default control port for `--background` and `--stop` when you do not provide `--control-port`.
+The CLI uses the graph's configured `controlPort` when `--control-port` is omitted; otherwise it defaults to `43034`. An explicit CLI `--control-port` overrides the graph configuration.
 
 Each item in the `ServicesMap` passed as the first argument to `useServiceGraph` is a `ServiceDefinition`.
 
@@ -525,7 +527,7 @@ node ./service-graph.ts --stop
 
 - Foreground inherits stdio to print it to your terminal; Ctrl+C requests `POST /stop` and waits for graceful shutdown before signaling the managed child as a fallback. `--background` runs a detached process and waits until all selected services report ready.
 - `--stop` sends `POST /stop` to the runtime service on the requested control port. It works for both foreground and background graphs.
-- `--control-port` defaults to `43034`.
+- `--control-port` overrides the graph's configured `controlPort`; when neither is set, the service graph defaults to `43034`.
 - The `--background` mode polls the control plane's HTTP `GET /ready` endpoint internally. Each request waits up to 30 seconds, and the client retries after a 504 until its total startup wait expires.
 - `--startup-timeout` sets the total background CLI wait in milliseconds and defaults to `120000`. `simulationCLI` also accepts `startupTimeout` in its options. If it expires, the CLI requests graceful graph shutdown, waits for the shared grace period, then escalates if needed before reporting the timeout.
 

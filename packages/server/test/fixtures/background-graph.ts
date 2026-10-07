@@ -7,6 +7,9 @@ export const services = useServiceGraph(
   {},
   {
     globalData: { background: true },
+    ...(process.env.SIMULACRUM_TEST_GRAPH_CONTROL_PORT
+      ? { controlPort: Number(process.env.SIMULACRUM_TEST_GRAPH_CONTROL_PORT) }
+      : {}),
   },
 );
 
