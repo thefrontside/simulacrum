@@ -212,7 +212,7 @@ Creates a runner for a graph of services, simulators, and supporting processes.
 
 - `ServiceGraphRunner<ServicesMap>` - a runner operation factory that starts the graph when invoked
 - `options`:
-  -`simulationCLI` uses service graph `options.controlPort` when no `--control-port` override is supplied.
+  - `simulationCLI` uses service graph `options.controlPort` when no `--control-port` override is supplied.
 
 Call the runner inside an `effection` scope to start the graph:
 
