@@ -504,7 +504,7 @@ The `options.wellnessCheck` object supports:
 
 - `simulationCLI` wraps the runner in a small CLI loop and provides convenience flags: `--services`, `--watch`, `--watch-debounce`, `--startup-timeout`, `--background`, `--stop`, and `--control-port`.
 - Use the CLI helper for local development workflows where you want to run your graph directly from a file (see `service-graph.ts` examples above).
-- Foreground and background CLI modes launch a managed child process to provide robustness against various external process kills or failures. Foreground inherits terminal stdio and forwards Ctrl+C for graceful shutdown; `--background` detaches the child. `useServiceTestRig` / `createServiceTestRig` run the service graph in-process allowing the test runner to manage the service lifecycle.
+- Foreground and background CLI modes launch a managed child process to provide robustness against various external process kills or failures. Foreground inherits terminal stdio and requests graceful shutdown through the control plane on Ctrl+C; `--background` detaches the child. `useServiceTestRig` / `createServiceTestRig` run the service graph in-process allowing the test runner to manage the service lifecycle.
 
 ```bash
 # foreground
@@ -523,9 +523,9 @@ node ./service-graph.ts --stop --control-port 4310
 node ./service-graph.ts --stop
 ```
 
-- Foreground inherits stdio to print it to your terminal; `--background` runs a detached process and waits until all selected services report ready.
+- Foreground inherits stdio to print it to your terminal; Ctrl+C requests `POST /stop` and waits for graceful shutdown before signaling the managed child as a fallback. `--background` runs a detached process and waits until all selected services report ready.
 - `--stop` sends `POST /stop` to the runtime service on the requested control port. It works for both foreground and background graphs.
-- `--control-port` defaults to `43034` for both `--background` and `--stop`.
+- `--control-port` defaults to `43034`.
 - The `--background` mode polls the control plane's HTTP `GET /ready` endpoint internally. Each request waits up to 30 seconds, and the client retries after a 504 until its total startup wait expires.
 - `--startup-timeout` sets the total background CLI wait in milliseconds and defaults to `120000`. `simulationCLI` also accepts `startupTimeout` in its options. If it expires, the CLI requests graceful graph shutdown, waits for the shared grace period, then escalates if needed before reporting the timeout.
 
