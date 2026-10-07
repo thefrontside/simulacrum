@@ -42,6 +42,10 @@
       "development": "./src/index.ts",
       "default": "./dist/index.mjs"
     },
+    "./run-reaper": {
+      "development": "./src/run-reaper.ts",
+      "default": "./dist/run-reaper.mjs"
+    },
     "./run-simulation-child": {
       "development": "./src/run-simulation-child.ts",
       "default": "./dist/run-simulation-child.mjs"
@@ -54,6 +58,7 @@
     },
     "exports": {
       ".": "./dist/index.mjs",
+      "./run-reaper": "./dist/run-reaper.mjs",
       "./run-simulation-child": "./dist/run-simulation-child.mjs",
       "./package.json": "./package.json"
     }
@@ -69,10 +74,12 @@
   },
   "dependencies": {
     "@effectionx/context-api": "^0.6.0",
+    "@effectionx/node": "^0.2.4",
     "@effectionx/process": "^0.8.1",
     "@effectionx/stream-helpers": "^0.8.2",
     "@effectionx/timebox": "^0.4.3",
     "chokidar": "^5.0.0",
+    "ctrlc-windows": "^2.2.0",
     "effection": "catalog:",
     "picomatch": "^4.0.4"
   },

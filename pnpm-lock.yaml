@@ -195,6 +195,9 @@ importers:
       '@effectionx/context-api':
         specifier: ^0.6.0
         version: 0.6.0(effection@4.0.3)
+      '@effectionx/node':
+        specifier: ^0.2.4
+        version: 0.2.4(effection@4.0.3)
       '@effectionx/process':
         specifier: ^0.8.1
         version: 0.8.1(effection@4.0.3)
@@ -207,6 +210,9 @@ importers:
       chokidar:
         specifier: ^5.0.0
         version: 5.0.0
+      ctrlc-windows:
+        specifier: ^2.2.0
+        version: 2.2.0
       effection:
         specifier: 'catalog:'
         version: 4.0.3
