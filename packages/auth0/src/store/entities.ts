@@ -33,6 +33,16 @@ export const mergeMetadata = (current: Metadata, update: unknown): Metadata => {
   }
   return merged;
 };
+
+// every simulated user signs in with a database connection
+export const identitiesOf = (user: Auth0User, connection = "Username-Password-Authentication") => [
+  {
+    connection,
+    provider: "auth0",
+    user_id: user.id.replace(/^auth0\|/, ""),
+    isSocial: false,
+  },
+];
 export const defaultUser = auth0UserSchema.parse({
   name: "default",
   email: "default@example.com",

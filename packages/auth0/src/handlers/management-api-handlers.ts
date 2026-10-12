@@ -4,7 +4,14 @@ import type { Request, RequestHandler, Response } from "express";
 import { createLocalJWKSet, jwtVerify } from "jose";
 import { faker } from "@faker-js/faker";
 import { JWKS } from "../auth/constants.ts";
-import { auth0UserSchema, type Auth0User, type PasswordTicket } from "../store/entities.ts";
+import {
+  auth0UserSchema,
+  identitiesOf,
+  mergeMetadata,
+  type Auth0User,
+  type Metadata,
+  type PasswordTicket,
+} from "../store/entities.ts";
 import type { AnyState } from "@simulacrum/foundation-simulator";
 import type { ExtendedSimulationStore } from "../store/index.ts";
 import { passwordResetForm, passwordResetMessage } from "../views/password-reset.ts";
@@ -19,8 +26,6 @@ export type ManagementRoutes =
   | "POST /api/v2/tickets/password-change"
   | "GET /lo/reset"
   | "POST /lo/reset";
-
-type Metadata = Record<string, unknown>;
 
 const jwks = createLocalJWKSet(JWKS as unknown as Parameters<typeof createLocalJWKSet>[0]);
 // Auth0 password-change tickets default to 5 days
@@ -39,26 +44,16 @@ const toApiUser = (user: Auth0User) => ({
   picture: user.picture,
   user_metadata: user.user_metadata,
   app_metadata: user.app_metadata,
-  identities: [
-    {
-      connection: "Username-Password-Authentication",
-      provider: "auth0",
-      user_id: user.id.replace(/^auth0\|/, ""),
-      isSocial: false,
-    },
-  ],
+  logins_count: user.logins_count,
+  identities: identitiesOf(user),
 });
 
-// Top-level merge as Auth0 does it: nested objects are replaced, and `null` removes a key.
-const mergeMetadata = (current: Metadata, update: unknown): Metadata => {
-  if (!update || typeof update !== "object") return current;
-  let merged = { ...current };
-  for (let [key, value] of Object.entries(update)) {
-    if (value === null) delete merged[key];
-    else merged[key] = value;
-  }
-  return merged;
-};
+// PATCH merges metadata, except that an empty object clears it
+// https://auth0.com/docs/manage-users/user-accounts/metadata/manage-user-metadata
+const patchMetadata = (current: Metadata, update: unknown): Metadata =>
+  update && typeof update === "object" && Object.keys(update).length === 0
+    ? {}
+    : mergeMetadata(current, update);
 
 export const createManagementApiHandlers = (
   simulationStore: ExtendedSimulationStore,
@@ -146,8 +141,8 @@ export const createManagementApiHandlers = (
         ...(typeof body.email_verified === "boolean" && { email_verified: body.email_verified }),
         ...(typeof body.password === "string" && { password: body.password }),
         ...(typeof body.picture === "string" && { picture: body.picture }),
-        user_metadata: mergeMetadata(user.user_metadata, body.user_metadata),
-        app_metadata: mergeMetadata(user.app_metadata, body.app_metadata),
+        user_metadata: patchMetadata(user.user_metadata, body.user_metadata),
+        app_metadata: patchMetadata(user.app_metadata, body.app_metadata),
       });
       if (!parsed.success) {
         return sendError(res, 400, `Payload validation error: ${parsed.error.message}`);

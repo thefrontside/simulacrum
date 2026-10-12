@@ -213,7 +213,14 @@ describe("actions runner", () => {
 describe("post-login actions on /oauth/token", () => {
   let port = 4440;
   let auth0Url = `https://localhost:${port}`;
-  let person = {
+  let person: {
+    id: string;
+    name: string;
+    email: string;
+    password: string;
+    user_metadata: Record<string, unknown>;
+    email_verified?: boolean;
+  } = {
     id: "auth0|alice",
     name: "Alice",
     email: "alice@example.com",
@@ -343,6 +350,22 @@ describe("post-login actions on /oauth/token", () => {
       let { id_token } = (await (await login()).json()) as Record<string, string>;
 
       expect(decodeJwt(id_token).visits).toBe(2);
+    });
+  });
+
+  describe("event.user", () => {
+    beforeEach(async () => {
+      person.email_verified = false;
+      await start("test/fixtures/actions/email-verified.js");
+    });
+    afterEach(() => {
+      delete person.email_verified;
+    });
+
+    it("carries the stored email_verified", async () => {
+      let { id_token } = (await (await login()).json()) as Record<string, string>;
+
+      expect(decodeJwt(id_token).event_email_verified).toBe(false);
     });
   });
 
