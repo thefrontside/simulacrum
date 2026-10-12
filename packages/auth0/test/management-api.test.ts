@@ -45,7 +45,15 @@ describe("Management API", () => {
   beforeAll(async () => {
     server = await simulation({
       initialState: { users: [seeded] },
-      options: { rulesDirectory: "test/fixtures/rules-metadata" },
+      options: {
+        actions: [
+          {
+            code: `exports.onExecutePostLogin = async (event, api) => {
+              api.accessToken.setCustomClaim("https://example.nl/org", event.user.app_metadata.organisation_id);
+            };`,
+          },
+        ],
+      },
     }).listen(basePort);
 
     let res = await fetch(`${auth0Url}/oauth/token`, {
@@ -187,6 +195,23 @@ describe("Management API", () => {
       });
     });
 
+    it("clears metadata patched to an empty object, leaving omitted metadata alone", async () => {
+      let user = await createUser({
+        email: "clear@example.com",
+        user_metadata: { a: 1 },
+        app_metadata: { b: 2 },
+      });
+
+      let res = await api(`/users/${encodeURIComponent(user.user_id)}`, {
+        method: "PATCH",
+        body: { user_metadata: {} },
+      });
+
+      let patched = (await res.json()) as Record<string, unknown>;
+      expect(patched.user_metadata).toEqual({});
+      expect(patched.app_metadata).toEqual({ b: 2 });
+    });
+
     it("shows a metadata update in the next token, including for seeded users", async () => {
       let claim = async () => {
         let res = await login(seeded.email, seeded.password);
@@ -203,6 +228,17 @@ describe("Management API", () => {
       expect(res.status).toBe(200);
 
       expect(await claim()).toBe("org_2");
+    });
+
+    it("counts logins on the user", async () => {
+      let before = (await (await api(`/users/${encodeURIComponent(seeded.id)}`)).json()) as {
+        logins_count: number;
+      };
+
+      await login(seeded.email, seeded.password);
+
+      let after = await api(`/users/${encodeURIComponent(seeded.id)}`);
+      expect(await after.json()).toMatchObject({ logins_count: before.logins_count + 1 });
     });
 
     it("refuses to patch in an invalid email", async () => {
