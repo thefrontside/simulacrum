@@ -111,6 +111,67 @@ importers:
 
   packages/client: {}
 
+  packages/entra:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^9.3.0
+        version: 9.9.0
+      '@simulacrum/foundation-simulator':
+        specifier: ^0.8.0
+        version: link:../foundation
+      assert-ts:
+        specifier: ^0.3.4
+        version: 0.3.4
+      base64-url:
+        specifier: ^2.3.3
+        version: 2.3.3
+      cookie-session:
+        specifier: ^2.1.0
+        version: 2.1.1
+      cors:
+        specifier: ^2.8.6
+        version: 2.8.6
+      cosmiconfig:
+        specifier: ^9.0.0
+        version: 9.0.1(typescript@5.8.3)
+      express:
+        specifier: ^5.2.1
+        version: 5.2.1
+      html-entities:
+        specifier: ^2.5.2
+        version: 2.6.0
+      jose:
+        specifier: ^5.9.6
+        version: 5.10.0
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+    devDependencies:
+      '@simulacrum/server':
+        specifier: workspace:^
+        version: link:../server
+      '@types/base64-url':
+        specifier: ^2.2.2
+        version: 2.2.2
+      '@types/cookie-session':
+        specifier: ^2.0.49
+        version: 2.0.49
+      '@types/cors':
+        specifier: ^2.8.19
+        version: 2.8.19
+      '@types/express':
+        specifier: ^5.0.3
+        version: 5.0.6
+      '@types/keygrip':
+        specifier: ^1.0.4
+        version: 1.0.6
+      effection:
+        specifier: 'catalog:'
+        version: 4.0.3
+      keygrip:
+        specifier: ^1.1.0
+        version: 1.1.0
+
   packages/foundation:
     dependencies:
       ajv-formats:

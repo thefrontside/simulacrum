@@ -42,6 +42,11 @@
       "manager": "javascript",
       "dependencies": ["@simulacrum/foundation-simulator"]
     },
+    "@simulacrum/entra-simulator": {
+      "path": "./packages/entra",
+      "manager": "javascript",
+      "dependencies": ["@simulacrum/foundation-simulator"]
+    },
     "@simulacrum/github-api-simulator": {
       "path": "./packages/github-api",
       "manager": "javascript",

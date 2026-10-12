@@ -1,0 +1,90 @@
+{
+  "name": "@simulacrum/entra-simulator",
+  "version": "0.1.0",
+  "description": "Run local instance of Microsoft Entra ID (Azure AD) OIDC for local development and integration testing",
+  "keywords": [
+    "authentication",
+    "azure-ad",
+    "azuread",
+    "emulation",
+    "entra",
+    "integration testing",
+    "microsoft",
+    "mock",
+    "mocking",
+    "oidc",
+    "simulation",
+    "stubbing"
+  ],
+  "homepage": "https://github.com/thefrontside/simulacrum#readme",
+  "bugs": {
+    "url": "https://github.com/thefrontside/simulacrum/issues"
+  },
+  "license": "MIT",
+  "author": "Frontside Engineering <engineering@frontside.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thefrontside/simulacrum.git",
+    "directory": "packages/entra"
+  },
+  "bin": "bin/start.mjs",
+  "files": [
+    "bin/**/*",
+    "dist/**/*"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.mts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./*"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "default": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./package.json": "./package.json"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "lint": "oxlint",
+    "prepack": "pnpm run build",
+    "start": "node --experimental-transform-types ./example/index.mts",
+    "test": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest run --fileParallelism=false",
+    "test:watch": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" vitest watch --fileParallelism=false",
+    "tsc": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.3.0",
+    "@simulacrum/foundation-simulator": "^0.8.0",
+    "assert-ts": "^0.3.4",
+    "base64-url": "^2.3.3",
+    "cookie-session": "^2.1.0",
+    "cors": "^2.8.6",
+    "cosmiconfig": "^9.0.0",
+    "express": "^5.2.1",
+    "html-entities": "^2.5.2",
+    "jose": "^5.9.6",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@simulacrum/server": "workspace:^",
+    "@types/base64-url": "^2.2.2",
+    "@types/cookie-session": "^2.0.49",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/keygrip": "^1.0.4",
+    "effection": "catalog:",
+    "keygrip": "^1.1.0"
+  }
+}
