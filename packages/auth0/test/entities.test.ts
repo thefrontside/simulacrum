@@ -59,4 +59,12 @@ describe("initialState user fields", () => {
     expect(user.user_metadata).toEqual({});
     expect(user.app_metadata).toEqual({});
   });
+
+  it("defaults logins_count to zero, or keeps a seeded count", () => {
+    const parsed = auth0InitialStoreSchema.parse({
+      users: [{ name: "new" }, { name: "returning", logins_count: 5 }],
+    });
+
+    expect(parsed.users.map((user) => user.logins_count)).toEqual([0, 5]);
+  });
 });
