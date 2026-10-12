@@ -34,6 +34,19 @@ export const mergeMetadata = (current: Metadata, update: unknown): Metadata => {
   }
   return Object.fromEntries(merged);
 };
+
+// the database connection, unless the login came through another
+export const identitiesOf = (
+  user: Auth0User,
+  connection = { name: "Username-Password-Authentication", strategy: "auth0" },
+) => [
+  {
+    connection: connection.name,
+    provider: connection.strategy,
+    user_id: user.id.replace(/^auth0\|/, ""),
+    isSocial: false,
+  },
+];
 export const defaultUser = auth0UserSchema.parse({
   name: "default",
   email: "default@example.com",
