@@ -87,6 +87,12 @@ export const createTokens = async ({
 
     user = result.user;
     nonce = result.nonce;
+
+    let authorizeQuery =
+      nonce &&
+      simulationStore.schema.sessions.selectById(simulationStore.store.getState(), { id: nonce })
+        ?.authorizeQuery;
+    if (authorizeQuery) request = { ...request, query: authorizeQuery };
   }
 
   assert(!!user, "500::No user found");
