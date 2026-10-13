@@ -164,7 +164,7 @@ The following endpoints have been assigned handlers:
 
 A subset of the [Auth0 Management API](https://auth0.com/docs/api/management/v2) is served under `/api/v2`, backed by the same store the login flow reads, so a user created here can log in and a metadata update reaches the next login's [actions](#actions). Actions can call it too, at the simulator's own URL. Requests need a bearer token signed by the simulator from a `client_credentials` grant on `/oauth/token` with the audience `https://<simulator host>/api/v2/`. Scopes are not checked.
 
-- `POST /api/v2/users` — `409` if the email is taken. The id is `auth0|<user_id>` (generated when omitted), `email_verified` defaults to `false`, and a user created without a `password` gets a random one, so they can only log in once a password-change ticket has set it.
+- `POST /api/v2/users` — `409` if the email is taken. The id is `auth0|<user_id>` (generated when omitted), `email_verified` defaults to `false`, and `password` is required, as it is for an Auth0 database connection.
 - `GET /api/v2/users/:id`
 - `PATCH /api/v2/users/:id` — `user_metadata` and `app_metadata` are merged at the top level, a `null` value removes the key, and an empty object clears it, as in Auth0.
 - `DELETE /api/v2/users/:id`
