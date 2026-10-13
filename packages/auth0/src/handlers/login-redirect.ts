@@ -16,6 +16,8 @@ export const createLoginRedirectHandler = (options: Auth0Configuration): Request
       code_challenge_method,
       auth0Client,
       response_type,
+      screen_hint,
+      login_hint,
     } = req.query as QueryParams;
 
     res.status(302).redirect(
@@ -32,6 +34,8 @@ export const createLoginRedirectHandler = (options: Auth0Configuration): Request
         code_challenge_method,
         auth0Client,
         audience: audience || options.audience,
+        ...(screen_hint && { screen_hint }),
+        ...(login_hint && { login_hint }),
       })}`,
     );
   };
