@@ -216,7 +216,7 @@ export const createAuth0Handlers = (
         email: email.toLowerCase(),
         email_verified: false,
         password,
-        user_metadata,
+        user_metadata: user_metadata ?? undefined,
       });
       if (!parsed.success) {
         return badRequest("invalid_body", parsed.error.message);
