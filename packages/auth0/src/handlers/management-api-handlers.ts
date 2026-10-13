@@ -192,8 +192,8 @@ export const createManagementApiHandlers = (
       if (!user) return sendError(res, 404, "The user does not exist.", "inexistent_user");
 
       // as in Auth0, an omitted or 0 ttl_sec means the default
-      let ttl = Number(body.ttl_sec ?? 0);
-      if (!Number.isSafeInteger(ttl) || ttl < 0) {
+      let ttl: unknown = body.ttl_sec === undefined ? 0 : body.ttl_sec;
+      if (typeof ttl !== "number" || !Number.isSafeInteger(ttl) || ttl < 0) {
         return sendError(
           res,
           400,
