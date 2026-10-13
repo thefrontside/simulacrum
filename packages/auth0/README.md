@@ -131,7 +131,7 @@ Actions run on every login and refresh token exchange through `/oauth/token`, af
 
 Metadata is never added to the tokens unless an action sets it as a claim. An error thrown by an action ends the flow, as `api.access.deny` does, and `/oauth/token` responds with that error.
 
-Unlike Auth0, actions run when `/oauth/token` issues the tokens rather than during `/authorize`. So in the authorization code flow, a denied login fails at the code exchange rather than redirecting with an error, and `event.request` describes the `/oauth/token` request rather than the original `/authorize` parameters.
+Unlike Auth0, actions run when `/oauth/token` issues the tokens rather than during `/authorize`. So in the authorization code flow, a denied login fails at the code exchange rather than redirecting with an error. `event.request.query` is still the original `/authorize` query, as in Auth0, so custom `ext-*` parameters reach the action, but the rest of `event.request` describes the `/oauth/token` request.
 
 ### Rules
 

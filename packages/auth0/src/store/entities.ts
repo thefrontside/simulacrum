@@ -51,7 +51,11 @@ export const defaultUser = auth0UserSchema.parse({
 export const auth0InitialStoreSchema = z.object({
   users: z.array(auth0UserSchema),
 });
-export type AuthSession = { username: string; nonce: string };
+export type AuthSession = {
+  username?: string;
+  nonce: string;
+  authorizeQuery?: Record<string, unknown>;
+};
 export type PasswordTicket = {
   id: string;
   userId: string;
