@@ -1,5 +1,20 @@
 import { z } from "zod";
 
+// An Action bound to a trigger, as Auth0 runs them: CommonJS source exporting `onExecutePostLogin`.
+// https://auth0.com/docs/customize/actions/explore-triggers/post-login
+export const actionSchema = z
+  .object({
+    name: z.optional(z.string()),
+    file: z.optional(z.string()),
+    code: z.optional(z.string()),
+    secrets: z.optional(z.record(z.string())),
+  })
+  .refine((action) => (action.file === undefined) !== (action.code === undefined), {
+    message: "an action needs either `file` or `code`",
+  });
+
+export type ActionConfig = z.infer<typeof actionSchema>;
+
 export const configurationSchema = z.object({
   port: z.optional(
     z.number().gt(2999, "port must be greater than 2999").lt(10000, "must be less than 10000"),
@@ -19,9 +34,11 @@ export const configurationSchema = z.object({
   ]),
   clientSecret: z.optional(z.string()),
   rulesDirectory: z.optional(z.string()),
+  actions: z.optional(z.array(actionSchema)),
   auth0SessionCookieName: z.optional(z.string()),
   auth0CookieSecret: z.optional(z.string()),
   connection: z.optional(z.string()),
+  disableSignup: z.optional(z.boolean()),
   cookieSecret: z.optional(z.string()),
 });
 
@@ -59,6 +76,8 @@ export type QueryParams = {
   response_mode: ResponseModes;
   auth0Client: string;
   audience: string;
+  screen_hint?: string;
+  login_hint?: string;
 };
 
 export interface TokenSet {

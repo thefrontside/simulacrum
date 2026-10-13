@@ -12,6 +12,7 @@ Read about this simulator on our blog: [Simplified Local Development and Testing
     - [Example](#example)
   - [Configuration](#configuration)
     - [Options](#options)
+    - [Actions](#actions)
     - [Rules](#rules)
   - [Endpoints](#endpoints)
 
@@ -61,6 +62,24 @@ app.listen(4400, () => console.log(`auth0 simulation server started at https://l
 
 By passing an `initialState`, you may control the initial users in the store.
 
+```js
+const app = simulation({
+  initialState: {
+    users: [
+      {
+        id: "auth0|alice",
+        name: "Alice",
+        email: "alice@example.com",
+        password: "12345",
+        user_metadata: { theme: "dark" },
+        app_metadata: { roles: ["admin"] },
+        logins_count: 3, // optional, defaults to 0
+      },
+    ],
+  },
+});
+```
+
 ### Example
 
 The folks at Auth0 maintain many samples such as [github.com/auth0-samples/auth0-react-samples](https://github.com/auth0-samples/auth0-react-samples). Follow the instructions to run the sample, set the configuration in `auth_config.json` to match the defaults as noted above, and run the Auth0 simulation server with `npx auth0-simulator`.
@@ -75,9 +94,50 @@ The `options` field supports the [auth0 configuration fields](https://auth0.com/
 
 The `scope` also accepts an array of objects containing `clientId`, `scope` and optionally `audience` to enable dynamic scopes from a single simulator. This should allow multiple clients to all use the same simulator. Additionally, setting the `clientId: "default"` will enable a default fallback scope so every client does not need to be included.
 
+An optional [`actions` field](#actions) lists [Auth0 Actions](https://auth0.com/docs/customize/actions) to run after login, more on this [below](#actions).
+
+Set `disableSignup: true` to turn off [signup](#signup), like Auth0's "Disable Sign Ups" connection setting.
+
 An optional [`rulesDirectory` field](#rules) can specify a directory of [auth0 rules](https://auth0.com/docs/rules) code files, more on this [below](#rules).
 
+### Actions
+
+Post-login [Actions](https://auth0.com/docs/customize/actions/explore-triggers/post-login) run in the order given by the `actions` option, like the bindings of Auth0's post-login trigger. Each entry has either a `file` (relative to the current working directory) or the `code` itself, and optionally the action's `secrets`:
+
+```js
+const app = simulation({
+  options: {
+    actions: [
+      { file: "auth0/actions/post-login.js", secrets: { NAMESPACE: "https://example.com" } },
+    ],
+  },
+});
+```
+
+An action is the same CommonJS source you deploy to Auth0, exporting `onExecutePostLogin`:
+
+```js
+exports.onExecutePostLogin = async (event, api) => {
+  let { organisation_id } = event.user.app_metadata;
+  api.accessToken.setCustomClaim(`${event.secrets.NAMESPACE}/organisation_id`, organisation_id);
+};
+```
+
+Actions run on every login and refresh token exchange through `/oauth/token`, after any [rules](#rules). The simulator provides this subset of the post-login trigger:
+
+- `event`: `user` (including `user_metadata` and `app_metadata`), `secrets`, `stats.logins_count`, `client.client_id`, `connection`, `transaction.protocol`, `transaction.requested_scopes`, `resource_server.identifier`, `authorization.roles` (always empty) and `request` (`ip`, `hostname`, `method`, `user_agent` and `query`).
+- `api.idToken.setCustomClaim` and `api.accessToken.setCustomClaim`. As in Auth0, the registered claims (`iss`, `sub`, `aud`, `exp`, `nbf`, `iat`, `jti`) can't be overwritten.
+- `api.user.setUserMetadata` and `api.user.setAppMetadata`. Setting a key to `null` removes it. Later actions see the change, and the user is updated once all actions have run.
+- `api.access.deny`, which answers `/oauth/token` with a `403` `access_denied`.
+- `api.cache`, kept for the life of the simulation.
+
+Metadata is never added to the tokens unless an action sets it as a claim. An error thrown by an action ends the flow, as `api.access.deny` does, and `/oauth/token` responds with that error.
+
+Unlike Auth0, actions run when `/oauth/token` issues the tokens rather than during `/authorize`. So in the authorization code flow, a denied login fails at the code exchange rather than redirecting with an error. `event.request.query` is still the original `/authorize` query, as in Auth0, so custom `ext-*` parameters reach the action, but the rest of `event.request` describes the `/oauth/token` request.
+
 ### Rules
+
+Auth0 is retiring Rules on 18 November 2026, so prefer [Actions](#actions) for anything new.
 
 It is possible to run [auth0 rules](https://auth0.com/docs/rules) if the compiled code files are on disk and all located in the same directory.
 
@@ -95,8 +155,27 @@ The following endpoints have been assigned handlers:
 - `/login`
 - `/u/login`
 - `/usernamepassword/login`
+- `/dbconnections/signup`
 - `/login/callback`
 - `/oauth/token`
 - `/v2/logout`
 - `/.well-known/jwks.json`
 - `/.well-known/openid-configuration`
+- `/lo/reset` (password-change ticket page)
+
+### Signup
+
+`/authorize` passes `screen_hint` and `login_hint` on to `/login`, as Universal Login does. With `screen_hint=signup` the page is a signup form, and `login_hint` prefills the email on either form. The signup form posts to `/dbconnections/signup` (what auth0.js `signup()` calls), which adds an unverified `auth0|<id>` user to the store and then logs them in, so the [actions](#actions) see the new user on their first login. An email that is already taken gets Auth0's `400` `invalid_signup`. Pre-user-registration actions are not run. With the `disableSignup` [option](#options), `/login` always renders the login form and `/dbconnections/signup` answers `400` `operation_not_allowed`.
+
+### Management API
+
+A subset of the [Auth0 Management API](https://auth0.com/docs/api/management/v2) is served under `/api/v2`, backed by the same store the login flow reads, so a user created here can log in and a metadata update reaches the next login's [actions](#actions). Actions can call it too, at the simulator's own URL. Requests need a bearer token signed by the simulator from a `client_credentials` grant on `/oauth/token` with the audience `https://<simulator host>/api/v2/`. Scopes are not checked.
+
+- `POST /api/v2/users` — `409` if the email is taken. The id is `auth0|<user_id>` (generated when omitted), `email_verified` defaults to `false`, and `password` is required, as it is for an Auth0 database connection.
+- `GET /api/v2/users/:id`
+- `PATCH /api/v2/users/:id` — `user_metadata` and `app_metadata` are merged at the top level, a `null` value removes the key, and an empty object clears it, as in Auth0.
+- `DELETE /api/v2/users/:id`
+- `GET /api/v2/users-by-email?email=`
+- `POST /api/v2/tickets/password-change` — accepts `user_id` (or `email`), `result_url`, `ttl_sec` and `mark_email_as_verified`. The returned ticket URL opens a page on `/lo/reset` that sets the password and, if given, redirects to `result_url`.
+
+Errors use Auth0's `{ statusCode, error, message, errorCode }` shape.

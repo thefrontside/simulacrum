@@ -8,7 +8,11 @@ export const auth0UserSchema = z
     name: z.string(),
     password: z.string().optional().default("12345"),
     email: z.string().email().optional(),
+    email_verified: z.boolean().default(true),
     picture: z.string().url().optional(),
+    user_metadata: z.record(z.unknown()).default({}),
+    app_metadata: z.record(z.unknown()).default({}),
+    logins_count: z.number().int().nonnegative().default(0),
   })
   .transform((user) => {
     if (!user.email) user.email = faker.internet.email({ firstName: user.name });
@@ -16,6 +20,29 @@ export const auth0UserSchema = z
     return user;
   });
 export type Auth0User = z.infer<typeof auth0UserSchema>;
+
+export type Metadata = Record<string, unknown>;
+
+// Top-level merge as Auth0 does it: nested objects are replaced, and `null` removes a key.
+export const mergeMetadata = (current: Metadata, update: unknown): Metadata => {
+  if (!update || typeof update !== "object") return current;
+  let merged = { ...current };
+  for (let [key, value] of Object.entries(update)) {
+    if (value === null) delete merged[key];
+    else merged[key] = value;
+  }
+  return merged;
+};
+
+// every simulated user signs in with a database connection
+export const identitiesOf = (user: Auth0User, connection = "Username-Password-Authentication") => [
+  {
+    connection,
+    provider: "auth0",
+    user_id: user.id.replace(/^auth0\|/, ""),
+    isSocial: false,
+  },
+];
 export const defaultUser = auth0UserSchema.parse({
   name: "default",
   email: "default@example.com",
@@ -24,9 +51,21 @@ export const defaultUser = auth0UserSchema.parse({
 export const auth0InitialStoreSchema = z.object({
   users: z.array(auth0UserSchema),
 });
-export type AuthSession = { username: string; nonce: string };
+export type AuthSession = {
+  username?: string;
+  nonce: string;
+  authorizeQuery?: Record<string, unknown>;
+};
+export type PasswordTicket = {
+  id: string;
+  userId: string;
+  expiresAt: number;
+  resultUrl?: string | undefined;
+  markEmailAsVerified: boolean;
+};
 export type Auth0Store = z.output<typeof auth0InitialStoreSchema> & {
   sessions: AuthSession[];
+  passwordTickets: PasswordTicket[];
 };
 export type Auth0InitialStore = z.input<typeof auth0InitialStoreSchema>;
 

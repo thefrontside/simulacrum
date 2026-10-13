@@ -17,12 +17,14 @@ import {
   defaultUser,
   type Auth0User,
   type AuthSession,
+  type PasswordTicket,
   type Auth0InitialStore,
 } from "./entities.ts";
 
 export type ExtendedSchema = ({ slice }: ExtendSimulationSchema) => {
   sessions: (n: string) => TableOutput<AuthSession, AnyState, AuthSession | undefined>;
   users: (n: string) => TableOutput<Auth0User, AnyState, Auth0User | undefined>;
+  passwordTickets: (n: string) => TableOutput<PasswordTicket, AnyState, PasswordTicket | undefined>;
 };
 type ExtendActions = typeof inputActions;
 type ExtendSelectors = typeof inputSelectors;
@@ -40,6 +42,7 @@ const inputSchema =
     const extended = extendedSchema ? extendedSchema({ slice }) : {};
     let slices = {
       sessions: slice.table<AuthSession>(),
+      passwordTickets: slice.table<PasswordTicket>(),
       users: slice.table<Auth0User>(
         !storeInitialState
           ? {
