@@ -142,6 +142,15 @@ describe("signup", () => {
       });
     });
 
+    it("treats a null user_metadata as none", async () => {
+      let res = await signup({
+        email: "null-meta@example.com",
+        password: "pw",
+        user_metadata: null,
+      });
+      expect(res.status).toBe(200);
+    });
+
     it("refuses an email that has already signed up", async () => {
       let res = await signup({ email: "SEEDED@example.com", password: "other-pw" });
 
