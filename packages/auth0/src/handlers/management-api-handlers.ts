@@ -103,6 +103,13 @@ export const createManagementApiHandlers = (
           "Payload validation error: 'Missing required property: password'.",
         );
       }
+      if (user_id !== undefined && (typeof user_id !== "string" || !user_id)) {
+        return sendError(
+          res,
+          400,
+          "Payload validation error: 'user_id' must be a non-empty string.",
+        );
+      }
       if (findByEmail(email)) {
         return sendError(res, 409, "The user already exists.", "auth0_idp_error");
       }

@@ -150,6 +150,14 @@ describe("Management API", () => {
       expect(user.user_id).toBe("auth0|custom-1");
     });
 
+    it.each([{}, 42, "", null])("answers 400 for a user_id of %j", async (user_id) => {
+      let res = await api("/users", {
+        method: "POST",
+        body: { email: "bad-id@example.com", password: "pw", user_id },
+      });
+      expect(res.status).toBe(400);
+    });
+
     it("answers 409 for an email that is already taken", async () => {
       let res = await api("/users", {
         method: "POST",
@@ -340,12 +348,13 @@ describe("Management API", () => {
     });
 
     it("redirects to result_url after redeeming", async () => {
+      let user = await createUser({ email: "redirect@example.com" });
       let ticketUrl = await createTicket({
-        user_id: seeded.id,
+        user_id: user.user_id,
         result_url: "https://app.example.com/welcome",
       });
 
-      let res = await redeem(ticketUrl, "new-seeded-pw");
+      let res = await redeem(ticketUrl, "redirect-pw");
       expect(res.status).toBe(302);
       expect(res.headers.get("location")).toBe("https://app.example.com/welcome");
     });
