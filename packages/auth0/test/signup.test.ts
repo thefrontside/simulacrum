@@ -159,3 +159,41 @@ describe("signup", () => {
     });
   });
 });
+
+describe("signup with disableSignup", () => {
+  let server: FoundationSimulatorListening<unknown>;
+  let url = `https://localhost:${basePort + 1}`;
+
+  beforeAll(async () => {
+    server = await simulation({ options: { disableSignup: true } }).listen(basePort + 1);
+  });
+  afterAll(async () => {
+    await server.ensureClose();
+  });
+
+  it("renders the login form for screen_hint=signup, without a link to sign up", async () => {
+    let res = await fetch(
+      `${url}/login?${stringify({ client_id: clientId, screen_hint: "signup" })}`,
+    );
+    let html = await res.text();
+    expect(html).toContain("<title>login</title>");
+    expect(html).not.toContain("webAuth.signup(");
+    expect(html).not.toContain('id="switch-mode"');
+  });
+
+  it("refuses /dbconnections/signup", async () => {
+    let res = await fetch(`${url}/dbconnections/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: clientId,
+        connection: "Username-Password-Authentication",
+        email: "new@example.com",
+        password: "pw",
+      }),
+    });
+
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({ code: "operation_not_allowed", statusCode: 400 });
+  });
+});

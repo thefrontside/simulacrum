@@ -96,6 +96,8 @@ The `scope` also accepts an array of objects containing `clientId`, `scope` and 
 
 An optional [`actions` field](#actions) lists [Auth0 Actions](https://auth0.com/docs/customize/actions) to run after login, more on this [below](#actions).
 
+Set `disableSignup: true` to turn off [signup](#signup), like Auth0's "Disable Sign Ups" connection setting.
+
 An optional [`rulesDirectory` field](#rules) can specify a directory of [auth0 rules](https://auth0.com/docs/rules) code files, more on this [below](#rules).
 
 ### Actions
@@ -163,7 +165,7 @@ The following endpoints have been assigned handlers:
 
 ### Signup
 
-`/authorize` passes `screen_hint` and `login_hint` on to `/login`, as Universal Login does. With `screen_hint=signup` the page is a signup form, and `login_hint` prefills the email on either form. The signup form posts to `/dbconnections/signup` (what auth0.js `signup()` calls), which adds an unverified `auth0|<id>` user to the store and then logs them in, so the [actions](#actions) see the new user on their first login. An email that is already taken gets Auth0's `400` `invalid_signup`. Pre-user-registration actions are not run.
+`/authorize` passes `screen_hint` and `login_hint` on to `/login`, as Universal Login does. With `screen_hint=signup` the page is a signup form, and `login_hint` prefills the email on either form. The signup form posts to `/dbconnections/signup` (what auth0.js `signup()` calls), which adds an unverified `auth0|<id>` user to the store and then logs them in, so the [actions](#actions) see the new user on their first login. An email that is already taken gets Auth0's `400` `invalid_signup`. Pre-user-registration actions are not run. With the `disableSignup` [option](#options), `/login` always renders the login form and `/dbconnections/signup` answers `400` `operation_not_allowed`.
 
 ### Management API
 

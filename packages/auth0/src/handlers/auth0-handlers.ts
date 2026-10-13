@@ -113,7 +113,7 @@ export const createAuth0Handlers = (
       let responseAudience = query.audience ?? audience;
       assert(!!responseClientId, `no clientID assigned`);
 
-      let signup = query.screen_hint === "signup";
+      let signup = !options.disableSignup && query.screen_hint === "signup";
       let switchModeQuery = new URLSearchParams(req.query as Record<string, string>);
       if (signup) switchModeQuery.delete("screen_hint");
       else switchModeQuery.set("screen_hint", "signup");
@@ -127,7 +127,7 @@ export const createAuth0Handlers = (
         loginFailed: false,
         signup,
         loginHint: query.login_hint,
-        switchModeUrl: `/login?${switchModeQuery}`,
+        ...(!options.disableSignup && { switchModeUrl: `/login?${switchModeQuery}` }),
       });
 
       res.set("Content-Type", "text/html");
@@ -193,6 +193,10 @@ export const createAuth0Handlers = (
       let badRequest = (code: string, description: string) => {
         res.status(400).json({ name: "BadRequestError", code, description, statusCode: 400 });
       };
+
+      if (options.disableSignup) {
+        return badRequest("operation_not_allowed", "Public signup is disabled");
+      }
 
       if (typeof email !== "string" || !email) {
         return badRequest("invalid_body", "Missing required property: email");

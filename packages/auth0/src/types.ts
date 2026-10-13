@@ -38,6 +38,7 @@ export const configurationSchema = z.object({
   auth0SessionCookieName: z.optional(z.string()),
   auth0CookieSecret: z.optional(z.string()),
   connection: z.optional(z.string()),
+  disableSignup: z.optional(z.boolean()),
   cookieSecret: z.optional(z.string()),
 });
 
