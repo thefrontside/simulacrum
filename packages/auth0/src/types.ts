@@ -38,6 +38,7 @@ export interface Auth0Configuration {
   rulesDirectory?: string | undefined;
   actions?: ActionConfig[] | undefined;
   connection?: string | undefined;
+  disableSignup?: boolean | undefined;
   protocol?: "http" | "https" | undefined;
 }
 
