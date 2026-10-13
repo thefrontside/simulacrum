@@ -37,7 +37,7 @@ describe("Management API", () => {
     });
 
   let createUser = async (body: Record<string, unknown>) => {
-    let res = await api("/users", { method: "POST", body });
+    let res = await api("/users", { method: "POST", body: { password: "initial-pw", ...body } });
     expect(res.status).toBe(201);
     return (await res.json()) as Record<string, any>;
   };
@@ -138,9 +138,11 @@ describe("Management API", () => {
       expect(decodeJwt(id_token).sub).toBe(user.user_id);
     });
 
-    it("does not give a user created without a password a guessable one", async () => {
-      await createUser({ email: "no-password@example.com" });
-      expect((await login("no-password@example.com", "12345")).status).toBe(401);
+    it("answers 400 for a missing password, as for an Auth0 database connection", async () => {
+      let res = await api("/users", { method: "POST", body: { email: "no-password@example.com" } });
+      expect(res.status).toBe(400);
+      expect((await api("/users-by-email?email=no-password@example.com")).status).toBe(200);
+      expect(await (await api("/users-by-email?email=no-password@example.com")).json()).toEqual([]);
     });
 
     it("prefixes a caller-supplied user_id", async () => {
@@ -149,7 +151,10 @@ describe("Management API", () => {
     });
 
     it("answers 409 for an email that is already taken", async () => {
-      let res = await api("/users", { method: "POST", body: { email: "SEEDED@example.com" } });
+      let res = await api("/users", {
+        method: "POST",
+        body: { email: "SEEDED@example.com", password: "pw" },
+      });
       expect(res.status).toBe(409);
       expect(await res.json()).toMatchObject({
         statusCode: 409,

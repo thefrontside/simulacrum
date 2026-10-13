@@ -96,6 +96,13 @@ export const createManagementApiHandlers = (
       if (typeof email !== "string" || !email) {
         return sendError(res, 400, "Payload validation error: 'Missing required property: email'.");
       }
+      if (typeof body.password !== "string" || !body.password) {
+        return sendError(
+          res,
+          400,
+          "Payload validation error: 'Missing required property: password'.",
+        );
+      }
       if (findByEmail(email)) {
         return sendError(res, 409, "The user already exists.", "auth0_idp_error");
       }
@@ -106,8 +113,7 @@ export const createManagementApiHandlers = (
         email: email.toLowerCase(),
         // Auth0 marks created users unverified unless told otherwise
         email_verified: body.email_verified ?? false,
-        // Auth0 requires one; a random one keeps the account closed until a ticket sets it
-        password: body.password ?? randomUUID(),
+        password: body.password,
         picture: body.picture,
         user_metadata: body.user_metadata,
         app_metadata: body.app_metadata,
