@@ -75,6 +75,8 @@ export type QueryParams = {
   response_mode: ResponseModes;
   auth0Client: string;
   audience: string;
+  screen_hint?: string;
+  login_hint?: string;
 };
 
 export interface TokenSet {

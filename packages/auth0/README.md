@@ -153,12 +153,17 @@ The following endpoints have been assigned handlers:
 - `/login`
 - `/u/login`
 - `/usernamepassword/login`
+- `/dbconnections/signup`
 - `/login/callback`
 - `/oauth/token`
 - `/v2/logout`
 - `/.well-known/jwks.json`
 - `/.well-known/openid-configuration`
 - `/lo/reset` (password-change ticket page)
+
+### Signup
+
+`/authorize` passes `screen_hint` and `login_hint` on to `/login`, as Universal Login does. With `screen_hint=signup` the page is a signup form, and `login_hint` prefills the email on either form. The signup form posts to `/dbconnections/signup` (what auth0.js `signup()` calls), which adds an unverified `auth0|<id>` user to the store and then logs them in, so the [actions](#actions) see the new user on their first login. An email that is already taken gets Auth0's `400` `invalid_signup`. Pre-user-registration actions are not run.
 
 ### Management API
 

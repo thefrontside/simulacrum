@@ -8,7 +8,13 @@ interface LoginViewProps {
   clientID: string;
   audience: string;
   loginFailed: boolean;
+  signup?: boolean;
+  loginHint?: string | undefined;
+  switchModeUrl?: string;
 }
+
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export const loginView = ({
   domain,
@@ -17,6 +23,9 @@ export const loginView = ({
   clientID,
   audience,
   loginFailed = false,
+  signup = false,
+  loginHint = "",
+  switchModeUrl,
 }: LoginViewProps): string => {
   return /*html*/ `
     <html lang="en">
@@ -29,7 +38,7 @@ export const loginView = ({
         />
         <script src="https://cdn.auth0.com/js/auth0/9.19.0/auth0.js"></script>
       </head>
-      <title>login</title>
+      <title>${signup ? "signup" : "login"}</title>
       <body>
         <main
           class="min-h-screen flex items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8"
@@ -42,8 +51,8 @@ export const loginView = ({
                 src="/img/frontside-logo.png"
               />
             </div>
-            <h1 class="flex justify-center text-4xl">Welcome</h1>
-            <h2 class="flex justify-center">Login to continue to frontside</h2>
+            <h1 class="flex justify-center text-4xl">${signup ? "Create your account" : "Welcome"}</h1>
+            <h2 class="flex justify-center">${signup ? "Sign up" : "Login"} to continue to frontside</h2>
             <form id="the-form" class="mt-8 space-y-6">
               <div class="rounded-md shadow-sm -space-y-px">
                 <div>
@@ -54,7 +63,7 @@ export const loginView = ({
                     type="email"
                     autocomplete="email"
                     required=""
-                    value=""
+                    value="${escapeHtml(loginHint)}"
                     class="${
                       loginFailed ? "border-red-500" : ""
                     } appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
@@ -67,7 +76,7 @@ export const loginView = ({
                     id="password"
                     name="password"
                     type="password"
-                    autocomplete="current-password"
+                    autocomplete="${signup ? "new-password" : "current-password"}"
                     required=""
                     class="my-4 ${
                       loginFailed ? "border-red-500" : ""
@@ -79,7 +88,7 @@ export const loginView = ({
               <div
                 class="error bg-red-500 text-white p-3 ${loginFailed ? "" : "hidden"}"
               >
-                Wrong email or password
+                ${signup ? "Could not sign up" : "Wrong email or password"}
               </div>
 
               <div>
@@ -106,9 +115,19 @@ export const loginView = ({
                       ></path>
                     </svg>
                   </span>
-                  Sign in
+                  ${signup ? "Sign up" : "Sign in"}
                 </button>
-              </div>
+              </div>${
+                switchModeUrl
+                  ? /*html*/ `
+              <p class="text-center text-sm">
+                ${signup ? "Already have an account?" : "Don't have an account?"}
+                <a id="switch-mode" class="text-blue-600" href="${escapeHtml(switchModeUrl)}"
+                  >${signup ? "Log in" : "Sign up"}</a
+                >
+              </p>`
+                  : ""
+              }
             </form>
           </div>
         </main>
@@ -131,24 +150,41 @@ export const loginView = ({
               var username = document.querySelector("#username");
               var password = document.querySelector("#password");
 
-              webAuth.login(
-                {
-                  username: username.value,
-                  password: password.value,
-                  realm: "Username-Password-Authentication",
-                  scope: "${deriveScope({ scopeConfig, clientID, audience })}",
-                  nonce: params.get("nonce"),
-                  state: params.get("state"),
-                },
-                function (err, authResult) {
-                  if (err) {
-                    [username, password].forEach((e) =>
-                      e.classList.add("border-red-500")
-                    );
-                    document.querySelector(".error").classList.remove("hidden");
+              var showError = function () {
+                [username, password].forEach((e) => e.classList.add("border-red-500"));
+                document.querySelector(".error").classList.remove("hidden");
+              };
+              var login = function () {
+                webAuth.login(
+                  {
+                    username: username.value,
+                    password: password.value,
+                    realm: "Username-Password-Authentication",
+                    scope: "${deriveScope({ scopeConfig, clientID, audience })}",
+                    nonce: params.get("nonce"),
+                    state: params.get("state"),
+                  },
+                  function (err) {
+                    if (err) showError();
                   }
+                );
+              };
+
+              ${
+                signup
+                  ? /*js*/ `webAuth.signup(
+                {
+                  email: username.value,
+                  password: password.value,
+                  connection: "Username-Password-Authentication",
+                },
+                function (err) {
+                  if (err) showError();
+                  else login();
                 }
-              );
+              );`
+                  : "login();"
+              }
             });
           });
         </script>
