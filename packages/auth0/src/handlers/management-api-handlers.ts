@@ -178,10 +178,20 @@ export const createManagementApiHandlers = (
       user ??= typeof body.email === "string" ? findByEmail(body.email) : undefined;
       if (!user) return sendError(res, 404, "The user does not exist.", "inexistent_user");
 
+      // as in Auth0, an omitted or 0 ttl_sec means the default
+      let ttl = Number(body.ttl_sec ?? 0);
+      if (!Number.isSafeInteger(ttl) || ttl < 0) {
+        return sendError(
+          res,
+          400,
+          "Payload validation error: 'ttl_sec' must be a positive integer.",
+        );
+      }
+
       let ticket: PasswordTicket = {
         id: randomUUID(),
         userId: user.id,
-        expiresAt: Date.now() + (Number(body.ttl_sec) || DEFAULT_TICKET_TTL_SEC) * 1000,
+        expiresAt: Date.now() + (ttl || DEFAULT_TICKET_TTL_SEC) * 1000,
         resultUrl: typeof body.result_url === "string" ? body.result_url : undefined,
         markEmailAsVerified: body.mark_email_as_verified === true,
       };

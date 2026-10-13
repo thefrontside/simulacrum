@@ -353,6 +353,14 @@ describe("Management API", () => {
       expect((await redeem(ticketUrl, "too-late")).status).toBe(400);
     });
 
+    it.each([-1, 1.5, "Infinity", "soon"])("answers 400 for a ttl_sec of %j", async (ttl_sec) => {
+      let res = await api("/tickets/password-change", {
+        method: "POST",
+        body: { user_id: seeded.id, ttl_sec },
+      });
+      expect(res.status).toBe(400);
+    });
+
     it("answers 404 for an unknown user", async () => {
       let res = await api("/tickets/password-change", {
         method: "POST",
