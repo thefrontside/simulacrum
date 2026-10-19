@@ -47,7 +47,46 @@ describe("CLI config parsing", () => {
     }
   });
 
-  it("rejects legacy clientId in JSON config with a migration message", () => {
+  it("rejects unknown keys in config values", () => {
+    let result = getCLIConfig({
+      args: [],
+      envs: [],
+      values: [{ name: "test config", value: { port: 4567, unexpectedConfigKey: true } }],
+    });
+
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.text).toContain("unexpectedConfigKey");
+    }
+  });
+
+  it("validates known config values with their parameter schema", () => {
+    let result = getCLIConfig({
+      args: [],
+      envs: [],
+      values: [{ name: "test config", value: { port: "not a number" } }],
+    });
+
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.text).toContain("port");
+    }
+  });
+
+  it("does not validate a config value overridden by a CLI value", () => {
+    let result = getCLIConfig({
+      args: ["--port", "4567"],
+      envs: [],
+      values: [{ name: "test config", value: { port: "not a number" } }],
+    });
+
+    expect(result.type).toBe("config");
+    if (result.type === "config") {
+      expect(result.value.port).toBe(4567);
+    }
+  });
+
+  it("rejects legacy clientId in JSON config", () => {
     tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
     let configPath = join(tempDirectory, "config.json");
     writeFileSync(configPath, JSON.stringify({ clientId: "legacy-client-id" }), "utf8");
@@ -57,7 +96,7 @@ describe("CLI config parsing", () => {
     expect(result.type).toBe("error");
 
     if (result.type === "error") {
-      expect(result.text).toContain('use "clientID" instead');
+      expect(result.text).toContain('"clientId"');
     }
   });
 
@@ -75,7 +114,16 @@ describe("CLI config parsing", () => {
     expect(result.type).toBe("error");
 
     if (result.type === "error") {
-      expect(result.text).toContain('Scope key "clientId"');
+      expect(result.text).toContain("scope");
+    }
+  });
+
+  it("rejects unclaimed CLI arguments", () => {
+    let result = getCLIConfig({ args: ["unexpected-arg"], envs: [] });
+
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.text).toContain("unexpected-arg");
     }
   });
 

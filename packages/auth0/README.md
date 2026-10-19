@@ -83,7 +83,7 @@ defaults as noted above, and run the Auth0 simulation server with `npx auth0-sim
 
 ## Configuration
 
-The Auth0 Simulator uses [configliere](https://github.com/thefrontside/configliere) to parse
+The Auth0 Simulator uses [@bomb.sh/router](https://github.com/bombshell-dev/router) to parse
 configuration from CLI flags, environment variables, JSON config files, and programmatic options.
 Configuration sources are resolved in this order: CLI flags, environment variables, JSON config,
 then built-in defaults.
@@ -115,6 +115,7 @@ When `-c` is not supplied, the simulator searches the current directory and its 
 
 YAML and JavaScript config files are not loaded. Values from CLI flags take precedence over
 environment variables and JSON config values.
+Unknown keys in JSON config files are rejected; use the documented `clientID` spelling.
 
 ### Environment Variables
 

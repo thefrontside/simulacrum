@@ -61,11 +61,11 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
+    "@bomb.sh/router": "^0.8.0",
     "@faker-js/faker": "^9.3.0",
     "@simulacrum/foundation-simulator": "^0.8.0",
     "assert-ts": "^0.3.4",
     "base64-url": "^2.3.3",
-    "configliere": "^0.6.0",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",

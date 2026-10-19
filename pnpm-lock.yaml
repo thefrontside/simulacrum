@@ -44,6 +44,9 @@ importers:
 
   packages/auth0:
     dependencies:
+      '@bomb.sh/router':
+        specifier: ^0.8.0
+        version: 0.8.0
       '@faker-js/faker':
         specifier: ^9.3.0
         version: 9.9.0
@@ -56,9 +59,6 @@ importers:
       base64-url:
         specifier: ^2.3.3
         version: 2.3.3
-      configliere:
-        specifier: ^0.6.0
-        version: 0.6.0
       cookie-session:
         specifier: ^2.1.0
         version: 2.1.1
@@ -342,6 +342,10 @@ packages:
   '@babel/types@8.0.0-rc.6':
     resolution: {integrity: sha512-p7/ABylAYlexb31wtRdIfH9L9A0Z2T/9H6zAqzqndkY2PLkvNNc580wGhp/gGKN4Sp9sQvSkhc6Oga8/O+wTyw==}
     engines: {node: ^22.18.0 || >=24.11.0}
+
+  '@bomb.sh/router@0.8.0':
+    resolution: {integrity: sha512-9Y0fA76+dlFL8aRf8PVfgXrI0qHr4GQrLLv09E75tGRqCtCI5+E/ZzLnyTGJMo/j4CzYt44c4jdXDLv+m9/g9g==}
+    engines: {node: '>= 20'}
 
   '@braidai/lang@1.1.2':
     resolution: {integrity: sha512-qBcknbBufNHlui137Hft8xauQMTZDKdophmLFv05r2eNmdIv/MlPuP4TdUknHG68UdWLgVZwgxVe735HzJNIwA==}
@@ -1912,10 +1916,6 @@ packages:
   common-tags@1.8.2:
     resolution: {integrity: sha512-gk/Z852D2Wtb//0I+kRFNKKE9dIIVirjoqPoA1wJU+XePVXZfGeBpk45+A1rKO4Q43prqWBNY/MiIeRLbPWUaA==}
     engines: {node: '>=4.0.0'}
-
-  configliere@0.6.0:
-    resolution: {integrity: sha512-7c7Soc2hbumAZQYVmhjs56X9mngz+moui7yjog4CfSus/cXY2/qwkXLKsvOLM8NM7foELnaWCSeXbwOYFQfW0g==}
-    engines: {node: '>= 16'}
 
   constant-case@3.0.4:
     resolution: {integrity: sha512-I2hSBi7Vvs7BEuJDr5dDHfzb/Ruj3FyvFyh7KLilAjNQw3Be+xgqUBA2W6scVEcL0hL1dwPRtIqEPVUCKkSsyQ==}
@@ -3578,6 +3578,10 @@ snapshots:
       '@babel/helper-string-parser': 8.0.0-rc.6
       '@babel/helper-validator-identifier': 8.0.0-rc.6
 
+  '@bomb.sh/router@0.8.0':
+    dependencies:
+      '@standard-schema/spec': 1.1.0
+
   '@braidai/lang@1.1.2': {}
 
   '@effectionx/context-api@0.6.0(effection@4.0.3)':
@@ -5091,10 +5095,6 @@ snapshots:
   colorette@2.0.20: {}
 
   common-tags@1.8.2: {}
-
-  configliere@0.6.0:
-    dependencies:
-      '@standard-schema/spec': 1.1.0
 
   constant-case@3.0.4:
     dependencies:
