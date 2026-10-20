@@ -113,9 +113,38 @@ npx @simulacrum/auth0-simulator -c auth0-simulator.json --port 5000
 When `-c` is not supplied, the simulator searches the current directory and its parents for
 `auth0Simulator.config.json`. Use `-c` to load a JSON config from any other path.
 
-YAML and JavaScript config files are not loaded. Values from CLI flags take precedence over
-environment variables and JSON config values.
-Unknown keys in JSON config files are rejected; use the documented `clientID` spelling.
+If you need a different configuration format, load it with your preferred parser and pass the
+parsed values to the exported `getCLIConfig` helper. It validates the config and still handles the
+simulator's CLI flags and environment variables. For example, after installing the `yaml` package:
+
+```js
+import { readFileSync } from "node:fs";
+import { parse } from "yaml";
+import { getCLIConfig, simulation } from "@simulacrum/auth0-simulator";
+
+const result = getCLIConfig({
+  args: process.argv.slice(2),
+  envs: [{ name: "environment", value: process.env }],
+  values: [
+    {
+      name: "auth0.yaml",
+      value: parse(readFileSync("auth0.yaml", "utf8")),
+    },
+  ],
+});
+
+if (result.type !== "config") {
+  console.error(result.text);
+  if (result.type === "error") process.exitCode = 1;
+} else {
+  const app = simulation({ config: result.value });
+  await app.listen();
+}
+```
+
+The parsed config is the lowest-precedence source; environment variables and CLI flags can override
+it. You can also use `simulation({ config })` directly when your own configuration system already
+produces a final `Auth0Configuration` object.
 
 ### Environment Variables
 
