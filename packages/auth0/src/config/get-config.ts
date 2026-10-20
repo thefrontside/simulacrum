@@ -98,9 +98,10 @@ const configSourcesSchema = z
   .pipe(z.array(z.object({ name: z.string(), value: configKeysSchema })));
 
 const configSchema = configObjectSchema.transform((input, context) => {
-  let domainUrl = input.domain === undefined
-    ? undefined
-    : new URL(input.domain.includes("://") ? input.domain : `http://${input.domain}`);
+  let domainUrl =
+    input.domain === undefined
+      ? undefined
+      : new URL(input.domain.includes("://") ? input.domain : `http://${input.domain}`);
   let domainPort = domainUrl?.port ? Number(domainUrl.port) : undefined;
 
   if (input.port !== undefined && domainPort !== undefined && domainPort !== input.port) {
@@ -237,7 +238,11 @@ export function getCLIConfig({ args, envs, values }: CLIConfigInput): CLIConfigR
     };
   }
 
-  let first = configliereParse(auth0App, { argv: args, envs: envs ?? [], values: valueSources.data });
+  let first = configliereParse(auth0App, {
+    argv: args,
+    envs: envs ?? [],
+    values: valueSources.data,
+  });
   let settled: AnyIntent | MethodNotAllowed | UnprocessableContent = first as
     | AnyIntent
     | MethodNotAllowed

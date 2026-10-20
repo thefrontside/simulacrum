@@ -275,7 +275,7 @@ describe("CLI config parsing", () => {
     originalWorkingDirectory = process.cwd();
     process.chdir(tempDirectory);
     writeFileSync(
-      join(tempDirectory, ".auth0Simulatorrc.json"),
+      join(tempDirectory, "auth0Simulator.config.json"),
       JSON.stringify({ port: 4567 }),
       "utf8",
     );

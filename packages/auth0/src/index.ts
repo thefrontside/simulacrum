@@ -34,9 +34,8 @@ export const simulation: Auth0Simulator = ({
   // if config is provided, use it.
   // Otherwise, get the config from passed in options and defaults
   const config = suppliedConfig ?? getConfig(options);
-  const parsedInitialState = initialState === undefined
-    ? undefined
-    : auth0InitialStoreSchema.parse(initialState);
+  const parsedInitialState =
+    initialState === undefined ? undefined : auth0InitialStoreSchema.parse(initialState);
   return createFoundationSimulationServer({
     ...(config.port !== undefined && { port: config.port }),
     protocol: config.protocol ?? "https",

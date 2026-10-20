@@ -1,9 +1,5 @@
 #!/usr/bin/env node
-import {
-  getCLIConfig,
-  simulation,
-  defaultUser,
-} from "@simulacrum/auth0-simulator";
+import { getCLIConfig, simulation, defaultUser } from "@simulacrum/auth0-simulator";
 
 const args = process.argv.slice(2);
 const envs = [{ name: "env", value: /** @type {Record<string, string>} */ (process.env) }];
