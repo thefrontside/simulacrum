@@ -289,10 +289,10 @@ export const githubOrganizationSchema = z
     description: z.string().optional().default("Generic org description"),
     created_at: z
       .string()
-      .default(() => faker.date.recent().toISOString())
-      .optional(),
+      .optional()
+      .default(() => faker.date.recent().toISOString()),
 
-    teams: z.union([z.array(z.string()), z.undefined()]),
+    teams: z.array(z.string()).optional(),
     avatar_url: z.string().optional().default("https://github.com/images/error/octocat_happy.gif"),
     gravatar_id: z.string().optional().default(""),
     site_admin: z.boolean().optional().default(true),
