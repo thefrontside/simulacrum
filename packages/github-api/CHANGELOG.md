@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.9.0]
+
+### Dependencies
+
+- [`56bb038`](https://github.com/thefrontside/simulacrum/commit/56bb038c87147159e3ba0ba9e67ea8f9b832a282) ([#385](https://github.com/thefrontside/simulacrum/pull/385) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Update to `zod` v4.
+
 ## \[0.8.0]
 
 ### Enhancements
