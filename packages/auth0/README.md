@@ -110,8 +110,9 @@ You can stage configuration through a JSON file with `-c` and then override valu
 npx @simulacrum/auth0-simulator -c auth0-simulator.json --port 5000
 ```
 
-When `-c` is not supplied, the simulator searches the current directory and its parents for
-`auth0Simulator.config.json`. Use `-c` to load a JSON config from any other path.
+The simulator searches the current directory and its parents for
+`auth0Simulator.config.json`. Use `-c` / `--config` or the `CONFIG` environment variable to load a
+JSON config from any other path.
 
 If you need a different configuration format, load it with your preferred parser and pass the
 parsed values to the exported `getCLIConfig` helper. It validates the config and still handles the

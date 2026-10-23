@@ -1,25 +1,19 @@
-import { afterEach, describe, expect, it } from "vitest";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { getConfigSources } from "../src/config/config-sources.ts";
 import { getCLIConfig, getConfig } from "../src/index.ts";
 
 describe("CLI config parsing", () => {
-  let tempDirectory: string | undefined;
-  let originalWorkingDirectory: string | undefined;
+  let configFixtures = fileURLToPath(new URL("./fixtures/configs/", import.meta.url));
+  let discoveredConfigDirectory = fileURLToPath(
+    new URL("./fixtures/config-discovery/", import.meta.url),
+  );
+  let portConfigPath = join(configFixtures, "port.json");
+  let legacyClientIdConfigPath = join(configFixtures, "legacy-client-id.json");
+  let legacyScopeClientIdConfigPath = join(configFixtures, "legacy-scope-client-id.json");
 
   let envs = [{ name: "env", value: process.env as Record<string, string> }];
-
-  afterEach(() => {
-    if (originalWorkingDirectory) {
-      process.chdir(originalWorkingDirectory);
-      originalWorkingDirectory = undefined;
-    }
-    if (tempDirectory) {
-      rmSync(tempDirectory, { recursive: true, force: true });
-      tempDirectory = undefined;
-    }
-  });
 
   it("parses config directly from argv", () => {
     let result = getCLIConfig({ args: ["--port", "4567"], envs });
@@ -32,18 +26,25 @@ describe("CLI config parsing", () => {
   });
 
   it("loads a JSON config file before parsing remaining args", () => {
-    tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
-    let configPath = join(tempDirectory, "config.json");
-    writeFileSync(configPath, JSON.stringify({ port: 4567 }), "utf8");
     let clientID = "client-id-value-for-cli-merge-01";
 
-    let result = getCLIConfig({ args: ["-c", configPath, "--client-id", clientID], envs });
+    let result = getCLIConfig({
+      args: ["--config", portConfigPath, "--client-id", clientID],
+      envs,
+    });
 
     expect(result.type).toBe("config");
 
     if (result.type === "config") {
       expect(result.value.port).toBe(4567);
       expect(result.value.clientID).toBe(clientID);
+    }
+
+    let shortFlagResult = getCLIConfig({ args: ["-c", portConfigPath], envs });
+
+    expect(shortFlagResult.type).toBe("config");
+    if (shortFlagResult.type === "config") {
+      expect(shortFlagResult.value.port).toBe(4567);
     }
   });
 
@@ -87,11 +88,7 @@ describe("CLI config parsing", () => {
   });
 
   it("rejects legacy clientId in JSON config", () => {
-    tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
-    let configPath = join(tempDirectory, "config.json");
-    writeFileSync(configPath, JSON.stringify({ clientId: "legacy-client-id" }), "utf8");
-
-    let result = getCLIConfig({ args: ["-c", configPath], envs: [] });
+    let result = getCLIConfig({ args: ["-c", legacyClientIdConfigPath], envs: [] });
 
     expect(result.type).toBe("error");
 
@@ -101,15 +98,7 @@ describe("CLI config parsing", () => {
   });
 
   it("rejects legacy clientId in scope entries", () => {
-    tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
-    let configPath = join(tempDirectory, "config.json");
-    writeFileSync(
-      configPath,
-      JSON.stringify({ scope: [{ clientId: "legacy-client-id", scope: "custom:access" }] }),
-      "utf8",
-    );
-
-    let result = getCLIConfig({ args: ["-c", configPath], envs: [] });
+    let result = getCLIConfig({ args: ["-c", legacyScopeClientIdConfigPath], envs: [] });
 
     expect(result.type).toBe("error");
 
@@ -127,17 +116,12 @@ describe("CLI config parsing", () => {
     }
   });
 
-  it("discovers a JSON config file in the working directory", () => {
-    tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
-    originalWorkingDirectory = process.cwd();
-    process.chdir(tempDirectory);
-    writeFileSync(
-      join(tempDirectory, "auth0Simulator.config.json"),
-      JSON.stringify({ port: 4567 }),
-      "utf8",
-    );
-
-    let result = getCLIConfig({ args: [], envs: [] });
+  it("discovers a JSON config file from the working directory", () => {
+    let result = getCLIConfig({
+      args: [],
+      envs: [],
+      values: getConfigSources(undefined, discoveredConfigDirectory),
+    });
 
     expect(result.type).toBe("config");
 
@@ -219,12 +203,8 @@ describe("CLI config parsing", () => {
   });
 
   it("resolves environment variables above config file values", () => {
-    tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
-    let configPath = join(tempDirectory, "config.json");
-    writeFileSync(configPath, JSON.stringify({ port: 4567 }), "utf8");
-
     let result = getCLIConfig({
-      args: ["-c", configPath],
+      args: ["-c", portConfigPath],
       envs: [{ name: "env", value: { PORT: "4588" } }],
     });
 
@@ -248,13 +228,16 @@ describe("CLI config parsing", () => {
     }
   });
 
-  it("does not read a config path from the environment", () => {
+  it("loads a JSON config path from the CONFIG environment variable", () => {
     let result = getCLIConfig({
       args: [],
-      envs: [{ name: "env", value: { CONFIG: "/nonexistent/auth0-config.json" } }],
+      envs: [{ name: "env", value: { CONFIG: portConfigPath } }],
     });
 
     expect(result.type).toBe("config");
+    if (result.type === "config") {
+      expect(result.value.port).toBe(4567);
+    }
   });
 
   it("derives domain from port for programmatic config", () => {
@@ -271,18 +254,19 @@ describe("CLI config parsing", () => {
   });
 
   it("resolves programmatic options above discovered JSON config", () => {
-    tempDirectory = mkdtempSync(join(tmpdir(), "auth0-config-"));
-    originalWorkingDirectory = process.cwd();
-    process.chdir(tempDirectory);
-    writeFileSync(
-      join(tempDirectory, "auth0Simulator.config.json"),
-      JSON.stringify({ port: 4567 }),
-      "utf8",
-    );
+    let result = getCLIConfig({
+      args: [],
+      envs: [],
+      values: [
+        { name: "options", value: { port: 4568 } },
+        ...getConfigSources(undefined, discoveredConfigDirectory),
+      ],
+    });
 
-    let config = getConfig({ port: 4568 });
-
-    expect(config.port).toBe(4568);
+    expect(result.type).toBe("config");
+    if (result.type === "config") {
+      expect(result.value.port).toBe(4568);
+    }
   });
 
   it("throws when domain and port conflict", () => {
