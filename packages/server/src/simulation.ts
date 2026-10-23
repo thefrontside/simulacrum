@@ -80,7 +80,11 @@ export function useSimulationChildProcess(
   options?: { nodeArgs?: string[] },
 ) {
   return withOperationMetadata(
-    resource<{ port: number; pid: number }>(function* (provide) {
+    resource<{
+      port: number;
+      pid: number;
+      command: { executable: string; arguments: string[] };
+    }>(function* (provide) {
       yield* useAttributes({
         name: `useSimulation ${name}`,
         module: modulePath,
@@ -168,7 +172,11 @@ export function useSimulationChildProcess(
       yield* logger.debug(`${name} simulation: port ${port} pid ${pid}`);
 
       try {
-        yield* provide({ port, pid });
+        yield* provide({
+          port,
+          pid,
+          command: { executable: "node", arguments: [...(options?.nodeArgs ?? []), ...args] },
+        });
       } finally {
         yield* logger.debug(`${name} simulation: closed on port ${port}`);
       }
@@ -205,7 +213,7 @@ export function useSimulation(
   name: string,
   modulePath: string,
   options?: { subprocess?: true; nodeArgs?: string[] },
-): Operation<{ port: number; pid: number }>;
+): Operation<{ port: number; pid: number; command: { executable: string; arguments: string[] } }>;
 export function useSimulation<L extends object = Record<string, unknown>>(
   name: string,
   factoryOrModulePath: ((initData?: unknown) => FoundationSimulator<L>) | string,

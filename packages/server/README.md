@@ -211,6 +211,8 @@ Creates a runner for a graph of services, simulators, and supporting processes.
 ###### Returns
 
 - `ServiceGraphRunner<ServicesMap>` - a runner operation factory that starts the graph when invoked
+- `options`:
+  - `simulationCLI` uses service graph `options.controlPort` when no `--control-port` override is supplied.
 
 Call the runner inside an `effection` scope to start the graph:
 
@@ -240,7 +242,7 @@ const graph = yield * runner(["api"], { controlPort: 4310 });
 File watching: pass `options.watch = true` and `options.watchDebounce` to enable watching and restart propagation across dependents. This is enabled through the CLI helper.
 Control port: pass `options.controlPort` or `runner(..., { controlPort })` when you want the runtime service to bind to a stable port for background/recall workflows.
 Exclude services: pass `runner(undefined, { exclude: ["worker"] })` or combine it with a subset to skip named services and automatically prune dependents that no longer have their startup requirements.
-The CLI uses `43034` as the default control port for `--background` and `--stop` when you do not provide `--control-port`.
+The CLI uses the graph's configured `controlPort` when `--control-port` is omitted; otherwise it defaults to `43034`. An explicit CLI `--control-port` overrides the graph configuration.
 
 Each item in the `ServicesMap` passed as the first argument to `useServiceGraph` is a `ServiceDefinition`.
 
@@ -260,7 +262,7 @@ type ServiceDefinition<T> = {
 
 - In most cases, pass `useSimulation(args)` or `useService(args)`.
 - Each service must provide an `operation: Operation<void>` or another long-lived `effection` operation that resolves when the service is ready.
-- The operation may also return service metadata such as `{ port: number }` or `{ port: number; pid: number }` to surface runtime information in the graph's `status` map.
+- The operation may also return service metadata such as `{ port: number }` or `{ port: number; pid: number }` to surface runtime information in the graph's `status` map. We also track all PIDs launched through `@effectionx/process` so the graph can track their lifecycle and clean them up in failure situations.
 - If you are defining your own custom operation, use `try { ... yield* suspend(); } finally { ... }` inside an `effection` operation or `resource()` to run cleanup logic when the service stops.
 
 #### Test rigs
@@ -502,8 +504,9 @@ The `options.wellnessCheck` object supports:
 
 #### simulationCLI(serviceGraph)
 
-- `simulationCLI` wraps the runner in a small CLI loop and provides convenience flags: `--services`, `--watch`, `--watch-debounce`, `--background`, `--stop`, and `--control-port`.
+- `simulationCLI` wraps the runner in a small CLI loop and provides convenience flags: `--services`, `--watch`, `--watch-debounce`, `--startup-timeout`, `--background`, `--stop`, and `--control-port`.
 - Use the CLI helper for local development workflows where you want to run your graph directly from a file (see `service-graph.ts` examples above).
+- Foreground and background CLI modes launch a managed child process to provide robustness against various external process kills or failures. Foreground inherits terminal stdio and requests graceful shutdown through the control plane on Ctrl+C; `--background` detaches the child. `useServiceTestRig` / `createServiceTestRig` run the service graph in-process allowing the test runner to manage the service lifecycle.
 
 ```bash
 # foreground
@@ -522,9 +525,47 @@ node ./service-graph.ts --stop --control-port 4310
 node ./service-graph.ts --stop
 ```
 
-- `--background` starts the graph in a detached managed child process and waits until the runtime service responds on the requested control port.
-- `--stop` sends `POST /stop` to the runtime service on the requested control port.
-- `--control-port` defaults to `43034` for both `--background` and `--stop`.
+- Foreground inherits stdio to print it to your terminal; Ctrl+C requests `POST /stop` and waits for graceful shutdown before signaling the managed child as a fallback. `--background` runs a detached process and waits until all selected services report ready.
+- `--stop` sends `POST /stop` to the runtime service on the requested control port. It works for both foreground and background graphs.
+- `--control-port` overrides the graph's configured `controlPort`; when neither is set, the service graph defaults to `43034`.
+- The `--background` mode polls the control plane's HTTP `GET /ready` endpoint internally. Each request waits up to 30 seconds, and the client retries after a 504 until its total startup wait expires.
+- `--startup-timeout` sets the total background CLI wait in milliseconds and defaults to `120000`. `simulationCLI` also accepts `startupTimeout` in its options. If it expires, the CLI requests graceful graph shutdown, waits for the shared grace period, then escalates if needed before reporting the timeout.
+
+The control plane's `/health` endpoint reports whether its HTTP server is running. `/status` returns an immediate service-state snapshot, including the command and arguments for services that launch a process. When a tracked process exits, its service reports `lastExit` with the observed exit code and/or signal; graph-requested restarts may also include `requestedSignal`. The `simulacrum` service also reports the graph's `launcher` command; this can differ from its `command` when a wrapper such as `unshare` or `tini` is used, see below.
+
+##### Custom graph launcher
+
+Pass an optional second argument to `simulationCLI` to customize how the managed graph process is launched. Its `launchGraph` hook receives the launch request and a default launcher it can delegate to. For example, a team using only Linux could wrap the graph in a PID namespace and use `tini` as its init process:
+
+```ts
+import { simulationCLI } from "@simulacrum/server";
+
+simulationCLI(services, {
+  launchGraph(request, launch) {
+    return launch({
+      ...request,
+      command: "unshare",
+      args: [
+        "--user",
+        "--map-root-user",
+        "--pid",
+        "--fork",
+        "--mount-proc",
+        "--kill-child",
+        "tini",
+        "-g",
+        "--",
+        request.command,
+        ...request.args,
+      ],
+    });
+  },
+});
+```
+
+This example requires `tini` to be on `PATH` and unprivileged user namespaces to be enabled. If user namespaces are disabled, use an appropriately privileged setup instead.
+
+The same hook is then used in foreground and background modes. The request includes the mode, stdio policy, and detachment setting. The default launcher uses Node's child-process API in both modes. Custom launchers can delegate with a modified request or implement their own spawning behavior; foreground launchers should preserve stdio and forward SIGINT for graceful shutdown.
 
 ## Development
 

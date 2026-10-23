@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/auth0-simulator",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "description": "Run local instance of Auth0 API for local development and integration testing",
   "keywords": [
     "auth0",

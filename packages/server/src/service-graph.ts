@@ -1,19 +1,24 @@
 import {
   type Operation,
   type Stream,
-  type WithResolvers,
   resource,
   spawn,
   withResolvers,
   each,
   createContext,
 } from "effection";
+import { ProcessApi } from "@effectionx/process";
 
 import { useAttributes } from "./logging.ts";
 import { type ServiceUpdate, useWatcher } from "./watch.ts";
 import { logger } from "./logging.ts";
-import { startDataService } from "./control-service.ts";
+import { useControlPlane } from "./control-plane.ts";
 import { getOperationMetadata } from "./operation-metadata.ts";
+import type { ServiceInfo, ServiceStatusRecord } from "./service-status.ts";
+export type { ServiceInfo } from "./service-status.ts";
+import { selectServices } from "./select-services.ts";
+import { consumeGraphLauncher } from "./launch-metadata.ts";
+import { GraphLauncher } from "./service-graph-context.ts";
 
 /**
  * Context key for the Simulacrum gateway listening port.
@@ -50,17 +55,10 @@ export type ServiceGraphStatus = {
   services: Record<string, ServiceInfo>;
 };
 
-export type ServiceInfo = {
-  port?: number | undefined;
-  pid?: number | undefined;
-};
-
-export type ServiceStatus = {
-  startup: WithResolvers<void>;
-  running: WithResolvers<void>;
-  port?: number | undefined;
-  pid?: number | undefined;
-};
+export type ServiceStatus = Pick<
+  ServiceStatusRecord,
+  "startup" | "running" | "state" | "port" | "pid" | "command" | "launcher" | "lastExit"
+>;
 
 export type ServiceGraphRunOptions = {
   watch?: boolean;
@@ -71,10 +69,19 @@ export type ServiceGraphRunOptions = {
   requestRestart?: ((service?: string) => void) | undefined;
 };
 
-export type ServiceGraphRunner<S extends ServiceMap> = (
+export type ServiceGraphOptions = {
+  globalData?: Record<string, unknown>;
+  watch?: boolean;
+  watchDebounce?: number;
+  controlPort?: number;
+};
+
+export type ServiceGraphRunner<S extends ServiceMap> = ((
   subset?: Array<keyof S>,
   runOptions?: ServiceGraphRunOptions,
-) => Operation<ServiceGraph<S>>;
+) => Operation<ServiceGraph<S>>) & {
+  options?: ServiceGraphOptions | undefined;
+};
 
 export type ServiceGraphFor<R extends ServiceGraphRunner<any>> =
   R extends ServiceGraphRunner<infer S> ? ServiceGraph<S> : never;
@@ -89,20 +96,20 @@ export type ServiceGraphFor<R extends ServiceGraphRunner<any>> =
  * callers.
  *
  * @param services - a map of service names to definitions
- * @param options - optional configuration: `{ globalData?, watch?, watchDebounce? }`
+ * @param options - optional graph configuration such as `globalData`, watching, and `controlPort`
  * @returns a runner function returning the graph operation
  */
 export function useServiceGraph<S extends ServiceMap>(
   services: S,
-  options?: {
-    globalData?: Record<string, unknown>;
-    watch?: boolean;
-    watchDebounce?: number;
-    controlPort?: number;
-  },
+  options?: ServiceGraphOptions,
 ): ServiceGraphRunner<S> {
-  return (subset?: Array<keyof S>, runOptions?: ServiceGraphRunOptions) => {
+  const runner: ServiceGraphRunner<S> = (
+    subset?: Array<keyof S>,
+    runOptions?: ServiceGraphRunOptions,
+  ) => {
     return resource<ServiceGraph<S>>(function* (provide) {
+      yield* GraphLauncher.set(consumeGraphLauncher());
+
       const effectiveRunOptions = {
         watch: runOptions?.watch ?? options?.watch,
         watchDebounce: runOptions?.watchDebounce ?? options?.watchDebounce,
@@ -111,123 +118,26 @@ export function useServiceGraph<S extends ServiceMap>(
         requestStop: runOptions?.requestStop,
       };
 
-      // detect cycles in the dependency graph
-      const nodes = Object.keys(services);
       // label the root of the service graph operation
       yield* useAttributes({
         name: "serviceGraph",
-        totalServices: String(nodes.length),
+        totalServices: String(Object.keys(services).length),
       });
-      const temp = new Set<string>();
-      const perm = new Set<string>();
-
-      function visit(n: string) {
-        if (perm.has(n)) return;
-        if (temp.has(n)) throw new Error("Cycle detected in services");
-        temp.add(n);
-        const def = services[n];
-        const deps: readonly string[] = def.dependsOn?.startup ?? [];
-        for (const d of deps) {
-          if (!(d in services)) continue;
-          visit(d);
-        }
-        temp.delete(n);
-        perm.add(n);
-      }
-
-      for (const n of nodes) {
-        visit(n);
-      }
-
-      let effectiveServices = services; // {} as typeof services;
-      const requested = subset
-        ? new Set<string>(subset.map((s) => String(s).trim()).filter((s) => s.length > 0))
-        : undefined;
-      const excluded = new Set<string>(
-        (effectiveRunOptions.exclude ?? [])
-          .map((s) => String(s).trim())
-          .filter((s) => s.length > 0),
-      );
-
-      for (const name of excluded) {
-        if (!(name in services)) {
-          throw new Error(`Excluded service '${name}' not found`);
-        }
-      }
-
-      if (requested || excluded.size > 0) {
-        const selected = requested ? new Set<string>() : new Set<string>(Object.keys(services));
-
-        function include(name: string) {
-          if (selected.has(name)) return;
-          if (!(name in services)) throw new Error(`Requested service '${name}' not found`);
-          selected.add(name);
-          for (const dep of services[name].dependsOn?.startup ?? []) {
-            include(String(dep));
-          }
-        }
-
-        for (const name of requested ?? []) {
-          include(name);
-        }
-
-        for (const name of excluded) {
-          selected.delete(name);
-        }
-
-        let pruned = true;
-        while (pruned) {
-          pruned = false;
-          for (const name of Array.from(selected)) {
-            const deps = services[name].dependsOn?.startup ?? [];
-            if (deps.some((dep) => !selected.has(String(dep)))) {
-              selected.delete(name);
-              pruned = true;
-            }
-          }
-        }
-
-        for (const name of requested ?? []) {
-          if (!selected.has(name)) {
-            throw new Error(
-              `Requested service '${name}' cannot be started because it or one of its startup dependencies is excluded`,
-            );
-          }
-        }
-
-        const picked: Partial<typeof services> = {};
-        for (const name of selected) {
-          picked[name as keyof typeof services] = services[name as keyof typeof services];
-        }
-        effectiveServices = picked as typeof services;
-
+      const selection = selectServices(services, subset, effectiveRunOptions.exclude);
+      const effectiveServices = selection.services;
+      if (selection.filtered) {
         yield* useAttributes({
           name: "serviceGraph",
-          requestedServices: Array.from(requested ?? []).join(", "),
-          excludedServices: Array.from(excluded).join(", "),
-          includedServices: Array.from(selected).join(", "),
+          requestedServices: Array.from(selection.requested ?? []).join(", "),
+          excludedServices: Array.from(selection.excluded).join(", "),
+          includedServices: Array.from(selection.selected).join(", "),
         });
         yield* logger.stdout(
-          `simulation starting with services: ${Array.from(selected).join(", ")}`,
+          `simulation starting with services: ${Array.from(selection.selected).join(", ")}`,
         );
       }
 
       const status = new Map<string, ServiceStatus>();
-
-      function serializeStatus(): ServiceGraphStatus {
-        return {
-          cwd: process.cwd(),
-          services: Object.fromEntries(
-            Array.from(status.entries()).map(([name, service]) => [
-              name,
-              {
-                port: service.port,
-                pid: service.pid,
-              },
-            ]),
-          ),
-        };
-      }
 
       let restartRequested = withResolvers<string | undefined>("wait for a restart request");
       function requestRestart(service?: string) {
@@ -240,28 +150,26 @@ export function useServiceGraph<S extends ServiceMap>(
         current.resolve(service);
       }
 
-      const dataServiceProvided = yield* startDataService({
+      const controlPlane = yield* useControlPlane({
         data: options?.globalData ?? {},
         port: effectiveRunOptions.controlPort,
-        getStatus: serializeStatus,
+        services: Object.keys(effectiveServices),
         requestStop: effectiveRunOptions.requestStop,
         requestRestart,
       });
       yield* useAttributes({
         name: "serviceGraph",
-        dataServicePort: String(dataServiceProvided.port),
+        dataServicePort: String(controlPlane.port),
       });
 
-      status.set("simulacrum", {
-        startup: withResolvers<void>(),
-        running: withResolvers<void>(),
-        port: dataServiceProvided.port,
-      });
-      status.get("simulacrum")?.startup.resolve();
+      const controlServiceStatus = controlPlane.getServiceStatus("simulacrum");
+      if (!controlServiceStatus) throw new Error("missing simulacrum service status");
+      status.set("simulacrum", controlServiceStatus);
+      controlServiceStatus.startup.resolve();
 
       // set the SimulacrumEndpoint in this operation scope so children started
       // in this graph can access the port via context
-      yield* SimulacrumEndpoint.set(dataServiceProvided.port);
+      yield* SimulacrumEndpoint.set(controlPlane.port);
 
       // start up a watcher only when the CLI or caller explicitly asks for it
       // or when at least one of the services has a `watch` configuration. by
@@ -283,10 +191,9 @@ export function useServiceGraph<S extends ServiceMap>(
 
       for (const name of Object.keys(effectiveServices)) {
         const def = effectiveServices[name];
-        status.set(name, {
-          startup: withResolvers<void>(),
-          running: withResolvers<void>(),
-        });
+        const serviceStatus = controlPlane.getServiceStatus(name);
+        if (!serviceStatus) throw new Error(`missing status for service '${name}'`);
+        status.set(name, serviceStatus);
         if (def.watch && watcher) {
           watcher.add(name, def.watch);
         }
@@ -310,14 +217,12 @@ export function useServiceGraph<S extends ServiceMap>(
 
         // log so it is clear in the inspector output when a restart is triggered
         yield* logger.stdout(`restarting service ${service}`);
+        controlPlane.setServiceInfo(service, { state: "stopping" });
+        controlPlane.setServiceInfo(service, { requestedSignal: "SIGTERM" });
         // refresh the startup resolver
         task.startup = withResolvers<void>();
 
-        // remove any recorded port/pid for the service; it will be re-registered when it starts again
-        delete task.port;
-        delete task.pid;
-
-        // signal the running operation to stop so it can clean up
+        // Let the operation clean up before clearing its control-plane record.
         task.running.resolve();
       }
 
@@ -378,6 +283,7 @@ export function useServiceGraph<S extends ServiceMap>(
             status: `restarted ${++restartCount} times`,
           });
           yield* waitDeps(service, restartCount);
+          controlPlane.setServiceInfo(service, { state: "starting" });
 
           const def = effectiveServices[service];
           const task = status.get(service);
@@ -389,6 +295,29 @@ export function useServiceGraph<S extends ServiceMap>(
           // run the service in a scoped child operation so it can be cleanly
           // cancelled when a file change triggers a restart
           const serviceTask = yield* spawn(function* () {
+            yield* ProcessApi.around({
+              *exec(args, next) {
+                const [command, options] = args;
+                return yield* controlPlane.trackProcess(
+                  service,
+                  command,
+                  options,
+                  next(...args),
+                  false,
+                );
+              },
+              *daemon(args, next) {
+                const [command, options] = args;
+                return yield* controlPlane.trackProcess(
+                  service,
+                  command,
+                  options,
+                  next(...args),
+                  true,
+                );
+              },
+            });
+
             // capture any returned listening info (e.g., from useSimulation)
             const maybeProvided = yield* def.operation;
             if (maybeProvided && typeof maybeProvided === "object") {
@@ -397,22 +326,36 @@ export function useServiceGraph<S extends ServiceMap>(
                   name: `service ${service}`,
                   port: String(maybeProvided.port),
                 });
-                task.port = maybeProvided.port;
+                controlPlane.setServiceInfo(service, { port: maybeProvided.port });
               }
               if ("pid" in maybeProvided && typeof maybeProvided.pid === "number") {
-                task.pid = maybeProvided.pid;
                 yield* useAttributes({
                   name: `service ${service}`,
                   pid: String(maybeProvided.pid),
                 });
+                controlPlane.setServiceInfo(service, { pid: maybeProvided.pid });
+              }
+              if ("command" in maybeProvided) {
+                controlPlane.setServiceInfo(service, {
+                  command: maybeProvided.command,
+                });
               }
             }
 
+            if (controlPlane.getServiceInfo(service)?.state !== "failed") {
+              controlPlane.setServiceInfo(service, { state: "ready" });
+            }
             task.startup.resolve();
             // wait until the watcher asks for this service to be restarted
             yield* task.running.operation;
           });
-          yield* serviceTask;
+          try {
+            yield* serviceTask;
+          } catch (error) {
+            controlPlane.setServiceInfo(service, { state: "failed" });
+            throw error;
+          }
+          controlPlane.clearServiceInfo(service, "waiting");
         }
       }
 
@@ -447,4 +390,7 @@ export function useServiceGraph<S extends ServiceMap>(
       }
     });
   };
+
+  runner.options = options;
+  return runner;
 }
