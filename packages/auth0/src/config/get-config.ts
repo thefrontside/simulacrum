@@ -34,51 +34,42 @@ const fieldDefaults = {
 } satisfies Partial<Auth0Configuration>;
 
 const configFields = {
-  port: z.optional(
-    z.number().gt(2999, "port must be greater than 2999").lt(10000, "port must be less than 10000"),
-  ),
-  protocol: z.enum(["http", "https"]).default(fieldDefaults.protocol),
-  domain: z.optional(z.string().min(1, "domain is required")),
-  audience: z.string().min(1, "audience is required").default(fieldDefaults.audience),
-  clientID: z
-    .string()
-    .max(32, "must be at most 32 characters long")
-    .default(fieldDefaults.clientID),
-  clientSecret: z.optional(z.string()),
+  port: z
+    .number()
+    .gt(2999, "port must be greater than 2999")
+    .lt(10000, "port must be less than 10000")
+    .optional(),
+  protocol: z.enum(["http", "https"]).optional(),
+  domain: z.string().min(1, "domain is required").optional(),
+  audience: z.string().min(1, "audience is required").optional(),
+  clientID: z.string().max(32, "must be at most 32 characters long").optional(),
+  clientSecret: z.string().optional(),
   scope: z
     .union([
       z.string().min(1, "scope is required"),
       z.array(
         z.strictObject({
           clientID: z.string().max(32, "must be at most 32 characters long"),
-          audience: z.optional(z.string().min(1, "audience is required")),
+          audience: z.string().min(1, "audience is required").optional(),
           scope: z.string().min(1, "scope is required"),
         }),
       ),
     ])
-    .default(fieldDefaults.scope),
-  rulesDirectory: z.optional(z.string()),
-  connection: z.optional(z.string()),
+    .optional(),
+  rulesDirectory: z.string().optional(),
+  connection: z.string().optional(),
 };
 
 const configObjectSchema = z.object(configFields);
-const configFieldNameSchema = configObjectSchema.keyof();
 
-const configKeysSchema = z.record(z.string(), z.unknown()).superRefine((config, context) => {
-  for (const key of Object.keys(config)) {
-    if (!configFieldNameSchema.safeParse(key).success) {
-      context.addIssue({
-        code: "custom",
-        path: [key],
-        message: `Unrecognized config key "${key}"`,
-      });
-    }
-  }
-});
-
-const configSourcesSchema = z
-  .array(z.object({ name: z.string(), value: z.unknown() }))
-  .pipe(z.array(z.object({ name: z.string(), value: configKeysSchema })));
+const configSourcesSchema = z.array(z.object({ name: z.string(), value: z.unknown() })).pipe(
+  z.array(
+    z.object({
+      name: z.string(),
+      value: configObjectSchema.strict(),
+    }),
+  ),
+);
 
 const configSchema = configObjectSchema.transform((input, context) => {
   let domainUrl =
@@ -104,7 +95,15 @@ const configSchema = configObjectSchema.transform((input, context) => {
       : `${domainUrl.hostname}:${port}`;
   }
 
-  return { ...input, port, domain };
+  return {
+    ...input,
+    audience: input.audience ?? fieldDefaults.audience,
+    clientID: input.clientID ?? fieldDefaults.clientID,
+    scope: input.scope ?? fieldDefaults.scope,
+    protocol: input.protocol ?? fieldDefaults.protocol,
+    port,
+    domain,
+  };
 });
 
 // the config file path binds ahead of the values checkpoint so it is visible
@@ -119,7 +118,7 @@ export const auth0App = command(
     name("config"),
     description("path to a JSON config file"),
     cli(["--config", "-c"]),
-    schema(z.optional(z.string())),
+    schema(z.string().optional()),
   ),
   dynamic(configSourcesSchema, withValues),
   option(
@@ -140,6 +139,7 @@ export const auth0App = command(
   ),
   option(name("connection"), description("auth0 connection"), schema(configFields.connection)),
   option(name("protocol"), description("server protocol"), schema(configFields.protocol)),
+  // to normalize protocol, domain an port
   transform(configSchema),
 );
 
@@ -183,8 +183,8 @@ export function getCLIConfig({ args, envs, values }: CLIConfigInput): CLIConfigR
   }
 
   try {
-    const fileSources = getConfigSources(first.model.config);
-    const settled = first.resume([...(values ?? []), ...fileSources]);
+    const sources = [...(values ?? []), ...getConfigSources(first.model.config)];
+    const settled = first.resume(sources);
 
     if (!settled.ok) {
       return { type: "error", text: printErrors(settled) };

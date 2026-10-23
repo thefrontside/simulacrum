@@ -10,6 +10,7 @@ describe("CLI config parsing", () => {
     new URL("./fixtures/config-discovery/", import.meta.url),
   );
   let portConfigPath = join(configFixtures, "port.json");
+  let invalidPortConfigPath = join(configFixtures, "invalid-port.json");
   let legacyClientIdConfigPath = join(configFixtures, "legacy-client-id.json");
   let legacyScopeClientIdConfigPath = join(configFixtures, "legacy-scope-client-id.json");
 
@@ -74,16 +75,15 @@ describe("CLI config parsing", () => {
     }
   });
 
-  it("does not validate a config value overridden by a CLI value", () => {
+  it("rejects an invalid config value even when overridden by a CLI value", () => {
     let result = getCLIConfig({
-      args: ["--port", "4567"],
+      args: ["--config", invalidPortConfigPath, "--port", "4567"],
       envs: [],
-      values: [{ name: "test config", value: { port: "not a number" } }],
     });
 
-    expect(result.type).toBe("config");
-    if (result.type === "config") {
-      expect(result.value.port).toBe(4567);
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.text).toContain("port");
     }
   });
 
