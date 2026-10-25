@@ -4,7 +4,8 @@ import type { Auth0Configuration, QueryParams, ResponseModes } from "../types.ts
 import { createLoginRedirectHandler } from "./login-redirect.ts";
 import { createWebMessageHandler } from "./web-message.ts";
 import { loginView } from "../views/login.ts";
-import { createTokens } from "./oauth-handlers.ts";
+import { AccessDeniedError, createTokens } from "./oauth-handlers.ts";
+import { createActionsRunner } from "../actions/actions-runner.ts";
 import { assert } from "assert-ts";
 import { stringify } from "querystring";
 import { encode } from "base64-url";
@@ -44,6 +45,7 @@ export const createAuth0Handlers = (
   debug: boolean,
 ): Record<Routes, RequestHandler> => {
   let { audience, scope, clientID, rulesDirectory } = options;
+  let actionsRunner = createActionsRunner(options.actions);
   let personQuery = createPersonQuery(simulationStore);
 
   let authorizeHandlers: Record<ResponseModes, RequestHandler> = {
@@ -200,6 +202,14 @@ export const createAuth0Handlers = (
           clientID: responseClientId,
           audience: responseAudience,
           rulesDirectory,
+          actionsRunner,
+          request: {
+            query: req.query,
+            ip: req.ip,
+            hostname: req.hostname,
+            method: req.method,
+            user_agent: req.get("user-agent"),
+          },
           scope,
         });
 
@@ -209,7 +219,11 @@ export const createAuth0Handlers = (
           token_type: "Bearer",
         });
       } catch (error) {
-        next(error);
+        if (error instanceof AccessDeniedError) {
+          res.status(403).json({ error: "access_denied", error_description: error.message });
+        } else {
+          next(error);
+        }
       }
     },
 

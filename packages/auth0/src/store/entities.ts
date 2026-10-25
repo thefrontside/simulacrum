@@ -9,6 +9,9 @@ export const auth0UserSchema = z
     password: z.string().optional().default("12345"),
     email: z.string().email().optional(),
     picture: z.string().url().optional(),
+    user_metadata: z.record(z.unknown()).default({}),
+    app_metadata: z.record(z.unknown()).default({}),
+    logins_count: z.number().int().nonnegative().default(0),
   })
   .transform((user) => {
     if (!user.email) user.email = faker.internet.email({ firstName: user.name });
@@ -16,6 +19,19 @@ export const auth0UserSchema = z
     return user;
   });
 export type Auth0User = z.infer<typeof auth0UserSchema>;
+
+export type Metadata = Record<string, unknown>;
+
+// Top-level merge as Auth0 does it: nested objects are replaced, and `null` removes a key.
+export const mergeMetadata = (current: Metadata, update: unknown): Metadata => {
+  if (!update || typeof update !== "object") return current;
+  let merged = { ...current };
+  for (let [key, value] of Object.entries(update)) {
+    if (value === null) delete merged[key];
+    else merged[key] = value;
+  }
+  return merged;
+};
 export const defaultUser = auth0UserSchema.parse({
   name: "default",
   email: "default@example.com",
