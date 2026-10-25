@@ -4,19 +4,23 @@ import type { Auth0Configuration, QueryParams, ResponseModes } from "../types.ts
 import { createLoginRedirectHandler } from "./login-redirect.ts";
 import { createWebMessageHandler } from "./web-message.ts";
 import { loginView } from "../views/login.ts";
-import { createTokens } from "./oauth-handlers.ts";
+import { AccessDeniedError, createTokens } from "./oauth-handlers.ts";
+import { createActionsRunner } from "../actions/actions-runner.ts";
 import { assert } from "assert-ts";
 import { stringify } from "querystring";
 import { encode } from "base64-url";
 import { userNamePasswordForm } from "../views/username-password.ts";
 import { decodeJwt as decodeToken } from "jose";
 import { createPersonQuery } from "./utils.ts";
+import { faker } from "@faker-js/faker";
+import { auth0UserSchema } from "../store/entities.ts";
 
 export type Routes =
   | "/heartbeat"
   | "/authorize"
   | "/login"
   | "/usernamepassword/login"
+  | "/dbconnections/signup"
   | "/login/callback"
   | "/oauth/token"
   | "/v2/logout"
@@ -44,6 +48,7 @@ export const createAuth0Handlers = (
   debug: boolean,
 ): Record<Routes, RequestHandler> => {
   let { audience, scope, clientID, rulesDirectory } = options;
+  let actionsRunner = createActionsRunner(options.actions);
   let personQuery = createPersonQuery(simulationStore);
 
   let authorizeHandlers: Record<ResponseModes, RequestHandler> = {
@@ -69,6 +74,18 @@ export const createAuth0Handlers = (
       let currentUser = req.query.currentUser as string | undefined;
 
       assert(!!req.session, "no session");
+
+      // Auth0 shows an authorization code login's Actions the /authorize query, not /oauth/token's
+      let nonce = req.query.nonce;
+      if (typeof nonce === "string" && nonce) {
+        simulationStore.store.dispatch(
+          simulationStore.actions.batchUpdater([
+            simulationStore.schema.sessions.patch({
+              [nonce]: { nonce, authorizeQuery: req.query as Record<string, unknown> },
+            }),
+          ]),
+        );
+      }
 
       if (currentUser) {
         // the request is a silent login.
@@ -96,6 +113,11 @@ export const createAuth0Handlers = (
       let responseAudience = query.audience ?? audience;
       assert(!!responseClientId, `no clientID assigned`);
 
+      let signup = !options.disableSignup && query.screen_hint === "signup";
+      let switchModeQuery = new URLSearchParams(req.query as Record<string, string>);
+      if (signup) switchModeQuery.delete("screen_hint");
+      else switchModeQuery.set("screen_hint", "signup");
+
       let html = loginView({
         domain: new URL(serviceURL(req)).host,
         scope,
@@ -103,6 +125,9 @@ export const createAuth0Handlers = (
         clientID: responseClientId,
         audience: responseAudience,
         loginFailed: false,
+        signup,
+        loginHint: query.login_hint,
+        ...(!options.disableSignup && { switchModeUrl: `/login?${switchModeQuery}` }),
       });
 
       res.set("Content-Type", "text/html");
@@ -160,6 +185,51 @@ export const createAuth0Handlers = (
       res.status(200).send(userNamePasswordForm(req.body));
     },
 
+    // https://auth0.com/docs/api/authentication#signup
+    ["/dbconnections/signup"]: function (req, res) {
+      logger.log({ "/dbconnections/signup": { body: { ...req.body, password: undefined } } });
+      let { email, password, name, user_metadata } = req.body ?? {};
+
+      let badRequest = (code: string, description: string) => {
+        res.status(400).json({ name: "BadRequestError", code, description, statusCode: 400 });
+      };
+
+      if (options.disableSignup) {
+        return badRequest("operation_not_allowed", "Public signup is disabled");
+      }
+
+      if (typeof email !== "string" || !email) {
+        return badRequest("invalid_body", "Missing required property: email");
+      }
+      if (typeof password !== "string" || !password) {
+        return badRequest("invalid_body", "Missing required property: password");
+      }
+      // Auth0 doesn't say whether the email is taken, to avoid user enumeration
+      if (personQuery((person) => person.email?.toLowerCase() === email.toLowerCase())) {
+        return badRequest("invalid_signup", "Invalid sign up");
+      }
+
+      let _id = faker.database.mongodbObjectId();
+      let parsed = auth0UserSchema.safeParse({
+        id: `auth0|${_id}`,
+        name: name ?? email,
+        email: email.toLowerCase(),
+        email_verified: false,
+        password,
+        user_metadata: user_metadata ?? undefined,
+      });
+      if (!parsed.success) {
+        return badRequest("invalid_body", parsed.error.message);
+      }
+
+      simulationStore.store.dispatch(
+        simulationStore.actions.batchUpdater([
+          simulationStore.schema.users.add({ [parsed.data.id]: parsed.data }),
+        ]),
+      );
+      res.status(200).json({ _id, email: parsed.data.email, email_verified: false });
+    },
+
     ["/login/callback"]: function (req, res) {
       let wctx = JSON.parse(req.body.wctx);
       logger.log({
@@ -200,6 +270,14 @@ export const createAuth0Handlers = (
           clientID: responseClientId,
           audience: responseAudience,
           rulesDirectory,
+          actionsRunner,
+          request: {
+            query: req.query,
+            ip: req.ip,
+            hostname: req.hostname,
+            method: req.method,
+            user_agent: req.get("user-agent"),
+          },
           scope,
         });
 
@@ -209,7 +287,11 @@ export const createAuth0Handlers = (
           token_type: "Bearer",
         });
       } catch (error) {
-        next(error);
+        if (error instanceof AccessDeniedError) {
+          res.status(403).json({ error: "access_denied", error_description: error.message });
+        } else {
+          next(error);
+        }
       }
     },
 
@@ -249,7 +331,7 @@ export const createAuth0Handlers = (
         given_name: user.name,
         family_name: user.name,
         email: user.email,
-        email_verified: true,
+        email_verified: user.email_verified,
         locale: "en",
         hd: "okta.com",
       };

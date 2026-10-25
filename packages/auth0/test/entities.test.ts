@@ -35,4 +35,36 @@ describe("initialState user fields", () => {
     expect(user.id).toBeTruthy();
     expect(user.email).toContain("@");
   });
+
+  it("keeps user_metadata and app_metadata", () => {
+    const parsed = auth0InitialStoreSchema.parse({
+      users: [
+        {
+          name: "dev",
+          user_metadata: { theme: "dark" },
+          app_metadata: { organisation_id: "org_123", roles: ["admin"] },
+        },
+      ],
+    });
+    const user = Object.values(convertInitialStateToStoreState(parsed)!.users)[0];
+
+    expect(user.user_metadata).toEqual({ theme: "dark" });
+    expect(user.app_metadata).toEqual({ organisation_id: "org_123", roles: ["admin"] });
+  });
+
+  it("defaults metadata to empty objects", () => {
+    const parsed = auth0InitialStoreSchema.parse({ users: [{ name: "dev" }] });
+    const user = Object.values(convertInitialStateToStoreState(parsed)!.users)[0];
+
+    expect(user.user_metadata).toEqual({});
+    expect(user.app_metadata).toEqual({});
+  });
+
+  it("defaults logins_count to zero, or keeps a seeded count", () => {
+    const parsed = auth0InitialStoreSchema.parse({
+      users: [{ name: "new" }, { name: "returning", logins_count: 5 }],
+    });
+
+    expect(parsed.users.map((user) => user.logins_count)).toEqual([0, 5]);
+  });
 });
