@@ -1,6 +1,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { ValueSource } from "@bomb.sh/router";
+import { dynamic, type ValueSource, withValues } from "@bomb.sh/router";
+import { z } from "zod";
+
+export function sourceConfig(valueSchema: z.ZodType) {
+  let sourcesSchema = z
+    .array(z.object({ name: z.string(), value: z.unknown() }))
+    .pipe(z.array(z.object({ name: z.string(), value: valueSchema })));
+
+  return dynamic(sourcesSchema, withValues);
+}
 
 export function readJsonConfig(path: string): Record<string, unknown> {
   const contents = readFileSync(resolve(path), "utf8");

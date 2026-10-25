@@ -3,7 +3,6 @@ import {
   cli,
   command,
   description,
-  dynamic,
   type EnvSource,
   name,
   option,
@@ -14,11 +13,10 @@ import {
   schema,
   transform,
   type ValueSource,
-  withValues,
   version,
 } from "@bomb.sh/router";
 import { z } from "zod";
-import { getConfigSources } from "./config-sources.ts";
+import { getConfigSources, sourceConfig } from "./config-sources.ts";
 import type { Auth0Configuration } from "../types.ts";
 
 const pkg: {
@@ -60,16 +58,8 @@ const configFields = {
   connection: z.string().optional(),
 };
 
-const configObjectSchema = z.object(configFields);
-
-const configSourcesSchema = z.array(z.object({ name: z.string(), value: z.unknown() })).pipe(
-  z.array(
-    z.object({
-      name: z.string(),
-      value: configObjectSchema.strict(),
-    }),
-  ),
-);
+// strict schema throws errors of unrecognized keys
+const configObjectSchema = z.object(configFields).strict();
 
 const configSchema = configObjectSchema.transform((input, context) => {
   let domainUrl =
@@ -120,7 +110,7 @@ export const auth0App = command(
     cli(["--config", "-c"]),
     schema(z.string().optional()),
   ),
-  dynamic(configSourcesSchema, withValues),
+  sourceConfig(configObjectSchema),
   option(
     name("port"),
     description("port to listen on"),
