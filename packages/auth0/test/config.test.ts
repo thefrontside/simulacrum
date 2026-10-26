@@ -10,7 +10,9 @@ describe("CLI config parsing", () => {
     new URL("./fixtures/config-discovery/", import.meta.url),
   );
   let portConfigPath = join(configFixtures, "port.json");
+  let clientIdConfigPath = join(configFixtures, "client-id.json");
   let invalidPortConfigPath = join(configFixtures, "invalid-port.json");
+  let malformedJsonConfigPath = join(configFixtures, "malformed-json.txt");
   let legacyClientIdConfigPath = join(configFixtures, "legacy-client-id.json");
   let legacyScopeClientIdConfigPath = join(configFixtures, "legacy-scope-client-id.json");
 
@@ -49,6 +51,19 @@ describe("CLI config parsing", () => {
     }
   });
 
+  it("merges multiple JSON config files, with the last file taking precedence", () => {
+    let result = getCLIConfig({
+      args: ["-c", portConfigPath, "--config", clientIdConfigPath],
+      envs: [],
+    });
+
+    expect(result.type).toBe("config");
+    if (result.type === "config") {
+      expect(result.value.port).toBe(4568);
+      expect(result.value.clientID).toBe("client-id-from-second-file");
+    }
+  });
+
   it("rejects unknown keys in config values", () => {
     let result = getCLIConfig({
       args: [],
@@ -59,6 +74,16 @@ describe("CLI config parsing", () => {
     expect(result.type).toBe("error");
     if (result.type === "error") {
       expect(result.text).toContain("unexpectedConfigKey");
+    }
+  });
+
+  it("identifies the config file when its JSON is malformed", () => {
+    let result = getCLIConfig({ args: ["--config", malformedJsonConfigPath], envs: [] });
+
+    expect(result.type).toBe("error");
+    if (result.type === "error") {
+      expect(result.text).toContain(malformedJsonConfigPath);
+      expect(result.text).toContain("Invalid JSON in config file");
     }
   });
 

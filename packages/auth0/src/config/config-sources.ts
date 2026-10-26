@@ -13,7 +13,14 @@ export function sourceConfig(valueSchema: z.ZodType) {
 
 export function readJsonConfig(path: string): Record<string, unknown> {
   const contents = readFileSync(resolve(path), "utf8");
-  const parsed: unknown = JSON.parse(contents);
+  let parsed: unknown;
+
+  try {
+    parsed = JSON.parse(contents);
+  } catch (error) {
+    let message = error instanceof Error ? error.message : String(error);
+    throw new SyntaxError(`Invalid JSON in config file ${JSON.stringify(path)}: ${message}`);
+  }
 
   if (!isRecord(parsed)) {
     throw new TypeError(`Config file ${path} must contain a JSON object`);
@@ -27,11 +34,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function getConfigSources(
-  configPath?: string,
+  configPaths?: readonly string[],
   workingDirectory = process.cwd(),
 ): ValueSource[] {
-  if (configPath !== undefined) {
-    return loadConfig(configPath);
+  if (configPaths !== undefined) {
+    return [...configPaths].reverse().flatMap(loadConfig);
   }
 
   let directory = resolve(workingDirectory);

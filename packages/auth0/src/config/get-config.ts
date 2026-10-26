@@ -3,7 +3,7 @@ import {
   cli,
   command,
   description,
-  type EnvSource,
+  multiple,
   name,
   option,
   parse,
@@ -12,8 +12,9 @@ import {
   printVersion,
   schema,
   transform,
-  type ValueSource,
   version,
+  type EnvSource,
+  type ValueSource,
 } from "@bomb.sh/router";
 import { z } from "zod";
 import { getConfigSources, sourceConfig } from "./config-sources.ts";
@@ -108,7 +109,8 @@ export const auth0App = command(
     name("config"),
     description("path to a JSON config file"),
     cli(["--config", "-c"]),
-    schema(z.string().optional()),
+    multiple(),
+    schema(z.array(z.string()).optional()),
   ),
   sourceConfig(configObjectSchema),
   option(
