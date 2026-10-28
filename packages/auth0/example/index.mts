@@ -1,6 +1,8 @@
-import { simulation } from "../src/index.ts";
+import { getConfig, simulation } from "../src/index.ts";
 
+const config = getConfig();
 let app = simulation({
+  config,
   extend: {
     extendRouter: (router, _simulationStore) => {
       router.get("/hello", (_req, res) => {
@@ -9,8 +11,17 @@ let app = simulation({
     },
   },
 });
-app.listen(undefined, () =>
+
+app.listen().then(({ server, port }) => {
+  const info = server.address();
+  const rawHost =
+    typeof info === "object" && info?.address && !["::", "0.0.0.0"].includes(info.address)
+      ? info.address
+      : "localhost";
+  const host = rawHost.includes(":") ? `[${rawHost}]` : rawHost;
   console.log(
-    `auth0 simulation server started at https://localhost:4400\nusername: default@example.com\npassword: 12345\n`,
-  ),
-);
+    `Auth0 simulation server started at ${config.protocol ?? "https"}://${host}:${port}\n` +
+      `username: default@example.com\n` +
+      `password: 12345\n`,
+  );
+});
