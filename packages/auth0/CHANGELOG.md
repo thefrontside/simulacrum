@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.0]
+
+### Enhancements
+
+- [`1e601b0`](https://github.com/thefrontside/simulacrum/commit/1e601b0a353e72ce81e2735c7ab958ab0463a141) ([#384](https://github.com/thefrontside/simulacrum/pull/384) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Migrate to `@bomb.sh/router` which allows us to normalize our config, CLI args, and environment variable handling.
+  Possibly breaking: We now discover `auth0Simulator.config.json` or accept a path to a JSON config file through the `--config` / `-c` CLI option or `CONFIG` environment variable. We also adjusted the accepted configuration to `clientID` where `ID` is capitalized to align with Auth0 usage. The legacy `clientId` used in some situations now produces an error in configuration.
+
+### Dependencies
+
+- [`1e601b0`](https://github.com/thefrontside/simulacrum/commit/1e601b0a353e72ce81e2735c7ab958ab0463a141) ([#384](https://github.com/thefrontside/simulacrum/pull/384) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Update to `zod` to v4.
+- [`b00a8d0`](https://github.com/thefrontside/simulacrum/commit/b00a8d0f8b94f8eeca06c5824ba842d2d6692908) ([#387](https://github.com/thefrontside/simulacrum/pull/387) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Use the workspace catalog for `@faker-js/faker` v10.6.0 in Auth0 and GitHub API.
+
 ## \[0.13.1]
 
 - [`d4edee7`](https://github.com/thefrontside/simulacrum/commit/d4edee78aed5b00636b4c38031e8085c4830998d) ([#375](https://github.com/thefrontside/simulacrum/pull/375) by [@joergjaeckel](https://github.com/thefrontside/simulacrum/../../joergjaeckel)) Include kid (`JWKS.keys[0].kid`) in `SignJWT().setProtectedHeader()` for `access_token` and `id_token` so clients performing JWKS-based signature verification can find the correct public key.
