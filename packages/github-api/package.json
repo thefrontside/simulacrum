@@ -64,7 +64,7 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "@faker-js/faker": "^9.3.0",
+    "@faker-js/faker": "catalog:",
     "@graphql-tools/utils": "^10.9.1",
     "@simulacrum/foundation-simulator": "^0.8.0",
     "assert-ts": "^0.3.4",

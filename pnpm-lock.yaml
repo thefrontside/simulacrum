@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@faker-js/faker':
+      specifier: ^10.6.0
+      version: 10.6.0
     effection:
       specifier: ^4.0.3
       version: 4.0.3
@@ -48,8 +51,8 @@ importers:
         specifier: ^0.8.0
         version: 0.8.0
       '@faker-js/faker':
-        specifier: ^9.3.0
-        version: 9.9.0
+        specifier: 'catalog:'
+        version: 10.6.0
       '@simulacrum/foundation-simulator':
         specifier: ^0.8.0
         version: link:../foundation
@@ -148,8 +151,8 @@ importers:
   packages/github-api:
     dependencies:
       '@faker-js/faker':
-        specifier: ^9.3.0
-        version: 9.9.0
+        specifier: 'catalog:'
+        version: 10.6.0
       '@graphql-tools/utils':
         specifier: ^10.9.1
         version: 10.11.0(graphql@16.13.2)
@@ -580,9 +583,9 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@faker-js/faker@9.9.0':
-    resolution: {integrity: sha512-OEl393iCOoo/z8bMezRlJu+GlRGlsKbUAN7jKB6LhnKoqKve5DXRpalbItIIcwnCjs1k/FOPjFzcA6Qn+H+YbA==}
-    engines: {node: '>=18.0.0', npm: '>=9.0.0'}
+  '@faker-js/faker@10.6.0':
+    resolution: {integrity: sha512-3RQHgEtvL1Frl/d1cSreo7qhJ3Gk1OdNUai/CtZ8G+wYeRQnJih3s9xJ9/kgYekPQRdwgh0HXRPqMlzWGwivIQ==}
+    engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
   '@fastify/busboy@3.2.0':
     resolution: {integrity: sha512-m9FVDXU3GT2ITSe0UaMA5rU3QkfC/UXtCU8y0gSN/GugTqtVldOBWIB5V6V3sbmenVZUIpU6f+mPEO2+m5iTaA==}
@@ -3762,7 +3765,7 @@ snapshots:
   '@esbuild/win32-x64@0.27.7':
     optional: true
 
-  '@faker-js/faker@9.9.0': {}
+  '@faker-js/faker@10.6.0': {}
 
   '@fastify/busboy@3.2.0': {}
 
