@@ -6,4 +6,5 @@ linkWorkspacePackages: deep
 disallowWorkspaceCycles: true
 
 catalog:
+  '@faker-js/faker': ^10.6.0
   effection: ^4.0.3

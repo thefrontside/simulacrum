@@ -61,7 +61,7 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
-    "@faker-js/faker": "^10.6.0",
+    "@faker-js/faker": "catalog:",
     "@simulacrum/foundation-simulator": "^0.8.0",
     "assert-ts": "^0.3.4",
     "base64-url": "^2.3.3",
