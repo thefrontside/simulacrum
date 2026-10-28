@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0]
+
+### Dependencies
+
+- [`56bb038`](https://github.com/thefrontside/simulacrum/commit/56bb038c87147159e3ba0ba9e67ea8f9b832a282) ([#385](https://github.com/thefrontside/simulacrum/pull/385) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Update to `zod` v4.
+- [`b00a8d0`](https://github.com/thefrontside/simulacrum/commit/b00a8d0f8b94f8eeca06c5824ba842d2d6692908) ([#387](https://github.com/thefrontside/simulacrum/pull/387) by [@jbolda](https://github.com/thefrontside/simulacrum/../../jbolda)) Use the workspace catalog for `@faker-js/faker` v10.6.0 in Auth0 and GitHub API.
+
 ## \[0.8.0]
 
 ### Enhancements
