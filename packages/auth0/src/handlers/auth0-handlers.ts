@@ -114,7 +114,11 @@ export const createAuth0Handlers = (
       assert(!!responseClientID, `no clientID assigned`);
 
       let signup = !options.disableSignup && query.screen_hint === "signup";
-      let switchModeQuery = new URLSearchParams(req.query as Record<string, string>);
+      // appended one by one, as URLSearchParams would join a repeated value with commas
+      let switchModeQuery = new URLSearchParams();
+      for (let [key, value] of Object.entries(req.query)) {
+        for (let item of [value].flat()) switchModeQuery.append(key, String(item));
+      }
       if (signup) switchModeQuery.delete("screen_hint");
       else switchModeQuery.set("screen_hint", "signup");
 
@@ -126,7 +130,8 @@ export const createAuth0Handlers = (
         audience: responseAudience,
         loginFailed: false,
         signup,
-        loginHint: query.login_hint,
+        // a repeated login_hint arrives as an array
+        loginHint: typeof query.login_hint === "string" ? query.login_hint : undefined,
         ...(!options.disableSignup && { switchModeUrl: `/login?${switchModeQuery}` }),
       });
 
