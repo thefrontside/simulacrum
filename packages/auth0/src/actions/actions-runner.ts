@@ -177,8 +177,17 @@ const restrictedClaims = new Set([
 ]);
 
 const setClaim = (claims: Record<string, unknown>, name: string, value: unknown) => {
-  if (restrictedClaims.has(name)) console.warn(`ignoring the restricted claim "${name}"`);
-  else claims[name] = value;
+  if (restrictedClaims.has(name)) {
+    console.warn(`ignoring the restricted claim "${name}"`);
+    return;
+  }
+  // defined rather than assigned, so that a `__proto__` claim is set like any other
+  Object.defineProperty(claims, name, {
+    value,
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
 };
 
 // Auth0 ends the whole run of a trigger with an error once it takes over 20 seconds

@@ -169,6 +169,19 @@ describe("actions runner", () => {
     expect(result.accessTokenClaims).toEqual({ kept: true });
   });
 
+  it("sets a __proto__ claim as its own claim", async () => {
+    let runner = createActionsRunner([
+      {
+        code: `exports.onExecutePostLogin = async (event, api) => { api.idToken.setCustomClaim("__proto__", { admin: true }); };`,
+      },
+    ]);
+
+    let { idTokenClaims } = await runner.postLogin(event());
+
+    expect(Object.keys(idTokenClaims)).toEqual(["__proto__"]);
+    expect(Object.getPrototypeOf(idTokenClaims)).toBe(Object.prototype);
+  });
+
   it("keeps an action's cache across executions", async () => {
     let runner = createActionsRunner([
       {
