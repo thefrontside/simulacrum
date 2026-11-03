@@ -247,6 +247,8 @@ exports.onExecutePostLogin = async (event, api) => {
 };
 ```
 
+An action is always evaluated as CommonJS, whatever the `type` of the package it sits in, so it runs the same whether your project is ESM or CommonJS. Its `require` resolves from the action's file, for Node built-ins and npm dependencies. Requiring another of your own files follows Node's rules, so in a `"type": "module"` package give a CommonJS helper the `.cjs` extension. (In Auth0 an action can only require its npm dependencies.)
+
 Actions run on every login and refresh token exchange through `/oauth/token`, after any [rules](#rules). The simulator provides this subset of the post-login trigger:
 
 - `event`: `user` (including `user_metadata` and `app_metadata`), `secrets`, `stats.logins_count`, `client.client_id`, `connection`, `transaction.protocol`, `transaction.requested_scopes`, `resource_server.identifier`, `authorization.roles` (always empty) and `request` (`ip`, `hostname`, `method`, `user_agent` and `query`).

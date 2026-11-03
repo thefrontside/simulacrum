@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { describe, it, beforeEach, afterEach, expect } from "vitest";
 import { decodeJwt } from "jose";
 import type { FoundationSimulatorListening } from "@simulacrum/foundation-simulator";
@@ -191,6 +192,16 @@ describe("actions runner", () => {
     let result = await runner.postLogin(event());
 
     expect(result.idTokenClaims).toEqual({ greeting: "hello from a sibling module" });
+  });
+
+  it("evaluates an action as CommonJS even in a package that is ESM", async () => {
+    let runner = createActionsRunner([{ file: "test/fixtures/actions/esm-package/post-login.js" }]);
+
+    let result = await runner.postLogin(event());
+
+    expect(result.idTokenClaims).toEqual({
+      user_hash: createHash("sha256").update("auth0|alice").digest("hex"),
+    });
   });
 
   it("skips actions that don't handle post-login", async () => {
