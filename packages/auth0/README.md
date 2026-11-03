@@ -257,7 +257,7 @@ Actions run on every login and refresh token exchange through `/oauth/token`, af
 - `api.access.deny`, which answers `/oauth/token` with a `403` `access_denied`.
 - `api.cache`, kept for the life of the simulation.
 
-Metadata is never added to the tokens unless an action sets it as a claim. An error thrown by an action ends the flow, as `api.access.deny` does, and `/oauth/token` responds with that error.
+Metadata is never added to the tokens unless an action sets it as a claim. An error thrown by an action ends the flow, as `api.access.deny` does, and `/oauth/token` responds with that error. As in Auth0, the actions together have 20 seconds to finish, after which the flow ends with a `Script execution time exceeded` error.
 
 Unlike Auth0, actions run when `/oauth/token` issues the tokens rather than during `/authorize`. So in the authorization code flow, a denied login fails at the code exchange rather than redirecting with an error, and `event.request` describes the `/oauth/token` request rather than the original `/authorize` parameters.
 

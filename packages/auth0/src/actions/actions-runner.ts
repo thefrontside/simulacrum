@@ -119,7 +119,12 @@ const setClaim = (claims: Record<string, unknown>, name: string, value: unknown)
   else claims[name] = value;
 };
 
-export function createActionsRunner(actions: ActionConfig[] | undefined): ActionsRunner {
+// Auth0 ends the whole run of a trigger with an error once it takes over 20 seconds
+// https://auth0.com/docs/customize/actions/limitations
+export function createActionsRunner(
+  actions: ActionConfig[] | undefined,
+  { timeLimit = 20_000 }: { timeLimit?: number } = {},
+): ActionsRunner {
   let loaded = (actions ?? []).map(loadAction);
 
   return {
@@ -127,6 +132,7 @@ export function createActionsRunner(actions: ActionConfig[] | undefined): Action
       // actions see each other's metadata changes, but not the store's copy
       let user = structuredClone(input.user);
       let result: PostLoginResult = { idTokenClaims: {}, accessTokenClaims: {} };
+      let deadline = Date.now() + timeLimit;
 
       for (let action of loaded) {
         if (!action.onExecutePostLogin) continue;
@@ -165,10 +171,21 @@ export function createActionsRunner(actions: ActionConfig[] | undefined): Action
           cache: action.cache,
         };
 
+        let timer: ReturnType<typeof setTimeout> | undefined;
         try {
-          await action.onExecutePostLogin({ ...input, user, secrets: action.secrets }, api);
+          await Promise.race([
+            action.onExecutePostLogin({ ...input, user, secrets: action.secrets }, api),
+            new Promise((_, reject) => {
+              timer = setTimeout(
+                () => reject(new Error("Script execution time exceeded")),
+                deadline - Date.now(),
+              );
+            }),
+          ]);
         } catch (error) {
           result.error = error;
+        } finally {
+          clearTimeout(timer);
         }
 
         // a failed or denied login runs no further actions, but keeps the metadata changes made so far

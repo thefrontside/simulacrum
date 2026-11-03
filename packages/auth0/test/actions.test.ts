@@ -204,6 +204,34 @@ describe("actions runner", () => {
     });
   });
 
+  it("ends with an error when an action doesn't settle in time", async () => {
+    let runner = createActionsRunner(
+      [{ code: `exports.onExecutePostLogin = () => new Promise(() => {});` }],
+      { timeLimit: 20 },
+    );
+
+    let result = await runner.postLogin(event());
+
+    expect(result.error).toEqual(new Error("Script execution time exceeded"));
+  });
+
+  it("limits the time of the whole run, not of each action", async () => {
+    let sleepThenClaim = (name: string) => ({
+      code: `exports.onExecutePostLogin = async (event, api) => {
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        api.idToken.setCustomClaim("${name}", true);
+      };`,
+    });
+    let runner = createActionsRunner([sleepThenClaim("first"), sleepThenClaim("second")], {
+      timeLimit: 50,
+    });
+
+    let result = await runner.postLogin(event());
+
+    expect(result.idTokenClaims).toEqual({ first: true });
+    expect(result.error).toEqual(new Error("Script execution time exceeded"));
+  });
+
   it("skips actions that don't handle post-login", async () => {
     let runner = createActionsRunner([
       { code: `exports.onExecuteCredentialsExchange = async () => { throw new Error("no"); };` },
