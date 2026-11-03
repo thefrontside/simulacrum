@@ -11,6 +11,7 @@ import {
   printHelp,
   printVersion,
   schema,
+  toggle,
   transform,
   version,
   type EnvSource,
@@ -18,7 +19,7 @@ import {
 } from "@bomb.sh/router";
 import { z } from "zod";
 import { getConfigSources, sourceConfig } from "./config-sources.ts";
-import type { Auth0Configuration } from "../types.ts";
+import { actionSchema, type Auth0Configuration } from "../types.ts";
 
 const pkg: {
   name: "@simulacrum/auth0-simulator";
@@ -56,7 +57,9 @@ const configFields = {
     ])
     .optional(),
   rulesDirectory: z.string().optional(),
+  actions: z.array(actionSchema).optional(),
   connection: z.string().optional(),
+  disableSignup: z.boolean().optional(),
 };
 
 // strict schema throws errors of unrecognized keys
@@ -129,7 +132,13 @@ export const auth0App = command(
     description("directory containing auth0 rules"),
     schema(configFields.rulesDirectory),
   ),
+  option(
+    name("actions"),
+    description("post-login actions to run, in order"),
+    schema(configFields.actions),
+  ),
   option(name("connection"), description("auth0 connection"), schema(configFields.connection)),
+  toggle(name("disableSignup"), description("refuse public signups")),
   option(name("protocol"), description("server protocol"), schema(configFields.protocol)),
   // to normalize protocol, domain an port
   transform(configSchema),

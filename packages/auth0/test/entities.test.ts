@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { auth0InitialStoreSchema, convertInitialStateToStoreState } from "../src/store/entities.ts";
+import {
+  auth0InitialStoreSchema,
+  convertInitialStateToStoreState,
+  mergeMetadata,
+} from "../src/store/entities.ts";
 
 describe("initialState user fields", () => {
   it("preserves all provided fields through to store state", () => {
@@ -34,5 +38,62 @@ describe("initialState user fields", () => {
 
     expect(user.id).toBeTruthy();
     expect(user.email).toContain("@");
+  });
+
+  it("keeps user_metadata and app_metadata", () => {
+    const parsed = auth0InitialStoreSchema.parse({
+      users: [
+        {
+          name: "dev",
+          user_metadata: { theme: "dark" },
+          app_metadata: { organisation_id: "org_123", roles: ["admin"] },
+        },
+      ],
+    });
+    const user = Object.values(convertInitialStateToStoreState(parsed)!.users)[0];
+
+    expect(user.user_metadata).toEqual({ theme: "dark" });
+    expect(user.app_metadata).toEqual({ organisation_id: "org_123", roles: ["admin"] });
+  });
+
+  it("defaults metadata to empty objects", () => {
+    const parsed = auth0InitialStoreSchema.parse({ users: [{ name: "dev" }] });
+    const user = Object.values(convertInitialStateToStoreState(parsed)!.users)[0];
+
+    expect(user.user_metadata).toEqual({});
+    expect(user.app_metadata).toEqual({});
+  });
+
+  it("defaults logins_count to zero, or keeps a seeded count", () => {
+    const parsed = auth0InitialStoreSchema.parse({
+      users: [{ name: "new" }, { name: "returning", logins_count: 5 }],
+    });
+
+    expect(parsed.users.map((user) => user.logins_count)).toEqual([0, 5]);
+  });
+});
+
+describe("mergeMetadata", () => {
+  it("replaces top-level keys and removes those set to null", () => {
+    expect(
+      mergeMetadata(
+        { plan: "free", prefs: { theme: "dark" }, team: "a" },
+        {
+          plan: "pro",
+          prefs: { lang: "nl" },
+          team: null,
+        },
+      ),
+    ).toEqual({ plan: "pro", prefs: { lang: "nl" } });
+  });
+
+  it("stores a __proto__ key as its own property", () => {
+    let merged = mergeMetadata({}, JSON.parse('{"__proto__": {"admin": true}}'));
+
+    expect(Object.keys(merged)).toEqual(["__proto__"]);
+    expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
+    expect(JSON.parse(JSON.stringify(merged))).toEqual(
+      JSON.parse('{"__proto__": {"admin": true}}'),
+    );
   });
 });
