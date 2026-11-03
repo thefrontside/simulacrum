@@ -185,19 +185,23 @@ const runPostLoginActions = async ({
   // a refresh token exchange runs the actions but isn't a login
   let logins = grant_type === "refresh_token" ? 0 : 1;
 
-  // counted before the actions run, so that overlapping logins each see their own count
+  // counted before the actions run, so that overlapping logins each see their own count, and the
+  // user read back as it is now, since the store may have changed while the rules ran. The update
+  // is synchronous, so nothing comes between the two.
   let { schema, store, actions } = simulationStore;
-  let logins_count = user.logins_count + logins;
   store.dispatch(
     actions.batchUpdater([
       (state) => {
         let current = schema.users.selectById(state, { id: user.id });
         if (!current) return;
-        logins_count = current.logins_count + logins;
-        schema.users.patch({ [user.id]: { logins_count } })(state);
+        schema.users.patch({ [user.id]: { logins_count: current.logins_count + logins } })(state);
       },
     ]),
   );
+  user = schema.users.selectById(store.getState(), { id: user.id }) ?? {
+    ...user,
+    logins_count: user.logins_count + logins,
+  };
 
   let result = await actionsRunner.postLogin({
     user: {
@@ -218,7 +222,7 @@ const runPostLoginActions = async ({
       ],
     },
     request,
-    stats: { logins_count },
+    stats: { logins_count: user.logins_count },
     client: { client_id: clientID },
     authorization: { roles: [] },
     resource_server: { identifier: audience },

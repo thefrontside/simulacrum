@@ -441,6 +441,27 @@ describe("post-login actions on /oauth/token", () => {
     });
   });
 
+  describe("metadata after slow rules", () => {
+    beforeEach(async () => {
+      server = await simulation({
+        initialState: { users: [person] },
+        options: {
+          rulesDirectory: "test/fixtures/rules-slow",
+          actions: [{ file: "test/fixtures/actions/count-visits.js" }],
+        },
+      }).listen(port);
+    });
+
+    it("shows the metadata an overlapping login stored while the rules ran", async () => {
+      let first = login();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      await Promise.all([first, login()]);
+      let { id_token } = (await (await login()).json()) as Record<string, string>;
+
+      expect(decodeJwt(id_token).visits).toBe(3);
+    });
+  });
+
   describe("metadata removal", () => {
     beforeEach(async () => {
       await start("test/fixtures/actions/remove-organisation.js");
