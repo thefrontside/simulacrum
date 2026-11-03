@@ -315,10 +315,13 @@ describe("post-login actions on /oauth/token", () => {
     });
 
     it("counts overlapping logins", async () => {
-      await Promise.all([login(), login()]);
-      let { id_token } = (await (await login()).json()) as Record<string, string>;
+      let logins = async () => {
+        let { id_token } = (await (await login()).json()) as Record<string, string>;
+        return decodeJwt(id_token)["https://ns/logins"];
+      };
 
-      expect(decodeJwt(id_token)["https://ns/logins"]).toBe(3);
+      expect((await Promise.all([logins(), logins()])).sort()).toEqual([1, 2]);
+      expect(await logins()).toBe(3);
     });
 
     it("keeps metadata out of the tokens unless an action adds it", async () => {

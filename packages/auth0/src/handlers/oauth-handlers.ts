@@ -185,6 +185,20 @@ const runPostLoginActions = async ({
   // a refresh token exchange runs the actions but isn't a login
   let logins = grant_type === "refresh_token" ? 0 : 1;
 
+  // counted before the actions run, so that overlapping logins each see their own count
+  let { schema, store, actions } = simulationStore;
+  let logins_count = user.logins_count + logins;
+  store.dispatch(
+    actions.batchUpdater([
+      (state) => {
+        let current = schema.users.selectById(state, { id: user.id });
+        if (!current) return;
+        logins_count = current.logins_count + logins;
+        schema.users.patch({ [user.id]: { logins_count } })(state);
+      },
+    ]),
+  );
+
   let result = await actionsRunner.postLogin({
     user: {
       user_id: user.id,
@@ -204,7 +218,7 @@ const runPostLoginActions = async ({
       ],
     },
     request,
-    stats: { logins_count: user.logins_count + logins },
+    stats: { logins_count },
     client: { client_id: clientID },
     authorization: { roles: [] },
     resource_server: { identifier: audience },
@@ -213,7 +227,6 @@ const runPostLoginActions = async ({
   });
 
   // applied to the user as it is now, which overlapping logins or the Management API may have changed
-  let { schema, store, actions } = simulationStore;
   store.dispatch(
     actions.batchUpdater([
       (state) => {
@@ -221,7 +234,6 @@ const runPostLoginActions = async ({
         if (!current) return; // deleted while the actions ran
         schema.users.patch({
           [user.id]: {
-            logins_count: current.logins_count + logins,
             user_metadata: mergeMetadata(current.user_metadata, result.userMetadata),
             app_metadata: mergeMetadata(current.app_metadata, result.appMetadata),
           },
