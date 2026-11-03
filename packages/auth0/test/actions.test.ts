@@ -360,6 +360,20 @@ describe("post-login actions on /oauth/token", () => {
     });
   });
 
+  describe("metadata removal", () => {
+    beforeEach(async () => {
+      await start("test/fixtures/actions/remove-organisation.js");
+    });
+
+    it("removes a key set to null from the stored user", async () => {
+      let first = (await (await login()).json()) as Record<string, string>;
+      let second = (await (await login()).json()) as Record<string, string>;
+
+      expect(decodeJwt(first.id_token).had_organisation).toBe(true);
+      expect(decodeJwt(second.id_token).had_organisation).toBe(false);
+    });
+  });
+
   describe("access.deny", () => {
     beforeEach(async () => {
       await start("test/fixtures/actions/deny.js");
