@@ -31,11 +31,14 @@ describe("signup", () => {
       body: JSON.stringify({ grant_type: "password", client_id: clientId, username, password }),
     });
 
-  let loginPage = async (query: Record<string, string>) => {
+  let loginPage = async (query: Record<string, string | string[]>) => {
     let res = await fetch(`${auth0Url}/login?${stringify({ client_id: clientId, ...query })}`);
     expect(res.status).toBe(200);
     return res.text();
   };
+
+  let switchHref = (html: string) =>
+    new URL(html.match(/id="switch-mode"[^>]*href="([^"]+)"/)![1].replace(/&amp;/g, "&"), auth0Url);
 
   beforeAll(async () => {
     server = await simulation({ initialState: { users: [seeded] } }).listen(basePort);
@@ -95,12 +98,6 @@ describe("signup", () => {
     });
 
     it("links between login and signup, keeping the rest of the query", async () => {
-      let switchHref = (html: string) =>
-        new URL(
-          html.match(/id="switch-mode"[^>]*href="([^"]+)"/)![1].replace(/&amp;/g, "&"),
-          auth0Url,
-        );
-
       let toSignup = switchHref(await loginPage({ state: "s" }));
       expect(toSignup.searchParams.get("screen_hint")).toBe("signup");
       expect(toSignup.searchParams.get("state")).toBe("s");
@@ -110,10 +107,20 @@ describe("signup", () => {
       expect(toLogin.searchParams.get("state")).toBe("s");
     });
 
+    it("keeps repeated query values apart in the switch link", async () => {
+      let toSignup = switchHref(await loginPage({ state: ["a", "b"] }));
+      expect(toSignup.searchParams.getAll("state")).toEqual(["a", "b"]);
+    });
+
     it("escapes login_hint", async () => {
       let html = await loginPage({ login_hint: '"><script>alert(1)</script>' });
       expect(html).not.toContain("<script>alert(1)</script>");
       expect(html).toContain("&quot;&gt;&lt;script&gt;");
+    });
+
+    it("ignores a repeated login_hint", async () => {
+      let html = await loginPage({ login_hint: ["a@example.com", "b@example.com"] });
+      expect(html).not.toContain('value="a@example.com"');
     });
   });
 
