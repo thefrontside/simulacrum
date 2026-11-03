@@ -111,11 +111,73 @@ const loadAction = (config: ActionConfig, index: number): LoadedAction => {
   return { secrets, cache: createCache(), onExecutePostLogin: module.exports.onExecutePostLogin };
 };
 
-// Auth0 ignores custom claims that would overwrite these
-const registeredClaims = new Set(["iss", "sub", "aud", "exp", "nbf", "iat", "jti"]);
+// Auth0 ignores custom claims that would set the OIDC and OAuth claims or its own
+// https://auth0.com/docs/secure/tokens/json-web-tokens/create-custom-claims
+const restrictedClaims = new Set([
+  "acr",
+  "act",
+  "active",
+  "amr",
+  "at_hash",
+  "ath",
+  "attest",
+  "aud",
+  "auth_time",
+  "authorization_details",
+  "azp",
+  "c_hash",
+  "client_id",
+  "cnf",
+  "cty",
+  "dest",
+  "entitlements",
+  "events",
+  "exp",
+  "groups",
+  "gty",
+  "htm",
+  "htu",
+  "iat",
+  "internalService",
+  "iss",
+  "jcard",
+  "jku",
+  "jti",
+  "jwe",
+  "jwk",
+  "kid",
+  "may_act",
+  "mky",
+  "nbf",
+  "nonce",
+  "object_id",
+  "org_id",
+  "org_name",
+  "orig",
+  "origid",
+  "permissions",
+  "roles",
+  "rph",
+  "s_hash",
+  "sid",
+  "sip_callid",
+  "sip_cseq_num",
+  "sip_date",
+  "sip_from_tag",
+  "sip_via_branch",
+  "sub",
+  "sub_jwk",
+  "toe",
+  "txn",
+  "typ",
+  "uuid",
+  "vot",
+  "vtm",
+  "x5t#S256",
+]);
 
 const setClaim = (claims: Record<string, unknown>, name: string, value: unknown) => {
-  if (registeredClaims.has(name)) console.warn(`ignoring the restricted claim "${name}"`);
+  if (restrictedClaims.has(name)) console.warn(`ignoring the restricted claim "${name}"`);
   else claims[name] = value;
 };
 

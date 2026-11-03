@@ -150,12 +150,14 @@ describe("actions runner", () => {
     expect(result.userMetadata).toEqual({ tried: true });
   });
 
-  it("ignores registered JWT claims, as Auth0 does", async () => {
+  it("ignores the claims Auth0 restricts", async () => {
     let runner = createActionsRunner([
       {
         code: `exports.onExecutePostLogin = async (event, api) => {
           api.idToken.setCustomClaim("sub", "someone-else");
           api.accessToken.setCustomClaim("aud", "elsewhere");
+          api.accessToken.setCustomClaim("gty", "password");
+          api.accessToken.setCustomClaim("permissions", ["admin"]);
           api.accessToken.setCustomClaim("kept", true);
         };`,
       },

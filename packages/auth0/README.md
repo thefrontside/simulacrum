@@ -252,7 +252,7 @@ An action is always evaluated as CommonJS, whatever the `type` of the package it
 Actions run on every login and refresh token exchange through `/oauth/token`, after any [rules](#rules). The simulator provides this subset of the post-login trigger:
 
 - `event`: `user` (including `user_metadata` and `app_metadata`), `secrets`, `stats.logins_count`, `client.client_id`, `connection`, `transaction.protocol`, `transaction.requested_scopes`, `resource_server.identifier`, `authorization.roles` (always empty) and `request` (`ip`, `hostname`, `method`, `user_agent` and `query`).
-- `api.idToken.setCustomClaim` and `api.accessToken.setCustomClaim`. As in Auth0, the registered claims (`iss`, `sub`, `aud`, `exp`, `nbf`, `iat`, `jti`) can't be overwritten.
+- `api.idToken.setCustomClaim` and `api.accessToken.setCustomClaim`. As in Auth0, the claims it restricts (the OIDC and OAuth claims such as `iss`, `sub`, `aud`, `azp` and `gty`, and its own such as `org_id` and `permissions`) are ignored.
 - `api.user.setUserMetadata` and `api.user.setAppMetadata`. Setting a key to `null` removes it. Later actions see the change, and the user is updated once all actions have run.
 - `api.access.deny`, which answers `/oauth/token` with a `403` `access_denied`.
 - `api.cache`, kept for the life of the simulation.
