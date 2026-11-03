@@ -116,7 +116,7 @@ export const createTokens = async ({
     simulationStore,
     user,
     grant_type,
-    connection: body.connection ?? "Username-Password-Authentication",
+    connection: connectionOf(grant_type, body),
     request,
     clientID,
     audience,
@@ -161,6 +161,18 @@ const protocolOf = (grant_type: GrantType) =>
     refresh_token: "oauth2-refresh-token",
   })[grant_type as string] ?? "oidc-basic-profile";
 
+// a passwordless login goes through the email or sms connection its realm names
+const connectionOf = (
+  grant_type: GrantType,
+  body: Request["body"],
+): PostLoginEvent["connection"] => {
+  if (grant_type !== "http://auth0.com/oauth/grant-type/passwordless/otp") {
+    return { name: body.connection ?? "Username-Password-Authentication", strategy: "auth0" };
+  }
+  let name = body.realm === "sms" ? "sms" : "email";
+  return { name, strategy: name };
+};
+
 const runPostLoginActions = async ({
   actionsRunner,
   simulationStore,
@@ -176,7 +188,7 @@ const runPostLoginActions = async ({
   simulationStore: ExtendedSimulationStore;
   user: Auth0User;
   grant_type: GrantType;
-  connection: string;
+  connection: PostLoginEvent["connection"];
   request: PostLoginEvent["request"];
   clientID: string;
   audience: string;
@@ -214,9 +226,9 @@ const runPostLoginActions = async ({
       app_metadata: user.app_metadata,
       identities: [
         {
-          provider: "auth0",
+          provider: connection.strategy,
           user_id: user.id.replace(/^auth0\|/, ""),
-          connection,
+          connection: connection.name,
           isSocial: false,
         },
       ],
@@ -226,7 +238,7 @@ const runPostLoginActions = async ({
     client: { client_id: clientID },
     authorization: { roles: [] },
     resource_server: { identifier: audience },
-    connection: { name: connection, strategy: "auth0" },
+    connection,
     transaction: { protocol: protocolOf(grant_type), requested_scopes: scope.split(" ") },
   });
 

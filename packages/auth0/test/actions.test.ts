@@ -441,6 +441,40 @@ describe("post-login actions on /oauth/token", () => {
     });
   });
 
+  describe("event.connection", () => {
+    beforeEach(async () => {
+      await start("test/fixtures/actions/connection.js");
+    });
+
+    let claims = async (body: Record<string, string>) => {
+      let { id_token } = (await (await token(body)).json()) as Record<string, string>;
+      return decodeJwt(id_token);
+    };
+    let otp = "http://auth0.com/oauth/grant-type/passwordless/otp";
+
+    it("is the database connection for a password login", async () => {
+      expect(
+        await claims({ grant_type: "password", username: person.email, password: person.password }),
+      ).toMatchObject({
+        connection: { name: "Username-Password-Authentication", strategy: "auth0" },
+        provider: "auth0",
+      });
+    });
+
+    it("is the passwordless connection its realm names for an OTP login", async () => {
+      expect(await claims({ grant_type: otp, username: person.email, realm: "sms" })).toMatchObject(
+        {
+          connection: { name: "sms", strategy: "sms" },
+          provider: "sms",
+        },
+      );
+      expect(await claims({ grant_type: otp, username: person.email })).toMatchObject({
+        connection: { name: "email", strategy: "email" },
+        provider: "email",
+      });
+    });
+  });
+
   describe("metadata after slow rules", () => {
     beforeEach(async () => {
       server = await simulation({
