@@ -208,38 +208,49 @@ export function createActionsRunner(
       for (let action of loaded) {
         if (!action.onExecutePostLogin) continue;
 
+        // an action still running after its execution ended, as when it ran out of time,
+        // can no longer change the login or the cache, as in Auth0 where its sandbox is gone
+        let active = true;
+        let { cache } = action;
         let api = {
           access: {
             deny: (reason: string) => {
-              result.denied = reason;
+              if (active) result.denied = reason;
               return api;
             },
           },
           idToken: {
             setCustomClaim: (name: string, value: unknown) => {
-              setClaim(result.idTokenClaims, name, value);
+              if (active) setClaim(result.idTokenClaims, name, value);
               return api;
             },
           },
           accessToken: {
             setCustomClaim: (name: string, value: unknown) => {
-              setClaim(result.accessTokenClaims, name, value);
+              if (active) setClaim(result.accessTokenClaims, name, value);
               return api;
             },
           },
           user: {
             setUserMetadata: (name: string, value: unknown) => {
+              if (!active) return api;
               result.userMetadata = { ...result.userMetadata, [name]: value };
               user.user_metadata = mergeMetadata(user.user_metadata, { [name]: value });
               return api;
             },
             setAppMetadata: (name: string, value: unknown) => {
+              if (!active) return api;
               result.appMetadata = { ...result.appMetadata, [name]: value };
               user.app_metadata = mergeMetadata(user.app_metadata, { [name]: value });
               return api;
             },
           },
-          cache: action.cache,
+          cache: {
+            get: cache.get,
+            set: (...args: Parameters<typeof cache.set>) =>
+              active ? cache.set(...args) : { type: "error" },
+            delete: (key: string) => (active ? cache.delete(key) : { type: "error" }),
+          },
         };
 
         let timer: ReturnType<typeof setTimeout> | undefined;
@@ -256,6 +267,7 @@ export function createActionsRunner(
         } catch (error) {
           result.error = error;
         } finally {
+          active = false;
           clearTimeout(timer);
         }
 

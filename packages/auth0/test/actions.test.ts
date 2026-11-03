@@ -247,6 +247,32 @@ describe("actions runner", () => {
     expect(result.error).toEqual(new Error("Script execution time exceeded"));
   });
 
+  it("ignores what an action does after it ran out of time", async () => {
+    let runner = createActionsRunner(
+      [
+        {
+          code: `exports.onExecutePostLogin = async (event, api) => {
+            api.idToken.setCustomClaim("cached", api.cache.get("late")?.value ?? null);
+            await new Promise((resolve) => setTimeout(resolve, 30));
+            api.cache.set("late", "written after the time limit");
+            api.idToken.setCustomClaim("late", true);
+            api.user.setUserMetadata("late", true);
+          };`,
+        },
+      ],
+      { timeLimit: 10 },
+    );
+
+    let first = await runner.postLogin(event());
+    await new Promise((resolve) => setTimeout(resolve, 40));
+    let second = await runner.postLogin(event());
+
+    expect(first.error).toEqual(new Error("Script execution time exceeded"));
+    expect(first.idTokenClaims).toEqual({ cached: null });
+    expect(first.userMetadata).toBeUndefined();
+    expect(second.idTokenClaims).toEqual({ cached: null });
+  });
+
   it("skips actions that don't handle post-login", async () => {
     let runner = createActionsRunner([
       { code: `exports.onExecuteCredentialsExchange = async () => { throw new Error("no"); };` },
