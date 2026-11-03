@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { auth0InitialStoreSchema, convertInitialStateToStoreState } from "../src/store/entities.ts";
+import {
+  auth0InitialStoreSchema,
+  convertInitialStateToStoreState,
+  mergeMetadata,
+} from "../src/store/entities.ts";
 
 describe("initialState user fields", () => {
   it("preserves all provided fields through to store state", () => {
@@ -66,5 +70,30 @@ describe("initialState user fields", () => {
     });
 
     expect(parsed.users.map((user) => user.logins_count)).toEqual([0, 5]);
+  });
+});
+
+describe("mergeMetadata", () => {
+  it("replaces top-level keys and removes those set to null", () => {
+    expect(
+      mergeMetadata(
+        { plan: "free", prefs: { theme: "dark" }, team: "a" },
+        {
+          plan: "pro",
+          prefs: { lang: "nl" },
+          team: null,
+        },
+      ),
+    ).toEqual({ plan: "pro", prefs: { lang: "nl" } });
+  });
+
+  it("stores a __proto__ key as its own property", () => {
+    let merged = mergeMetadata({}, JSON.parse('{"__proto__": {"admin": true}}'));
+
+    expect(Object.keys(merged)).toEqual(["__proto__"]);
+    expect(Object.getPrototypeOf(merged)).toBe(Object.prototype);
+    expect(JSON.parse(JSON.stringify(merged))).toEqual(
+      JSON.parse('{"__proto__": {"admin": true}}'),
+    );
   });
 });

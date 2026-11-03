@@ -25,12 +25,13 @@ export type Metadata = Record<string, unknown>;
 // Top-level merge as Auth0 does it: nested objects are replaced, and `null` removes a key.
 export const mergeMetadata = (current: Metadata, update: unknown): Metadata => {
   if (!update || typeof update !== "object") return current;
-  let merged = { ...current };
+  // a Map rather than assignment, so that a `__proto__` key is stored like any other
+  let merged = new Map(Object.entries(current));
   for (let [key, value] of Object.entries(update)) {
-    if (value === null) delete merged[key];
-    else merged[key] = value;
+    if (value === null) merged.delete(key);
+    else merged.set(key, value);
   }
-  return merged;
+  return Object.fromEntries(merged);
 };
 export const defaultUser = auth0UserSchema.parse({
   name: "default",
