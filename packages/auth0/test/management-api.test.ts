@@ -49,6 +49,7 @@ describe("Management API", () => {
         actions: [
           {
             code: `exports.onExecutePostLogin = async (event, api) => {
+              if (event.user.app_metadata.slow) await new Promise((resolve) => setTimeout(resolve, 50));
               api.accessToken.setCustomClaim("https://example.nl/org", event.user.app_metadata.organisation_id);
             };`,
           },
@@ -303,6 +304,20 @@ describe("Management API", () => {
 
       expect((await login("doomed@example.com", "pw")).status).toBe(401);
       expect((await api(`/users/${encodeURIComponent(user.user_id)}`)).status).toBe(404);
+    });
+
+    it("refuses a login whose user is deleted while its actions run", async () => {
+      let user = await createUser({
+        email: "mid-login@example.com",
+        password: "pw",
+        app_metadata: { slow: true },
+      });
+
+      let loggingIn = login("mid-login@example.com", "pw");
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      await api(`/users/${encodeURIComponent(user.user_id)}`, { method: "DELETE" });
+
+      expect((await loggingIn).status).toBe(401);
     });
   });
 
