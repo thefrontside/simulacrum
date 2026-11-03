@@ -259,6 +259,8 @@ const runPostLoginActions = async ({
 
   if (result.error !== undefined) throw result.error;
   if (result.denied !== undefined) throw new AccessDeniedError(result.denied);
+  // a user deleted while the actions ran can't log in
+  assert(!!schema.users.selectById(store.getState(), { id: user.id }), "401::Unauthorized");
 
   return result;
 };
