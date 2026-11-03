@@ -127,8 +127,8 @@ export const createTokens = async ({
     access_token: await new SignJWT({
       ...accessToken,
       ...context.accessToken,
-      ...actions.accessTokenClaims,
       ...(scope.split(" ").includes("email") ? { email: user.email } : {}),
+      ...actions.accessTokenClaims,
     })
       .setProtectedHeader({ alg: "RS256", kid: JWKS.keys[0].kid })
       .setIssuedAt()

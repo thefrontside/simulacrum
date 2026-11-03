@@ -360,6 +360,18 @@ describe("post-login actions on /oauth/token", () => {
     });
   });
 
+  describe("an email claim", () => {
+    beforeEach(async () => {
+      await start("test/fixtures/actions/set-email.js");
+    });
+
+    it("keeps the action's value over the one the email scope adds", async () => {
+      let { access_token } = (await (await login()).json()) as Record<string, string>;
+
+      expect(decodeJwt(access_token).email).toBe("work@example.com");
+    });
+  });
+
   describe("metadata removal", () => {
     beforeEach(async () => {
       await start("test/fixtures/actions/remove-organisation.js");
