@@ -226,6 +226,25 @@ describe("Management API", () => {
       expect(patched.app_metadata).toEqual({ b: 2 });
     });
 
+    it("rejects metadata that isn't an object", async () => {
+      let user = await createUser({ email: "not-an-object@example.com", user_metadata: { a: 1 } });
+      let patch = (body: unknown) =>
+        api(`/users/${encodeURIComponent(user.user_id)}`, { method: "PATCH", body });
+
+      let res = await patch({ user_metadata: ["x"] });
+      expect(res.status).toBe(400);
+      expect(await res.json()).toMatchObject({
+        message:
+          "Payload validation error: 'Expected type object but found type array' on property user_metadata.",
+      });
+      expect((await patch({ app_metadata: "x" })).status).toBe(400);
+
+      let unchanged = (await (await api(`/users/${encodeURIComponent(user.user_id)}`)).json()) as {
+        user_metadata: unknown;
+      };
+      expect(unchanged.user_metadata).toEqual({ a: 1 });
+    });
+
     it("shows a metadata update in the next token, including for seeded users", async () => {
       let claim = async () => {
         let res = await login(seeded.email, seeded.password);

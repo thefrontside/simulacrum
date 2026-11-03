@@ -147,6 +147,17 @@ export const createManagementApiHandlers = (
       if (!user) return sendError(res, 404, "The user does not exist.", "inexistent_user");
 
       let body = req.body ?? {};
+      for (let field of ["user_metadata", "app_metadata"] as const) {
+        let value = body[field];
+        let type = Array.isArray(value) ? "array" : typeof value;
+        if (value !== undefined && value !== null && type !== "object") {
+          return sendError(
+            res,
+            400,
+            `Payload validation error: 'Expected type object but found type ${type}' on property ${field}.`,
+          );
+        }
+      }
       let parsed = auth0UserSchema.safeParse({
         ...user,
         ...(typeof body.name === "string" && { name: body.name }),
