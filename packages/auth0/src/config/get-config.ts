@@ -18,7 +18,7 @@ import {
 } from "@bomb.sh/router";
 import { z } from "zod";
 import { getConfigSources, sourceConfig } from "./config-sources.ts";
-import type { Auth0Configuration } from "../types.ts";
+import { actionSchema, type Auth0Configuration } from "../types.ts";
 
 const pkg: {
   name: "@simulacrum/auth0-simulator";
@@ -56,6 +56,7 @@ const configFields = {
     ])
     .optional(),
   rulesDirectory: z.string().optional(),
+  actions: z.array(actionSchema).optional(),
   connection: z.string().optional(),
 };
 
@@ -128,6 +129,11 @@ export const auth0App = command(
     name("rulesDirectory"),
     description("directory containing auth0 rules"),
     schema(configFields.rulesDirectory),
+  ),
+  option(
+    name("actions"),
+    description("post-login actions to run, in order"),
+    schema(configFields.actions),
   ),
   option(name("connection"), description("auth0 connection"), schema(configFields.connection)),
   option(name("protocol"), description("server protocol"), schema(configFields.protocol)),

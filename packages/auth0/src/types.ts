@@ -1,3 +1,20 @@
+import { z } from "zod";
+
+// An Action bound to a trigger, as Auth0 runs them: CommonJS source exporting `onExecutePostLogin`.
+// https://auth0.com/docs/customize/actions/explore-triggers/post-login
+export const actionSchema = z
+  .strictObject({
+    name: z.string().optional(),
+    file: z.string().optional(),
+    code: z.string().optional(),
+    secrets: z.record(z.string(), z.string()).optional(),
+  })
+  .refine((action) => (action.file === undefined) !== (action.code === undefined), {
+    message: "an action needs either `file` or `code`",
+  });
+
+export type ActionConfig = z.infer<typeof actionSchema>;
+
 // grant_type list as defined by auth0
 // https://auth0.com/docs/get-started/applications/application-grant-types#spec-conforming-grants
 export type GrantType =
@@ -19,6 +36,7 @@ export interface Auth0Configuration {
   domain?: string | undefined;
   clientSecret?: string | undefined;
   rulesDirectory?: string | undefined;
+  actions?: ActionConfig[] | undefined;
   connection?: string | undefined;
   protocol?: "http" | "https" | undefined;
 }
