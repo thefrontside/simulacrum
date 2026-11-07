@@ -1,4 +1,5 @@
 import { assert } from "assert-ts";
+import { decode, encode } from "base64-url";
 import type { ScopeConfig } from "../types.ts";
 import type { ExtendedSimulationStore } from "../store/index.ts";
 import type { Auth0User } from "../store/entities.ts";
@@ -48,4 +49,20 @@ export const deriveScope = ({
   assert(!!application.scope, `500::${application.clientID} is expected to have a scope`);
 
   return application.scope;
+};
+
+// an authorization code carries the login's nonce and username, as JSON so either may hold a ":"
+export const encodeCode = (nonce: unknown, username: unknown): string =>
+  encode(JSON.stringify({ nonce, username }));
+
+export const decodeCode = (code: string): { nonce?: string; username?: string } => {
+  try {
+    let { nonce, username } = JSON.parse(decode(code));
+    return {
+      ...(typeof nonce === "string" && { nonce }),
+      ...(typeof username === "string" && { username }),
+    };
+  } catch {
+    return {};
+  }
 };

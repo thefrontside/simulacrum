@@ -8,10 +8,9 @@ import { AccessDeniedError, createTokens } from "./oauth-handlers.ts";
 import { createActionsRunner } from "../actions/actions-runner.ts";
 import { assert } from "assert-ts";
 import { stringify } from "querystring";
-import { encode } from "base64-url";
 import { userNamePasswordForm } from "../views/username-password.ts";
 import { decodeJwt as decodeToken } from "jose";
-import { createPersonQuery } from "./utils.ts";
+import { createPersonQuery, encodeCode } from "./utils.ts";
 import { faker } from "@faker-js/faker";
 import { auth0UserSchema } from "../store/entities.ts";
 
@@ -193,7 +192,7 @@ export const createAuth0Handlers = (
     // https://auth0.com/docs/api/authentication#signup
     ["/dbconnections/signup"]: function (req, res) {
       logger.log({ "/dbconnections/signup": { body: { ...req.body, password: undefined } } });
-      let { email, password, name, user_metadata } = req.body ?? {};
+      let { email, password, name, user_metadata, connection } = req.body ?? {};
 
       let badRequest = (code: string, description: string) => {
         res.status(400).json({ name: "BadRequestError", code, description, statusCode: 400 });
@@ -203,6 +202,10 @@ export const createAuth0Handlers = (
         return badRequest("operation_not_allowed", "Public signup is disabled");
       }
 
+      // the simulator's passwordless connections; any other name is taken as a database connection
+      if (connection === "email" || connection === "sms") {
+        return badRequest("invalid_connection", "Connection is not a database connection");
+      }
       if (typeof email !== "string" || !email) {
         return badRequest("invalid_body", "Missing required property: email");
       }
@@ -249,7 +252,7 @@ export const createAuth0Handlers = (
 
       const { username } = session ?? {};
 
-      let encodedNonce = encode(`${nonce}:${username}`);
+      let encodedNonce = encodeCode(nonce, username);
 
       let qs = stringify({ code: encodedNonce, ...wctx });
 

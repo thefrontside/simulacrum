@@ -143,8 +143,8 @@ export const loginView = ({
             var form = document.querySelector("#the-form");
 
             form.addEventListener("submit", function (e) {
-              event.preventDefault();
-              event.stopPropagation();
+              e.preventDefault();
+              e.stopPropagation();
               let params = new URLSearchParams(window.location.search);
 
               var username = document.querySelector("#username");

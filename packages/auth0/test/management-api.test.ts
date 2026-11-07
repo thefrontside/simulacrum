@@ -14,6 +14,15 @@ let seeded = {
   password: "seeded-pw",
   app_metadata: { organisation_id: "org_1" },
 };
+// seeded users can share an email, as users of different connections do in Auth0
+let sharedEmail = [
+  { id: "auth0|shared-1", name: "Shared 1", email: "shared@example.com" },
+  { id: "auth0|shared-2", name: "Shared 2", email: "Shared@example.com" },
+];
+
+// lets a test hold a login's action until it says otherwise
+type ActionGate = { started: () => void; released: Promise<void> };
+let gated = globalThis as typeof globalThis & { actionGate?: ActionGate };
 
 describe("Management API", () => {
   let server: FoundationSimulatorListening<unknown>;
@@ -44,12 +53,15 @@ describe("Management API", () => {
 
   beforeAll(async () => {
     server = await simulation({
-      initialState: { users: [seeded] },
+      initialState: { users: [seeded, ...sharedEmail] },
       options: {
         actions: [
           {
             code: `exports.onExecutePostLogin = async (event, api) => {
-              if (event.user.app_metadata.slow) await new Promise((resolve) => setTimeout(resolve, 50));
+              if (event.user.app_metadata.gated) {
+                globalThis.actionGate.started();
+                await globalThis.actionGate.released;
+              }
               api.accessToken.setCustomClaim("https://example.nl/org", event.user.app_metadata.organisation_id);
             };`,
           },
@@ -115,6 +127,16 @@ describe("Management API", () => {
       let res = await api(`/users/${encodeURIComponent(seeded.id)}`, { token: "not.a.jwt" });
       expect(res.status).toBe(401);
     });
+
+    it("rejects a token whose signature was changed", async () => {
+      let [header, payload, signature] = token.split(".");
+      let flipped = (signature!.startsWith("A") ? "B" : "A") + signature!.slice(1);
+
+      let res = await api(`/users/${encodeURIComponent(seeded.id)}`, {
+        token: `${header}.${payload}.${flipped}`,
+      });
+      expect(res.status).toBe(401);
+    });
   });
 
   describe("users", () => {
@@ -172,8 +194,10 @@ describe("Management API", () => {
     });
 
     it("answers 400 for a missing or invalid email", async () => {
-      expect((await api("/users", { method: "POST", body: {} })).status).toBe(400);
-      expect((await api("/users", { method: "POST", body: { email: "nope" } })).status).toBe(400);
+      let create = (body: Record<string, unknown>) =>
+        api("/users", { method: "POST", body: { password: "pw", ...body } });
+      expect((await create({})).status).toBe(400);
+      expect((await create({ email: "nope" })).status).toBe(400);
     });
 
     it("gets a user by id and by email", async () => {
@@ -191,6 +215,15 @@ describe("Management API", () => {
       expect(res.status).toBe(404);
     });
 
+    it("gets every user with an email", async () => {
+      let res = await api(`/users-by-email?email=shared%40example.com`);
+      let found = (await res.json()) as { user_id: string }[];
+      expect(found.map((user) => user.user_id).sort()).toEqual([
+        "auth0|shared-1",
+        "auth0|shared-2",
+      ]);
+    });
+
     it("merges metadata at the top level and deletes keys set to null", async () => {
       let user = await createUser({
         email: "merge@example.com",
@@ -203,10 +236,9 @@ describe("Management API", () => {
       });
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toMatchObject({
-        name: "Merged",
-        user_metadata: { a: 1, b: { replaced: true }, d: 4 },
-      });
+      let patched = (await res.json()) as Record<string, unknown>;
+      expect(patched.name).toBe("Merged");
+      expect(patched.user_metadata).toEqual({ a: 1, b: { replaced: true }, d: 4 });
     });
 
     it("clears metadata patched to an empty object, leaving omitted metadata alone", async () => {
@@ -282,6 +314,34 @@ describe("Management API", () => {
       expect(res.status).toBe(400);
     });
 
+    it.each([
+      { name: 42 },
+      { email: true },
+      { password: null },
+      { picture: {} },
+      { email_verified: "yes" },
+      { password: "" },
+    ])("answers 400 for a patch of %j", async (body) => {
+      let res = await api(`/users/${encodeURIComponent(seeded.id)}`, { method: "PATCH", body });
+      expect(res.status).toBe(400);
+      expect((await login(seeded.email, seeded.password)).status).toBe(200);
+    });
+
+    it("unverifies a changed email, unless the patch says otherwise", async () => {
+      let user = await createUser({ email: "verified@example.com", email_verified: true });
+      let patch = async (body: Record<string, unknown>) => {
+        let res = await api(`/users/${encodeURIComponent(user.user_id)}`, {
+          method: "PATCH",
+          body,
+        });
+        return ((await res.json()) as { email_verified: boolean }).email_verified;
+      };
+
+      expect(await patch({ email: "VERIFIED@example.com" })).toBe(true);
+      expect(await patch({ email: "changed@example.com" })).toBe(false);
+      expect(await patch({ email: "again@example.com", email_verified: true })).toBe(true);
+    });
+
     it("validates the whole patched user", async () => {
       let res = await api(`/users/${encodeURIComponent(seeded.id)}`, {
         method: "PATCH",
@@ -329,14 +389,25 @@ describe("Management API", () => {
       let user = await createUser({
         email: "mid-login@example.com",
         password: "pw",
-        app_metadata: { slow: true },
+        app_metadata: { gated: true },
       });
+      let started!: () => void;
+      let release!: () => void;
+      let actionStarted = new Promise<void>((resolve) => (started = resolve));
+      gated.actionGate = { started, released: new Promise<void>((resolve) => (release = resolve)) };
 
-      let loggingIn = login("mid-login@example.com", "pw");
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      await api(`/users/${encodeURIComponent(user.user_id)}`, { method: "DELETE" });
+      try {
+        let loggingIn = login("mid-login@example.com", "pw");
+        await actionStarted;
+        let deleted = await api(`/users/${encodeURIComponent(user.user_id)}`, { method: "DELETE" });
+        expect(deleted.status).toBe(204);
+        release();
 
-      expect((await loggingIn).status).toBe(401);
+        expect((await loggingIn).status).toBe(401);
+      } finally {
+        release();
+        delete gated.actionGate;
+      }
     });
   });
 
@@ -391,6 +462,37 @@ describe("Management API", () => {
       let res = await redeem(ticketUrl, "redirect-pw");
       expect(res.status).toBe(302);
       expect(res.headers.get("location")).toBe("https://app.example.com/welcome");
+    });
+
+    it("leaves the email unverified if it changed after the ticket was made", async () => {
+      let user = await createUser({ email: "before@example.com" });
+      let ticketUrl = await createTicket({ user_id: user.user_id, mark_email_as_verified: true });
+      await api(`/users/${encodeURIComponent(user.user_id)}`, {
+        method: "PATCH",
+        body: { email: "after@example.com" },
+      });
+
+      expect((await redeem(ticketUrl, "after-pw")).status).toBe(200);
+      let res = await api(`/users/${encodeURIComponent(user.user_id)}`);
+      expect(await res.json()).toMatchObject({ email_verified: false });
+    });
+
+    it("revokes a deleted user's tickets", async () => {
+      let user = await createUser({ email: "reused@example.com", user_id: "reused" });
+      let ticketUrl = await createTicket({ user_id: user.user_id });
+      await api(`/users/${encodeURIComponent(user.user_id)}`, { method: "DELETE" });
+      await createUser({ email: "reused@example.com", user_id: "reused" });
+
+      expect((await fetch(ticketUrl)).status).toBe(400);
+      expect((await redeem(ticketUrl, "hijacked")).status).toBe(400);
+    });
+
+    it("answers 400 for a result_url that isn't well-formed", async () => {
+      let res = await api("/tickets/password-change", {
+        method: "POST",
+        body: { user_id: seeded.id, result_url: "https://app.example.com/\uD800\uD800" },
+      });
+      expect(res.status).toBe(400);
     });
 
     it("refuses an expired ticket", async () => {

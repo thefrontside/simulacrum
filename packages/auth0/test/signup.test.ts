@@ -165,6 +165,18 @@ describe("signup", () => {
       expect(await res.json()).toMatchObject({ code: "invalid_signup", statusCode: 400 });
     });
 
+    it.each(["email", "sms"])("refuses the passwordless %s connection", async (connection) => {
+      let res = await signup({
+        email: `${connection}-signup@example.com`,
+        password: "pw",
+        connection,
+      });
+
+      expect(res.status).toBe(400);
+      expect(await res.json()).toMatchObject({ code: "invalid_connection", statusCode: 400 });
+      expect((await login(`${connection}-signup@example.com`, "pw")).status).toBe(401);
+    });
+
     it.each([
       ["email", { password: "pw" }],
       ["password", { email: "missing-pw@example.com" }],
