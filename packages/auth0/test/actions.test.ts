@@ -293,7 +293,14 @@ describe("actions runner", () => {
 describe("post-login actions on /oauth/token", () => {
   let port = 4440;
   let auth0Url = `https://localhost:${port}`;
-  let person = {
+  let person: {
+    id: string;
+    name: string;
+    email: string;
+    password: string;
+    user_metadata: Record<string, unknown>;
+    email_verified?: boolean;
+  } = {
     id: "auth0|alice",
     name: "Alice",
     email: "alice@example.com",
@@ -318,7 +325,7 @@ describe("post-login actions on /oauth/token", () => {
     token({ grant_type: "password", username: person.email, password: person.password });
 
   // the authorization code flow, whose nonce the refresh grant requires
-  let codeLogin = async () => {
+  let codeLogin = async (authorizeParams: Record<string, string> = {}) => {
     let frontend = await frontendSimulation.listen();
     try {
       let fields = {
@@ -332,6 +339,13 @@ describe("post-login actions on /oauth/token", () => {
         state: "state",
         tenant: `localhost:${port}`,
       };
+      let { tenant: _, connection: __, ...authorize } = fields;
+      await fetch(
+        `${auth0Url}/authorize?${new URLSearchParams({ ...authorize, ...authorizeParams })}`,
+        {
+          redirect: "manual",
+        },
+      );
       await fetch(`${auth0Url}/usernamepassword/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -413,6 +427,30 @@ describe("post-login actions on /oauth/token", () => {
       expect(decodeJwt(id_token)["https://ns/organisation_id"]).toBe("org_123");
       expect(decodeJwt(id_token)["https://ns/logins"]).toBe(2);
       expect(decodeJwt(id_token)["https://ns/protocol"]).toBe("oauth2-refresh-token");
+    });
+  });
+
+  describe("event.request.query", () => {
+    beforeEach(async () => {
+      await start("test/fixtures/actions/request-query.js");
+    });
+
+    it("is the /authorize query for an authorization code login", async () => {
+      let res = await codeLogin({ "ext-invitation": "invite-token" });
+      expect(res.ok).toBe(true);
+      let { id_token } = (await res.json()) as Record<string, string>;
+
+      expect(decodeJwt(id_token).query).toMatchObject({
+        "ext-invitation": "invite-token",
+        response_type: "code",
+      });
+    });
+
+    it("is the token request's own query for a password grant", async () => {
+      await codeLogin({ "ext-invitation": "invite-token" });
+      let { id_token } = (await (await login()).json()) as Record<string, string>;
+
+      expect(decodeJwt(id_token).query).toEqual({});
     });
   });
 
@@ -507,6 +545,22 @@ describe("post-login actions on /oauth/token", () => {
 
       expect(decodeJwt(first.id_token).had_organisation).toBe(true);
       expect(decodeJwt(second.id_token).had_organisation).toBe(false);
+    });
+  });
+
+  describe("event.user", () => {
+    beforeEach(async () => {
+      person.email_verified = false;
+      await start("test/fixtures/actions/email-verified.js");
+    });
+    afterEach(() => {
+      delete person.email_verified;
+    });
+
+    it("carries the stored email_verified", async () => {
+      let { id_token } = (await (await login()).json()) as Record<string, string>;
+
+      expect(decodeJwt(id_token).event_email_verified).toBe(false);
     });
   });
 

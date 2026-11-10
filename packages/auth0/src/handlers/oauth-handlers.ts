@@ -18,7 +18,7 @@ import type {
 } from "../types.ts";
 import { createRefreshToken, issueRefreshToken } from "../auth/refresh-token.ts";
 import { type ExtendedSimulationStore } from "../store/index.ts";
-import { mergeMetadata, type Auth0User } from "../store/entities.ts";
+import { identitiesOf, mergeMetadata, type Auth0User } from "../store/entities.ts";
 
 export const createTokens = async ({
   body,
@@ -87,6 +87,12 @@ export const createTokens = async ({
 
     user = result.user;
     nonce = result.nonce;
+
+    let authorizeQuery =
+      nonce &&
+      simulationStore.schema.sessions.selectById(simulationStore.store.getState(), { id: nonce })
+        ?.authorizeQuery;
+    if (authorizeQuery) request = { ...request, query: authorizeQuery };
   }
 
   assert(!!user, "500::No user found");
@@ -219,19 +225,12 @@ const runPostLoginActions = async ({
     user: {
       user_id: user.id,
       email: user.email,
-      email_verified: true,
+      email_verified: user.email_verified,
       name: user.name,
       picture: user.picture,
       user_metadata: user.user_metadata,
       app_metadata: user.app_metadata,
-      identities: [
-        {
-          provider: connection.strategy,
-          user_id: user.id.replace(/^auth0\|/, ""),
-          connection: connection.name,
-          isSocial: false,
-        },
-      ],
+      identities: identitiesOf(user, connection),
     },
     request,
     stats: { logins_count: user.logins_count },
@@ -260,6 +259,8 @@ const runPostLoginActions = async ({
 
   if (result.error !== undefined) throw result.error;
   if (result.denied !== undefined) throw new AccessDeniedError(result.denied);
+  // a user deleted while the actions ran can't log in
+  assert(!!schema.users.selectById(store.getState(), { id: user.id }), "401::Unauthorized");
 
   return result;
 };
@@ -282,7 +283,7 @@ export const getIdToken = ({
   let userData: RuleUser = {
     name: body?.name ?? user.name,
     email: body?.email ?? user.email,
-    email_verified: true,
+    email_verified: user.email_verified,
     user_id: body?.id ?? user.id,
     nickname: body?.nickname,
     picture: body?.picture ?? user.picture,

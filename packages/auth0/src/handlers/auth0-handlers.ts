@@ -72,6 +72,18 @@ export const createAuth0Handlers = (
 
       assert(!!req.session, "no session");
 
+      // Auth0 shows an authorization code login's Actions the /authorize query, not /oauth/token's
+      let nonce = req.query.nonce;
+      if (typeof nonce === "string" && nonce) {
+        simulationStore.store.dispatch(
+          simulationStore.actions.batchUpdater([
+            simulationStore.schema.sessions.patch({
+              [nonce]: { nonce, authorizeQuery: req.query as Record<string, unknown> },
+            }),
+          ]),
+        );
+      }
+
       if (currentUser) {
         // the request is a silent login.
         // We fake an existing login by
@@ -263,7 +275,7 @@ export const createAuth0Handlers = (
         given_name: user.name,
         family_name: user.name,
         email: user.email,
-        email_verified: true,
+        email_verified: user.email_verified,
         locale: "en",
         hd: "okta.com",
       };

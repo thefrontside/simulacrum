@@ -259,7 +259,7 @@ Actions run on every login and refresh token exchange through `/oauth/token`, af
 
 Metadata is never added to the tokens unless an action sets it as a claim. An error thrown by an action ends the flow, as `api.access.deny` does, and `/oauth/token` responds with that error. As in Auth0, the actions together have 20 seconds to finish, after which the flow ends with a `Script execution time exceeded` error. Actions run in the simulator's own process, so the limit ends a wait but not synchronous code: an action stuck in a loop that never yields blocks the simulator, as it would any Node process.
 
-Unlike Auth0, actions run when `/oauth/token` issues the tokens rather than during `/authorize`. So in the authorization code flow, a denied login fails at the code exchange rather than redirecting with an error, and `event.request` describes the `/oauth/token` request rather than the original `/authorize` parameters.
+Unlike Auth0, actions run when `/oauth/token` issues the tokens rather than during `/authorize`. So in the authorization code flow, a denied login fails at the code exchange rather than redirecting with an error. `event.request.query` is still the original `/authorize` query, as in Auth0, when `/authorize` has a `nonce` (as the Auth0 SDKs always send), so custom `ext-*` parameters reach the action, but the rest of `event.request` describes the `/oauth/token` request.
 
 ### Rules
 
@@ -289,3 +289,17 @@ The following endpoints have been assigned handlers:
 - `/v2/logout`
 - `/.well-known/jwks.json`
 - `/.well-known/openid-configuration`
+- `/lo/reset` (password-change ticket page)
+
+### Management API
+
+A subset of the [Auth0 Management API](https://auth0.com/docs/api/management/v2) is served under `/api/v2`, backed by the same store the login flow reads, so a user created here can log in and a metadata update reaches the next login's [actions](#actions). Actions can call it too, at the simulator's own URL. Requests need a bearer token signed by the simulator from a `client_credentials` grant on `/oauth/token` with the audience `https://<simulator host>/api/v2/`. Scopes are not checked.
+
+- `POST /api/v2/users` — `409` if the email is taken. The id is `auth0|<user_id>` (generated when omitted), `email_verified` defaults to `false`, and `password` is required, as it is for an Auth0 database connection.
+- `GET /api/v2/users/:id`
+- `PATCH /api/v2/users/:id` — `user_metadata` and `app_metadata` are merged at the top level, a `null` value removes the key, and an empty object clears it, as in Auth0.
+- `DELETE /api/v2/users/:id`
+- `GET /api/v2/users-by-email?email=`
+- `POST /api/v2/tickets/password-change` — accepts `user_id` (or `email`), `result_url`, `ttl_sec` and `mark_email_as_verified`. The returned ticket URL opens a page on `/lo/reset` that sets the password and, if given, redirects to `result_url`.
+
+Errors use Auth0's `{ statusCode, error, message, errorCode }` shape.
