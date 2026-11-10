@@ -1,6 +1,6 @@
 {
   "name": "@simulacrum/github-api-simulator",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Provides common functionality to frontend app and plugins.",
   "keywords": [
     "emulation",
