@@ -66,6 +66,8 @@ export type PasswordTicket = {
   expiresAt: number;
   resultUrl?: string | undefined;
   markEmailAsVerified: boolean;
+  // the email the ticket was made for
+  email?: string | undefined;
 };
 export type Auth0Store = z.output<typeof auth0InitialStoreSchema> & {
   sessions: AuthSession[];

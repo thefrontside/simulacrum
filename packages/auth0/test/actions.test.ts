@@ -325,14 +325,14 @@ describe("post-login actions on /oauth/token", () => {
     token({ grant_type: "password", username: person.email, password: person.password });
 
   // the authorization code flow, whose nonce the refresh grant requires
-  let codeLogin = async (authorizeParams: Record<string, string> = {}) => {
+  let codeLogin = async (authorizeParams: Record<string, string> = {}, nonce = "bm9uY2U=") => {
     let frontend = await frontendSimulation.listen();
     try {
       let fields = {
         client_id: "00000000000000000000000000000000",
         audience: "https://example.nl",
         connection: "Username-Password-Authentication",
-        nonce: "bm9uY2U=",
+        nonce,
         redirect_uri: "http://localhost:3000",
         response_type: "code",
         scope: "openid profile email offline_access",
@@ -444,6 +444,15 @@ describe("post-login actions on /oauth/token", () => {
         "ext-invitation": "invite-token",
         response_type: "code",
       });
+    });
+
+    it("is the /authorize query when the nonce holds a colon", async () => {
+      let res = await codeLogin({ "ext-invitation": "invite-token" }, "a:b:c");
+      expect(res.ok).toBe(true);
+      let { id_token } = (await res.json()) as Record<string, string>;
+
+      expect(decodeJwt(id_token).nonce).toBe("a:b:c");
+      expect(decodeJwt(id_token).query).toMatchObject({ "ext-invitation": "invite-token" });
     });
 
     it("is the token request's own query for a password grant", async () => {

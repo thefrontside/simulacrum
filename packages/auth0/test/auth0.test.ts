@@ -285,9 +285,9 @@ describe("Auth0 simulator", () => {
     });
 
     it("should return a 401 responsive with invalid credentials", async () => {
-      let [nonce] = decode(code).split(":");
+      let { nonce } = JSON.parse(decode(code));
 
-      let invalidCode = encode(`${nonce}:invalid-user`);
+      let invalidCode = encode(JSON.stringify({ nonce, username: "invalid-user" }));
 
       let res: Response = await fetch(`${auth0Url}/oauth/token`, {
         method: "POST",

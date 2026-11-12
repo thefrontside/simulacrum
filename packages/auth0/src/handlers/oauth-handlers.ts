@@ -1,11 +1,11 @@
 import { assert } from "assert-ts";
-import { decode, decode as decodeBase64 } from "base64-url";
+import { decode } from "base64-url";
 import { epochTime, expiresAt } from "../auth/date.ts";
 import { signingKey, JWKS } from "../auth/constants.ts";
 import { SignJWT } from "jose";
 import { createRulesRunner } from "../rules/rules-runner.ts";
 import type { ActionsRunner, PostLoginEvent } from "../actions/actions-runner.ts";
-import { deriveScope, createPersonQuery } from "./utils.ts";
+import { deriveScope, createPersonQuery, decodeCode } from "./utils.ts";
 
 import type { Request } from "express";
 import type { RuleContext, RuleUser } from "../rules/types.ts";
@@ -355,7 +355,7 @@ const verifyUserExistsInStore = ({
     // specifically grant_type === 'authorization_code'
     // but naively using it to handle other cases at the moment
     assert(typeof code !== "undefined", "400::no code in /oauth/token");
-    [nonce, username] = decodeBase64(code).split(":");
+    ({ nonce, username } = decodeCode(code));
     assert(!!username, `400::no nonce in store for ${code}`);
   }
 

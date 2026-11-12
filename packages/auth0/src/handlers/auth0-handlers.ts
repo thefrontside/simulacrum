@@ -8,16 +8,18 @@ import { AccessDeniedError, createTokens } from "./oauth-handlers.ts";
 import { createActionsRunner } from "../actions/actions-runner.ts";
 import { assert } from "assert-ts";
 import { stringify } from "querystring";
-import { encode } from "base64-url";
 import { userNamePasswordForm } from "../views/username-password.ts";
 import { decodeJwt as decodeToken } from "jose";
-import { createPersonQuery } from "./utils.ts";
+import { createPersonQuery, encodeCode } from "./utils.ts";
+import { faker } from "@faker-js/faker";
+import { auth0UserSchema } from "../store/entities.ts";
 
 export type Routes =
   | "/heartbeat"
   | "/authorize"
   | "/login"
   | "/usernamepassword/login"
+  | "/dbconnections/signup"
   | "/login/callback"
   | "/oauth/token"
   | "/v2/logout"
@@ -110,6 +112,15 @@ export const createAuth0Handlers = (
       let responseAudience = query.audience ?? audience;
       assert(!!responseClientID, `no clientID assigned`);
 
+      let signup = !options.disableSignup && query.screen_hint === "signup";
+      // appended one by one, as URLSearchParams would join a repeated value with commas
+      let switchModeQuery = new URLSearchParams();
+      for (let [key, value] of Object.entries(req.query)) {
+        for (let item of [value].flat()) switchModeQuery.append(key, String(item));
+      }
+      if (signup) switchModeQuery.delete("screen_hint");
+      else switchModeQuery.set("screen_hint", "signup");
+
       let html = loginView({
         domain: new URL(serviceURL(req)).host,
         scope,
@@ -117,6 +128,10 @@ export const createAuth0Handlers = (
         clientID: responseClientID,
         audience: responseAudience,
         loginFailed: false,
+        signup,
+        // a repeated login_hint arrives as an array
+        loginHint: typeof query.login_hint === "string" ? query.login_hint : undefined,
+        ...(!options.disableSignup && { switchModeUrl: `/login?${switchModeQuery}` }),
       });
 
       res.set("Content-Type", "text/html");
@@ -174,6 +189,59 @@ export const createAuth0Handlers = (
       res.status(200).send(userNamePasswordForm(req.body));
     },
 
+    // https://auth0.com/docs/api/authentication#signup
+    ["/dbconnections/signup"]: function (req, res) {
+      logger.log({ "/dbconnections/signup": { body: { ...req.body, password: undefined } } });
+      let { email, password, name, user_metadata, connection } = req.body ?? {};
+
+      let badRequest = (code: string, description: string) => {
+        res.status(400).json({ name: "BadRequestError", code, description, statusCode: 400 });
+      };
+
+      if (options.disableSignup) {
+        return badRequest("operation_not_allowed", "Public signup is disabled");
+      }
+
+      // the simulator's passwordless connections; any other name is taken as a database connection
+      if (connection === "email" || connection === "sms") {
+        return badRequest("invalid_connection", "Connection is not a database connection");
+      }
+      if (typeof email !== "string" || !email) {
+        return badRequest("invalid_body", "Missing required property: email");
+      }
+      if (typeof password !== "string" || !password) {
+        return badRequest("invalid_body", "Missing required property: password");
+      }
+      // Auth0 answers only "Invalid sign up" here, to avoid user enumeration. The simulator
+      // keeps the code but says why, as there is nothing to hide
+      if (personQuery((person) => person.email?.toLowerCase() === email.toLowerCase())) {
+        return badRequest(
+          "invalid_signup",
+          "Invalid sign up: a user with this email already exists (Auth0 itself does not say why)",
+        );
+      }
+
+      let _id = faker.database.mongodbObjectId();
+      let parsed = auth0UserSchema.safeParse({
+        id: `auth0|${_id}`,
+        name: name ?? email,
+        email: email.toLowerCase(),
+        email_verified: false,
+        password,
+        user_metadata: user_metadata ?? undefined,
+      });
+      if (!parsed.success) {
+        return badRequest("invalid_body", parsed.error.message);
+      }
+
+      simulationStore.store.dispatch(
+        simulationStore.actions.batchUpdater([
+          simulationStore.schema.users.add({ [parsed.data.id]: parsed.data }),
+        ]),
+      );
+      res.status(200).json({ _id, email: parsed.data.email, email_verified: false });
+    },
+
     ["/login/callback"]: function (req, res) {
       let wctx = JSON.parse(req.body.wctx);
       logger.log({
@@ -188,7 +256,7 @@ export const createAuth0Handlers = (
 
       const { username } = session ?? {};
 
-      let encodedNonce = encode(`${nonce}:${username}`);
+      let encodedNonce = encodeCode(nonce, username);
 
       let qs = stringify({ code: encodedNonce, ...wctx });
 

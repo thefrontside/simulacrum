@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 import { assert } from "assert-ts";
-import { encode } from "base64-url";
+import { encodeCode } from "./utils.ts";
 import type { QueryParams } from "../types.ts";
 import { webMessage } from "../views/web-message.ts";
 
@@ -17,7 +17,7 @@ export const createWebMessageHandler = (): RequestHandler =>
     res.set("Content-Type", "text/html");
 
     let message = webMessage({
-      code: encode(`${nonce}:${username}`),
+      code: encodeCode(nonce, username),
       state,
       redirect_uri,
       nonce,

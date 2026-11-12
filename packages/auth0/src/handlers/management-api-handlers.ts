@@ -55,6 +55,28 @@ const patchMetadata = (current: Metadata, update: unknown): Metadata =>
     ? {}
     : mergeMetadata(current, update);
 
+const patchTypes = {
+  name: "string",
+  email: "string",
+  email_verified: "boolean",
+  password: "string",
+  picture: "string",
+  user_metadata: "object",
+  app_metadata: "object",
+} as const;
+
+const typeOf = (value: unknown) =>
+  value === null ? "null" : Array.isArray(value) ? "array" : typeof value;
+
+const isWellFormed = (value: string) => {
+  try {
+    encodeURI(value);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export const createManagementApiHandlers = (
   simulationStore: ExtendedSimulationStore,
   serviceURL: (request: Request) => string,
@@ -67,6 +89,12 @@ export const createManagementApiHandlers = (
   let findById = (id: string) => users().find((user) => user.id === id);
   let findByEmail = (email: string) =>
     users().find((user) => user.email?.toLowerCase() === email.toLowerCase());
+
+  let ticketIds = (predicate: (ticket: PasswordTicket) => boolean) =>
+    schema.passwordTickets
+      .selectTableAsList(store.getState())
+      .filter(predicate)
+      .map((ticket) => ticket.id);
 
   let validTicket = (id: unknown): PasswordTicket | undefined => {
     if (typeof id !== "string") return undefined;
@@ -147,24 +175,33 @@ export const createManagementApiHandlers = (
       if (!user) return sendError(res, 404, "The user does not exist.", "inexistent_user");
 
       let body = req.body ?? {};
-      for (let field of ["user_metadata", "app_metadata"] as const) {
+      for (let [field, expected] of Object.entries(patchTypes)) {
         let value = body[field];
-        let type = Array.isArray(value) ? "array" : typeof value;
-        if (value !== undefined && value !== null && type !== "object") {
+        // null metadata leaves it as it is
+        if (value === undefined || (value === null && expected === "object")) continue;
+        let type = typeOf(value);
+        if (type !== expected) {
           return sendError(
             res,
             400,
-            `Payload validation error: 'Expected type object but found type ${type}' on property ${field}.`,
+            `Payload validation error: 'Expected type ${expected} but found type ${type}' on property ${field}.`,
           );
         }
       }
+      if (body.password === "") {
+        return sendError(res, 400, "Payload validation error: 'password' must not be empty.");
+      }
+      // Auth0 unverifies a changed email, unless the update says otherwise
+      let emailChanged =
+        body.email !== undefined && body.email.toLowerCase() !== user.email?.toLowerCase();
       let parsed = auth0UserSchema.safeParse({
         ...user,
-        ...(typeof body.name === "string" && { name: body.name }),
-        ...(typeof body.email === "string" && { email: body.email.toLowerCase() }),
-        ...(typeof body.email_verified === "boolean" && { email_verified: body.email_verified }),
-        ...(typeof body.password === "string" && { password: body.password }),
-        ...(typeof body.picture === "string" && { picture: body.picture }),
+        ...(body.name !== undefined && { name: body.name }),
+        ...(body.email !== undefined && { email: body.email.toLowerCase() }),
+        ...(emailChanged && { email_verified: false }),
+        ...(body.email_verified !== undefined && { email_verified: body.email_verified }),
+        ...(body.password !== undefined && { password: body.password }),
+        ...(body.picture !== undefined && { picture: body.picture }),
         user_metadata: patchMetadata(user.user_metadata, body.user_metadata),
         app_metadata: patchMetadata(user.app_metadata, body.app_metadata),
       });
@@ -183,7 +220,11 @@ export const createManagementApiHandlers = (
     },
 
     "DELETE /api/v2/users/:id": function (req, res) {
-      update(schema.users.remove([req.params.id as string]));
+      let id = req.params.id as string;
+      update(
+        schema.users.remove([id]),
+        schema.passwordTickets.remove(ticketIds((ticket) => ticket.userId === id)),
+      );
       res.status(204).end();
     },
 
@@ -192,8 +233,9 @@ export const createManagementApiHandlers = (
       if (typeof email !== "string" || !email) {
         return sendError(res, 400, "Query validation error: 'Missing required property: email'.");
       }
-      let user = findByEmail(email);
-      res.status(200).json(user ? [toApiUser(user)] : []);
+      let lower = email.toLowerCase();
+      let matches = users().filter((user) => user.email?.toLowerCase() === lower);
+      res.status(200).json(matches.map(toApiUser));
     },
 
     "POST /api/v2/tickets/password-change": function (req, res) {
@@ -212,14 +254,25 @@ export const createManagementApiHandlers = (
         );
       }
 
+      let resultUrl: unknown = body.result_url;
+      if (typeof resultUrl === "string" && !isWellFormed(resultUrl)) {
+        return sendError(res, 400, "Payload validation error: 'result_url' must be a valid URL.");
+      }
+
+      let now = Date.now();
       let ticket: PasswordTicket = {
         id: randomUUID(),
         userId: user.id,
-        expiresAt: Date.now() + (ttl || DEFAULT_TICKET_TTL_SEC) * 1000,
-        resultUrl: typeof body.result_url === "string" ? body.result_url : undefined,
+        expiresAt: now + (ttl || DEFAULT_TICKET_TTL_SEC) * 1000,
+        resultUrl: typeof resultUrl === "string" ? resultUrl : undefined,
         markEmailAsVerified: body.mark_email_as_verified === true,
+        email: user.email,
       };
-      update(schema.passwordTickets.add({ [ticket.id]: ticket }));
+      // expired tickets are dropped as new ones are made, so the table doesn't grow without bound
+      update(
+        schema.passwordTickets.remove(ticketIds((expired) => expired.expiresAt <= now)),
+        schema.passwordTickets.add({ [ticket.id]: ticket }),
+      );
 
       res.status(201).json({ ticket: `${serviceURL(req)}lo/reset?ticket=${ticket.id}#` });
     },
@@ -262,7 +315,9 @@ export const createManagementApiHandlers = (
           [user.id]: {
             ...user,
             password,
-            ...(ticket.markEmailAsVerified && { email_verified: true }),
+            // only the address the ticket was made for
+            ...(ticket.markEmailAsVerified &&
+              user.email === ticket.email && { email_verified: true }),
           },
         }),
         schema.passwordTickets.remove([ticket.id]),

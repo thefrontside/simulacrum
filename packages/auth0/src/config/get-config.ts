@@ -11,6 +11,7 @@ import {
   printHelp,
   printVersion,
   schema,
+  toggle,
   transform,
   version,
   type EnvSource,
@@ -58,6 +59,7 @@ const configFields = {
   rulesDirectory: z.string().optional(),
   actions: z.array(actionSchema).optional(),
   connection: z.string().optional(),
+  disableSignup: z.boolean().optional(),
 };
 
 // strict schema throws errors of unrecognized keys
@@ -136,6 +138,7 @@ export const auth0App = command(
     schema(configFields.actions),
   ),
   option(name("connection"), description("auth0 connection"), schema(configFields.connection)),
+  toggle(name("disableSignup"), description("refuse public signups")),
   option(name("protocol"), description("server protocol"), schema(configFields.protocol)),
   // to normalize protocol, domain an port
   transform(configSchema),

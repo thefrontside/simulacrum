@@ -38,6 +38,7 @@ export const extendRouter =
       .get("/login", auth0["/login"])
       .get("/u/login", auth0["/usernamepassword/login"])
       .post("/usernamepassword/login", auth0["/usernamepassword/login"])
+      .post("/dbconnections/signup", auth0["/dbconnections/signup"])
       .post("/login/callback", auth0["/login/callback"])
       .post("/oauth/token", auth0["/oauth/token"])
       .post("/passwordless/start", auth0["/passwordless/start"])
