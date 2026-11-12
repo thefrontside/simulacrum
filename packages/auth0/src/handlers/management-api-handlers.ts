@@ -68,7 +68,6 @@ const patchTypes = {
 const typeOf = (value: unknown) =>
   value === null ? "null" : Array.isArray(value) ? "array" : typeof value;
 
-// encodeURI throws on lone surrogates, as res.redirect would once the ticket is spent
 const isWellFormed = (value: string) => {
   try {
     encodeURI(value);

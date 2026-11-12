@@ -212,9 +212,13 @@ export const createAuth0Handlers = (
       if (typeof password !== "string" || !password) {
         return badRequest("invalid_body", "Missing required property: password");
       }
-      // Auth0 doesn't say whether the email is taken, to avoid user enumeration
+      // Auth0 answers only "Invalid sign up" here, to avoid user enumeration. The simulator
+      // keeps the code but says why, as there is nothing to hide
       if (personQuery((person) => person.email?.toLowerCase() === email.toLowerCase())) {
-        return badRequest("invalid_signup", "Invalid sign up");
+        return badRequest(
+          "invalid_signup",
+          "Invalid sign up: a user with this email already exists (Auth0 itself does not say why)",
+        );
       }
 
       let _id = faker.database.mongodbObjectId();

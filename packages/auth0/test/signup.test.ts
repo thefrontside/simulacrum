@@ -162,7 +162,11 @@ describe("signup", () => {
       let res = await signup({ email: "SEEDED@example.com", password: "other-pw" });
 
       expect(res.status).toBe(400);
-      expect(await res.json()).toMatchObject({ code: "invalid_signup", statusCode: 400 });
+      expect(await res.json()).toMatchObject({
+        code: "invalid_signup",
+        description: expect.stringContaining("already exists"),
+        statusCode: 400,
+      });
     });
 
     it.each(["email", "sms"])("refuses the passwordless %s connection", async (connection) => {

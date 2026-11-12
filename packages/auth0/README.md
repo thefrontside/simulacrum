@@ -298,7 +298,7 @@ The following endpoints have been assigned handlers:
 
 ### Signup
 
-`/authorize` passes `screen_hint` and `login_hint` on to `/login`, as Universal Login does. With `screen_hint=signup` the page is a signup form, and `login_hint` prefills the email on either form. The signup form posts to `/dbconnections/signup` (what auth0.js `signup()` calls), which adds an unverified `auth0|<id>` user to the store and then logs them in, so the [actions](#actions) see the new user on their first login. An email that is already taken gets Auth0's `400` `invalid_signup`. Pre-user-registration actions are not run. With the `disableSignup` [option](#options), `/login` always renders the login form and `/dbconnections/signup` answers `400` `operation_not_allowed`.
+`/authorize` passes `screen_hint` and `login_hint` on to `/login`, as Universal Login does. With `screen_hint=signup` the page is a signup form, and `login_hint` prefills the email on either form. The signup form posts to `/dbconnections/signup` (what auth0.js `signup()` calls), which adds an unverified `auth0|<id>` user to the store and then logs them in, so the [actions](#actions) see the new user on their first login. An email that is already taken gets Auth0's `400` `invalid_signup`, with a description that says why (Auth0's own is just "Invalid sign up"). Pre-user-registration actions are not run. With the `disableSignup` [option](#options), `/login` always renders the login form and `/dbconnections/signup` answers `400` `operation_not_allowed`.
 
 ### Management API
 
